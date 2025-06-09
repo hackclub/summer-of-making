@@ -247,9 +247,9 @@ class User < ApplicationRecord
     idv_data = fetch_idv[:identity]
 
     case idv_data[:verification_status]
-    when "pending", "needs_submission"
+    when "pending"
       :pending
-    when "needs_resubmission"
+    when "needs_submission"
       :needs_resubmission
     when "verified"
       if idv_data[:ysws_eligible]
