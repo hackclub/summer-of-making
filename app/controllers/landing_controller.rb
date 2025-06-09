@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 require "open-uri"
-CHANNEL_LIST = ["C08MYN7HVN2","C08N1NWKEF4","C016DEDUL87","C75M7C0SY", "C090JKDJYN8", "C090B3T9R9R"]
+CHANNEL_LIST = [ "C08MYN7HVN2", "C08N1NWKEF4", "C016DEDUL87", "C75M7C0SY", "C090JKDJYN8", "C090B3T9R9R" ]
 class LandingController < ApplicationController
   def index
     redirect_to explore_path if user_signed_in?
@@ -252,12 +252,12 @@ class LandingController < ApplicationController
     invites: [
     {
       email: email,
-      type: 'restricted',
-      mode: 'manual'
+      type: "restricted",
+      mode: "manual"
     }
   ],
     restricted: true,
-    channels: CHANNEL_LIST          
+    channels: CHANNEL_LIST
   }
   uri = URI.parse("https://slack.com/api/users.admin.inviteBulk")
   http = Net::HTTP.new(uri.host, uri.port)
@@ -265,12 +265,12 @@ class LandingController < ApplicationController
 
 
   request = Net::HTTP::Post.new(uri)
-  request['Content-Type'] = 'application/json'
-  request['Cookie'] = "d=#{ENV['SLACK_XOXD']}"
-  request['Authorization'] = "Bearer #{ENV["SLACK_XOXC"]}"  
+  request["Content-Type"] = "application/json"
+  request["Cookie"] = "d=#{ENV['SLACK_XOXD']}"
+  request["Authorization"] = "Bearer #{ENV["SLACK_XOXC"]}"
   request.body = JSON.generate(payload)
 
-# Send the request
+  # Send the request
   response = http.request(request)
   response.body
   end
