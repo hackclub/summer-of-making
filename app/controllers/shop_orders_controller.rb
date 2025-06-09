@@ -1,20 +1,16 @@
 class ShopOrdersController < ApplicationController
-  before_action :set_shop_order, only: [:show]
-  before_action :set_shop_item, only: [:new, :create]
+  before_action :set_shop_order, only: [ :show ]
+  before_action :set_shop_item, only: [ :new, :create ]
   def index
-
   end
 
   def show
-
   end
 
   def new
-
   end
 
   def create
-
   end
 
   private
