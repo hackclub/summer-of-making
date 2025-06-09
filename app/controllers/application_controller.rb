@@ -13,10 +13,6 @@ class ApplicationController < ActionController::Base
 
   before_action :fetch_hackatime_data_if_needed
 
-  if Rails.env.development?
-    skip_before_action :verify_authenticity_token
-  end
-
   helper_method :current_user, :user_signed_in?, :current_verification_status
 
   def current_user
