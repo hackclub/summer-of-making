@@ -24,6 +24,8 @@
       <p>Actual IRL FR HC cost</p>
       <%= number_field_editable(item, :usd_cost, display_prefix: "$") %>
   <% end %>
+
+  <%= button_to "buy!", order_shop_item_path(item), method: :get %>
 </div>
 
 <!-- <script>
