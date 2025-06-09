@@ -19,7 +19,7 @@ module Admin
     end
 
     def awaiting_fulfillment
-      @pagy, @shop_orders = pagy(SCOPE.pending)
+      @pagy, @shop_orders = pagy(scope.pending)
       render :index, locals: { title: "pending " }
     end
 
@@ -78,7 +78,7 @@ module Admin
     private
 
     def set_shop_order
-      @shop_order = SCOPE.find(params[:id])
+      @shop_order = scope.find(params[:id])
     end
   end
 end

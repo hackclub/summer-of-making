@@ -25,6 +25,9 @@ class ShopItem < ApplicationRecord
     attachable.variant :thumb, resize_to_limit: [ 256, 256 ]
   end
 
+  scope :black_market, -> { where(requires_black_market: true) }
+  scope :not_black_market, -> { where(requires_black_market: false) }
+
   def manually_fulfilled?
     true
   end

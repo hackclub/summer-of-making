@@ -212,8 +212,8 @@ Rails.application.routes.draw do
   get "timer_sessions/active", to: "timer_sessions#global_active"
 
   resources :projects do
-    resources :devlogs, only: [ :create, :destroy, :update ]
-    resources :timer_sessions, only: [ :create, :update, :show, :destroy ] do
+    resources :devlogs, only: [:create, :destroy, :update]
+    resources :timer_sessions, only: [:create, :update, :show, :destroy] do
       collection do
         get :active
       end
@@ -229,11 +229,18 @@ Rails.application.routes.draw do
   end
 
   get "devlogs", to: "devlogs#index"
-  resources :votes, only: [ :new, :create ]
+  resources :votes, only: [:new, :create]
 
-
-  resources :shop_items, except: [ :index ]
-  get "/shop", to: "shop_items#index"
+  scope :shop do
+    get "/", to: "shop_items#index", as: :shop
+    resources :shop_items, except: [:index], path: :items do
+      member do
+        get :buy, to: "shop_orders#new", as: :order
+        post :buy, to: "shop_orders#create", as: :checkout
+      end
+    end
+    resources :shop_orders, path: :orders, except: %i[edit update new]
+  end
 
   match "/404", to: "errors#not_found", via: :all
   match "/500", to: "errors#internal_server_error", via: :all
@@ -248,7 +255,7 @@ Rails.application.routes.draw do
   end
 
   resources :devlogs do
-    resources :comments, only: [ :create, :destroy ]
+    resources :comments, only: [:create, :destroy]
     member do
       post :toggle_like, to: "likes#toggle"
     end
@@ -261,10 +268,10 @@ Rails.application.routes.draw do
   # API routes
   namespace :api do
     namespace :v1 do
-      resources :projects, only: [ :index, :show ]
-      resources :devlogs, only: [ :index, :show ]
-      resources :comments, only: [ :index, :show ]
-      resources :emotes, only: [ :show ]
+      resources :projects, only: [:index, :show]
+      resources :devlogs, only: [:index, :show]
+      resources :comments, only: [:index, :show]
+      resources :emotes, only: [:show]
     end
   end
   get "api/check_user", to: "users#check_user"
@@ -277,7 +284,7 @@ Rails.application.routes.draw do
 
   namespace :admin do
     get "/", to: "static_pages#index", as: :root
-    resources :users, only: [] do
+    resources :users, only: [:index, :show] do
       member do
         post :internal_notes
       end

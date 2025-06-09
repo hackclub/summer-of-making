@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_06_08_150835) do
+ActiveRecord::Schema[8.0].define(version: 2025_06_08_182459) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -415,6 +415,7 @@ ActiveRecord::Schema[8.0].define(version: 2025_06_08_150835) do
     t.string "identity_vault_access_token"
     t.boolean "ysws_verified", default: false
     t.text "internal_notes"
+    t.boolean "has_black_market"
   end
 
   create_table "votes", force: :cascade do |t|

@@ -10,6 +10,7 @@
 #  email                        :string
 #  first_name                   :string
 #  hackatime_confirmation_shown :boolean          default(FALSE)
+#  has_black_market             :boolean
 #  has_commented                :boolean          default(FALSE)
 #  has_hackatime                :boolean          default(FALSE)
 #  identity_vault_access_token  :string
@@ -37,6 +38,7 @@ class User < ApplicationRecord
   has_one :hackatime_stat, dependent: :destroy
   has_one :tutorial_progress, dependent: :destroy
   has_one :magic_link, dependent: :destroy
+  has_many :shop_orders
 
   validates :slack_id, presence: true, uniqueness: true
   validates :email, :display_name, :timezone, :avatar, presence: true
@@ -44,6 +46,9 @@ class User < ApplicationRecord
 
   after_create :create_tutorial_progress
   after_commit :sync_to_airtable, on: %i[create update]
+
+  include PublicActivity::Model
+  tracked only: [], owner: Proc.new { |controller, model| controller&.current_user }
 
   def self.exchange_slack_token(code, redirect_uri)
     response = Faraday.post("https://slack.com/api/oauth.v2.access",
