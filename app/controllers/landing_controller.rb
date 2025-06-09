@@ -246,34 +246,33 @@ class LandingController < ApplicationController
   private
 
   def send_slack_invite(email)
-payload = {
-  token:  ENV["SLACK_XOXC"],
-  email: email,
-  invites: [
+  payload = {
+    token:  ENV["SLACK_XOXC"],
+    email: email,
+    invites: [
     {
       email: email,
       type: 'restricted',
       mode: 'manual'
     }
   ],
-  restricted: true,
-  channels: CHANNEL_LIST          
-}
-uri = URI.parse("https://slack.com/api/users.admin.inviteBulk")
-http = Net::HTTP.new(uri.host, uri.port)
-http.use_ssl = true
+    restricted: true,
+    channels: CHANNEL_LIST          
+  }
+  uri = URI.parse("https://slack.com/api/users.admin.inviteBulk")
+  http = Net::HTTP.new(uri.host, uri.port)
+  http.use_ssl = true
 
 
-request = Net::HTTP::Post.new(uri)
-request['Content-Type'] = 'application/json'
-request['Cookie'] = "d=#{ENV['SLACK_XOXD']}"
-request['Authorization'] = "Bearer #{ENV["SLACK_XOXC"]}"  
-request.body = JSON.generate(payload)
+  request = Net::HTTP::Post.new(uri)
+  request['Content-Type'] = 'application/json'
+  request['Cookie'] = "d=#{ENV['SLACK_XOXD']}"
+  request['Authorization'] = "Bearer #{ENV["SLACK_XOXC"]}"  
+  request.body = JSON.generate(payload)
 
 # Send the request
-response = http.request(request)
-response.body
-    end
+  response = http.request(request)
+  response.body
   end
 
   def fetch_continent(ip)
