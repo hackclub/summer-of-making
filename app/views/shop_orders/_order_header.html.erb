@@ -1,0 +1,23 @@
+<!-- Order header -->
+<div class="flex items-center justify-between mb-8">
+  <div>
+    <h1 class="text-3xl font-bold text-darker-taupe mb-2">Order #<%= @order.id %></h1>
+    <p class="text-lg text-saddle-taupe">
+      Placed on <%= @order.created_at.strftime("%B %d, %Y at %I:%M %p") %>
+    </p>
+  </div>
+  
+  <div class="text-right">
+    <span class="inline-flex items-center px-4 py-2 text-lg font-medium rounded-full <%= 
+      case @order.aasm_state
+      when 'pending' then 'bg-yellow-100 text-yellow-800'
+      when 'awaiting_periodical_fulfillment' then 'bg-blue-100 text-blue-800'
+      when 'fulfilled' then 'bg-green-100 text-green-800'
+      when 'rejected' then 'bg-red-100 text-red-800'
+      when 'on_hold' then 'bg-orange-100 text-orange-800'
+      else 'bg-gray-100 text-gray-800'
+      end %>">
+      <%= @order.aasm_state.humanize %>
+    </span>
+  </div>
+</div>

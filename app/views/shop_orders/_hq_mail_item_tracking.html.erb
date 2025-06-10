@@ -1,0 +1,89 @@
+<!-- HQ Mail Item Status -->
+<div class="bg-white card-pixel p-6 mb-6">
+  <h3 class="text-xl font-bold text-darker-taupe mb-4">HQ Mail Processing</h3>
+  
+  <!-- Timeline for HQ mail items -->
+  <div class="space-y-4">
+    <div class="flex items-center space-x-4">
+      <div class="w-4 h-4 bg-green-500 rounded-full flex-shrink-0"></div>
+      <div>
+        <p class="font-semibold text-darker-taupe">Mail Request Submitted</p>
+        <p class="text-sm text-saddle-taupe"><%= @order.created_at.strftime("%B %d, %Y at %I:%M %p") %></p>
+      </div>
+    </div>
+    
+    <% if @order.awaiting_periodical_fulfillment_at %>
+      <div class="flex items-center space-x-4">
+        <div class="w-4 h-4 bg-blue-500 rounded-full flex-shrink-0"></div>
+        <div>
+          <p class="font-semibold text-darker-taupe">Queued for HQ Processing</p>
+          <p class="text-sm text-saddle-taupe"><%= @order.awaiting_periodical_fulfillment_at.strftime("%B %d, %Y at %I:%M %p") %></p>
+          <p class="text-xs text-saddle-taupe">Added to HQ mail processing queue</p>
+        </div>
+      </div>
+    <% end %>
+    
+    <% if @order.fulfilled_at %>
+      <div class="flex items-center space-x-4">
+        <div class="w-4 h-4 bg-green-500 rounded-full flex-shrink-0"></div>
+        <div>
+          <p class="font-semibold text-darker-taupe">Sent from HQ</p>
+          <p class="text-sm text-saddle-taupe"><%= @order.fulfilled_at.strftime("%B %d, %Y at %I:%M %p") %></p>
+          <% if @order.external_ref.present? %>
+            <div class="mt-2 p-3 bg-orange-50 rounded">
+              <p class="text-sm font-semibold text-orange-800">Tracking Info:</p>
+              <p class="text-lg font-mono text-orange-800"><%= @order.external_ref %></p>
+              <p class="text-xs text-saddle-taupe mt-1">Track your package from Hack Club HQ</p>
+            </div>
+          <% end %>
+        </div>
+      </div>
+    <% end %>
+    
+    <% if @order.rejected_at %>
+      <div class="flex items-center space-x-4">
+        <div class="w-4 h-4 bg-red-500 rounded-full flex-shrink-0"></div>
+        <div>
+          <p class="font-semibold text-darker-taupe">Request Declined</p>
+          <p class="text-sm text-saddle-taupe"><%= @order.rejected_at.strftime("%B %d, %Y at %I:%M %p") %></p>
+          <% if @order.rejection_reason.present? %>
+            <p class="text-sm text-vintage-red bg-vintage-red/10 p-2 rounded mt-1">
+              <strong>Reason:</strong> <%= @order.rejection_reason %>
+            </p>
+          <% end %>
+        </div>
+      </div>
+    <% end %>
+    
+    <% unless @order.fulfilled? || @order.rejected? %>
+      <div class="flex items-center space-x-4">
+        <div class="w-4 h-4 bg-gray-300 rounded-full flex-shrink-0"></div>
+        <div>
+          <p class="font-semibold text-saddle-taupe">Preparing at HQ</p>
+          <p class="text-sm text-saddle-taupe">Our team at Hack Club HQ is preparing your mail</p>
+        </div>
+      </div>
+      
+      <div class="flex items-center space-x-4">
+        <div class="w-4 h-4 bg-gray-300 rounded-full flex-shrink-0"></div>
+        <div>
+          <p class="font-semibold text-saddle-taupe">Sent from HQ</p>
+          <p class="text-sm text-saddle-taupe">You'll receive tracking info when it ships</p>
+        </div>
+      </div>
+    <% end %>
+  </div>
+
+  <!-- HQ mail info -->
+  <% unless @order.fulfilled? || @order.rejected? %>
+    <div class="mt-6 p-4 bg-orange-50 rounded">
+      <h4 class="font-semibold text-orange-800 mb-2">📮 HQ Mail Processing</h4>
+      <ul class="text-sm text-orange-700 space-y-1">
+        <li>• Mail is processed directly from Hack Club HQ in Vermont</li>
+        <li>• Typical processing time: 2-4 business days</li>
+        <li>• Personal touch from the Hack Club team</li>
+        <li>• You'll get tracking info once it's on its way!</li>
+      </ul>
+    </div>
+  <% end %>
+</div>

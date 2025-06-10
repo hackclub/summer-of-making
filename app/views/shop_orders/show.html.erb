@@ -1,0 +1,208 @@
+<% content_for :title, "Order ##{@order.id}" %>
+
+<div class="max-w-4xl mx-auto p-4 md:p-8">
+  <!-- Navigation -->
+  <div class="flex items-center justify-between mb-6">
+    <%= link_to shop_orders_path, class: "inline-flex items-center text-saddle-taupe hover:text-darker-taupe transition-colors duration-200" do %>
+      <%= inline_svg "arrow-left.svg", class: "h-5 w-5 mr-2" if defined?(inline_svg) %>
+      <span class="text-lg">← My Orders</span>
+    <% end %>
+    
+    <%= link_to shop_path, class: "text-saddle-taupe hover:text-darker-taupe transition-colors duration-200" do %>
+      <span class="text-lg">Continue Shopping →</span>
+    <% end %>
+  </div>
+
+  <div class="bg-soft-bone card-pixel p-6 md:p-8">
+    <!-- Order header -->
+    <div class="flex items-center justify-between mb-8">
+      <div>
+        <h1 class="text-3xl font-bold text-darker-taupe mb-2">Order #<%= @order.id %></h1>
+        <p class="text-lg text-saddle-taupe">
+          Placed on <%= @order.created_at.strftime("%B %d, %Y at %I:%M %p") %>
+        </p>
+      </div>
+      
+      <div class="text-right">
+        <span class="inline-flex items-center px-4 py-2 text-lg font-medium rounded-full <%= 
+          case @order.aasm_state
+          when 'pending' then 'bg-yellow-100 text-yellow-800'
+          when 'awaiting_periodical_fulfillment' then 'bg-blue-100 text-blue-800'
+          when 'fulfilled' then 'bg-green-100 text-green-800'
+          when 'rejected' then 'bg-red-100 text-red-800'
+          when 'on_hold' then 'bg-orange-100 text-orange-800'
+          else 'bg-gray-100 text-gray-800'
+          end %>">
+          <%= @order.aasm_state.humanize %>
+        </span>
+      </div>
+    </div>
+
+    <!-- Item details -->
+    <div class="bg-white card-pixel p-6 mb-6">
+      <div class="flex items-start space-x-6">
+        <% if @order.shop_item.image.attached? %>
+          <div class="w-32 h-32 bg-soft-bone card-pixel p-4 flex-shrink-0">
+            <%= image_tag @order.shop_item.image.variant(:thumb), 
+                class: "w-full h-full object-contain",
+                alt: @order.shop_item.name %>
+          </div>
+        <% else %>
+          <div class="w-32 h-32 bg-soft-bone card-pixel p-4 flex-shrink-0 flex items-center justify-center">
+            <span class="text-4xl">📦</span>
+          </div>
+        <% end %>
+        
+        <div class="flex-grow">
+          <h2 class="text-2xl font-bold text-darker-taupe mb-2"><%= @order.shop_item.name %></h2>
+          <% if @order.shop_item.description.present? %>
+            <p class="text-saddle-taupe mb-4"><%= @order.shop_item.description %></p>
+          <% end %>
+          
+          <div class="grid md:grid-cols-2 gap-4">
+            <div>
+              <span class="font-semibold text-darker-taupe">Quantity:</span>
+              <span class="text-saddle-taupe"><%= @order.quantity %></span>
+            </div>
+            
+            <% if @order.frozen_item_price.present? %>
+              <div>
+                <span class="font-semibold text-darker-taupe">Total Cost:</span>
+                <span class="text-saddle-taupe flex items-center">
+                  <span class="mr-1">🐚</span>
+                  <%= number_with_delimiter(@order.frozen_item_price * @order.quantity) %> tickets
+                </span>
+              </div>
+            <% end %>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Order Status & Tracking -->
+    <div class="bg-white card-pixel p-6 mb-6">
+      <h3 class="text-xl font-bold text-darker-taupe mb-4">Order Status & Tracking</h3>
+      
+      <!-- Timeline -->
+      <div class="space-y-4">
+        <!-- Pending Acceptance -->
+        <div class="flex items-center space-x-4">
+          <div class="w-4 h-4 <%= @order.pending? ? 'bg-yellow-500' : 'bg-green-500' %> rounded-full flex-shrink-0"></div>
+          <div>
+            <p class="font-semibold text-darker-taupe">Pending Acceptance</p>
+            <p class="text-sm text-saddle-taupe"><%= @order.created_at.strftime("%B %d, %Y at %I:%M %p") %></p>
+            <% if @order.pending? %>
+              <p class="text-xs text-yellow-600">Waiting for team review</p>
+            <% end %>
+          </div>
+        </div>
+        
+        <!-- Pending Fulfillment (for manually fulfilled items) -->
+        <% if @order.shop_item.manually_fulfilled? %>
+          <div class="flex items-center space-x-4">
+            <div class="w-4 h-4 <%= @order.awaiting_periodical_fulfillment? ? 'bg-blue-500' : (@order.fulfilled? ? 'bg-green-500' : 'bg-gray-300') %> rounded-full flex-shrink-0"></div>
+            <div>
+              <p class="font-semibold text-darker-taupe">Pending Fulfillment</p>
+              <% if @order.awaiting_periodical_fulfillment_at %>
+                <p class="text-sm text-saddle-taupe"><%= @order.awaiting_periodical_fulfillment_at.strftime("%B %d, %Y at %I:%M %p") %></p>
+              <% end %>
+              <% if @order.awaiting_periodical_fulfillment? %>
+                <p class="text-xs text-blue-600">Being prepared for fulfillment</p>
+              <% elsif !@order.fulfilled? && !@order.rejected? %>
+                <p class="text-xs text-gray-500">Awaiting acceptance before fulfillment</p>
+              <% end %>
+            </div>
+          </div>
+        <% end %>
+        
+        <!-- Fulfilled -->
+        <div class="flex items-center space-x-4">
+          <div class="w-4 h-4 <%= @order.fulfilled? ? 'bg-green-500' : 'bg-gray-300' %> rounded-full flex-shrink-0"></div>
+          <div>
+            <p class="font-semibold text-darker-taupe">Fulfilled</p>
+            <% if @order.fulfilled_at %>
+              <p class="text-sm text-saddle-taupe"><%= @order.fulfilled_at.strftime("%B %d, %Y at %I:%M %p") %></p>
+              <% if @order.external_ref.present? %>
+                <div class="mt-2 p-3 bg-forest/10 rounded">
+                  <p class="text-sm font-semibold text-forest">Tracking:</p>
+                  <p class="text-lg font-mono text-forest"><%= @order.external_ref %></p>
+                </div>
+              <% end %>
+            <% else %>
+              <p class="text-xs text-gray-500">You'll receive updates when your order is complete</p>
+            <% end %>
+          </div>
+        </div>
+        
+        <!-- Rejection (if applicable) -->
+        <% if @order.rejected? %>
+          <div class="flex items-center space-x-4">
+            <div class="w-4 h-4 bg-red-500 rounded-full flex-shrink-0"></div>
+            <div>
+              <p class="font-semibold text-darker-taupe">Order Rejected</p>
+              <p class="text-sm text-saddle-taupe"><%= @order.rejected_at.strftime("%B %d, %Y at %I:%M %p") %></p>
+              <% if @order.rejection_reason.present? %>
+                <p class="text-sm text-vintage-red bg-vintage-red/10 p-2 rounded mt-1">
+                  <strong>Reason:</strong> <%= @order.rejection_reason %>
+                </p>
+              <% end %>
+            </div>
+          </div>
+        <% end %>
+      </div>
+
+      <!-- Order info based on type -->
+      <% unless @order.fulfilled? || @order.rejected? %>
+        <div class="mt-6 p-4 bg-blue-50 rounded">
+          <h4 class="font-semibold text-blue-800 mb-2">📦 Order Processing</h4>
+          <ul class="text-sm text-blue-700 space-y-1">
+            <% case @order.shop_item.type %>
+            <% when /Grant/i %>
+              <li>• Grant requests are reviewed by our team</li>
+              <li>• Approved grants are automatically processed</li>
+            <% when /HQMail/i %>
+              <li>• Mail is sent directly from Hack Club HQ</li>
+              <li>• Typical processing time: 2-4 business days</li>
+              <li>• Personal touch from the Hack Club team</li>
+            <% when /Special/i %>
+              <li>• This item requires special coordination by our team</li>
+              <li>• Processing time varies based on the specific request</li>
+              <li>• Someone from Hack Club will be in touch!</li>
+            <% else %>
+              <li>• Orders are processed during business hours</li>
+              <li>• Typical processing time: 3-5 business days</li>
+              <li>• You'll receive tracking info here once shipped</li>
+            <% end %>
+            <li>• Questions? Contact our support team</li>
+          </ul>
+        </div>
+      <% end %>
+    </div>
+
+    <!-- Actions -->
+    <div class="flex flex-col sm:flex-row gap-4 mt-8">
+      <%= link_to "View My Orders", shop_orders_path, 
+          class: "bg-forest hover:bg-forest/90 text-white font-bold py-3 px-6 btn-pixel text-center transition-colors duration-200" %>
+      <%= link_to "Continue Shopping", shop_path, 
+          class: "bg-soft-bone hover:bg-saddle-taupe/10 text-darker-taupe font-bold py-3 px-6 btn-pixel text-center border-2 border-saddle-taupe/30 transition-colors duration-200" %>
+    </div>
+  </div>
+</div>
+
+<style>
+.btn-pixel {
+  box-shadow: 0 0 0 1px rgba(0,0,0,0.1), 
+              2px 2px 0 0 rgba(0,0,0,0.1);
+}
+
+.btn-pixel:hover {
+  transform: translate(1px, 1px);
+  box-shadow: 0 0 0 1px rgba(0,0,0,0.1), 
+              1px 1px 0 0 rgba(0,0,0,0.1);
+}
+
+.card-pixel {
+  box-shadow: 0 0 0 2px rgba(0,0,0,0.1),
+              4px 4px 0 0 rgba(0,0,0,0.05);
+}
+</style>

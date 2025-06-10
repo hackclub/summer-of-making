@@ -13,6 +13,10 @@ module ShopItemsHelper
     editable(item, field_name, nil, :image)
   end
 
+  def checkbox_field_editable(item, field_name, display_name: nil)
+    editable(item, field_name, display_name || field_name.to_s.humanize, :checkbox)
+  end
+
   private
 
   def editable(item, field_name, display_prefix = "", field_type)
@@ -26,6 +30,8 @@ module ShopItemsHelper
                   content_tag(:div, class: "item", style: "display: flex; flex-direction: column;") do
                     tag = if field_type == :image
                             image_tag item.image.variant(:thumb) if item.image.attached?
+                    elsif field_type == :checkbox
+                            content_tag(:p, "#{display_prefix}: #{item.public_send(field_name) ? 'Yes' : 'No'}", class: style)
                     else
                             content_tag(:p, "#{display_prefix}#{item.public_send(field_name)}", class: style)
                     end
@@ -46,6 +52,8 @@ module ShopItemsHelper
                       form_field = f.number_field(field_name, step: 0.01, class: style)
                     when :image
                       form_field = f.file_field(field_name, class: style)
+                    when :checkbox
+                      form_field = f.check_box(field_name, class: "mr-2") + f.label(field_name, display_prefix)
                     else
                       raise NotImplementedError
                     end

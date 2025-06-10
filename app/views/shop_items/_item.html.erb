@@ -1,17 +1,17 @@
 <div class="bg-soft-bone card-pixel p-2 sm:p-4 w-fit">
-    <% admin_tool do %>
-        <p class="text-xs">Reload after hitting update bc i'm lazy</p>
-        <%= form_with(model: item, url: shop_item_path(item), scope: :shop_item, class: "flex flex-col items-start") do |f| %>
-            <%= f.select :type, [["Typeless (ILLEGAL)", nil], *@shop_item_types], selected: item.type %>
-            <%= f.submit %>
-        <% end %>
+  <% admin_tool do %>
+    <p class="text-xs">Reload after hitting update bc i'm lazy</p>
+    <%= form_with(model: item, url: shop_item_path(item), scope: :shop_item, class: "flex flex-col items-start") do |f| %>
+      <%= f.select :type, [["Typeless (ILLEGAL)", nil], *@shop_item_types], selected: item.type %>
+      <%= f.submit %>
     <% end %>
+  <% end %>
 
   <%= text_field_editable(item, :name) %>
   <%= text_field_editable(item, :description) %>
 
   <% admin_tool do %>
-      <%= text_field_editable(item, :internal_description) %>
+    <%= text_field_editable(item, :internal_description) %>
   <% end %>
 
   <%= image_tag item.image.variant(:thumb) if item.image.attached? %>
@@ -21,11 +21,42 @@
   <%= number_field_editable(item, :ticket_cost, display_prefix: "🐚") %>
 
   <% admin_tool do %>
-      <p>Actual IRL FR HC cost</p>
-      <%= number_field_editable(item, :usd_cost, display_prefix: "$") %>
+    <p>Actual IRL FR HC cost</p>
+    <%= number_field_editable(item, :usd_cost, display_prefix: "$") %>
+    <%= number_field_editable(item, :max_qty, display_prefix: "Max qty: ") %>
+    <%= checkbox_field_editable(item, :one_per_person_ever, display_name: "One per person ever") %>
+    <%= checkbox_field_editable(item, :requires_black_market, display_name: "Black market only") %>
   <% end %>
 
-  <%= button_to "buy!", order_shop_item_path(item), method: :get %>
+  <% if item.one_per_person_ever? %>
+    <div class="bg-vintage-red/10 p-2 card-pixel mt-2">
+      <p class="text-xs text-vintage-red font-semibold">⚠️ Limited: One per person</p>
+    </div>
+  <% end %>
+
+  <% can_afford = item.ticket_cost.blank? || item.ticket_cost.zero? || current_user.balance >= item.ticket_cost %>
+  <% already_ordered = item.one_per_person_ever? && current_user.shop_orders.joins(:shop_item).where(shop_item: item).exists? %>
+
+  <% if already_ordered %>
+    <div class="relative">
+      <%= button_to "already ordered", "#", method: :get, disabled: true,
+                    class: "bg-saddle-taupe/30 text-saddle-taupe/60 font-bold py-2 px-4 btn-pixel cursor-not-allowed" %>
+      <div class="absolute -top-8 left-0 bg-vintage-red text-white text-xs px-2 py-1 rounded opacity-0 hover:opacity-100 transition-opacity duration-200 whitespace-nowrap">
+        You've already ordered this item
+      </div>
+    </div>
+  <% elsif can_afford %>
+    <%= button_to "buy!", order_shop_item_path(item), method: :get, data: { turbo: false },
+                  class: "bg-forest hover:bg-forest/90 text-white font-bold py-2 px-4 btn-pixel transition-colors duration-200" %>
+  <% else %>
+    <div class="relative">
+      <%= button_to "buy!", "#", method: :get, disabled: true,
+                    class: "bg-saddle-taupe/30 text-saddle-taupe/60 font-bold py-2 px-4 btn-pixel cursor-not-allowed" %>
+      <div class="absolute -top-8 left-0 bg-vintage-red text-white text-xs px-2 py-1 rounded opacity-0 hover:opacity-100 transition-opacity duration-200 whitespace-nowrap">
+        Need <%= number_with_delimiter(item.ticket_cost - current_user.balance) %> more 🐚
+      </div>
+    </div>
+  <% end %>
 </div>
 
 <!-- <script>

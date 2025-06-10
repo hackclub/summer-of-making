@@ -1,0 +1,88 @@
+<!-- Special Fulfillment Item Status -->
+<div class="bg-white card-pixel p-6 mb-6">
+  <h3 class="text-xl font-bold text-darker-taupe mb-4">Special Fulfillment Status</h3>
+  
+  <!-- Timeline for special fulfillment items -->
+  <div class="space-y-4">
+    <div class="flex items-center space-x-4">
+      <div class="w-4 h-4 bg-green-500 rounded-full flex-shrink-0"></div>
+      <div>
+        <p class="font-semibold text-darker-taupe">Request Submitted</p>
+        <p class="text-sm text-saddle-taupe"><%= @order.created_at.strftime("%B %d, %Y at %I:%M %p") %></p>
+      </div>
+    </div>
+    
+    <% if @order.awaiting_periodical_fulfillment_at %>
+      <div class="flex items-center space-x-4">
+        <div class="w-4 h-4 bg-blue-500 rounded-full flex-shrink-0"></div>
+        <div>
+          <p class="font-semibold text-darker-taupe">Under Special Review</p>
+          <p class="text-sm text-saddle-taupe"><%= @order.awaiting_periodical_fulfillment_at.strftime("%B %d, %Y at %I:%M %p") %></p>
+          <p class="text-xs text-saddle-taupe">Our team is coordinating special fulfillment</p>
+        </div>
+      </div>
+    <% end %>
+    
+    <% if @order.fulfilled_at %>
+      <div class="flex items-center space-x-4">
+        <div class="w-4 h-4 bg-green-500 rounded-full flex-shrink-0"></div>
+        <div>
+          <p class="font-semibold text-darker-taupe">Fulfilled</p>
+          <p class="text-sm text-saddle-taupe"><%= @order.fulfilled_at.strftime("%B %d, %Y at %I:%M %p") %></p>
+          <% if @order.external_ref.present? %>
+            <div class="mt-2 p-3 bg-purple-50 rounded">
+              <p class="text-sm font-semibold text-purple-800">Fulfillment Details:</p>
+              <p class="text-sm text-purple-800"><%= @order.external_ref %></p>
+            </div>
+          <% end %>
+        </div>
+      </div>
+    <% end %>
+    
+    <% if @order.rejected_at %>
+      <div class="flex items-center space-x-4">
+        <div class="w-4 h-4 bg-red-500 rounded-full flex-shrink-0"></div>
+        <div>
+          <p class="font-semibold text-darker-taupe">Request Declined</p>
+          <p class="text-sm text-saddle-taupe"><%= @order.rejected_at.strftime("%B %d, %Y at %I:%M %p") %></p>
+          <% if @order.rejection_reason.present? %>
+            <p class="text-sm text-vintage-red bg-vintage-red/10 p-2 rounded mt-1">
+              <strong>Reason:</strong> <%= @order.rejection_reason %>
+            </p>
+          <% end %>
+        </div>
+      </div>
+    <% end %>
+    
+    <% unless @order.fulfilled? || @order.rejected? %>
+      <div class="flex items-center space-x-4">
+        <div class="w-4 h-4 bg-gray-300 rounded-full flex-shrink-0"></div>
+        <div>
+          <p class="font-semibold text-saddle-taupe">Coordinating Fulfillment</p>
+          <p class="text-sm text-saddle-taupe">Our team is working on your special request</p>
+        </div>
+      </div>
+      
+      <div class="flex items-center space-x-4">
+        <div class="w-4 h-4 bg-gray-300 rounded-full flex-shrink-0"></div>
+        <div>
+          <p class="font-semibold text-saddle-taupe">Completed</p>
+          <p class="text-sm text-saddle-taupe">You'll be notified when your request is fulfilled</p>
+        </div>
+      </div>
+    <% end %>
+  </div>
+
+  <!-- Special fulfillment info -->
+  <% unless @order.fulfilled? || @order.rejected? %>
+    <div class="mt-6 p-4 bg-purple-50 rounded">
+      <h4 class="font-semibold text-purple-800 mb-2">⭐ Special Fulfillment</h4>
+      <ul class="text-sm text-purple-700 space-y-1">
+        <li>• This item requires special coordination by our team</li>
+        <li>• Processing time varies based on the specific request</li>
+        <li>• You'll receive updates as we work on your request</li>
+        <li>• Our team may reach out if additional information is needed</li>
+      </ul>
+    </div>
+  <% end %>
+</div>

@@ -241,6 +241,19 @@ class User < ApplicationRecord
     )
   end
 
+  def has_idv_addresses?
+    return false if identity_vault_access_token.blank?
+
+    begin
+      idv_data = fetch_idv
+      addresses = idv_data.dig(:identity, :addresses)
+      addresses.present? && addresses.any?
+    rescue => e
+      Rails.logger.error "Failed to fetch IDV addresses: #{e.message}"
+      false
+    end
+  end
+
   def verification_status
     return :not_linked if identity_vault_id.blank?
 
