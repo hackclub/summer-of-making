@@ -1,7 +1,7 @@
 <b>Name: </b> <%= link_to admin_user_path(user) do %>
   <%= user.first_name %> <%= user.last_name %>
-<% end %> <br/>
-<b>Verified: </b> <%= !!user.ysws_verified %> <br/>
-<b>Balance: </b> who knows, ask malted <br/>
+<% end %> <br>
+<b>Verified: </b> <%= !!user.ysws_verified %> <br>
+<b>Balance: </b> who knows, ask malted <br>
 <%= render "admin/shared/internal_notes", record: user %>
 <%= link_to "visit on Avo?", "/avo/resources/users/#{user.id}" %>

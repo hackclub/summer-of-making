@@ -12,7 +12,7 @@
 
   <%= link_to my_projects_path, class: "flex flex-col items-center #{'text-saddle-taupe' if current_page?(my_projects_path) || (controller_name == 'projects' && action_name == 'show' && @project&.user == current_user)}" do %>
     <%= inline_svg "radio-tower.svg", class: "h-8 w-8" %>
-    <span class="text-xs mt-1">My Projects</span>
+    <span class="text-xs mt-1">Projects</span>
   <% end %>
 
   <%= link_to new_vote_path, class: "flex flex-col items-center #{'text-saddle-taupe' if current_page?(new_vote_path)}" do %>

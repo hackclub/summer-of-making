@@ -22,7 +22,7 @@
 class TutorialProgress < ApplicationRecord
   belongs_to :user
 
-  TUTORIAL_STEPS = %w[signpost explore gallery my_projects vote shop].freeze
+  TUTORIAL_STEPS = %w[signpost explore my_projects vote shop].freeze
 
   after_initialize :setup_default_progress, if: :new_record?
 

@@ -1,0 +1,65 @@
+<%#
+  Parameters:
+    - attr: The attributes to apply to the main element of the container.
+    - full_height: If true, the container will fill up all vertical space available to it.
+    .              Defaults to false.
+%>
+
+<% full_height = local_assigns.fetch(:full_height, false) %>
+
+<div
+  class="flex flex-col"
+  <% if local_assigns[:attr] %>
+    <%= raw(attr) %>
+  <% end %>
+>
+  <%# Top parchment header %>
+  <div class="w-full h-min flex">
+    <div>
+      <%= inline_svg("container/container-tl.svg", class: "-mr-[1px]") %>
+    </div>
+
+    <%= inline_svg("container/container-tm.svg", class: "w-full -mr-[1px]", preserve_aspect_ratio: "none") %>
+  
+    <div>
+      <%= inline_svg("container/container-tr.svg") %>
+    </div>
+  </div>
+
+  <div class="flex -mt-[1px] relative <%= 'h-full' if full_height %>">
+    <%#
+      What we do here for columns are two elements - one "anchor" element, which is invisible,
+      that participates in the box model. This is the one that has its width defined. For proper
+      scaling of the vectors, the second element is absolutely-positioned.
+    %>
+
+    <div class="w-[46px] h-full"></div>
+    <div class="ml-[1px] h-full absolute top-0 bottom-0">
+      <%= inline_svg("container/container-ml.svg", class: "h-full", preserve_aspect_ratio: "none") %>
+    </div>
+
+    <%# Actual content here! %>
+    <div class="bg-linear-to-b from-[#E6D4BE] to-[#F6DBBA] h-full w-full flex-1">
+        <%= yield %>
+    </div>
+
+    <div class="w-[36px] h-full"></div>
+    <div class="h-full absolute top-0 bottom-0 right-0">
+      <%= inline_svg("container/container-mr.svg", class: "h-full", preserve_aspect_ratio: "none") %>
+    </div>
+  </div>
+
+  <%# Bottom parchment header %>
+  <div class="w-full flex ml-[1px]">
+    <div>
+      <%= inline_svg("container/container-bl.svg", class: "-mr-[1px]") %>
+    </div>
+
+    <%= inline_svg("container/container-bm.svg", class: "w-full -mr-[1px]", preserve_aspect_ratio: "none") %>
+  
+    <div>
+      <%= inline_svg("container/container-br.svg") %>
+    </div>
+  </div>
+
+</div>

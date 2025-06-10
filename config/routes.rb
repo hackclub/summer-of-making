@@ -188,8 +188,8 @@ Rails.application.routes.draw do
   get "/auth/failure", to: "sessions#failure"
   delete "/logout", to: "sessions#destroy", as: :logout
 
-  get "/magic-link", to: "sessions#magic_link", as: :magic_link
-  post "/explorpheus/magic-link", to: "magic_link#get_secret_magic_url"
+  get "/magic-link", to: "sessions#magic_link", as: :magic_link # For users signing in
+  post "/explorpheus/magic-link", to: "magic_link#get_secret_magic_url" # For the welcome bot to fetch the magic link.
 
   # Identity Vault routes
   get "users/identity_vault_callback", to: "users#identity_vault_callback", as: :identity_vault_callback
@@ -201,7 +201,6 @@ Rails.application.routes.draw do
   # get "dashboard", to: "dashboard#index"
 
   get "explore", to: "projects#index"
-  get "gallery", to: "projects#gallery"
   get "my_projects", to: "projects#my_projects"
   post "check_link", to: "projects#check_link"
   get "check_github_readme", to: "projects#check_github_readme"
@@ -241,6 +240,9 @@ Rails.application.routes.draw do
     end
     resources :shop_orders, path: :orders, except: %i[edit update new]
   end
+
+  # Payouts etc
+  get "/payouts/:slack_id", to: "payouts#index"
 
   match "/404", to: "errors#not_found", via: :all
   match "/500", to: "errors#internal_server_error", via: :all
@@ -283,6 +285,7 @@ Rails.application.routes.draw do
   post "users/check_hackatime_connection", to: "users#check_hackatime_connection"
 
   namespace :admin do
+    mount Blazer::Engine, at: "blazer"
     get "/", to: "static_pages#index", as: :root
     resources :users, only: [ :index, :show ] do
       member do

@@ -18,10 +18,17 @@
   src: url("Pagaki.ttf") format(truetype);
 }
 
+@font-face {
+  font-family: "National Park";
+  font-weight: 200 800;
+  src: url("NationalPark.ttf") format(truetype);
+}
+
 @theme {
   --font-steven: "Steven", "sans-serif";
   --font-dynapuff: "DynaPuff", "sans-serif";
   --font-pagaki: "Pagaki", "sans-serif";
+  --font-national-park: "National Park", "sans-serif";
 
   --color-forest: hsl(143.53, 24.17%, 41.37%);
   --color-warm: hsl(37.5, 63.77%, 72.94%);
@@ -31,7 +38,6 @@
   --color-soft-bone: hsl(39, 80%, 80.39%);
   --color-saddle-taupe: hsl(26.25, 48.28%, 45.49%);
 
-  /* These colors are in HSL not in Hex. Please use HSL */
   --color-burn-sienna: hsl(20, 60%, 50%);
   --color-dark-sienna: hsl(14, 72%, 56%);
 

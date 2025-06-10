@@ -2,7 +2,7 @@
 
 class ProjectsController < ApplicationController
   include ActionView::RecordIdentifier
-  before_action :authenticate_user!, except: %i[index gallery show]
+  before_action :authenticate_user!, except: %i[index show]
   before_action :set_project,
                 only: %i[show edit update follow unfollow ship stake_stonks unstake_stonks destroy]
   before_action :check_if_shipped, only: %i[edit update]
@@ -21,6 +21,14 @@ class ProjectsController < ApplicationController
       # end
 
       @show_create_project = true if @projects.empty?
+    elsif params[:tab] == "gallery"
+      @projects = Project.includes(:user)
+                         .order(rating: :asc)
+
+      @projects = @projects.sort_by do |project|
+        weight = rand + (project.devlogs.count.positive? ? 1.5 : 0)
+        -weight
+      end
     elsif params[:tab] == "following"
       @followed_projects = current_user.followed_projects.includes(:user)
       @recent_devlogs = Devlog.joins(:project)
@@ -46,6 +54,12 @@ class ProjectsController < ApplicationController
                             .order(created_at: :desc)
 
       @pagy, @recent_devlogs = pagy(devlogs_query, items: 5)
+
+      @projects = Project.includes(:user).order(rating: :asc)
+      @projects = @projects.sort_by do |project|
+        weight = rand + (project.devlogs.count.positive? ? 1.5 : 0)
+        -weight
+      end
     end
   end
 
@@ -105,20 +119,6 @@ class ProjectsController < ApplicationController
     @show_create_project = true
 
     current_user.refresh_hackatime_data if current_user.has_hackatime?
-
-    render :index
-  end
-
-  def gallery
-    @projects = Project.includes(:user)
-                       .order(rating: :asc)
-
-    @projects = @projects.sort_by do |project|
-      weight = rand + (project.devlogs.count.positive? ? 1.5 : 0)
-      -weight
-    end
-
-    @feed_type = "projects"
 
     render :index
   end

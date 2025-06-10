@@ -66,6 +66,9 @@ end
 group :development do
   # Use console on exceptions pages [https://github.com/rails/web-console]
   gem "web-console"
+
+  # Auto-reload pages after a code change
+  gem "rails_live_reload"
 end
 
 group :test do
@@ -110,3 +113,5 @@ gem "lz_string", "~> 0.3.0"
 gem "aasm", "~> 5.5"
 
 gem "public_activity", "~> 3.0"
+
+gem "blazer", "~> 3.3"

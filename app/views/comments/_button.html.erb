@@ -1,4 +1,10 @@
-<button data-action="click->modal#open" data-modal-id="<%= devlog.id %>" data-modal-type="comment" class="inline-flex items-center py-1 sm:py-1.5 text-gray-600 hover:text-forest transition-colors duration-300 text-sm sm:text-base" onclick="event.stopPropagation()">
-  <%= inline_svg_tag "commmment.svg", class: "w-6 h-6 sm:w-8 sm:h-8 mr-1 mb-1" %>
+<button
+  data-action="click->modal#open"
+  data-modal-id="<%= devlog.id %>"
+  data-modal-type="comment"
+  class="inline-flex items-center py-1 sm:py-1.5 cursor-pointer text-sm sm:text-base"
+  onclick="event.stopPropagation()"
+>
+  <%= inline_svg_tag "icons/comments.svg", class: "w-6 h-6 mr-1 mb-1" %>
  <span class="mb-1"> <%= devlog.comments.count %></span>
 </button>

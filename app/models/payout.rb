@@ -26,6 +26,6 @@ class Payout < ApplicationRecord
   private
 
   def set_user_id
-    self.user ||= payable.user
+    self.user ||= payable.is_a?(User) ? payable : payable.user
   end
 end

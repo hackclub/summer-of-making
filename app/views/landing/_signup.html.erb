@@ -7,7 +7,8 @@
              placeholder="Enter your email..."
              autocomplete="email"
              class="marble-textarea with-icon w-full"
-             data-signup-form-target="emailInput">
+             data-signup-form-target="emailInput"
+             onkeydown="if(event.key==='Enter'){event.preventDefault();var btn=this.closest('[data-controller=signup-form]').querySelector('.marble-button');if(btn){btn.click();}}">
     </div>
     <div class="hidden bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded-lg text-sm"
          data-signup-form-target="msg">

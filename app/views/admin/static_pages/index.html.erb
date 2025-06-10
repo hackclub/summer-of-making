@@ -1,13 +1,22 @@
-  <h1>admin dashboard!</h1>
-  <p>you look great today :-)</p>
+<h1>admin dashboard!</h1>
+<p>you look great today :-)</p>
 
-  <ul>
+<ul>
+  <li>
     shop orders
     <ul>
       <li><%= link_to "all 'em", admin_shop_orders_path %></li>
       <li><%= link_to "ones which are pending acceptance", pending_admin_shop_orders_path %></li>
       <li><%= link_to "ones which are awaiting manual fulfillment", pending_admin_shop_orders_path %></li>
     </ul>
-  </ul>
+  </li>
+  <li>
+    admin tools
+    <ul>
+      <li><%= link_to "420 blaze it", admin_blazer_path %></li>
+    </ul>
+  </li>
+</ul>
 
-  <%= link_to "← back to normal people website", root_path %>
+
+<%= link_to "← back to normal people website", root_path %>

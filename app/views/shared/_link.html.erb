@@ -1,0 +1,80 @@
+<%#
+  Parameters:
+    - target: required. Will be passed to link_to.
+    - text: required. The text to display in the link.
+    - class: The classes to apply.
+    - icon: An icon identifier. You can find all icons in '/app/assets/images/icons'. You
+    .       shouldn't include the '.svg' extension.
+    - highlight: If true, the link will always be highlighted. Defaults to false.
+    - content_attr: The attributes to assign to the content.
+    - text_attr: The attributes to assign to the text (NOT the icon).
+    - as_button: If defined, a <button> will be produced instead of a link. The given
+    .            attributes will be assigned to it as well. 
+    - underline_attr: The attributes to assign to the underline decoration.
+%>
+<% raise "shared/link requires 'text' as a local" unless local_assigns[:text] %>
+
+<% as_button = local_assigns[:as_button] %>
+<% highlight    = local_assigns.fetch(:highlight, false) %>
+<% base_class   = "relative inline-block group py-2 cursor-pointer" %>
+<% final_class  = [base_class, local_assigns[:class]].compact.join(" ") %>
+
+<% if as_button %>
+  <% btn_opts = { type: 'button', class: "text-2xl #{final_class}" } %>
+  <% btn_opts[:data] = as_button[:data] if as_button[:data].is_a?(Hash) %>
+
+  <%= content_tag :button, btn_opts do %>
+    <span
+      class="relative z-10 flex items-center space-x-2"
+      <% if local_assigns[:content_attr] %>
+        <%= raw(content_attr) %>
+      <% end %>
+    >
+      <% if local_assigns[:icon] %>
+        <%= inline_svg "icons/#{icon}.svg", class: "w-6 mr-4" %>
+      <% end %>
+      <span
+        class="text-nowrap tracking-tight"
+        <% if local_assigns[:text_attr] %>
+          <%= raw(text_attr) %>
+        <% end %>
+      ><%= text %></span>
+    </span>
+
+    <div
+      data-kind="underline"
+      class="absolute bottom-1 -right-1 w-full pr-3 box-content h-6
+             bg-[#C7A077] rounded-full z-0 group-hover:opacity-100
+             <%= 'opacity-0' unless highlight %>"
+    ></div>
+  <% end %>
+<% else %>
+  <% raise "shared/link requires 'target' as a local" unless local_assigns[:target] %>
+
+  <%= link_to target, class: final_class do %>
+    <span
+      class="relative z-10 flex items-center space-x-2"
+      <% if local_assigns[:content_attr] %>
+        <%= raw(content_attr) %>
+      <% end %>
+    >
+      <% if local_assigns[:icon] %>
+        <%= inline_svg "icons/#{icon}.svg", class: "w-6 mr-4" %>
+      <% end %>
+      <span
+        class="text-nowrap tracking-tight"
+        <% if local_assigns[:text_attr] %>
+          <%= raw(text_attr) %>
+        <% end %>
+      ><%= text %></span>
+    </span>
+
+    <div
+      class="absolute transition-all duration-150 bottom-1 w-full pr-3 box-content h-6 bg-[#C7A077] rounded-full z-0
+             group-hover:opacity-100 <%= 'opacity-0' unless highlight %>"
+      <% if local_assigns[:underline_attr] %>
+        <%= raw(underline_attr) %>
+      <% end %>
+    ></div>
+  <% end %>
+<% end %>

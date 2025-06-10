@@ -11,7 +11,9 @@
   content_margin ||= ''                    # Content margin/padding classes
 %>
 
-<div class="bg-[#F3ECD8] rounded-xl border-5 border-[#E4DCC6] <%= context == 'explore' || context == 'project' ? '' : '' %> <%= context == 'project' ? 'p-2 sm:p-3' : 'p-3 sm:p-4' %> <%= container_classes %> transform <%= 'hover:scale-[1.01]' if context != 'project' %> transition-transform duration-300 <%= 'cursor-pointer' if show_project_navigation %> <%= 'max-w-2xl mx-auto' if context == 'explore' %>"
+<%= render layout: "shared/container" do %>
+
+<div class="ml-4 <%= context == 'explore' || context == 'project' ? '' : '' %> <%= container_classes %> <%= 'cursor-pointer' if show_project_navigation %>"
      id="<%= dom_id(devlog) %>"
      data-controller="modal devlog-card"
      data-devlog-card-project-path-value="<%= project_path(devlog.project) if show_project_navigation %>"
@@ -25,58 +27,60 @@
         <img src="<%= devlog.user.avatar %>" alt="<%= devlog.user.display_name %>" class="w-8 h-8 sm:w-10 sm:h-10 rounded-full mr-2 sm:mr-3">
       <% end %>
       <div>
-        <span class="font-medium text-base sm:text-lg 2xl:text-xl"><%= devlog.user.display_name %> <span class="text-gray-600 text-xs sm:text-sm 2xl:text-base">•</span></span>
+        <span class="text-base sm:text-lg 2xl:text-xl">@<%= devlog.user.display_name %></span>
 
-        <!-- Time info -->
-        <% if devlog.timer_sessions.any? %>
-          <% timer_session = devlog.timer_sessions.first %>
-          <span class="text-gray-600 text-xs sm:text-sm 2xl:text-base">
-            <% hours = timer_session.net_time / 3600 %>
-            <% minutes = (timer_session.net_time % 3600) / 60 %>
-            <%= hours > 0 ? "#{hours}h spent working" : "#{minutes}m spent working" %>
-          </span>
-          <span class="text-gray-600 text-xs sm:text-sm 2xl:text-base"> • </span>
-        <% elsif devlog.last_hackatime_time.present? && devlog.last_hackatime_time > 0 %>
-          <span class="text-gray-600 text-xs sm:text-sm 2xl:text-base">
-            <% hours = devlog.last_hackatime_time / 3600 %>
-            <% minutes = (devlog.last_hackatime_time % 3600) / 60 %>
-            <%= hours > 0 ? "#{hours}h spent working" : "#{minutes}m spent working" %>
-          </span>
-          <span class="text-gray-600 text-xs sm:text-sm 2xl:text-base"> • </span>
-        <% end %>
-
-        <!-- Time ago -->
-        <span class="text-gray-600 text-xs sm:text-sm 2xl:text-base">
-          <% time_diff = Time.current - devlog.created_at %>
-          <% if time_diff >= 86400 %>
-            <% days = (time_diff / 86400).to_i %>
-            <%= "#{days}d ago" %>
-          <% elsif time_diff >= 3600 %>
-            <% hours = (time_diff / 3600).to_i %>
-            <%= "#{hours}h ago" %>
-          <% elsif time_diff >= 60 %>
-            <% minutes = (time_diff / 60).to_i %>
-            <%= "#{minutes}m ago" %>
-          <% else %>
-            <% seconds = time_diff.to_i %>
-            <%= "#{seconds}s ago" %>
+        <div class="text-[#B89576]">
+          <!-- Time info -->
+          <% if devlog.timer_sessions.any? %>
+            <% timer_session = devlog.timer_sessions.first %>
+            <span>
+              <% hours = timer_session.net_time / 3600 %>
+              <% minutes = (timer_session.net_time % 3600) / 60 %>
+              <%= hours > 0 ? "#{hours}h spent working" : "#{minutes}m spent working" %>
+            </span>
+            <span class=""> • </span>
+          <% elsif devlog.last_hackatime_time.present? && devlog.last_hackatime_time > 0 %>
+            <span>
+              <% hours = devlog.last_hackatime_time / 3600 %>
+              <% minutes = (devlog.last_hackatime_time % 3600) / 60 %>
+              <%= hours > 0 ? "#{hours}h spent working" : "#{minutes}m spent working" %>
+            </span>
+            <span> • </span>
           <% end %>
-        </span>
 
-        <% if show_stonks && devlog.project.stonks.count %>
-        <span class="text-gray-600 text-xs sm:text-sm 2xl:text-base">
-        • <%= pluralize(devlog.project.stonks.count, 'stonker') %>
-        </span>
-        <% end %>
+          <!-- Time ago -->
+          <span>
+            <% time_diff = Time.current - devlog.created_at %>
+            <% if time_diff >= 86400 %>
+              <% days = (time_diff / 86400).to_i %>
+              <%= "#{days}d ago" %>
+            <% elsif time_diff >= 3600 %>
+              <% hours = (time_diff / 3600).to_i %>
+              <%= "#{hours}h ago" %>
+            <% elsif time_diff >= 60 %>
+              <% minutes = (time_diff / 60).to_i %>
+              <%= "#{minutes}m ago" %>
+            <% else %>
+              <% seconds = time_diff.to_i %>
+              <%= "#{seconds}s ago" %>
+            <% end %>
+          </span>
 
-        <span class="text-gray-600 text-xs sm:text-sm 2xl:text-base"> • </span>
-        <% position = devlog.project.devlogs.where("created_at < ?", devlog.created_at).count + 1 %>
-        <span class="text-gray-600 text-xs sm:text-sm 2xl:text-base"><%= position.ordinalize %> devlog</span>
+          <% if show_stonks && devlog.project.stonks.count %>
+          <span>
+          • <%= pluralize(devlog.project.stonks.count, 'stonker') %>
+          </span>
+          <% end %>
+
+          <span> • </span>
+          <% position = devlog.project.devlogs.where("created_at < ?", devlog.created_at).count + 1 %>
+          <span><%= position.ordinalize %> devlog</span>
+        </div>
       </div>
     </div>
   </div>
 
-  <div class="<%= content_margin.present? ? content_margin : 'ml-10 sm:ml-13' %> max-w-4xl">
+  <div class="<%= content_margin.present? ? content_margin : '' %> max-w-4xl">
     <!-- Update content -->
     <div data-devlog-card-target="content" class="prose max-w-[32em] text-black mb-2 sm:mb-3 text-base sm:text-lg 2xl:text-xl break-words overflow-wrap-anywhere">
       <%= devlog.formatted_text %>
@@ -155,4 +159,6 @@
 <!-- Edit Modal (only for project owner) -->
 <% if user_signed_in? && current_user == devlog.user %>
     <%= render "devlogs/edit_modal", devlog: devlog %>
+<% end %>
+
 <% end %>

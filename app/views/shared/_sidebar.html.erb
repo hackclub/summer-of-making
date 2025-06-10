@@ -1,72 +1,106 @@
-<div class="h-full bg-[#F3ECD8] flex flex-col transition-all duration-300 text-black rounded-tr-3xl rounded-br-3xl overflow-hidden"
-     data-sidebar-target="sidebar">
-  <div class="flex justify-between items-center p-4" data-sidebar-target="topContainer">
+<%= render layout: "shared/container", locals: {
+  full_height: true,
+  attr: 'data-action="mouseover->sidebar#handleMouseEnter mouseleave->sidebar#handleMouseExit"'
+} do %>
+
+<div
+  class="flex flex-col transition-all duration-300 text-[#4A2D24] h-full w-[220px] justify-between"
+  data-sidebar-target="sidebar"
+>
+  <% if false %>
+  <div class="flex justify-between items-center">
     <div class="cursor-pointer">
       <%= link_to payouts_path, class: "flex items-center gap-2 ml-4" do %>
         <img src="/shell.png" alt="shell" width=32>
-        <p class="text-[#fad85c] text-xl"><%= current_user.balance %></p>
+        <p class="text-[#fad85c] text-xl data-[sidebar-collapsed=true]:hidden" data-sidebar-collapsed="false"><%= current_user.balance %></p>
       <% end %>
     </div>
-    <button id="collapse-sidebar" class="hover:scale-110 transition-transform cursor-pointer"
-           data-action="click->sidebar#toggle">
-        <%= inline_svg "chevrom-yessa.svg", class: "2xl:h-12 2xl:w-12 transition-transform duration-300 h-10 w-10",
-                                       data: { 'sidebar-target': 'collapseIcon' } %>
-    </button>
   </div>
-  <nav class="flex-1 px-4 flex items-center text-justify text-3xl 2xl:text-4xl">
-    <ul class="space-y-4 w-full">
+  <% end %>
+
+  <nav class="flex items-center text-justify text-3xl 2xl:text-4xl">
+    <ul class="space-y-1 w-full transition-transform duration-150" data-sidebar-target="links">
       <li class="flex justify-start">
-        <%= link_to signpost_path, class: "px-4 py-2 block #{'organic-card' if current_page?(signpost_path)}" do %>
-          <span data-sidebar-target="content" class="ml-2">Signpost</span>
-        <% end %>
+        <%= render partial: "shared/link", locals: {
+          target: signpost_path,
+          text: "Signpost",
+          icon: "map",
+          highlight: current_page?(signpost_path),
+          text_attr: 'data-sidebar-target="collapseFade"',
+          underline_attr: 'data-sidebar-target="underline"'
+        } %>
       </li>
+
       <li class="flex justify-start">
-        <%= link_to explore_path, class: "px-4 py-2 block #{'organic-card' if current_page?(explore_path)}" do %>
-          <span data-sidebar-target="content" class="ml-2">Explore</span>
-        <% end %>
+        <%= render partial: "shared/link", locals: {
+          target: explore_path,
+          text: "Explore",
+          icon: "compass",
+          highlight: current_page?(explore_path),
+          text_attr: 'data-sidebar-target="collapseFade"',
+          underline_attr: 'data-sidebar-target="underline"'
+        } %>
       </li>
+
       <li class="flex justify-start">
-        <%= link_to gallery_path, class: "px-4 py-2 block #{'organic-card' if current_page?(gallery_path)}" do %>
-          <span data-sidebar-target="content" class="ml-2">Gallery</span>
-        <% end %>
+        <%= render partial: "shared/link", locals: {
+          target: my_projects_path,
+          text: "Projects",
+          icon: "user",
+          highlight: current_page?(my_projects_path),
+          text_attr: 'data-sidebar-target="collapseFade"',
+          underline_attr: 'data-sidebar-target="underline"'
+        } %>
       </li>
+
       <li class="flex justify-start">
-        <%= link_to my_projects_path, class: "px-4 py-2 block #{'organic-card' if current_page?(my_projects_path) || (controller_name == 'projects' && action_name == 'show' && @project&.user == current_user)}" do %>
-          <span data-sidebar-target="content" class="ml-2">My Projects</span>
-        <% end %>
+        <%= render partial: "shared/link", locals: {
+          target: new_vote_path,
+          text: "Vote",
+          icon: "vote",
+          highlight: current_page?(new_vote_path),
+          text_attr: 'data-sidebar-target="collapseFade"',
+          underline_attr: 'data-sidebar-target="underline"'
+        } %>
       </li>
+
       <li class="flex justify-start">
-        <%= link_to new_vote_path, class: "px-4 py-2 block #{'organic-card' if current_page?(new_vote_path)}" do %>
-          <span data-sidebar-target="content" class="ml-2">Vote</span>
-        <% end %>
+        <%= render partial: "shared/link", locals: {
+          target: shop_path,
+          text: "Shop",
+          icon: "shop",
+          highlight: current_page?(shop_path),
+          text_attr: 'data-sidebar-target="collapseFade"',
+          underline_attr: 'data-sidebar-target="underline"'
+        } %>
       </li>
-      <li class="flex justify-start">
-        <%= link_to shop_path, class: "px-4 py-2 block #{'organic-card' if current_page?(shop_path)}" do %>
-          <span data-sidebar-target="content" class="ml-2">Shop</span>
-        <% end %>
-      </li>
+
       <% admin_tool do %>
         <li class="flex justify-start">
           <%= link_to admin_root_path, class: "px-4 py-2 block" do %>
-            <span data-sidebar-target="content" class="ml-2">Admin</span>
+            <span class="ml-2 data-[sidebar-collapsed=true]:hidden" data-sidebar-collapsed="false">Admin</span>
           <% end %>
         </li>
       <% end %>
     </ul>
   </nav>
 
-  <div class="flex flex-col m-4 gap-4">
-    <div class="group relative transition-all duration-300 p-4 flex items-center text-[#E06540] bg-[#E06540]/40 rounded-3xl overflow-hidden" data-sidebar-target="logoutContainer">
+  <div class="flex flex-col gap-4">
+    <div class="relative flex items-center">
       <div class="flex items-center w-full">
-        <%= image_tag current_user.avatar, class: "h-12 w-12 rounded-full flex-shrink-0", data: { 'sidebar-target': 'avatar' } %>
-        <span class="text-xl ml-3 whitespace-nowrap" data-sidebar-target="content"><%= current_user.display_name %></span>
+        <%= image_tag current_user.avatar, class: "h-12 w-12 rounded-full flex-shrink-0" %>
+        
+        <div class="flex flex-col ml-3" data-sidebar-target="collapseHide">
+          <div class="h-4">Hello,</div>
+          <div class="text-xl whitespace-nowrap">@<%= current_user.display_name %>!</div>
+        </div>
       </div>
 
-      <div class="absolute inset-0 bg-[#ecb59b] flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300 cursor-pointer">
-        <%= button_to logout_path, method: :delete, class: "bg-transparent border-0 p-0 cursor-pointer hover:scale-110 transition-transform" do %>
-          <p class="text-3xl font-bold text-[#E06540]">Sign Out [></p>
-        <% end %>
-      </div>
+      <%= button_to logout_path, method: :delete, data: { sidebar_target: "collapseHide" }, class: "cursor-pointer block" do %>
+        <%= inline_svg("icons/exit.svg", class: "w-6") %>
+      <% end %>
     </div>
   </div>
 </div>
+
+<% end %>

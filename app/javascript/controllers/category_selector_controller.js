@@ -20,9 +20,9 @@ export default class extends Controller {
       const isSelected = button.dataset.category === this.selectedValue;
       
       if (isSelected) {
-        button.className = "px-6 tab-element py-2 text-md text-black";
+        button.classList.add("tab-element");
       } else {
-        button.className = "px-6 py-2 text-md text-black";
+        button.classList.remove("tab-element");
       }
     });
   }

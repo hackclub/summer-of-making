@@ -233,35 +233,6 @@
     0 0 20px rgba(255, 255, 255, 0.6), 0 0 30px rgba(255, 255, 255, 0.4);
 }
 
-.slider-box {
-  box-shadow: inset 60px 0 40px -40px rgba(0, 0, 0, 0.15),
-    inset -60px 0 40px -40px rgba(0, 0, 0, 0.15);
-
-  mask: linear-gradient(
-    to right,
-    transparent 0%,
-    rgba(0, 0, 0, 0.3) 8%,
-    rgba(0, 0, 0, 0.8) 18%,
-    black 25%,
-    black 75%,
-    rgba(0, 0, 0, 0.8) 82%,
-    rgba(0, 0, 0, 0.3) 92%,
-    transparent 100%
-  );
-  -webkit-mask: linear-gradient(
-    to right,
-    transparent 0%,
-    rgba(0, 0, 0, 0.3) 8%,
-    rgba(0, 0, 0, 0.8) 18%,
-    black 25%,
-    black 75%,
-    rgba(0, 0, 0, 0.8) 82%,
-    rgba(0, 0, 0, 0.3) 92%,
-    transparent 100%
-  );
-  position: relative;
-}
-
 .carousel-track {
   animation: infsc 60s linear infinite;
   width: fit-content;
@@ -330,34 +301,6 @@
   .cloud,
   .dynamic-cloud {
     display: none;
-  }
-
-  .slider-box {
-    box-shadow: inset 40px 0 30px -30px rgba(0, 0, 0, 0.15),
-      inset -40px 0 30px -30px rgba(0, 0, 0, 0.15);
-
-    mask: linear-gradient(
-      to right,
-      transparent 0%,
-      rgba(0, 0, 0, 0.4) 12%,
-      rgba(0, 0, 0, 0.8) 25%,
-      black 35%,
-      black 65%,
-      rgba(0, 0, 0, 0.8) 75%,
-      rgba(0, 0, 0, 0.4) 88%,
-      transparent 100%
-    );
-    -webkit-mask: linear-gradient(
-      to right,
-      transparent 0%,
-      rgba(0, 0, 0, 0.4) 12%,
-      rgba(0, 0, 0, 0.8) 25%,
-      black 35%,
-      black 65%,
-      rgba(0, 0, 0, 0.8) 75%,
-      rgba(0, 0, 0, 0.4) 88%,
-      transparent 100%
-    );
   }
 }
 

@@ -63,15 +63,8 @@ class SignpostController < ApplicationController
         completed: tutorial_completed?("explore")
       },
       {
-        id: "gallery",
-        title: "Browse Gallery",
-        description: "Check out the project gallery and get inspired",
-        path: "/gallery",
-        completed: tutorial_completed?("gallery")
-      },
-      {
         id: "my_projects",
-        title: "My Projects",
+        title: "Projects",
         description: "This is where you can see all your projects and create new ones.",
         path: "/my_projects",
         completed: tutorial_completed?("my_projects")

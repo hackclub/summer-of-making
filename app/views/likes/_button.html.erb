@@ -2,11 +2,11 @@
   <% if user_signed_in? %>
     <%= button_to toggle_like_devlog_path(likeable),
           remote: true,
-          class: "inline-flex items-center pb-2 text-gray-600 hover:text-vintage-red transition-colors duration-300 text-sm sm:text-base",
+          class: "inline-flex items-center pb-2 cursor-pointer text-sm sm:text-base",
           onclick: "event.stopPropagation()",
           data: { turbo_method: :post } do %>
       <% is_liked = defined?(liked) ? liked : likeable.liked_by?(current_user) %>
-      <%= inline_svg_tag "star.svg", class: "w-8 h-8 mr-1 #{is_liked ? 'text-vintage-red' : ''}" %>
+      <%= inline_svg_tag "icons/star.svg", class: "w-6 h-6 mr-1 #{is_liked ? 'text-vintage-red' : ''}" %>
       <%= likeable.likes_count %>
     <% end %>
   <% end %>
