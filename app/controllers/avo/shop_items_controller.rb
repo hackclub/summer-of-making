@@ -7,7 +7,7 @@ module Avo
     def index
       # Hide free stickers by default unless explicitly requested
       if params[:show_free_stickers] != "true"
-        @query = @query.where.not(type: 'ShopItem::FreeStickers')
+        @query = @query.where.not(type: "ShopItem::FreeStickers")
       end
       super
     end

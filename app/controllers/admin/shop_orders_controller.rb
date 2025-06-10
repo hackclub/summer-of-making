@@ -11,12 +11,12 @@ module Admin
 
     def filtered_scope
       base_scope = scope
-      
+
       # Hide free stickers orders by default unless explicitly requested
       unless params[:show_free_stickers] == "true"
-        base_scope = base_scope.joins(:shop_item).where.not(shop_items: { type: 'ShopItem::FreeStickers' })
+        base_scope = base_scope.joins(:shop_item).where.not(shop_items: { type: "ShopItem::FreeStickers" })
       end
-      
+
       base_scope
     end
 

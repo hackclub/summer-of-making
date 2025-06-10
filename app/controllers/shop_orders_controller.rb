@@ -25,10 +25,8 @@ class ShopOrdersController < ApplicationController
     # Check if user can afford this item
     if @item.ticket_cost.present? && @item.ticket_cost > 0 && current_user.balance < @item.ticket_cost
       redirect_to shop_path, alert: "You don't have enough tickets to purchase #{@item.name}. You need #{@item.ticket_cost - current_user.balance} more tickets."
-      return
+      nil
     end
-
-
   end
 
   def create
