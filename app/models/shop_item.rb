@@ -28,7 +28,7 @@ class ShopItem < ApplicationRecord
   end
 
   scope :black_market, -> { where(requires_black_market: true) }
-  scope :not_black_market, -> { where(requires_black_market: [false, nil]) }
+  scope :not_black_market, -> { where(requires_black_market: [ false, nil ]) }
 
   def manually_fulfilled?
     true

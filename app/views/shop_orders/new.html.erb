@@ -86,16 +86,14 @@
             </p>
           </div>
 
-          <!-- Address picker for free stickers -->
-          <% if @item.is_a?(ShopItem::FreeStickers) %>
-            <div class="space-y-2">
-              <%= render 'shared/address_picker', 
-                  user: current_user, 
-                  form: f, 
-                  field_name: 'shipping_address_id',
-                  label_text: 'Shipping Address' %>
-            </div>
-          <% end %>
+          <!-- Address picker for all orders -->
+          <div class="space-y-2">
+            <%= render 'shared/address_picker', 
+                user: current_user, 
+                form: f, 
+                field_name: 'shipping_address_id',
+                label_text: 'Shipping Address' %>
+          </div>
 
           <!-- Cost preview -->
           <% if @item.ticket_cost.present? && @item.ticket_cost > 0 %>

@@ -10,18 +10,18 @@ class ShopOrdersController < ApplicationController
 
   def new
     @order = ShopOrder.new
-    
+
     # Special handling for free stickers - collect address first if user doesn't have IDV addresses
     if @item.is_a?(ShopItem::FreeStickers) && !current_user.has_idv_addresses?
       return_url = order_shop_item_url(@item)
       sneaky_params = { address_return_to: return_url }
-      
+
       redirect_url = IdentityVaultService.build_address_creation_url(sneaky_params)
-      
+
       redirect_to redirect_url, allow_other_host: true
       return
     end
-    
+
     # Check if user can afford this item
     if @item.ticket_cost.present? && @item.ticket_cost > 0 && current_user.balance < @item.ticket_cost
       redirect_to shop_path, alert: "You don't have enough tickets to purchase #{@item.name}. You need #{@item.ticket_cost - current_user.balance} more tickets."
@@ -31,7 +31,7 @@ class ShopOrdersController < ApplicationController
     # Check if user already ordered this one-per-person item
     if @item.one_per_person_ever? && current_user.shop_orders.joins(:shop_item).where(shop_item: @item).exists?
       redirect_to shop_path, alert: "You have already ordered #{@item.name}. This item can only be ordered once per person."
-      return
+      nil
     end
   end
 
@@ -39,15 +39,13 @@ class ShopOrdersController < ApplicationController
     @order = current_user.shop_orders.build(shop_order_params)
     @order.shop_item = @item
     @order.frozen_item_price = @item.ticket_cost
-    
-    # Use IDV addresses for free stickers, fallback to session or user's address
-    if @item.is_a?(ShopItem::FreeStickers)
-      if current_user.has_idv_addresses?
-        # Use primary address from Identity Vault
-        idv_data = current_user.fetch_idv
-        primary_address = idv_data.dig(:identity, :addresses)&.find { |addr| addr[:primary_address] == true }
-        @order.frozen_address = primary_address if primary_address
-      end
+
+    # Use selected address from IDV data if provided, fallback to user's address
+    if params[:shipping_address_id].present?
+      # Find the selected address from IDV data
+      idv_data = current_user.fetch_idv
+      selected_address = idv_data.dig(:identity, :addresses)&.find { |addr| addr[:id].to_s == params[:shipping_address_id] }
+      @order.frozen_address = selected_address if selected_address
     elsif current_user.respond_to?(:address_hash)
       @order.frozen_address = current_user.address_hash
     end
@@ -74,6 +72,6 @@ class ShopOrdersController < ApplicationController
   end
 
   def shop_order_params
-    params.permit(:quantity)
+    params.permit(:quantity, :shipping_address_id)
   end
 end

@@ -141,7 +141,7 @@ class ShopOrder < ApplicationRecord
     return unless frozen_item_price.present? && frozen_item_price > 0 && quantity.present?
 
     total_cost = frozen_item_price * quantity
-    
+
     user.payouts.create!(
       amount: -total_cost,
       payable: self

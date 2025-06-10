@@ -10,7 +10,7 @@ class ShopItemsController < ApplicationController
       scope = scope.not_black_market unless current_user.has_black_market?
       @shop_items = scope.order(ticket_cost: :asc)
     else
-      scope = ShopItem.where(type: 'ShopItem::FreeStickers')
+      scope = ShopItem.where(type: "ShopItem::FreeStickers")
       @shop_items = scope.order(ticket_cost: :asc)
     end
     @shop_item_types = available_shop_item_types
