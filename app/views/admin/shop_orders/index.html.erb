@@ -1,5 +1,11 @@
 <h1><%= local_assigns[:title] %>shopped orders:</h1>
 
+<% if params[:show_free_stickers] %>
+  <%= link_to "oh god please make the free stickers stop", {show_free_stickers: nil} %>
+<% else %>
+  <%= link_to "show me the free stickers ones too", {show_free_stickers: true} %>
+<% end %>
+
 <ul>
   <% @shop_orders.each do |order| %>
     <li>
