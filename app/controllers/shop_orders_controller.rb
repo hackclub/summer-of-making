@@ -28,11 +28,7 @@ class ShopOrdersController < ApplicationController
       return
     end
 
-    # Check if user already ordered this one-per-person item
-    if @item.one_per_person_ever? && current_user.shop_orders.joins(:shop_item).where(shop_item: @item).exists?
-      redirect_to shop_path, alert: "You have already ordered #{@item.name}. This item can only be ordered once per person."
-      nil
-    end
+
   end
 
   def create
@@ -72,6 +68,6 @@ class ShopOrdersController < ApplicationController
   end
 
   def shop_order_params
-    params.permit(:quantity, :shipping_address_id)
+    params.permit(:quantity)
   end
 end

@@ -6,11 +6,12 @@ class ShopItemsController < ApplicationController
 
   def index
     if current_user.ysws_verified?
-      scope = ShopItem.all
+      scope = ShopItem.where.not(type: 'ShopItem::FreeStickers')
       scope = scope.not_black_market unless current_user.has_black_market?
       @shop_items = scope.order(ticket_cost: :asc)
     else
       scope = ShopItem.where(type: "ShopItem::FreeStickers")
+      scope = scope.not_black_market unless current_user.has_black_market?
       @shop_items = scope.order(ticket_cost: :asc)
     end
     @shop_item_types = available_shop_item_types

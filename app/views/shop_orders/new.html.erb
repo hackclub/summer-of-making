@@ -172,9 +172,22 @@
           <% end %>
 
           <!-- Submit button -->
-          <%= f.submit "Complete Purchase", 
+          <% 
+            is_one_per_person = @item.one_per_person_ever?
+            has_existing_order = current_user.shop_orders.where(shop_item_id: @item.id).exists?
+            already_ordered = is_one_per_person && has_existing_order
+            button_disabled = already_ordered
+            button_text = already_ordered ? "Already Purchased" : "Complete Purchase"
+            button_classes = if already_ordered
+              "w-full bg-gray-400 text-gray-600 font-bold py-4 px-6 btn-pixel text-lg cursor-not-allowed"
+            else
+              "w-full bg-forest hover:bg-forest/90 text-white font-bold py-4 px-6 btn-pixel text-lg transition-colors duration-200 cursor-pointer"
+            end
+          %>
+          <%= f.submit button_text, 
               id: "purchase-button",
-              class: "w-full bg-forest hover:bg-forest/90 text-white font-bold py-4 px-6 btn-pixel text-lg transition-colors duration-200 cursor-pointer" %>
+              disabled: button_disabled,
+              class: button_classes %>
         <% end %>
 
         <!-- Order info -->
