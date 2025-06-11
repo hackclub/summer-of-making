@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 require "open-uri"
-CHANNEL_LIST = [ "C08MYN7HVN2", "C08N1NWKEF4", "C016DEDUL87", "C75M7C0SY", "C090JKDJYN8", "C090B3T9R9R" ]
+CHANNEL_LIST = [ "C08MYN7HVN2", "C08N1NWKEF4", "C016DEDUL87", "C75M7C0SY", "C090JKDJYN8", "C090B3T9R9R", "C0M8PUPU6" ]
 class LandingController < ApplicationController
   def index
     redirect_to explore_path if user_signed_in?
@@ -272,7 +272,7 @@ class LandingController < ApplicationController
 
   # Send the request
   response = http.request(request)
-  response.body
+  response
   end
 
   def fetch_continent(ip)
