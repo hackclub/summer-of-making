@@ -1,6 +1,6 @@
 <h1>User #<%= @user.id %></h1>
-<%= render @user %>
-
+<%= render @user %> <br/>
+<b>IDV ID:</b> <%= @user.identity_vault_id || "none" %>
 <br><br>
 <b>audit lawg (incomplete):</b>
 <%= render_activities(@activities, layout: "activity") %>
