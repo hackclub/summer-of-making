@@ -289,6 +289,7 @@ Rails.application.routes.draw do
     resources :users, only: [ :index, :show ] do
       member do
         post :internal_notes
+        post :create_payout
       end
     end
     resources :shop_orders do

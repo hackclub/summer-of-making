@@ -18,10 +18,30 @@ module Admin
       render :internal_notes, layout: false
     end
 
+    def create_payout
+      parameters = payout_params
+      unless parameters[:reason].present?
+        return redirect_to(admin_user_path(@user), notice: "Please provide a reason!")
+      end
+      @payout = @user.payouts.build(parameters.merge(payable: @user))
+
+      begin
+        @payout.save!
+        @user.create_activity("manual_payout", parameters:)
+        redirect_to admin_user_path(@user), notice: 'Payout was successfully created.'
+      rescue ActiveRecord::RecordInvalid => e
+        redirect_to admin_user_path, notice: e.message
+      end
+    end
+
     private
 
     def set_user
       @user = User.find(params[:id])
+    end
+
+    def payout_params
+      params.require(:payout).permit(:amount, :reason)
     end
   end
 end
