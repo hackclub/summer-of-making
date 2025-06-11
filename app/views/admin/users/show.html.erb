@@ -6,8 +6,7 @@
 <b>Payouts:</b>
 <ul>
   <% @payouts.each do |payout| %>
-  <li id="<%= dom_id payout %>"><%= render payout %></li>
-
+    <li id="<%= dom_id payout %>"><%= render payout %></li>
   <% end %>
 </ul>
 <details>
@@ -23,7 +22,7 @@
       <%= f.label :reason, "Reason: " %>
       <%= f.text_area :reason, placeholder: "i just want them to have some walkin' around money!", rows: 3 %>
     </div>
-  <%= f.submit "do it!" %>
+    <%= f.submit "do it!" %>
   <% end %>
 </details>
 <br/><br/>
