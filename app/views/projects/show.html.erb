@@ -29,7 +29,9 @@
       <% end %>
 
       <div id="devlogs" class="space-y-3 md:space-y-8 ml-6 md:ml-16">
-        <div class="border-5 border-[#E4DCC6] absolute left-6 md:left-[67.2] bottom-11 -top-4 rounded-xl"></div>
+        <% unless !@timeline.present? %>
+          <div class="border-5 border-[#E4DCC6] absolute left-6 md:left-[67.2] bottom-11 -top-4 rounded-xl"></div>
+        <% end %>
 
         <% @timeline.each do |item| %>
             <div class="flex align-center justify-center">

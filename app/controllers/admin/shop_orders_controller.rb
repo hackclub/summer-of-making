@@ -9,17 +9,28 @@ module Admin
       ShopOrder.all.includes(:user, :shop_item).order(created_at: :desc)
     end
 
+    def filtered_scope
+      base_scope = scope
+
+      # Hide free stickers orders by default unless explicitly requested
+      unless params[:show_free_stickers] == "true"
+        base_scope = base_scope.joins(:shop_item).where.not(shop_items: { type: "ShopItem::FreeStickers" })
+      end
+
+      base_scope
+    end
+
     def index
-      @pagy, @shop_orders = pagy(scope)
+      @pagy, @shop_orders = pagy(filtered_scope)
     end
 
     def pending
-      @pagy, @shop_orders = pagy(scope.pending)
+      @pagy, @shop_orders = pagy(filtered_scope.pending)
       render :index, locals: { title: "pending " }
     end
 
     def awaiting_fulfillment
-      @pagy, @shop_orders = pagy(SCOPE.pending)
+      @pagy, @shop_orders = pagy(filtered_scope.pending)
       render :index, locals: { title: "pending " }
     end
 
@@ -78,7 +89,7 @@ module Admin
     private
 
     def set_shop_order
-      @shop_order = SCOPE.find(params[:id])
+      @shop_order = scope.find(params[:id])
     end
   end
 end

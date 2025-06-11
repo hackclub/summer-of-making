@@ -31,6 +31,10 @@ class ApplicationController < ActionController::Base
     redirect_to root_path, alert: "Please sign in to access this page" unless user_signed_in?
   end
 
+  def require_admin!
+    redirect_to "/" unless current_user && current_user.is_admin?
+  end
+
   private
 
   def fetch_hackatime_data_if_needed

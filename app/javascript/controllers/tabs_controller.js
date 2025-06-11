@@ -18,37 +18,54 @@ export default class extends Controller {
   updateTabButtons() {
     this.tabButtonTargets.forEach((button) => {
       const isActive = button.dataset.tab === this.currentTabValue;
+      const underline = button.querySelector('[data-kind="underline"]');
 
       if (isActive) {
-        button.className = "px-6 tab-element py-2 text-xl text-black";
+        underline.classList.remove("opacity-0");
       } else {
-        button.className = "px-6 py-2 text-xl text-black";
+        underline.classList.add("opacity-0");
       }
     });
   }
 
   loadTabContent(tab) {
-    const devlogsListContainer = document.getElementById(
-      "devlogs-list-container",
-    );
+    this.contentTargets.forEach((content) => {
+      content.classList.add("hidden");
+    });
 
-    if (devlogsListContainer) {
-      devlogsListContainer.innerHTML = `
-        <div class="space-y-4 sm:space-y-6" id="devlogs-list">
-        </div>
-        <div id="load-more-devlogs">
-        </div>
-      `;
-    }
+    if (tab === "gallery") {
+      const galleryContent = document.querySelector('[data-tab-content="gallery"]');
+      if (galleryContent) {
+        galleryContent.classList.remove("hidden");
+      }
+    } else {
+      const devlogsContent = document.querySelector('[data-tab-content="explore"]');
+      if (devlogsContent) {
+        devlogsContent.classList.remove("hidden");
+      }
 
-    const devlogsList = document.getElementById("devlogs-list");
-    const newInitialFrame = document.createElement("turbo-frame");
-    newInitialFrame.id = "initial-devlogs";
-    newInitialFrame.src = `/explore?tab=${tab}&format=turbo_stream`;
-    newInitialFrame.loading = "eager";
+      const devlogsListContainer = document.getElementById(
+        "devlogs-list-container",
+      );
 
-    if (devlogsList) {
-      devlogsList.appendChild(newInitialFrame);
+      if (devlogsListContainer) {
+        devlogsListContainer.innerHTML = `
+          <div class="space-y-4 sm:space-y-6" id="devlogs-list">
+          </div>
+          <div id="load-more-devlogs">
+          </div>
+        `;
+      }
+
+      const devlogsList = document.getElementById("devlogs-list");
+      const newInitialFrame = document.createElement("turbo-frame");
+      newInitialFrame.id = "initial-devlogs";
+      newInitialFrame.src = `/explore?tab=${tab}&format=turbo_stream`;
+      newInitialFrame.loading = "eager";
+
+      if (devlogsList) {
+        devlogsList.appendChild(newInitialFrame);
+      }
     }
   }
 }

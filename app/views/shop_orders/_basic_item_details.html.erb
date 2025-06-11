@@ -1,0 +1,40 @@
+<!-- Basic item details -->
+<div class="bg-white card-pixel p-6 mb-6">
+  <div class="flex items-start space-x-6">
+    <% if @order.shop_item.image.attached? %>
+      <div class="w-32 h-32 bg-soft-bone card-pixel p-4 flex-shrink-0">
+        <%= image_tag @order.shop_item.image.variant(:thumb),
+            class: "w-full h-full object-contain",
+            alt: @order.shop_item.name %>
+      </div>
+    <% else %>
+      <div class="w-32 h-32 bg-soft-bone card-pixel p-4 flex-shrink-0 flex items-center justify-center">
+        <span class="text-4xl">📦</span>
+      </div>
+    <% end %>
+
+    <div class="flex-grow">
+      <h2 class="text-2xl font-bold text-darker-taupe mb-2"><%= @order.shop_item.name %></h2>
+      <% if @order.shop_item.description.present? %>
+        <p class="text-saddle-taupe mb-4"><%= @order.shop_item.description %></p>
+      <% end %>
+
+      <div class="grid md:grid-cols-2 gap-4">
+        <div>
+          <span class="font-semibold text-darker-taupe">Quantity:</span>
+          <span class="text-saddle-taupe"><%= @order.quantity %></span>
+        </div>
+
+        <% if @order.frozen_item_price.present? %>
+          <div>
+            <span class="font-semibold text-darker-taupe">Total Cost:</span>
+            <span class="text-saddle-taupe flex items-center">
+              <span class="mr-1">🐚</span>
+              <%= number_with_delimiter(@order.frozen_item_price * @order.quantity) %> tickets
+            </span>
+          </div>
+        <% end %>
+      </div>
+    </div>
+  </div>
+</div>

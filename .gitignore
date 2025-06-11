@@ -39,3 +39,6 @@
 
 .DS_Store
 /.vscode
+
+/.idea
+.gem_rbs_collection

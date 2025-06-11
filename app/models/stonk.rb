@@ -28,6 +28,7 @@ class Stonk < ApplicationRecord
   belongs_to :project
 
   validates :amount, presence: true, numericality: { equal_to: DEFAULT_AMOUNT }
+  validate :prevent_new_stonks, on: :create
 
   before_validation :set_default_amount, on: :create
 
@@ -63,6 +64,10 @@ class Stonk < ApplicationRecord
   end
 
   private
+
+  def prevent_new_stonks
+    errors.add(:base, "Stonks are currently disabled")
+  end
 
   def set_default_amount
     self.amount ||= DEFAULT_AMOUNT

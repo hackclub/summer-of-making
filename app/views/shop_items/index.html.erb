@@ -1,17 +1,23 @@
-<h1>Shop</h1>
+<div class="mb-4 md:mb-6 px-4 md:px-8 pt-2 md:pt-8 pb-2 text-center w-full flex justify-center flex-col">
+  <h1 class="text-4xl sm:text-5xl mb-0">Shop</h1>
 
-<% admin_tool("mb-4") do %>
+  <% admin_tool("mb-4") do %>
     <p>Max item cost is enforced at the postgres level to be $9,999.99 (decimal precision 6, scale 2)</p>
 
     <%= link_to "New shop item", new_shop_item_path, class: "text-soft-bone px-4 py-2 block hover:bg-saddle-taupe hover-btn-pixel bg-saddle-taupe btn-pixel" %>
 
     <p><%= @shop_items.count %> items</p>
-<% end %>
+  <% end %>
 
-<%= render "verification_callout" unless current_verification_status == :verified %>
+  <div class="justify-center flex">
+    <%= render "verification_callout" unless current_verification_status == :verified %>
+  </div>
 
-<div class="flex flex-wrap gap-8">
-    <% @shop_items.each do |item| %>
+  <div class="mb-6 text-center flex justify-center flex-col">
+    <div class="flex flex-col sm:grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
+      <% @shop_items.each do |item| %>
         <%= render "item", item: %>
-    <% end %>
+      <% end %>
+    </div>
+  </div>
 </div>

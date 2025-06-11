@@ -64,6 +64,7 @@ class Project < ApplicationRecord
                          message: "%<value>s is not a valid category" }
 
   validate :cannot_change_category, on: :update
+  validate :user_must_have_hackatime, on: :create
 
   after_initialize :set_default_rating, if: :new_record?
   before_save :filter_hackatime_keys
@@ -166,6 +167,12 @@ class Project < ApplicationRecord
     return unless category_changed? && persisted?
 
     errors.add(:category, "cannot be changed after project creation")
+  end
+
+  def user_must_have_hackatime
+    return if user&.has_hackatime?
+
+    errors.add(:base, "You must link your HackaTime account before creating a project")
   end
 
   def filter_hackatime_keys

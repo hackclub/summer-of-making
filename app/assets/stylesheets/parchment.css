@@ -1,0 +1,198 @@
+.parchment-prize-card {
+  position: relative;
+  background: linear-gradient(145deg, #f6dbba 0%, #e6d4be 100%);
+  border-radius: clamp(6px, 1.5vw, 10px);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15),
+    inset 0 1px 0 rgba(255, 255, 255, 0.6), inset 3px 0 5px rgba(0, 0, 0, 0.05);
+  transition: all 0.3s ease;
+  transform-style: preserve-3d;
+  border: 2px solid rgba(89, 47, 49, 0.3);
+  overflow: hidden;
+  padding: 10px;
+  animation: parchment-float 6s ease-in-out infinite;
+}
+
+@keyframes parchment-float {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-4px);
+  }
+}
+
+.parchment-prize-card:hover {
+  transform: translateY(-6px) scale(1.05);
+  box-shadow: 0 12px 25px rgba(0, 0, 0, 0.2),
+    inset 0 1px 0 rgba(255, 255, 255, 0.8), 0 0 15px rgba(168, 149, 107, 0.3);
+  animation: none;
+}
+
+.parchment-prize-card::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: rgba(255, 255, 255, 0.6);
+  border-radius: 3px 3px 0 0;
+  z-index: 1;
+}
+
+.parchment-prize-card::after {
+  content: "";
+  position: absolute;
+  top: 2px;
+  right: 5px;
+  width: 40%;
+  height: 1px;
+  background: rgba(89, 47, 49, 0.2);
+  transform: rotate(-3deg);
+  z-index: 1;
+}
+
+.parchment-prize-image {
+  position: relative;
+  overflow: hidden;
+  border-radius: 8px;
+  border: 1px solid rgba(124, 74, 51, 0.3);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1),
+    inset 0 1px 0 rgba(255, 255, 255, 0.3);
+}
+
+.parchment-prize-name {
+  color: #4a2d24 !important;
+  font-weight: 600;
+  margin-top: 6px;
+  text-shadow: 0 1px 0 rgba(255, 255, 255, 0.5);
+}
+
+.parchment-prize-time {
+  color: #7c4a33 !important;
+  opacity: 0.8;
+  font-size: 0.75rem;
+}
+
+.parchment-texture {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100' height='100' viewBox='0 0 100 100'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100' height='100' filter='url(%23noise)' opacity='0.05'/%3E%3C/svg%3E"),
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='80' height='80' viewBox='0 0 80 80'%3E%3Cg fill='%23a8956b' fill-opacity='0.03'%3E%3Cpath d='M0 0h10v10H0zm10 10h10v10H10zm10 0h10v10H20zm10 10h10v10H30zm10 0h10v10H40zm10 10h10v10H50zm10 0h10v10H60zm10 10h10v10H70zm0-20h10v10H70zm-10 0h10v10H60zm-10-10h10v10H50zm-10 0h10v10H40zm-10-10h10v10H30zm-10 0h10v10H20zm-10 10h10v10H10zM0 20h10v10H0zm0 10h10v10H0zm0 10h10v10H0zm0 10h10v10H0zm10 0h10v10H10zm10 0h10v10H20zm10 0h10v10H30z'/%3E%3C/g%3E%3C/svg%3E");
+  opacity: 0.12;
+  pointer-events: none;
+}
+
+/* Add decorative border */
+.parchment-prize-card::after {
+  content: "";
+  position: absolute;
+  top: 2px;
+  right: 5px;
+  width: 40%;
+  height: 1px;
+  background: rgba(89, 47, 49, 0.2);
+  transform: rotate(-3deg);
+  z-index: 1;
+}
+
+/* Prize seal/stamp */
+.parchment-prize-card .seal {
+  position: absolute;
+  bottom: 5px;
+  right: 5px;
+  width: 32px;
+  height: 32px;
+  opacity: 0.3;
+  transition: opacity 0.3s ease;
+}
+
+.parchment-prize-card:hover .seal {
+  opacity: 0.6;
+}
+@media (max-width: 768px) {
+  .parchment-prize-card {
+    padding: 0.75rem;
+    border-width: 1px;
+    animation: none;
+  }
+
+  .parchment-prize-card::before,
+  .parchment-prize-card::after {
+    display: none;
+  }
+
+  .parchment-prize-name {
+    font-size: 0.9rem;
+  }
+
+  .parchment-prize-time {
+    font-size: 0.7rem;
+  }
+
+  .parchment-prize-card:hover {
+    transform: translateY(-2px) scale(1.02);
+    box-shadow: 0 8px 15px rgba(0, 0, 0, 0.15);
+  }
+
+  .parchment-prize-image {
+    border-width: 1px;
+  }
+}
+
+@media (max-width: 640px) {
+  .parchment-prize-card {
+    padding: 0.5rem;
+  }
+
+  .parchment-prize-name {
+    font-size: 0.8rem;
+    margin-top: 4px;
+  }
+
+  .parchment-prize-time {
+    font-size: 0.65rem;
+  }
+
+  .parchment-prize-card .seal,
+  .parchment-prize-card .absolute {
+    display: none;
+  }
+}
+
+/* Parchment FAQ Card Styles */
+.parchment-faq-card {
+  transform-style: preserve-3d;
+  transition: all 0.3s ease;
+}
+
+.parchment-faq-card:hover {
+  transform: translateY(-6px);
+}
+
+.parchment-faq-card h3 {
+  color: #4a2d24 !important;
+  font-weight: 600;
+  text-shadow: 0 1px 0 rgba(255, 255, 255, 0.5);
+}
+
+.parchment-faq-card p {
+  color: #3a2f25 !important;
+  text-shadow: 0 1px 0 rgba(255, 255, 255, 0.3);
+}
+
+.parchment-faq-card a {
+  color: #e06540;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  font-weight: 600;
+  transition: color 0.3s ease;
+}
+
+.parchment-faq-card a:hover {
+  color: #a8956b;
+}

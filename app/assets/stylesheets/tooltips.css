@@ -1,0 +1,65 @@
+.tooltip {
+    position: relative;
+    display: inline-block;
+  }
+  
+  .tooltip .tooltiptext {
+    visibility: hidden;
+    width: 200px;
+    background-color: #2d3748;
+    color: white;
+    text-align: center;
+    border-radius: 6px;
+    padding: 8px;
+    position: absolute;
+    z-index: 1000;
+    top: 50%;
+    left: 120%;
+    transform: translateY(-50%);
+    opacity: 0;
+    transition: opacity 0.3s;
+    font-size: 12px;
+    line-height: 1.4;
+  }
+  
+  .tooltip .tooltiptext::after {
+    content: "";
+    position: absolute;
+    top: 50%;
+    right: 100%;
+    margin-top: -5px;
+    border-width: 5px;
+    border-style: solid;
+    border-color: transparent #2d3748 transparent transparent;
+  }
+  
+  .tooltip:hover .tooltiptext {
+    visibility: visible;
+    opacity: 1;
+  }
+  
+  .question-mark {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    background-color: #6b7280;
+    color: white;
+    font-size: 11px;
+    margin-left: 6px;
+    cursor: help;
+    flex-shrink: 0;
+    vertical-align: middle;
+  }
+
+  .tooltip-label-container {
+    display: flex;
+    align-items: center;
+    margin-bottom: 4px;
+  }
+
+  .tooltip-label-container label {
+    margin-bottom: 0;
+  }

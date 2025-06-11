@@ -22,12 +22,13 @@
     <%= stylesheet_link_tag "application", "data-turbo-track": "reload" %>
     <%= stylesheet_link_tag "pixelart" %>
     <%= stylesheet_link_tag "som" %>
+    <%= stylesheet_link_tag "tooltips" %>
     <%= javascript_importmap_tags %>
     <%= Sentry.get_trace_propagation_meta.html_safe %>
     <script defer data-domain="journey.hackclub.com" src="https://plausible.io/js/script.hash.outbound-links.js"></script>
   </head>
 
-  <body class="min-h-screen font-dynapuff">
+  <body class="min-h-screen font-national-park font-bold text-[#4A2D24]">
     <%# admin_tool do %>
       <%# render "shared/stonk_tickler_marquee" %>
     <%# end %>
@@ -35,18 +36,18 @@
     <% if user_signed_in? %>
       <%= render "tutorial/tutorial" %>
 
-      <div data-controller="sidebar">
+      <div data-controller="sidebar" data-sidebar-collapsed-value="false">
         <% if mobile_device? %>
           <%= render "shared/mobile_nav" %>
-          <main class="pb-20 pt-12 px-4" data-sidebar-target="mainContent">
+          <main class="pb-20 pt-12 px-4">
             <div id="flash-container">
               <%= render "shared/flash" %>
             </div>
             <%= yield %>
           </main>
         <% else %>
-          <div class="flex flex-col h-screen overflow-hiden">
-            <% unless current_user.has_hackatime? %>
+          <div class="flex flex-col h-screen box-border p-4">
+            <% if !current_user.has_hackatime? && !current_user.tutorial_progress.completed_at.nil? %>
               <div class="w-full bg-vintage-red text-white flex flex-col justify-center py-2">
                 <p class="text-center">
                   Your time spent coding is not currently being tracked, therefore you can't create any projects.
@@ -56,15 +57,16 @@
               </div>
             <% end %>
 
-            <div class="flex h-full min-h-0">
-          <%= render "shared/sidebar" %>
-          <main class="overflow-auto w-full" data-sidebar-target="mainContent">
-            <div id="flash-container">
-              <%= render "shared/flash" %>
-            </div>
-            <%= yield %>
-          </main>
-            </div>
+          <div class="flex h-full min-h-0">
+            <%= render "shared/sidebar" %>
+            <main class="overflow-auto w-full" data-sidebar-target="mainContent">
+              <div id="flash-container">
+                <%= render "shared/flash" %>
+              </div>
+              <%= yield %>
+            </main>
+          </div>
+
         </div>
         <% end %>
       </div>

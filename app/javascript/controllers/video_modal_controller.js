@@ -13,8 +13,11 @@ export default class extends Controller {
 
   open(event) {
     event.preventDefault();
-    this.iframeTarget.src = "https://streamable.com/e/ay62z2?autoplay=1&loop=0";
     this.modalTarget.classList.remove("hidden");
+    if (this.hasIframeTarget) {
+      this.iframeTarget.src =
+        "https://streamable.com/e/ay62z2?autoplay=1&loop=0";
+    }
     this.modalTarget.style.opacity = "0";
     this.containerTarget.style.transform = "scale(0.9)";
     this.containerTarget.style.opacity = "0";
@@ -43,11 +46,13 @@ export default class extends Controller {
       this.modalTarget.style.transition = "";
       this.containerTarget.style.transition = "";
       this.containerTarget.style.transform = "";
+      if (this.hasIframeTarget) {
+        this.iframeTarget.src = "";
+      }
     }, 250);
 
     document.removeEventListener("keydown", this.escape);
     document.body.style.overflow = "auto";
-    this.iframeTarget.src = "";
   }
 
   closeBackground(event) {

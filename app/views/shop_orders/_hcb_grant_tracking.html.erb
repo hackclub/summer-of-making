@@ -1,0 +1,88 @@
+<!-- HCB Grant Status & Processing -->
+<div class="bg-white card-pixel p-6 mb-6">
+  <h3 class="text-xl font-bold text-darker-taupe mb-4">Card grant status:</h3>
+
+  <!-- Timeline for HCB grants -->
+  <div class="space-y-4">
+    <div class="flex items-center space-x-4">
+      <div class="w-4 h-4 bg-green-500 rounded-full flex-shrink-0"></div>
+      <div>
+        <p class="font-semibold text-darker-taupe">Order submitted</p>
+        <p class="text-sm text-saddle-taupe"><%= @order.created_at.strftime("%B %d, %Y at %I:%M %p") %></p>
+      </div>
+    </div>
+
+    <% if @order.awaiting_periodical_fulfillment_at %>
+      <div class="flex items-center space-x-4">
+        <div class="w-4 h-4 bg-blue-500 rounded-full flex-shrink-0"></div>
+        <div>
+          <p class="font-semibold text-darker-taupe">Under Review</p>
+          <p class="text-sm text-saddle-taupe"><%= @order.awaiting_periodical_fulfillment_at.strftime("%B %d, %Y at %I:%M %p") %></p>
+          <p class="text-xs text-saddle-taupe">HCB team is reviewing your grant request</p>
+        </div>
+      </div>
+    <% end %>
+
+    <% if @order.fulfilled_at %>
+      <div class="flex items-center space-x-4">
+        <div class="w-4 h-4 bg-green-500 rounded-full flex-shrink-0"></div>
+        <div>
+          <p class="font-semibold text-darker-taupe">Grant Approved & Processed</p>
+          <p class="text-sm text-saddle-taupe"><%= @order.fulfilled_at.strftime("%B %d, %Y at %I:%M %p") %></p>
+          <% if @order.external_ref.present? %>
+            <div class="mt-2 p-3 bg-green-50 rounded">
+              <p class="text-sm font-semibold text-green-800">Grant Reference:</p>
+              <p class="text-lg font-mono text-green-800"><%= @order.external_ref %></p>
+            </div>
+          <% end %>
+        </div>
+      </div>
+    <% end %>
+
+    <% if @order.rejected_at %>
+      <div class="flex items-center space-x-4">
+        <div class="w-4 h-4 bg-red-500 rounded-full flex-shrink-0"></div>
+        <div>
+          <p class="font-semibold text-darker-taupe">Grant Denied</p>
+          <p class="text-sm text-saddle-taupe"><%= @order.rejected_at.strftime("%B %d, %Y at %I:%M %p") %></p>
+          <% if @order.rejection_reason.present? %>
+            <p class="text-sm text-vintage-red bg-vintage-red/10 p-2 rounded mt-1">
+              <strong>Reason:</strong> <%= @order.rejection_reason %>
+            </p>
+          <% end %>
+        </div>
+      </div>
+    <% end %>
+
+    <% unless @order.fulfilled? || @order.rejected? %>
+      <div class="flex items-center space-x-4">
+        <div class="w-4 h-4 bg-gray-300 rounded-full flex-shrink-0"></div>
+        <div>
+          <p class="font-semibold text-saddle-taupe">Pending Review</p>
+          <p class="text-sm text-saddle-taupe">Waiting for HCB team review</p>
+        </div>
+      </div>
+
+      <div class="flex items-center space-x-4">
+        <div class="w-4 h-4 bg-gray-300 rounded-full flex-shrink-0"></div>
+        <div>
+          <p class="font-semibold text-saddle-taupe">Grant Processing</p>
+          <p class="text-sm text-saddle-taupe">Funds will be allocated to your account</p>
+        </div>
+      </div>
+    <% end %>
+  </div>
+
+  <!-- Grant info -->
+  <% unless @order.fulfilled? || @order.rejected? %>
+    <div class="mt-6 p-4 bg-green-50 rounded">
+      <h4 class="font-semibold text-green-800 mb-2">💰 HCB Grant Processing</h4>
+      <ul class="text-sm text-green-700 space-y-1">
+        <li>• Grant requests are reviewed by the HCB team</li>
+        <li>• Review process typically takes 5-10 business days</li>
+        <li>• Approved grants are automatically added to your HCB account</li>
+        <li>• You'll receive an email notification when processed</li>
+      </ul>
+    </div>
+  <% end %>
+</div>

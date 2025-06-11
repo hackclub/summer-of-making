@@ -10,6 +10,7 @@
  */
 
 @import "tutorial.css";
+@import "tooltips.css";
 
 ::-webkit-scrollbar {
     width: 8px;
@@ -93,10 +94,18 @@ body::before {
     left: 0;
     width: 100%;
     height: 100%;
-    background: linear-gradient(to bottom, #42A5E7, #97D8F8);
+    background: #dbc3a8;
     z-index: -1;
 }
 
 main {
     background: transparent !important;
+}
+
+.disable-transitions {
+    transition: none !important;
+
+    & * {
+        transition: none !important;
+    }
 }

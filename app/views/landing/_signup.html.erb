@@ -1,14 +1,22 @@
-<div data-controller="turbo-actions" class="font-dynapuff w-full max-w-sm ml-0">
-  <%= form_with url: sign_up_path, method: :post, data: { turbo: true }, class: "space-y-4" do |f| %>
+<div data-controller="signup-form" class="font-dynapuff w-full max-w-sm ml-0">
+  <div class="space-y-4">
     <div class="relative">
       <%= image_tag "email.svg", alt: "Email", class: "absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 pointer-events-none z-10 opacity-60 color[#d4c4b0]" %>
-      <%= f.email_field :email, required: true, placeholder: "Enter your email...", autocomplete: "email", class: "marble-textarea with-icon w-full" %>
+      <input type="email"
+             required
+             placeholder="Enter your email..."
+             autocomplete="email"
+             class="marble-textarea with-icon w-full"
+             data-signup-form-target="emailInput"
+             onkeydown="if(event.key==='Enter'){event.preventDefault();var btn=this.closest('[data-controller=signup-form]').querySelector('.marble-button');if(btn){btn.click();}}">
     </div>
-    <%= f.submit "Start creating", class: "marble-button w-full text-center" %>
-  <% end %>
-
-  <dialog id="signup-modal">
-    <div id="modal-content">
+    <div class="hidden bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded-lg text-sm"
+         data-signup-form-target="msg">
     </div>
-  </dialog>
+    <button type="button"
+            class="marble-button w-full text-center"
+            data-action="click->signup-form#startWizard">
+      Start creating
+    </button>
+  </div>
 </div>

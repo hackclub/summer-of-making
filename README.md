@@ -23,3 +23,11 @@ A 3 week journey into making!
 5. Comment out any airtable refrence from [`app/models/user.rb`](/app/models/user.rb), unless you have access to the journey airtable. (if you do comment it out, make sure you dont commit it) If you do have access, you can run `bin/rails airtable:sync` to sync the data from Airtable to your local database.
 6. Run `bin/dev` to start the development server on port 3000, then visit `http://localhost:3000` in your browser.
 7. Profit???
+
+> [!WARNING]
+> Using Codespaces? Make sure that `libvips` is installed to ensure everything works properly:
+>
+> ```bash
+> sudo apt update
+> sudo apt install libvips42
+> ```

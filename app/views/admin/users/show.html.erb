@@ -1,0 +1,8 @@
+<h1>User #<%= @user.id %></h1>
+<%= render @user %>
+
+<br><br>
+<b>audit lawg (incomplete):</b>
+<%= render_activities(@activities, layout: "activity") %>
+
+<br><br><%= link_to "← back", admin_users_path %>

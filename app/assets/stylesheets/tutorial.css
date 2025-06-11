@@ -1,54 +1,140 @@
-.tutorial-step-content {
+.tutorial-overlay {
     position: fixed;
-    bottom: 1rem;
-    right: 1rem;
-    z-index: 9997;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 9999;
+    pointer-events: none;
+}
 
+.tutorial-step-container {
+    position: absolute;
+    bottom: 2rem;
+    right: 2rem;
     display: flex;
-    flex-direction: column;
     align-items: flex-end;
-
-    &::before {
-        content: "";
-        position: fixed;
-        inset: 0;
-        background: radial-gradient(
-            circle at bottom right,
-            #000000c0 0%,
-            transparent 100%
-        );
-        pointer-events: none;
-    }
-
-    & .tutorial-mascot {
-        margin-top: -1rem;
-        z-index: 9998;
-    }
+    gap: 1rem;
+    pointer-events: auto;
+    max-width: 90vw;
 }
 
-.tutorial-step-content-bubble {
-    background: white;
+/* 9 slice*/
+.tutorial-content-card {
+    padding: 1.5rem;
+    max-width: 400px;
+    min-width: 280px;
     position: relative;
-    max-width: 60ch;
-    border-radius: 1em;
-    padding: 0.5em;
-    margin-left: 1rem;
+    animation: slideInUp 0.3s ease-out;
+    
+    background: 
+        /* Corners */
+        url('tutorial-container/top_left.png') top left no-repeat,
+        url('tutorial-container/top_right.png') top right no-repeat,
+        url('tutorial-container/bottom_left.png') bottom left no-repeat,
+        url('tutorial-container/bottom_right.png') bottom right no-repeat,
+        /* Edges */
+        url('tutorial-container/top.png') top center repeat-x,
+        url('tutorial-container/bottom.png') bottom center repeat-x,
+        url('tutorial-container/left_edge.png') center left repeat-y,
+        url('tutorial-container/right_edge.png') center right repeat-y,
+        /* Center fill */
+        url('tutorial-container/center.png') center repeat;
+    
+    background-size: 
+        auto auto, auto auto, auto auto, auto auto,  /* corners - natural size */
+        auto auto, auto auto, auto auto, auto auto,  /* edges - stretch appropriately */
+        auto auto;  /* center - repeat */
+}
 
-    & .bubble-penis {
-        position: absolute;
-        width: 6rem;
-        bottom: 3rem;
-        right: 0;
-        translate: 0 100%;
+.tutorial-header {
+    margin-bottom: 1.5rem;
+}
 
-        z-index: 9999;
+.tutorial-text {
+    flex: 1;
+}
+
+.tutorial-title {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: #4a3b2a;
+    margin: 0 0 0.5rem 0;
+    line-height: 1.3;
+}
+
+.tutorial-description {
+    color: #6b5b4f;
+    font-size: 0.95rem;
+    line-height: 1.6;
+    margin: 0;
+}
+
+.tutorial-actions {
+    display: flex;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+}
+
+.tutorial-form {
+    flex: 1;
+}
+
+.tutorial-continue-btn {
+    width: 100%;
+    background: linear-gradient(135deg, #8b6f47 0%, #a0845c 50%, #8b6f47 100%);
+    color: #f5f1eb;
+    border: 2px solid #6b5439;
+    border-radius: 12px;
+    padding: 0.75rem 1.5rem;
+    font-weight: 600;
+    font-size: 0.95rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.tutorial-continue-btn:hover {
+    background: linear-gradient(135deg, #9d7b52 0%, #b8936a 50%, #9d7b52 100%);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba(107, 84, 57, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.3);
+    border-color: #7a6148;
+}
+
+.tutorial-continue-btn:active {
+    transform: translateY(0);
+}
+
+/* Mascot */
+.tutorial-mascot-container {
+    flex-shrink: 0;
+    margin-bottom: 1rem;
+}
+
+.tutorial-mascot {
+    filter: drop-shadow(0 2px 8px rgba(0, 0, 0, 0.1));
+}
+
+/* Animations */
+@keyframes slideInUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px) scale(0.95);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
     }
 }
 
-.tutorial-dismiss {
-    margin-top: 0.5em;
-    background: #00000020;
-    padding-left: 0.5em;
-    padding-right: 0.5em;
-    border-radius: 0.5em;
+@keyframes bounce {
+    0%, 20%, 50%, 80%, 100% {
+        transform: translateY(0);
+    }
+    40% {
+        transform: translateY(-5px);
+    }
+    60% {
+        transform: translateY(-2px);
+    }
 }
+

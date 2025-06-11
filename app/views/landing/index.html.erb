@@ -1,74 +1,128 @@
 <%= stylesheet_link_tag "landing", "data-turbo-track": "reload" %>
+<%= stylesheet_link_tag "parchment", "data-turbo-track": "reload" %>
+<%= stylesheet_link_tag "faq_container", "data-turbo-track": "reload" %>
 
-<div class="font-['Fredoka',sans-serif] leading-normal min-h-screen w-full relative overflow-hidden bg-gradient-to-b from-[#97D8F8] via-[#87CEEB] to-[#42A5E7]" data-controller="clouds" data-clouds-cloud-count-value="8" data-clouds-speed-value="0.3" data-clouds-cloud-color-value="rgba(255, 255, 255, 0.4)">
-  <div class="absolute inset-0 w-full h-full overflow-hidden" data-clouds-target="container"></div>
+<div class="font-['Fredoka',sans-serif] leading-normal min-h-screen w-full relative overflow-hidden bg-gradient-to-b from-[#5988FF] via-[#42A5E7] to-[#97D8F8]" data-controller="smooth-scroll">
   <div class="absolute top-0 left-4 z-20">
-    <img src="https://assets.hackclub.com/flag-orpheus-top.png" alt="Island" class="w-30 animate-float">
+    <%= image_tag "flag-orpheus-top.png", alt: "Island", class: "w-30 animate-float" %>
   </div>
 
   <div class="absolute top-4 right-4 z-20">
-    <a href="/auth/slack" class="btn-fancy text-white py-2 px-4 text-base md:text-lg flex items-center justify-center gap-2 bg-gradient-to-br from-[#E06540] to-[#EC8153] rounded-lg shadow-lg hover:shadow-xl transition-all">
+    <a href="/auth/slack" class="marble-button py-2 px-4 text-base md:text-lg flex items-center justify-center gap-2 transition-all">
       <span class="flex items-center">
-        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mr-2" viewBox="0 0 24 24"><path fill="currentColor" d="M13 21q-.425 0-.712-.288T12 20t.288-.712T13 19h6V5h-6q-.425 0-.712-.288T12 4t.288-.712T13 3h6q.825 0 1.413.588T21 5v14q0 .825-.587 1.413T19 21zm-1.825-8H4q-.425 0-.712-.288T3 12t.288-.712T4 11h7.175L9.3 9.125q-.275-.275-.275-.675t.275-.7t.7-.313t.725.288L14.3 11.3q.3.3.3.7t-.3.7l-3.575 3.575q-.3.3-.712.288T9.3 16.25q-.275-.3-.262-.712t.287-.688z"/></svg>
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mr-2" viewBox="0 0 24 24"><path fill="currentColor" d="M13 21q-.425 0-.712-.288T12 20t.288-.712T13 19h6V5h-6q-.425 0-.712-.288T12 4t.288-.712T13 3h6q.825 0 1.413.588T21 5v14q0 .825-.587 1.413T19 21zm-1.825-8H4q-.425 0-.712-.288T3 12t.288-.712T4 11h7.175L9.3 9.125q-.275-.275-.275-.675t.275-.7t.7-.313t.725.288L14.3 11.3q.3.3.3.7t-.3.7l-3.575 3.575q-.3.3-.712.288T9.3 16.25q-.275-.3-.262-.712t.287-.688z" /></svg>
         <span class="flex items-center h-6">Sign In!</span>
       </span>
     </a>
   </div>
 
-
   <div class="relative z-15 flex items-center min-h-screen">
     <div class="w-full max-w-7xl mx-auto px-4 sm:px-8 grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-16 items-center">
-
       <div class="text-left space-y-8 animate-float mt-24 lg:mt-0"
       style="font-family: 'Pacifico', sans-serif;">
         <%= image_tag "mos.png", class: "-ml-16 lg:-ml-36" %>
 
-        <h2 class="head-med text-2xl md:text-3xl text-white font-medium">
+        <h2 class="head-med text-2xl md:text-3xl text-[#3a2f25] font-medium font-['DynaPuff',sans-serif]">
           <span class="">Build stuff.</span>
-          <br class="hidden md:block"/>
+          <br class="hidden md:block">
           <span class="ml-0 md:ml-16">Get stuff.</span>
-          <br class="hidden md:block"/>
+          <br class="hidden md:block">
           <span class="font-bold ml-0 md:ml-32">Repeat.</span>
         </h2>
-
         <div class="flex flex-col sm:flex-row gap-4 pt-4">
             <%= render "signup" %>
         </div>
-
-        <p class="font-['Fredoka',sans-serif] font-normal text-lg text-white opacity-90">
-          From Hack Club with love. For teenagers 18 and under <3
+        <p class="font-['Fredoka',sans-serif] font-normal text-lg text-[#3a2f25] opacity-90">
+            From <a href="#about-hack-club" class="text-[#8B4513] underline hover:text-[#a8956b] transition-colors font-semibold">Hack Club</a> with love. For teenagers 18 and under &lt;3
         </p>
       </div>
-
       <div class="flex justify-center lg:justify-end">
         <img src="https://files.catbox.moe/2ehrvm.png" alt="Island" class="w-80 h-80 lg:w-96 lg:h-96 object-contain drop-shadow-2xl animate-wiggle">
       </div>
-
     </div>
   </div>
 </div>
 
 <div class="py-20 px-4 sm:px-8 bg-gradient-to-br from-[#F3ECD8] via-[#E4DCC6] to-[#D4C4A8]" data-controller="video-modal">
-  <div class="max-w-6xl mx-auto flex flex-col md:flex-row items-center gap-10">
-    <div class="md:w-1/2 w-full mb-8 md:mb-0">
-      <p class="font-['Fredoka',sans-serif] font-normal text-xl opacity-80 mb-4 text-[#8B4513]">
-        Atlantis! Once lost, now found—and soon to be <span class="italic">filled</span> with teenage hackers. Build great things, make new friends, and earn sicknasty prizes on an island continent where high schoolers create the world they want to live in.
-      </p>
-      <p class="font-['Fredoka',sans-serif] font-normal text-lg opacity-70 text-[#8B4513]">
-        The Virgin Islands are mountain peaks rising from the Caribbean ocean floor.[6] The trade winds (prevailing east-to-west winds near Earth's equator) dominate its climate and local weather, with stronger winds and less rain during winter.[7]
-      </p>
-    </div>
-    <div class="card-box relative w-full md:w-1/2 max-w-3xl mx-auto rounded-2xl overflow-hidden shadow-2xl bg-white/95 aspect-[16/9] cursor-pointer hover:scale-[1.02] transition-transform duration-300" data-action="click->video-modal#open">
-      <img
-        class="absolute inset-0 w-full h-full object-cover"
-        src="https://files.catbox.moe/w9c4bz.png"
-        alt="Video Preview Thumbnail"
-      />
-      <div class="absolute inset-0 flex items-center justify-center bg-black/20">
-        <div class="bg-white/90 rounded-full p-2 shadow-lg hover:bg-white hover:scale-110 transition-all duration-300">
-          <svg xmlns="http://www.w3.org/2000/svg" class="w-12 h-12 text-[#E06540]"  viewBox="0 0 24 24"><path fill="currentColor" d="M8 17.175V6.825q0-.425.3-.713t.7-.287q.125 0 .263.037t.262.113l8.15 5.175q.225.15.338.375t.112.475t-.112.475t-.338.375l-8.15 5.175q-.125.075-.262.113T9 18.175q-.4 0-.7-.288t-.3-.712"/></svg>
+  <div class="max-w-6xl mx-auto">
+    <div class="flex flex-col md:flex-row items-center gap-10 mb-20">
+      <div class="md:w-1/2 w-full mb-8 md:mb-0">
+        <%= render "shared/container" do %>
+          <div class="p-5 relative">
+            <p class="font-['Fredoka',sans-serif] font-normal text-xl mb-4">
+              Atlantis! Once lost, now found—and soon to be <span class="italic">filled</span> with teenage hackers. Build great things, make new friends, and earn sicknasty prizes on an island continent where high schoolers create the world they want to live in.
+            </p>
+          </div>
+        <% end %>
+      </div>
+      <div class="card-box organic-card relative w-full md:w-1/2 max-w-3xl mx-auto rounded-2xl overflow-hidden shadow-2xl bg-white/95 aspect-[16/9] cursor-pointer hover:scale-[1.02] transition-transform duration-300" data-action="click->video-modal#open">
+        <img
+          id="thumb"
+          class="absolute inset-0 w-full h-full object-cover transition-opacity duration-500"
+          src="https://files.catbox.moe/o8g880.png"
+          alt="Video Preview Thumbnail">
+        <div class="absolute inset-0 flex items-center justify-center bg-black/20">
+          <div class="bg-white/90 rounded-full p-2 shadow-lg hover:bg-white hover:scale-110 transition-all duration-300">
+            <svg xmlns="http://www.w3.org/2000/svg" class="w-12 h-12 text-[#E06540]" viewBox="0 0 24 24"><path fill="currentColor" d="M8 17.175V6.825q0-.425.3-.713t.7-.287q.125 0 .263.037t.262.113l8.15 5.175q.225.15.338.375t.112.475t-.112.475t-.338.375l-8.15 5.175q-.125.075-.262.113T9 18.175q-.4 0-.7-.288t-.3-.712" /></svg>
+          </div>
         </div>
       </div>
+      <script>
+        (function() {
+          const i = document.getElementById('thumb');
+          if (!i) return;
+          const a = new Image();
+          a.onload = function() {
+            i.style.opacity = '0';
+            setTimeout(() => {
+              i.src = a.src;
+              i.style.opacity = '1';
+            }, 250);
+          };
+          a.src = 'https://files.catbox.moe/ys2h7s.webp';
+        })();
+      </script>
+    </div>
+    
+    <div id="how-it-works">
+      <h2 class="head-big text-5xl md:text-6xl font-bold text-center mb-12 text-[#3a2f25] font-['DynaPuff',sans-serif]">
+        How this works
+      </h2>
+
+      <div class="relative mb-16 flex flex-col items-center">
+        <div class="relative flex flex-col md:flex-row gap-8 mx-auto justify-center items-center md:items-stretch">
+          <div class="text-center p-4 lg:p-8 animate-wave max-w-80 sm:max-w-96 md:max-w-80 lg:max-w-96 bg-size-[100%_100%] bg-center bg-no-repeat organic-card" style="background-image: url('<%= asset_path('card.png') %>');">
+            <h3 class="head-med text-2xl font-bold mb-4 text-[#3a2f25] font-['DynaPuff',sans-serif]">Build Stuff</h3>
+            <p class="font-['Fredoka',sans-serif] font-normal text-lg" style="color: #3a2f25;">
+              Websites, games, apps—ship personal coding projects of any kind to earn <span class="italic">shells<img src="/shell.png" class="inline-block mx-1 mb-1 w-5 h-5" alt="shell"></span>
+            </p>
+          </div>
+
+          <div class="text-center p-4 lg:p-8 animate-wave max-w-80 sm:max-w-96 md:max-w-80 lg:max-w-96 bg-size-[100%_100%] bg-center bg-no-repeat organic-card" style="background-image: url('<%= asset_path('card.png') %>'); animation-delay: 2s;">
+            <h3 class="head-med text-2xl font-bold mb-4 text-[#3a2f25] font-['DynaPuff',sans-serif]">Get Stuff</h3>
+            <p class="font-['Fredoka',sans-serif] font-normal text-lg" style="color: #3a2f25;">
+              Redeem your <span class="">shells<img src="/shell.png" class="inline-block mx-1 mb-1 w-5 h-5" alt="shell"></span> for Raspberry Pis, Framework Laptops, 3D printers, and dozens of other awesome prizes to power your next project.
+            </p>
+          </div>
+
+          <div class="absolute mx-auto md:hidden block left-0">
+            <img src="/arc_arrow_top_bottom.png" class="relative max-h-40 sm:max-h-48 -left-4 sm:-left-16 aspect-auto rotate-180" alt="arrow">
+          </div>
+
+          <div class="absolute mx-auto md:hidden block right-0">
+            <img src="/arc_arrow_top_bottom.png" class="relative max-h-40 sm:max-h-48 -right-4 sm:-right-16 aspect-auto" alt="arrow">
+          </div>
+
+          <div class="absolute mx-auto -top-8 hidden md:block">
+            <img src="/arc_arrow_left_right.png" class="max-w-48 aspect-auto" alt="arrow">
+          </div>
+
+          <div class="absolute mx-auto -bottom-8 hidden md:block">
+            <img src="/arc_arrow_left_right.png" class="max-w-48 aspect-auto rotate-180" alt="arrow">
+          </div>
+        </div>
+      </div>
+      <%#= render "example_project" %>
     </div>
   </div>
 
@@ -94,172 +148,168 @@
   </div>
 </div>
 
-<div id="how-it-works" class="pt-20 px-4 sm:px-8 bg-gradient-to-br from-[#F3ECD8] via-[#E4DCC6] to-[#D4C4A8]">
-  <div class="max-w-6xl mx-auto">
-  <h2 class="head-big text-5xl md:text-6xl font-bold text-center mb-12 text-[#E06540]">
-    How this works
-  </h2>
-
-  <div class="relative mb-16 flex flex-col items-center">
-    <div class="relative flex flex-col md:flex-row gap-8 mx-auto justify-center items-center md:items-stretch">
-      <div class="text-center p-4 lg:p-8 animate-wave max-w-80 sm:max-w-96 md:max-w-80 lg:max-w-96 bg-size-[100%_100%] bg-center bg-no-repeat" style="background-image: url('<%= asset_path('card.png') %>');">
-        <h3 class="head-med text-2xl font-bold mb-4 text-[#E06540]">Build Stuff</h3>
-        <p class="font-['Fredoka',sans-serif] font-normal text-lg" style="color: #333;">
-            Websites, games, apps—ship personal coding projects of any kind to earn <span class="italic">shells<img src="/shell.png" class="inline-block mx-1 mb-1 w-5 h-5" alt="shell"></span>
-        </p>
-      </div>
-
-      <div class="text-center p-4 lg:p-8 animate-wave max-w-80 sm:max-w-96 md:max-w-80 lg:max-w-96 bg-size-[100%_100%] bg-center bg-no-repeat" style="background-image: url('<%= asset_path('card.png') %>'); animation-delay: 2s;">
-          <h3 class="head-med text-2xl font-bold mb-4 text-[#E06540]">Get Stuff</h3>
-          <p class="font-['Fredoka',sans-serif] font-normal text-lg" style="color: #333;">
-            Redeem your <span class="">shells<img src="/shell.png" class="inline-block mx-1 mb-1 w-5 h-5" alt="shell"></span> for Raspberry Pis, Framework Laptops, 3D printers, and dozens of other awesome prizes to power your next project.
-          </p>
-      </div>
-
-      <div class="absolute mx-auto md:hidden block left-0">
-          <img src="/arc_arrow_top_bottom.png" class="relative max-h-40 sm:max-h-48 -left-4 sm:-left-16 aspect-auto rotate-180" alt="arrow">
-      </div>
-
-      <div class="absolute mx-auto md:hidden block right-0">
-          <img src="/arc_arrow_top_bottom.png" class="relative max-h-40 sm:max-h-48 -right-4 sm:-right-16 aspect-auto" alt="arrow">
-      </div>
-
-      <div class="absolute mx-auto -top-8 hidden md:block">
-          <img src="/arc_arrow_left_right.png" class="max-w-48 aspect-auto" alt="arrow">
-      </div>
-
-      <div class="absolute mx-auto -bottom-8 hidden md:block">
-          <img src="/arc_arrow_left_right.png" class="max-w-48 aspect-auto rotate-180" alt="arrow">
-      </div>
-    </div>
-  </div>
-  <div class="flex items-start justify-center mb-8">
-      <img src="https://files.catbox.moe/ztikz5.png" class="w-16 h-16 rounded-full shadow-lg mr-4 border-2 border-yellow-300 bg-white">
-      <div class="relative max-w-xl">
-        <div class="bg-white/90 border border-yellow-200 rounded-2xl px-6 py-4 shadow-md text-left text-[#8B4513] font-['Fredoka',sans-serif] font-normal text-xl opacity-80">
-          Building projects?? That sounds like a lot of work!<br>
-        </div>
-        <svg class="absolute -left-4 top-6" width="24" height="24" viewBox="0 0 24 24">
-        <polygon points="24,0 0,12 24,24" fill="#fff" fill-opacity="0.9" stroke="#ffe082" stroke-width="1" />
-        </svg>
-      </div>
-  </div>
-  <div class="flex items-start justify-center mb-8 flex-row-reverse">
-      <img src="https://files.catbox.moe/d3hyls.png" class="w-16 h-16 rounded-full shadow-lg ml-4 border-2 border-yellow-300 bg-white">
-      <div class="relative max-w-xl">
-        <div class="bg-white/90 border border-yellow-200 rounded-2xl px-6 py-4 shadow-md text-left text-[#8B4513] font-['Fredoka',sans-serif] font-normal text-xl opacity-80">
-          Don't sweat it! It is really easy! Let's look at a example!
-        </div>
-        <svg class="absolute -right-4 top-6" width="24" height="24" viewBox="0 0 24 24">
-          <polygon points="0,0 24,12 0,24" fill="#fff" fill-opacity="0.9" stroke="#ffe082" stroke-width="1" />
-        </svg>
-      </div>
-  </div>
-
-  <%= render "example_project" %>
-
-  <div class="flex items-start justify-center mb-8 flex-row-reverse">
-    <img src="https://files.catbox.moe/d3hyls.png" class="w-16 h-16 rounded-full shadow-lg ml-4 border-2 border-yellow-300 bg-white">
-    <div class="relative max-w-xl">
-      <div class="bg-white/90 border border-yellow-200 rounded-2xl px-6 py-4 shadow-md text-left text-[#8B4513] font-['Fredoka',sans-serif] font-normal text-xl opacity-80">
-        Oh yeah, prizes! Let's talk about those...
-      </div>
-      <svg class="absolute -right-4 top-6" width="24" height="24" viewBox="0 0 24 24">
-        <polygon points="0,0 24,12 0,24" fill="#fff" fill-opacity="0.9" stroke="#ffe082" stroke-width="1" />
-      </svg>
-    </div>
-  </div>
-  </div>
-</div>
-
-<div class="section-z py-32 px-4 sm:px-8 bg-gradient-to-br from-[#97D8F8] via-[#87CEEB] to-[#42A5E7]">
+<div class="section-z py-32 px-4 sm:px-8 bg-gradient-to-br from-[#e6d7b8] via-[#d1c1a0] to-[#f1e4c3]">
   <div class="max-w-8xl mx-auto">
-    <h2 class="head-big text-5xl md:text-6xl font-bold text-center mb-4 text-white glow-w">
+    <h2 class="head-big text-5xl md:text-6xl font-bold text-center mb-4 text-[#4A2D24] relative font-['DynaPuff',sans-serif]">
       Amazing Prizes
     </h2>
-    <p class="font-['Fredoka',sans-serif] font-normal text-center text-xl mb-16 text-white opacity-90">
-      Redeem these prizes with your tickets! We cover shipping costs, so you can focus on making!<br>
-      <span class="glow-y text-[#E7E76B]">All prizes are available while supplies last.</span>
+    <p class="font-['Fredoka',sans-serif] font-normal text-center text-xl mb-16 text-[#8B4513] opacity-90">
+      Redeem these prizes with your shells! We cover shipping costs, so you can focus on making!<br>
+      <span class="text-[#E06540]">All prizes are available while supplies last.</span>
     </p>
 
-    <div class="relative mx-15 md:mx-15 sm:mx-10" data-controller="carousel" data-carousel-row-value="1">
-      <div class="slider-box overflow-hidden relative rounded-2xl py-8">
-        <div class="carousel-track flex gap-8 md:gap-8 sm:gap-6" data-carousel-target="container">
-          <% @prizes.each do |prize| %>
-            <div class="carousel-slide flex-none w-50 md:w-50 sm:w-40">
-              <div class="prize-card bg-white/95 backdrop-blur-lg rounded-2xl border-2 border-white/30 shadow-lg p-6 md:p-6 sm:p-4 text-center transition-all duration-300 hover:shadow-xl hover:-translate-y-2 hover:scale-105">
-                <div class="prize-image w-full h-full flex items-center justify-center mb-4 rounded-xl bg-yellow-100/20">
-                  <% if prize[:image] && prize[:image] != "" %>
-                    <img src="<%= prize[:image] %>" alt="<%= prize[:name] %>" class="w-full h-full object-cover rounded-xl" />
-                  <% else %>
-                    <%= image_tag "clubhuman.png", alt: "Prize", class: "w-full h-full object-cover rounded-xl" %>
-                  <% end %>
-                </div>
-                <h3 class="prize-name font-['Fredoka'] font-semibold text-lg md:text-lg sm:text-base text-orange-600 leading-tight m-0"><%= prize[:name] %></h3>
-                <p class="text-sm text-gray-600 mt-2"><%= prize[:time] %></p>
+    <div class="relative mx-15 md:mx-15 sm:mx-10" data-controller="carousel" data-carousel-row-value="1" style="transform: rotate(-3deg);">
+      <div class="carousel-track flex gap-4 md:gap-4 sm:gap-2" data-carousel-target="container">
+        <% @prizes.each_with_index do |prize, index| %>
+          <div class="carousel-slide flex-none w-40 md:w-44 sm:w-36" style="transform: <%= prize[:random_transform] %>; animation-delay: <%= (index * 0.5) %>s;">
+            <div class="parchment-prize-card p-3 md:p-3 sm:p-2 text-center transition-all duration-300 hover:shadow-xl hover:-translate-y-2 hover:scale-105" style="animation-delay: <%= (index * 0.3) %>s;">
+              <div class="parchment-texture"></div>
+              <div class="parchment-prize-image w-full h-full flex items-center justify-center mb-2 rounded-xl bg-yellow-100/20">
+                <% if prize[:image] && prize[:image] != "" %>
+                  <img src="<%= prize[:image] %>" alt="<%= prize[:name] %>" class="w-full h-full object-cover rounded-xl">
+                <% else %>
+                  <%= image_tag "clubhuman.png", alt: "Prize", class: "w-full h-full object-cover rounded-xl" %>
+                <% end %>
+              </div>
+              <h3 class="parchment-prize-name font-['Fredoka'] font-semibold text-base md:text-base sm:text-sm leading-tight m-0"><%= prize[:name] %></h3>
+              <p class="parchment-prize-time text-xs mt-1"><%= prize[:display_time] %></p>
+              <div class="absolute bottom-1 right-1 w-8 h-8 opacity-30 transition-opacity duration-300 hover:opacity-60">
+                <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M12 22C17.5228 22 22 17.5228 22 12C22 6.47715 17.5228 2 12 2C6.47715 2 2 6.47715 2 12C2 17.5228 6.47715 22 12 22Z" fill="#7C4A33" />
+                  <path d="M7 12L10 15L17 8" stroke="#F6DBBA" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                  <path d="M12 2C6.47715 2 2 6.47715 2 12C2 17.5228 6.47715 22 12 22C17.5228 22 22 17.5228 22 12C22 6.47715 17.5228 2 12 2Z" stroke="#4A2D24" stroke-width="0.5" />
+                </svg>
               </div>
             </div>
-          <% end %>
-        </div>
+          </div>
+        <% end %>
       </div>
     </div>
 
-    <div class="relative mx-15 md:mx-15 sm:mx-10" data-controller="carousel" data-carousel-row-value="2">
-      <div class="slider-box overflow-hidden relative rounded-2xl">
-        <div class="carousel-track-rev flex gap-8 py-4 md:gap-8 sm:gap-6" data-carousel-target="container">
-          <% @prizes.each do |prize| %>
-            <div class="carousel-slide flex-none w-50 md:w-50 sm:w-40">
-              <div class="prize-card bg-white/95 backdrop-blur-lg rounded-2xl border-2 border-white/30 shadow-lg p-6 md:p-6 sm:p-4 text-center transition-all duration-300 hover:shadow-xl hover:-translate-y-2 hover:scale-105">
-                <div class="prize-image w-full h-full flex items-center justify-center mb-4 rounded-xl bg-yellow-100/20">
-                  <% if prize[:image] && prize[:image] != "" %>
-                    <img src="<%= prize[:image] %>" alt="<%= prize[:name] %>" class="w-full h-full object-cover rounded-xl" />
-                  <% else %>
-                    <%= image_tag "clubhuman.png", alt: "Prize", class: "w-full h-full object-cover rounded-xl" %>
-                  <% end %>
-                </div>
-                <h3 class="prize-name font-['Fredoka'] font-semibold text-lg md:text-lg sm:text-base text-orange-600 leading-tight m-0"><%= prize[:name] %></h3>
-                <p class="text-sm text-gray-600 mt-2"><%= prize[:time] %></p>
+    <div class="relative mt-25 mx-15 md:mx-15 sm:mx-10" data-controller="carousel" data-carousel-row-value="2" style="transform: rotate(2deg);">
+      <div class="carousel-track-rev flex gap-4 md:gap-4 sm:gap-2" data-carousel-target="container">
+        <% @prizes.each_with_index do |prize, index| %>
+          <div class="carousel-slide flex-none w-40 md:w-44 sm:w-36" style="transform: <%= prize[:random_transform] %>; animation-delay: <%= (index * 0.4) %>s;">
+            <div class="parchment-prize-card p-3 md:p-3 sm:p-2 text-center transition-all duration-300 hover:shadow-xl hover:-translate-y-2 hover:scale-105" style="animation-delay: <%= (index * 0.4) %>s;">
+              <div class="parchment-prize-image w-full h-full flex items-center justify-center mb-2 rounded-xl bg-yellow-100/20">
+                <% if prize[:image] && prize[:image] != "" %>
+                  <img src="<%= prize[:image] %>" alt="<%= prize[:name] %>" class="w-full h-full object-cover rounded-xl">
+                <% else %>
+                  <%= image_tag "clubhuman.png", alt: "Prize", class: "w-full h-full object-cover rounded-xl" %>
+                <% end %>
               </div>
+              <h3 class="parchment-prize-name font-['Fredoka'] font-semibold text-base md:text-base sm:text-sm leading-tight m-0"><%= prize[:name] %></h3>
+              <p class="parchment-prize-time text-xs mt-1"><%= prize[:display_time] %></p>
             </div>
-          <% end %>
-        </div>
+          </div>
+        <% end %>
       </div>
     </div>
   </div>
 </div>
 
-<div class="py-20 px-4 sm:px-8 bg-[#e6c58e]">
+<div class="py-20 px-4 sm:px-8 bg-gradient-to-br from-[#F3ECD8] via-[#E4DCC6] to-[#D4C4A8]">
+  <div class="max-w-7xl mx-auto">
+    <h2 class="head-big text-5xl md:text-6xl font-bold text-center mb-16 text-[#3a2f25] font-['DynaPuff',sans-serif]">
+      FAQ
+    </h2>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 justify-center-safe mx-auto max-w-6xl">
+      <div class="transition-all duration-300 hover:-translate-y-1">
+        <%= render "shared/container", custom_class: 'faq-con h-full' do %>
+          <div class="p-5 relative">
+            <h3 class="font-['DynaPuff'] font-bold text-xl text-[#8B4513] mb-3 z-10">Who is eligible?</h3>
+            <p class="font-['Fredoka'] font-normal text-lg text-[#3a2f25] z-10">You need to be a high schooler (or younger).</p>
+          </div>
+        <% end %>
+      </div>
+
+      <div class="transition-all duration-300 hover:-translate-y-1">
+        <%= render "shared/container", custom_class: 'faq-con h-full' do %>
+          <div class="p-5 relative">
+            <h3 class="font-['DynaPuff'] font-bold text-xl text-[#8B4513] mb-3 z-10">How much does it cost?</h3>
+            <p class="font-['Fredoka'] font-normal text-lg text-[#3a2f25] z-10">100% free - all the prizes are donated to us or paid for by us!</p>
+          </div>
+        <% end %>
+      </div>
+
+      <div class="transition-all duration-300 hover:-translate-y-1">
+        <%= render "shared/container", custom_class: 'faq-con h-full' do %>
+          <div class="p-5 relative">
+            <h3 class="font-['DynaPuff'] font-bold text-xl text-[#8B4513] mb-3 z-10">What types of projects count?</h3>
+            <p class="font-['Fredoka'] font-normal text-lg text-[#3a2f25] z-10">Anything that you've programmed and is open-source!</p>
+          </div>
+        <% end %>
+      </div>
+
+      <div class="transition-all duration-300 hover:-translate-y-1">
+        <%= render "shared/container", custom_class: 'faq-con h-full' do %>
+          <div class="p-5 relative">
+            <h3 class="font-['DynaPuff'] font-bold text-xl text-[#8B4513] mb-3 z-10">How many projects can I build?</h3>
+            <p class="font-['Fredoka'] font-normal text-lg text-[#3a2f25] z-10">All the projects! The land's the limit! (But seriously, you could build as many as you want.)</p>
+          </div>
+        <% end %>
+      </div>
+
+      <div class="transition-all duration-300 hover:-translate-y-1">
+        <%= render "shared/container", custom_class: 'faq-con h-full' do %>
+          <div class="p-5 relative">
+            <h3 class="font-['DynaPuff'] font-bold text-xl text-[#8B4513] mb-3 z-10">I need help!</h3>
+            <p class="font-['Fredoka'] font-normal text-lg text-[#3a2f25] z-10">Read the big FAQ. Still stuck? Reach out in #summer-help channel of the Hack Club Slack and we'll help you out!</p>
+          </div>
+        <% end %>
+      </div>
+
+      <div class="transition-all duration-300 hover:-translate-y-1 md:col-span-2 lg:col-span-1">
+        <%= render "shared/container", custom_class: 'faq-con h-full' do %>
+          <div class="p-5 relative">
+            <h3 class="font-['DynaPuff'] font-bold text-xl text-[#8B4513] mb-3 z-10">Is this legit?</h3>
+            <p class="font-['Fredoka'] font-normal text-lg text-[#3a2f25] z-10">
+              Yup! Last winter, we ran <a href="https://highseas.hackclub.com/" target="_blank" class="text-[#8B4513] underline hover:text-[#a8956b] transition-colors font-semibold">High Seas</a>, which gave out over 12,000 prizes with 3,865 projects being shipped, and we have the <a href="https://hcb.hackclub.com/highseas" target="_blank" class="text-[#8B4513] underline hover:text-[#a8956b] transition-colors font-semibold">receipts</a> to prove it. 
+            </p>
+          </div>
+        <% end %>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="py-20 px-4 sm:px-8 bg-[#d1c1a0]">
   <div class="max-w-6xl mx-auto text-center">
-    <h3 class="head-big text-4xl font-bold mb-8 glow-y text-[#E7E76B]">
+    <h3 class="head-big text-4xl font-bold mb-8 text-[#3a2f25] font-['DynaPuff',sans-serif]">
       "Make stuff. Get stuff. Repeat."
     </h3>
     <p class="font-['Fredoka',sans-serif] font-normal text-xl mb-8 opacity-80 text-[#8B4513]">
-      Ready to start your island adventure? Join thousands of makers!<br>
-      Sign up with your email to get started on your making journey!
+      Sounds good?<br>
+      Sign up with your email to get started!
     </p>
     <div class="flex items-center justify-center max-w-3xl mx-auto">
       <%= render "signup" %>
     </div>
-    <div class="flex items-start justify-center mt-8 flex-row-reverse">
-      <img src="https://files.catbox.moe/d3hyls.png" class="w-16 h-16 rounded-full shadow-lg ml-4 border-2 border-yellow-300 bg-white">
-      <div class="relative max-w-xl">
-      <div class="bg-white/90 border border-yellow-200 rounded-2xl px-6 py-4 shadow-md text-left text-[#8B4513] font-['Fredoka',sans-serif] font-normal text-xl opacity-80">
-        Sounds good? Let's get started!<br>
-        We can't wait to see what you build!
-      </div>
-      <svg class="absolute -right-4 top-6" width="24" height="24" viewBox="0 0 24 24">
-        <polygon points="0,0 24,12 0,24" fill="#fff" fill-opacity="0.9" stroke="#ffe082" stroke-width="1" />
-      </svg>
-      </div>
-    </div>
-    <div class="mt-12">
-      <p class="font-['Fredoka',sans-serif] font-normal text-base opacity-90 text-[#6B3F13] max-w-3xl mx-auto bg-white/80 rounded-xl px-6 py-4 shadow">
-      <strong>Hack Club</strong> is a registered 501(c)(3) nonprofit supporting a global network of over 60,000 teenagers. We believe the best way to learn is by building, so we provide community, resources, and funding to help teens create. We've run programs like 
-      <a href="https://highseas.hackclub.com/" target="_blank" class="text-[#E06540] underline underline-offset-2 hover:text-[#EC8153] transition-colors font-semibold">High Seas</a>, a global coding challenge where teens build personal projects, websites, apps, or games, to earn doubloons and redeem for prizes like Raspberry Pis and 3D printers; 
-      <a href="https://juice.hackclub.com/" target="_blank" class="text-[#E06540] underline underline-offset-2 hover:text-[#EC8153] transition-colors font-semibold">Juice</a>, a two-month game jam where participants create video games and are flown to Shanghai, China, to showcase their games at a pop-up cafe; and 
-      <a href="https://trail.hackclub.com/" target="_blank" class="text-[#E06540] underline underline-offset-2 hover:text-[#EC8153] transition-colors font-semibold">The Trail</a>, a seven-day hike along the Pacific Crest Trail where 30 teens build their own technical hiking equipment.<br /><br />
-      At Hack Club, students aren’t just learning—they're shipping.
-      </p>
-    </div>
   </div>
 </div>
+
+<div class="relative min-h-[60vh] flex flex-col" style="background: linear-gradient(to bottom, #d1c1a0 0%, rgba(209,193,160,0.7) 40%, rgba(209,193,160,0.0) 100%), url('https://files.catbox.moe/yc5gr5.png') center/cover no-repeat;" id="about-hack-club">
+  <div class="max-w-6xl mx-auto text-center relative z-10 pt-16 pb-8 px-4 sm:px-8 md:py-20 lg:py-24">
+    <h4 class="text-2xl font-bold mb-6 md:mb-8 text-[#3a2f25] font-['DynaPuff',sans-serif]">About Hack Club</h4>
+    <%= render "shared/container", custom_class: 'p-2 md:p-4' do %>
+      <div class="relative">
+        <p class="font-['Fredoka',sans-serif] font-normal text-base md:text-lg max-w-5xl mx-auto">
+          <a href="https://hackclub.com/" target="_blank" class="text-[#592f31] underline hover:text-[#8B4513] transition-colors font-semibold">Hack Club</a> is a nonprofit supporting a global network of over 60,000 teenagers. We believe the best way to learn is by building, so we provide community, resources, and funding to help teens create. We've run programs like
+          <a href="https://highseas.hackclub.com/" target="_blank" class="text-[#592f31] underline hover:text-[#8B4513] transition-colors font-semibold">High Seas</a>, a global coding challenge where over 5,000 teens logged over 130,000 hours of coding and we shipped out 11,112 prizes to 119 countries;
+          <a href="https://juice.hackclub.com/" target="_blank" class="text-[#592f31] underline hover:text-[#8B4513] transition-colors font-semibold">Juice</a>, a two-month game jam where 100 teens created their own video games;
+          <a href="https://trail.hackclub.com/" target="_blank" class="text-[#592f31] underline hover:text-[#8B4513] transition-colors font-semibold">The Trail</a>, a seven-day hike along the Pacific Crest Trail where 30 teens build their own technical hiking equipment.
+        </p>
+        <p class="font-['Fredoka',sans-serif] font-normal text-base md:text-lg mt-4">
+          At Hack Club, students aren't just learning, they're shipping.
+        </p>
+      </div>
+    <% end %>
+  </div>
+
+  <div class="flex-grow min-h-[10vh] md:min-h-[10vh] lg:min-h-[10vh]"></div>
+
+  <div class="absolute inset-0 pointer-events-none" aria-hidden="true"></div>
+</div>
+
+<%= render "signup_wizard_modal" %>

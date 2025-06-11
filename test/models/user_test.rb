@@ -10,6 +10,7 @@
 #  email                        :string
 #  first_name                   :string
 #  hackatime_confirmation_shown :boolean          default(FALSE)
+#  has_black_market             :boolean
 #  has_commented                :boolean          default(FALSE)
 #  has_hackatime                :boolean          default(FALSE)
 #  identity_vault_access_token  :string

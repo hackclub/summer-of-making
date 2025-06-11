@@ -9,6 +9,6 @@
         <% when :pending %>
           Your document is under review. Patience is a virtue, grasshopper. <button id="annoying-nudge-button" class="text-soft-bone text-sm px-3 py-0.5 block hover:bg-saddle-taupe hover-btn-pixel bg-saddle-taupe btn-pixel mt-3" onclick="setTimeout(() => { alert(window.nudgeCount > 0 ? 'You\'ve already nudged someone. They\'re probably asleep. Be nice.' : 'You poked a staff member. We\'ll get right to it!'); window.nudgeCount = (window.nudgeCount || 0) + 1 }, Math.floor(Math.random() * (1500 - 250 + 1)) + 250);">Nudge a staff member to get around to it quicker.</button>
         <% when :ineligible %>
-            You're ineligible for this program. This is either because you're over 18, or you submitted fake documents. Please do not try again. We are a nonprofit for teenagers!
+            <strong>You're ineligible for this program.</strong> This is either because you're over 18, or you submitted fake documents. Please do not try again. We are a nonprofit for teenagers!
     <% end %>
 </div>

@@ -2,34 +2,51 @@
   <div class="flex flex-col justify-between items-start mb-4 md:mb-6 px-4 md:px-8 pt-2 md:pt-8 pb-2">
     <div class="flex justify-between items-center w-full flex-wrap">
       <% if params[:action] == 'my_projects' %>
-        <h1 class="text-4xl sm:text-5xl mb-0">My Projects</h1>
+        <h1 class="text-4xl sm:text-5xl mb-0">Projects</h1>
       <% elsif @feed_type == 'projects' %>
         <h1 class="text-4xl sm:text-5xl mb-0">Gallery</h1>
       <% else %>
-        <div class="flex justify-center w-full">
-            <div class="flex tab-container">
-                <button
-                    data-action="click->tabs#switchTab"
-                    data-tab="explore"
-                    class="px-6 py-2 text-xl text-black"
-                    data-tabs-target="tabButton">
-                    Explore
-                </button>
-                <button
-                    data-action="click->tabs#switchTab"
-                    data-tab="following"
-                    class="px-6 py-2 text-xl text-black"
-                    data-tabs-target="tabButton">
-                    Following
-                </button>
-                <button
-                    data-action="click->tabs#switchTab"
-                    data-tab="stonked"
-                    class="px-6 py-2 text-xl text-black"
-                    data-tabs-target="tabButton">
-                    Stonked
-                </button>
-            </div>
+        <div class="flex justify-center gap-16 w-full font-dynapuff">
+          <%=
+            render "shared/link",
+              text: "Devlogs",
+              icon: "globe",
+              as_button: {
+                data: {
+                  action: "click->tabs#switchTab",
+                  tab: "explore",
+                  tabs_target: "tabButton"
+                }
+              }
+          %>
+
+          <% if user_signed_in? && current_user.followed_projects.any? %>
+            <%=
+              render "shared/link",
+                text: "Following",
+                icon: "heart",
+                as_button: {
+                  data: {
+                    action: "click->tabs#switchTab",
+                    tab: "following",
+                    tabs_target: "tabButton"
+                  }
+                }
+            %>
+          <% end %>
+
+          <%=
+            render "shared/link",
+              text: "Gallery",
+              icon: "map",
+              as_button: {
+                data: {
+                  action: "click->tabs#switchTab",
+                  tab: "gallery",
+                  tabs_target: "tabButton"
+                }
+              }
+          %>
         </div>
       <% end %>
     </div>
@@ -85,56 +102,20 @@
             <div class="flex justify-center items-center">
               <%= image_tag 'happytriangle.png', class: 'w-32 h-32 sm:w-48 sm:h-48 2xl:w-64 2xl:h-64 transform scale-x-[-1] mb-4 sm:mb-6' %>
             </div>
-            <p class="mb-6 sm:mb-8 text-black text-large sm:text-xl 2xl:text-2xl text-center">You don't have a project yet. Create one to start your journey!</p>
-            <button data-action="click->modal#open" data-modal-type="create-project" class="px-4 md:px-6 py-1 md:py-2 bg-forest hover:bg-forest-dark text-white text-base md:text-lg 2xl:text-xl btn-pixel cursor-pointer">
-              Create Your Project
-            </button>
-          </div>
-        <% end %>
-      </div>
-    <% elsif @feed_type == 'projects' %>
-      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-8 px-4 md:px-8">
-        <% if @projects.any? %>
-          <% @projects.each do |project| %>
-            <div class="bg-[#F3ECD8] rounded-2xl border-4 border-[#E4DCC6] transform hover:scale-[1.02] transition-transform duration-300 flex flex-col h-full">
-              <% project_image = project.banner.attached? ? url_for(project.banner) : (project.devlogs.find { |u| u.attachment.present? }&.attachment || "https://raw.githubusercontent.com/hackclub/dinosaurs/main/confused_dinosaur.png") %>
-              <div class="h-36 md:h-48 overflow-hidden relative">
-                <img src="<%= project_image %>" alt="<%= project.title %>" class="w-full h-full object-cover">
-              </div>
-
-              <div class="p-4 md:p-6 flex flex-col flex-grow">
-                <div class="flex items-center justify-between mb-2 md:mb-3">
-                  <h2 class="text-xl md:text-2xl 2xl:text-3xl line-clamp-1"><%= project.title %></h2>
-                  <% if user_signed_in? && current_user != project.user %>
-                    <div>
-                      <%= render "projects/follow_button", project: project %>
-                    </div>
-                  <% end %>
-                </div>
-                <p class="mb-4 md:mb-6 line-clamp-3 text-sm md:text-base 2xl:text-lg text-gray-600 break-words overflow-wrap-anywhere"><%= project.description %></p>
-
-                <div class="flex flex-row space-x-4 mt-auto flex-wrap">
-                  <%= link_to project_path(project), class: "px-3 md:px-4 py-2 bg-forest hover:scale-[1.05] text-white transition-transform duration-300 flex-1 text-center btn-pixel text-base md:text-lg 2xl:text-2xl" do %>
-                    View Project
-                  <% end %>
-                  <%= link_to project_path(project), class: "px-3 md:px-4 py-2 bg-nice-blue text-white hover:scale-[1.05] transition-transform duration-300 flex-1 text-center btn-pixel text-base md:text-lg 2xl:text-xl" do %>
-                    <%= project.devlogs.count %> Updates
-                  <% end %>
-                </div>
-              </div>
-            </div>
-          <% end %>
-        <% else %>
-          <div class="col-span-full flex flex-col items-center justify-center bg-[#F3ECD8] rounded-2xl border-4 border-[#E4DCC6] p-6 md:p-8 mt-2 md:mt-0">
-            <div class="flex justify-center items-center">
-              <%= image_tag 'happytriangle.png', class: 'w-32 h-32 sm:w-48 sm:h-48 2xl:w-64 2xl:h-64 transform scale-x-[-1] mb-4 sm:mb-6' %>
-            </div>
-            <p class="mb-6 sm:mb-8 text-black text-large sm:text-xl 2xl:text-2xl text-center">No projects found in the gallery yet!</p>
+            <% if current_user&.has_hackatime %>
+              <p class="mb-6 sm:mb-8 text-black text-large sm:text-xl 2xl:text-2xl text-center">You don't have a project yet. Create one to start your journey!</p>
+              <button data-action="click->modal#open" data-modal-type="create-project" class="px-4 md:px-6 py-1 md:py-2 bg-forest hover:bg-forest-dark text-white text-base md:text-lg 2xl:text-xl btn-pixel cursor-pointer">
+                Create Your Project
+              </button>
+            <% else %>
+              <p class="mb-6 sm:mb-8 text-black text-large sm:text-xl 2xl:text-2xl text-center">Link your HackaTime account to start creating projects!</p>
+            <% end %>
           </div>
         <% end %>
       </div>
     <% else %>
-      <div class="px-4 md:px-8" data-tabs-target="content" id="devlogs-list-container">
+      <!-- Explore and Following tabs - show devlogs -->
+      <div class="px-4 md:px-8" data-tabs-target="content" id="devlogs-list-container" data-tab-content="explore">
         <div class="space-y-4 sm:space-y-6" id="devlogs-list">
           <%= turbo_frame_tag "initial-devlogs",
                 src: explore_path(tab: 'explore', format: :turbo_stream),
@@ -145,6 +126,50 @@
         <!-- Dear Lord Pagy life saver, but it is infitnie scroll trigger -->
         <div id="load-more-devlogs">
           <!-- It'll be replaced, i'm idiot -->
+        </div>
+      </div>
+
+      <!-- Gallery tab - show projects -->
+      <div class="px-4 md:px-8 hidden" data-tabs-target="content" data-tab-content="gallery">
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-8">
+          <% if @projects.any? %>
+            <% @projects.each do |project| %>
+              <div class="bg-[#F3ECD8] rounded-2xl border-4 border-[#E4DCC6] transform hover:scale-[1.02] transition-transform duration-300 flex flex-col h-full">
+                <% project_image = project.banner.attached? ? url_for(project.banner) : (project.devlogs.find { |u| u.attachment.present? }&.attachment || "https://raw.githubusercontent.com/hackclub/dinosaurs/main/confused_dinosaur.png") %>
+                <div class="h-36 md:h-48 overflow-hidden relative">
+                  <img src="<%= project_image %>" alt="<%= project.title %>" class="w-full h-full object-cover rounded-xl">
+                </div>
+
+                <div class="p-4 md:p-6 flex flex-col flex-grow">
+                  <div class="flex items-center justify-between mb-2 md:mb-3">
+                    <h2 class="text-xl md:text-2xl 2xl:text-3xl line-clamp-1"><%= project.title %></h2>
+                    <% if user_signed_in? && current_user != project.user %>
+                      <div>
+                        <%= render "projects/follow_button", project: project %>
+                      </div>
+                    <% end %>
+                  </div>
+                  <p class="mb-4 md:mb-6 line-clamp-3 text-sm md:text-base 2xl:text-lg text-gray-600 break-words overflow-wrap-anywhere"><%= project.description %></p>
+
+                  <div class="flex flex-row space-x-4 mt-auto flex-wrap">
+                    <%= link_to project_path(project), class: "px-3 md:px-4 py-2 bg-forest hover:scale-[1.05] text-white transition-transform duration-300 flex-1 text-center btn-pixel text-base md:text-lg 2xl:text-2xl" do %>
+                      View Project
+                    <% end %>
+                    <%= link_to project_path(project), class: "px-3 md:px-4 py-2 bg-nice-blue text-white hover:scale-[1.05] transition-transform duration-300 flex-1 text-center btn-pixel text-base md:text-lg 2xl:text-xl" do %>
+                      <%= project.devlogs.count %> Updates
+                    <% end %>
+                  </div>
+                </div>
+              </div>
+            <% end %>
+          <% else %>
+            <div class="col-span-full flex flex-col items-center justify-center bg-[#F3ECD8] rounded-2xl border-4 border-[#E4DCC6] p-6 md:p-8 mt-2 md:mt-0">
+              <div class="flex justify-center items-center">
+                <%= image_tag 'happytriangle.png', class: 'w-32 h-32 sm:w-48 sm:h-48 2xl:w-64 2xl:h-64 transform scale-x-[-1] mb-4 sm:mb-6' %>
+              </div>
+              <p class="mb-6 sm:mb-8 text-black text-large sm:text-xl 2xl:text-2xl text-center">No projects found in the gallery yet!</p>
+            </div>
+          <% end %>
         </div>
       </div>
     <% end %>
@@ -163,9 +188,16 @@
 
       <div class="max-h-[calc(90vh-100px)] overflow-y-auto overflow-x-hidden">
         <%= form_with model: Project.new, class: "p-3 md:p-6 mx-auto w-[calc(100%-2px)]", data: { controller: "project-form repo-autofill", action: "submit->project-form#validateForm" } do |f| %>
+
           <div class="space-y-2 md:space-y-4">
             <div class="mb-2 md:mb-4">
-              <%= f.label :title, class: "block text-sm font-medium mb-1" %>
+              <div class="tooltip-label-container">
+                <%= f.label :title, class: "block text-sm font-medium" %>
+                <div class="tooltip">
+                  <span class="question-mark">?</span>
+                  <span class="tooltiptext">Give your project a cool title!</span>
+                </div>
+              </div>
               <%= f.text_field :title, class: "w-full px-3 py-2 border border-saddle-taupe bg-bread border-opacity-50 focus:outline-none focus:ring-forest focus:border-forest text-sm md:text-base", id: "title", data: { project_form_target: "title" } %>
               <div class="flex justify-end">
                 <p class="mt-1 text-xs md:text-sm text-vintage-red">Required</p>
@@ -174,7 +206,13 @@
             </div>
 
             <div class="mb-2 md:mb-4">
-              <%= f.label :description, class: "block text-sm font-medium mb-1" %>
+              <div class="tooltip-label-container">
+                <%= f.label :description, class: "block text-sm font-medium" %>
+                <div class="tooltip">
+                  <span class="question-mark">?</span>
+                  <span class="tooltiptext">Describe what your project does, how you made it, and what makes it special. This helps others understand your work.</span>
+                </div>
+              </div>
               <%= f.text_area :description, rows: 3, class: "w-full px-3 py-2 border border-saddle-taupe bg-bread border-opacity-50 focus:outline-none focus:ring-forest focus:border-forest text-sm md:text-base", id: "description", data: { project_form_target: "description" } %>
               <div class="flex justify-end">
                 <p class="mt-1 text-xs md:text-sm text-vintage-red">Required</p>
@@ -192,7 +230,13 @@
             </style> -->
 
             <div class="mb-2 md:mb-4" data-controller="category-selector">
-              <%= f.label :category, class: "block text-sm font-medium mb-1" %>
+              <div class="tooltip-label-container">
+                <%= f.label :category, class: "block text-sm font-medium" %>
+                <div class="tooltip">
+                  <span class="question-mark">?</span>
+                  <span class="tooltiptext">Choose the category that best describes your project.</span>
+                </div>
+              </div>
               <%= f.hidden_field :category, data: { category_selector_target: "hiddenField" } %>
                 <div class="flex justify-between tab-container">
                   <button
@@ -235,17 +279,14 @@
               <p class="mt-1 text-xs md:text-sm text-vintage-red hidden" id="categoryError" data-project-form-target="categoryError"></p>
             </div>
 
-            <div class="mb-2 md:mb-4">
-              <%= f.label :demo_link, "Demo Link", class: "block text-sm font-medium mb-1" %>
-              <%= f.url_field :demo_link, placeholder: "https://journey.hackclub.com", class: "w-full px-3 py-2 border border-saddle-taupe bg-bread border-opacity-50 focus:outline-none focus:ring-forest focus:border-forest text-sm md:text-base", id: "demo", data: { project_form_target: "demo" } %>
-              <div class="flex justify-end">
-                <p class="mt-1 text-xs md:text-sm text-gray-700">Optional</p>
-              </div>
-              <p class="mt-1 text-xs md:text-sm text-vintage-red hidden" id="demoError" data-project-form-target="demoError"></p>
-            </div>
-
             <div class="mb-3 md:mb-6">
-              <%= f.label :repo_link, "Repository Link", class: "block text-sm font-medium mb-1" %>
+              <div class="tooltip-label-container">
+                <%= f.label :repo_link, "Repository Link", class: "block text-sm font-medium" %>
+                <div class="tooltip">
+                  <span class="question-mark">?</span>
+                  <span class="tooltiptext">Link to your project's GitHub, GitLab, or other remote repository.</span>
+                </div>
+              </div>
               <%= f.url_field :repo_link, placeholder: "https://github.com/hackclub/journey", class: "w-full px-3 py-2 border border-saddle-taupe bg-bread border-opacity-50 focus:outline-none focus:ring-forest focus:border-forest text-sm md:text-base", id: "repo", data: { project_form_target: "repo", repo_autofill_target: "repoInput", action: "input->repo-autofill#repoInputChanged" } %>
               <div class="flex justify-end">
                 <p class="mt-1 text-xs md:text-sm text-gray-700">Optional</p>
@@ -254,7 +295,13 @@
             </div>
 
             <div class="mb-2 md:mb-4">
-              <%= f.label :readme_link, "Readme Link", class: "block text-sm font-medium mb-1" %>
+              <div class="tooltip-label-container">
+                <%= f.label :readme_link, "Readme Link", class: "block text-sm font-medium" %>
+                <div class="tooltip">
+                  <span class="question-mark">?</span>
+                  <span class="tooltiptext">Direct link to your README file (usually the raw GitHub URL). This will be rendered in the arena.</span>
+                </div>
+              </div>
               <%= f.url_field :readme_link, placeholder: "https://raw.githubusercontent.com/hackclub/journey/main/README.md", class: "w-full px-3 py-2 border border-saddle-taupe bg-bread border-opacity-50 focus:outline-none focus:ring-forest focus:border-forest text-sm md:text-base", id: "readme", data: { project_form_target: "readme", repo_autofill_target: "readmeInput", action: "input->repo-autofill#validateReadmeUrl" } %>
               <div class="flex justify-end">
                 <p class="mt-1 text-xs md:text-sm text-gray-700">Optional</p>
@@ -262,10 +309,29 @@
               <p class="mt-1 text-xs md:text-sm text-vintage-red hidden" id="readmeError" data-project-form-target="readmeError"></p>
             </div>
 
+            <div class="mb-2 md:mb-4">
+              <div class="tooltip-label-container">
+                <%= f.label :demo_link, "Demo Link", class: "block text-sm font-medium" %>
+                <div class="tooltip">
+                  <span class="question-mark">?</span>
+                  <span class="tooltiptext">Link to a live demo, deployed version, or video demonstration of your project in action.</span>
+                </div>
+              </div>
+              <%= f.url_field :demo_link, placeholder: "https://journey.hackclub.com", class: "w-full px-3 py-2 border border-saddle-taupe bg-bread border-opacity-50 focus:outline-none focus:ring-forest focus:border-forest text-sm md:text-base", id: "demo", data: { project_form_target: "demo" } %>
+              <div class="flex justify-end">
+                <p class="mt-1 text-xs md:text-sm text-gray-700">Optional</p>
+              </div>
+              <p class="mt-1 text-xs md:text-sm text-vintage-red hidden" id="demoError" data-project-form-target="demoError"></p>
+            </div>
+
             <% if current_user&.has_hackatime %>
               <div class="mb-3 md:mb-6 border-t border-saddle-taupe border-opacity-30 pt-3">
                 <div class="flex items-center mb-2">
                   <h4 class="text-base md:text-lg">Link HackaTime Projects</h4>
+                  <div class="tooltip">
+                    <span class="question-mark">?</span>
+                    <span class="tooltiptext">Connect your existing HackaTime projects to automatically track time spent coding.</span>
+                  </div>
                 </div>
 
                 <div id="hackatime-projects" data-project-form-target="hackatimeProjects" class="space-y-2">

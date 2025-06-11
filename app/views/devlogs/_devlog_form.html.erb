@@ -12,46 +12,30 @@
     <%
       has_unlinked_timer_sessions = @unlinked_timer_sessions && @unlinked_timer_sessions.any?
 
-      has_hackatime_time = false
-      if @project.hackatime_project_keys.present? && @project.user.has_hackatime
-        time_since_last = @project.user.hackatime_stat.time_since_last_update_for_project(@project)
-        has_hackatime_time = time_since_last > 300 # Only count as having time if more than 5 minutes (300 seconds)
-      end
-
-      show_timer_prompt = !has_unlinked_timer_sessions && !has_hackatime_time
+      time_since_last = @project.user.hackatime_stat.time_since_last_update_for_project(@project)
+      has_hackatime_time = time_since_last > 0 # Only count as having time if more than 5 minutes (300 seconds)
     %>
 
     <%= form_with(model: [@project, @project.devlogs.build], class: "space-y-3 md:space-y-4", data: { controller: "form", action: "submit->form#preventDoubleSubmission" }) do |f| %>
 
-      <% if show_timer_prompt %>
+      <% if !has_hackatime_time %>
         <div class="flex flex-col items-center justify-center space-y-6">
           <%= image_tag 'orpheustimer.png', class: 'w-48 h-48 md:w-64 md:h-64 2xl:w-80 2xl:h-80 mb-4' %>
           <p class="text-base md:text-lg 2xl:text-xl text-center">
-            To post a devlog, you need to track time either with a Timer or with Hackatime.
-            <% if @project.hackatime_project_keys.present? && @project.user.has_hackatime %>
+            To post a devlog, you need at least 5 minutes of Hackatime time.
+            <% if @project.hackatime_project_keys.present? %>
               <br><br>Your Hackatime time since last devlog is
               <% time_since_last = @project.user.hackatime_stat.time_since_last_update_for_project(@project) %>
               <% since_last_hours = time_since_last / 3600 %>
               <% since_last_minutes = (time_since_last % 3600) / 60 %>
               <% since_last_seconds = time_since_last % 60 %>
-              <%= "#{since_last_hours}h #{since_last_minutes}m #{since_last_seconds}s" %>.
+              <%= "#{since_last_hours}h #{since_last_minutes}m #{since_last_seconds}s" %>
             <% end %>
           </p>
-
-          <div class="flex flex-row space-x-4 justify-center">
-            <button type="button" data-controller="modal" data-action="modal#open" data-modal-id="<%= @project.id %>" data-modal-type="timer" class="px-4 md:px-6 py-2 bg-forest hover:scale-[1.05] text-white transition-transform duration-300 text-sm md:text-base 2xl:text-xl btn-pixel cursor-pointer">
-              Start a Timer
-            </button>
-            <% if @project.hackatime_project_keys.present? && @project.user.has_hackatime %>
-              <button data-controller="modal" data-action="click->modal#open" data-modal-type="hackatime" class="px-4 py-2 btn-pixel bg-nice-blue text-white hover:scale-[1.05] transition-transform text-base md:text-lg mt-2 md:mt-0">
-                Manually Sync Hackatime
-              </button>
-            <% end %>
-          </div>
         </div>
       <% end %>
 
-      <div class="<%= 'hidden' if show_timer_prompt %>">
+      <div class="<%= 'hidden' if !has_hackatime_time %>">
         <% if has_unlinked_timer_sessions && @project.hackatime_project_keys.present? && @project.user.has_hackatime && has_hackatime_time %>
           <div data-controller="time-source" class="mb-6">
             <label class="block text-base md:text-lg 2xl:text-xl mb-2">Choose Time Tracking Source</label>
@@ -223,9 +207,9 @@
         <%= f.hidden_field :timer_session_id if !@unlinked_timer_sessions || @unlinked_timer_sessions.empty? %>
 
         <div class="flex justify-end space-x-4 pt-6">
-          <button type="button" data-controller="modal" data-action="modal#open" data-modal-id="<%= @project.id %>" data-modal-type="timer" class="px-4 md:px-6 py-2 bg-nice-blue hover:scale-[1.05] text-white transition-transform duration-300 text-sm md:text-base 2xl:text-xl btn-pixel cursor-pointer">
-            <%= TimerSession.where(user_id: current_user.id, project_id: @project.id, status: ['running', 'paused']).exists? ? "View Timer" : "Start Timer" %>
-          </button>
+          <%# <button type="button" data-controller="modal" data-action="modal#open" data-modal-id="<%= @project.id >" data-modal-type="timer" class="px-4 md:px-6 py-2 bg-nice-blue hover:scale-[1.05] text-white transition-transform duration-300 text-sm md:text-base 2xl:text-xl btn-pixel cursor-pointer">
+            <%= TimerSession.where(user_id: current_user.id, project_id: @project.id, status: ['running', 'paused']).exists? ? "View Timer" : "Start Timer" >
+          </button>%>
           <%= f.submit "Post Devlog", class: "px-4 md:px-6 py-2 bg-forest hover:scale-[1.05] text-white transition-transform duration-300 text-sm md:text-base 2xl:text-xl btn-pixel cursor-pointer", data: { form_target: "submitButton" } %>
         </div>
       </div>
@@ -234,7 +218,8 @@
 </div>
 
 <!-- Timer Modal -->
-<div id="timer-modal-<%= @project.id %>" data-controller="timer modal" class="hidden fixed inset-0 z-50 overflow-auto bg-black/30 flex items-center justify-center p-2 md:p-4">
+<!-- TODO: When enabling Timers, add timer modal to data controller -->
+<div id="timer-modal-<%= @project.id %>" data-controller="" class="hidden fixed inset-0 z-50 overflow-auto bg-black/30 flex items-center justify-center p-2 md:p-4">
   <div class="bg-soft-bone w-full max-w-md card-pixel mx-2 md:mx-auto relative max-h-[80vh] flex flex-col" data-modal-target="container">
     <div class="p-3 md:p-4 border-b border-saddle-taupe border-opacity-30 flex-shrink-0">
       <div class="flex justify-between items-center">

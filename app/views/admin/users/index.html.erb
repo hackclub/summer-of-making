@@ -1,0 +1,15 @@
+<h1>users</h1>
+
+<ul>
+  <% @users.each do |user| %>
+    <li>
+      #<%= user.id %>: <%= link_to "#{user.first_name} #{user.last_name}", admin_user_path(user) %>
+    </li>
+  <% end %>
+</ul>
+
+<%== pagy_nav(@pagy) %> <br>
+<%== pagy_info(@pagy) %> <br>
+
+jsyk, avo is probably a better bet for managing users!
+<%= link_to "← back", admin_root_path %>

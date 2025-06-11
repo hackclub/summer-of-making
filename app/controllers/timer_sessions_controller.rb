@@ -22,6 +22,9 @@ class TimerSessionsController < ApplicationController
   end
 
   def create
+    render json: { error: "Timer sessions are currently disabled" }, status: :service_unavailable
+    return
+
     active_session = TimerSession.where(user: current_user, status: %i[running paused]).first
 
     if active_session

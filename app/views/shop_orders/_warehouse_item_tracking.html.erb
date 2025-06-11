@@ -1,0 +1,89 @@
+<!-- Warehouse Item Tracking & Status -->
+<div class="bg-white card-pixel p-6 mb-6">
+  <h3 class="text-xl font-bold text-darker-taupe mb-4">Shipping & Tracking</h3>
+
+  <!-- Timeline for warehouse items -->
+  <div class="space-y-4">
+    <div class="flex items-center space-x-4">
+      <div class="w-4 h-4 bg-green-500 rounded-full flex-shrink-0"></div>
+      <div>
+        <p class="font-semibold text-darker-taupe">Order Placed</p>
+        <p class="text-sm text-saddle-taupe"><%= @order.created_at.strftime("%B %d, %Y at %I:%M %p") %></p>
+      </div>
+    </div>
+
+    <% if @order.awaiting_periodical_fulfillment_at %>
+      <div class="flex items-center space-x-4">
+        <div class="w-4 h-4 bg-blue-500 rounded-full flex-shrink-0"></div>
+        <div>
+          <p class="font-semibold text-darker-taupe">Order Approved & Queued</p>
+          <p class="text-sm text-saddle-taupe"><%= @order.awaiting_periodical_fulfillment_at.strftime("%B %d, %Y at %I:%M %p") %></p>
+          <p class="text-xs text-saddle-taupe">Added to warehouse fulfillment queue</p>
+        </div>
+      </div>
+    <% end %>
+
+    <% if @order.fulfilled_at %>
+      <div class="flex items-center space-x-4">
+        <div class="w-4 h-4 bg-green-500 rounded-full flex-shrink-0"></div>
+        <div>
+          <p class="font-semibold text-darker-taupe">Shipped</p>
+          <p class="text-sm text-saddle-taupe"><%= @order.fulfilled_at.strftime("%B %d, %Y at %I:%M %p") %></p>
+          <% if @order.external_ref.present? %>
+            <div class="mt-2 p-3 bg-forest/10 rounded">
+              <p class="text-sm font-semibold text-forest">Tracking Number:</p>
+              <p class="text-lg font-mono text-forest"><%= @order.external_ref %></p>
+              <p class="text-xs text-saddle-taupe mt-1">Use this number to track your package with the shipping carrier</p>
+            </div>
+          <% end %>
+        </div>
+      </div>
+    <% end %>
+
+    <% if @order.rejected_at %>
+      <div class="flex items-center space-x-4">
+        <div class="w-4 h-4 bg-red-500 rounded-full flex-shrink-0"></div>
+        <div>
+          <p class="font-semibold text-darker-taupe">Order Rejected</p>
+          <p class="text-sm text-saddle-taupe"><%= @order.rejected_at.strftime("%B %d, %Y at %I:%M %p") %></p>
+          <% if @order.rejection_reason.present? %>
+            <p class="text-sm text-vintage-red bg-vintage-red/10 p-2 rounded mt-1">
+              <strong>Reason:</strong> <%= @order.rejection_reason %>
+            </p>
+          <% end %>
+        </div>
+      </div>
+    <% end %>
+
+    <% unless @order.fulfilled? || @order.rejected? %>
+      <div class="flex items-center space-x-4">
+        <div class="w-4 h-4 bg-gray-300 rounded-full flex-shrink-0"></div>
+        <div>
+          <p class="font-semibold text-saddle-taupe">Preparing for Shipment</p>
+          <p class="text-sm text-saddle-taupe">Our warehouse team is preparing your order</p>
+        </div>
+      </div>
+
+      <div class="flex items-center space-x-4">
+        <div class="w-4 h-4 bg-gray-300 rounded-full flex-shrink-0"></div>
+        <div>
+          <p class="font-semibold text-saddle-taupe">Shipped</p>
+          <p class="text-sm text-saddle-taupe">You'll receive tracking information when your order ships</p>
+        </div>
+      </div>
+    <% end %>
+  </div>
+
+  <!-- Shipping info for warehouse items -->
+  <% unless @order.fulfilled? || @order.rejected? %>
+    <div class="mt-6 p-4 bg-blue-50 rounded">
+      <h4 class="font-semibold text-blue-800 mb-2">📦 Warehouse Fulfillment</h4>
+      <ul class="text-sm text-blue-700 space-y-1">
+        <li>• Orders are processed during business hours</li>
+        <li>• Typical processing time: 3-5 business days</li>
+        <li>• You'll receive tracking info via email once shipped</li>
+        <li>• Questions? Contact our support team</li>
+      </ul>
+    </div>
+  <% end %>
+</div>

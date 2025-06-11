@@ -10,6 +10,7 @@
 #  email                        :string
 #  first_name                   :string
 #  hackatime_confirmation_shown :boolean          default(FALSE)
+#  has_black_market             :boolean
 #  has_commented                :boolean          default(FALSE)
 #  has_hackatime                :boolean          default(FALSE)
 #  identity_vault_access_token  :string
@@ -37,6 +38,7 @@ class User < ApplicationRecord
   has_one :hackatime_stat, dependent: :destroy
   has_one :tutorial_progress, dependent: :destroy
   has_one :magic_link, dependent: :destroy
+  has_many :shop_orders
 
   validates :slack_id, presence: true, uniqueness: true
   validates :email, :display_name, :timezone, :avatar, presence: true
@@ -44,6 +46,9 @@ class User < ApplicationRecord
 
   after_create :create_tutorial_progress
   after_commit :sync_to_airtable, on: %i[create update]
+
+  include PublicActivity::Model
+  tracked only: [], owner: Proc.new { |controller, model| controller&.current_user }
 
   def self.exchange_slack_token(code, redirect_uri)
     response = Faraday.post("https://slack.com/api/oauth.v2.access",
@@ -105,9 +110,9 @@ class User < ApplicationRecord
   def self.check_hackatime(slack_id)
     response = Faraday.get("https://hackatime.hackclub.com/api/v1/users/#{slack_id}/stats?features=projects")
     result = JSON.parse(response.body)&.dig("data")
-    return unless result["user_id"] == slack_id
+    return unless result["status"] == "ok"
 
-    user = User.find_by(slack_id: slack_id)
+    user = User.find_by(slack_id:)
     user.has_hackatime = true
     user.save!
 
@@ -151,12 +156,15 @@ class User < ApplicationRecord
   end
 
   def refresh_hackatime_data_now
-    return unless has_hackatime?
-
     response = Faraday.get("https://hackatime.hackclub.com/api/v1/users/#{slack_id}/stats?features=projects")
     return unless response.success?
 
     result = JSON.parse(response.body)
+    return unless result.dig("data", "status") == "ok"
+
+    unless has_hackatime?
+      update!(has_hackatime: true)
+    end
 
     stats = hackatime_stat || build_hackatime_stat
     stats.update(data: result, last_updated_at: Time.current)
@@ -233,15 +241,28 @@ class User < ApplicationRecord
     )
   end
 
+  def has_idv_addresses?
+    return false if identity_vault_access_token.blank?
+
+    begin
+      idv_data = fetch_idv
+      addresses = idv_data.dig(:identity, :addresses)
+      addresses.present? && addresses.any?
+    rescue => e
+      Rails.logger.error "Failed to fetch IDV addresses: #{e.message}"
+      false
+    end
+  end
+
   def verification_status
     return :not_linked if identity_vault_id.blank?
 
     idv_data = fetch_idv[:identity]
 
     case idv_data[:verification_status]
-    when "pending", "needs_submission"
+    when "pending"
       :pending
-    when "needs_resubmission"
+    when "needs_submission"
       :needs_resubmission
     when "verified"
       if idv_data[:ysws_eligible]

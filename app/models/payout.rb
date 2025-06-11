@@ -19,11 +19,13 @@ class Payout < ApplicationRecord
   belongs_to :payable, polymorphic: true
   belongs_to :user
 
+  validates_presence_of :amount
+
   before_validation :set_user_id
 
   private
 
   def set_user_id
-    self.user = payable.user
+    self.user ||= payable.is_a?(User) ? payable : payable.user
   end
 end

@@ -38,6 +38,17 @@ class IdentityVaultService
       conn.get("/api/v1/identities/#{identity_id}").body
     end
 
+    def build_address_creation_url(sneaky_params = nil)
+      params = {
+        stash_data: encode_sneaky_params(sneaky_params)
+      }.compact_blank
+
+      identity_vault_host = Rails.application.credentials.dig(:identity_vault, :host)
+      "#{identity_vault_host}addresses/program_create_address?#{params.to_query}"
+    end
+
+
+
     private
 
     def conn

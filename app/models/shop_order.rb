@@ -37,6 +37,14 @@ class ShopOrder < ApplicationRecord
   belongs_to :user
   belongs_to :shop_item
 
+  has_many :payouts, as: :payable
+
+  validate :check_one_per_person_ever_limit
+  validate :check_max_quantity_limit
+  validate :check_black_market_access
+  validate :check_user_balance
+  after_create :create_negative_payout
+
   def full_name
     "#{user.first_name} #{user.last_name}'s order for #{quantity} #{shop_item.name.pluralize(quantity)}"
   end
@@ -88,5 +96,55 @@ class ShopOrder < ApplicationRecord
     event :user_was_verified do
       transitions from: :in_verification_limbo, to: :awaiting_periodical_fulfillment
     end
+  end
+
+  private
+
+  def check_one_per_person_ever_limit
+    return unless shop_item&.one_per_person_ever?
+
+    existing_order = user.shop_orders.joins(:shop_item).where(shop_item: shop_item)
+    existing_order = existing_order.where.not(id: id) if persisted?
+
+    if existing_order.exists?
+      errors.add(:base, "You can only order #{shop_item.name} once per person.")
+    end
+  end
+
+  def check_max_quantity_limit
+    return unless shop_item&.max_qty && quantity
+
+    if quantity > shop_item.max_qty
+      errors.add(:quantity, "cannot exceed #{shop_item.max_qty} for this item.")
+    end
+  end
+
+  def check_black_market_access
+    return unless shop_item&.requires_black_market?
+
+    unless user&.has_black_market?
+      errors.add(:base, "This item requires black market access.")
+    end
+  end
+
+  def check_user_balance
+    return unless shop_item&.ticket_cost&.positive? && quantity.present?
+
+    total_cost = shop_item.ticket_cost * quantity
+    if user&.balance&.< total_cost
+      shortage = total_cost - (user.balance || 0)
+      errors.add(:base, "Insufficient balance. You need #{shortage} more tickets.")
+    end
+  end
+
+  def create_negative_payout
+    return unless frozen_item_price.present? && frozen_item_price > 0 && quantity.present?
+
+    total_cost = frozen_item_price * quantity
+
+    user.payouts.create!(
+      amount: -total_cost,
+      payable: self
+    )
   end
 end

@@ -1,9 +1,0 @@
-.collapsed {
-  width: 80px !important;
-  transition: width 0.3s ease;
-}
-
-[data-controller="sidebar"] {
-  width: 280px;
-  transition: width 0.3s ease;
-} 

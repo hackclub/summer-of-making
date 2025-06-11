@@ -6,7 +6,7 @@
       <li class="bg-[#F3ECD8] rounded-xl border-5 border-[#E4DCC6] p-4">
         <p class="flex items-center">
           <span class="inline-flex items-center gap-2">
-            <img src="/shell.png" alt="shell" width=32 />
+            <img src="/shell.png" alt="shell" width=32>
             <span class="text-[#BEA234] font-bold"><%= payout.amount %>&nbsp;</span>
           </span>
           <%= time_ago_in_words payout.created_at %> ago on <%= indefinite_articlerize payout.payable_type.underscore.humanize.downcase %>

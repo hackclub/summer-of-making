@@ -1,0 +1,131 @@
+<div class="fixed inset-0 z-[9999] bg-black/50 hidden"
+     id="signup-wizard"
+     data-controller="signup-wizard"
+     data-action="click->signup-wizard#co">
+
+  <div class="flex items-center justify-center w-full h-full p-4">
+    <div class="bg-[#F3ECD8] w-[90vw] h-[90vh] max-w-6xl max-h-[90vh] flex flex-col relative overflow-hidden rounded-2xl shadow-2xl border-4 border-[#E4DCC6]">
+
+    <div class="p-8 border-b border-saddle-taupe border-opacity-20">
+      <div class="flex justify-between items-center">
+        <div>
+          <h2 class="text-2xl font-bold text-forest">Welcome to Summer of Making!</h2>
+          <p class="text-saddle-taupe mt-1">Let's get you signed up!</p>
+        </div>
+        <button type="button" class="text-gray-600 hover:text-vintage-red cursor-pointer transition-colors duration-200"
+                data-action="click->signup-wizard#close">
+          <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </button>
+      </div>
+
+      <div class="mt-4 flex items-center space-x-2">
+        <span class="text-sm text-saddle-taupe">Step </span>
+        <span class="font-bold text-forest" data-signup-wizard-target="stepIndicator">1</span>
+        <span class="text-sm text-saddle-taupe">of 4</span>
+        <div class="flex-1 bg-gray-200 rounded-full h-2 ml-4">
+          <div class="bg-forest h-2 rounded-full transition-all duration-300" style="width: 25%" data-signup-wizard-target="progressBar"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="flex-1 p-8 space-y-6 overflow-y-auto">
+      <div data-signup-wizard-target="step1" class="text-center space-y-6">
+        <div class="space-y-4">
+          <h3 class="text-xl font-bold text-forest">Step 1: Get the invite to Slack</h3>
+          <p class="text-saddle-taupe max-w-2xl mx-auto">
+            We will shoot you an email with a link to join our Slack. You can use this link to sign up for an account.
+          </p>
+        </div>
+
+        <div class="bg-gradient-to-br from-blue-100 to-indigo-100 rounded-xl p-8 max-w-2xl mx-auto">
+          <div class="aspect-video bg-gray-800 rounded-lg flex items-center justify-center text-white">
+            <video controls class="w-full h-full rounded-lg" data-signup-wizard-target="video1">
+              <source src="/assets/wat.mp4" type="video/mp4">
+              email preview
+            </video>
+          </div>
+          <p class="text-sm text-gray-600 mt-3 italic">example email</p>
+        </div>
+      </div>
+
+      <div data-signup-wizard-target="step2" class="hidden text-center space-y-6">
+        <div class="space-y-4">
+          <h3 class="text-xl font-bold text-forest">Step 2: Magic Link Sign In</h3>
+          <p class="text-saddle-taupe max-w-2xl mx-auto">
+            Our helpful bot will send you a magic link to sign in here. Just click the link and you'll be logged in automatically!
+          </p>
+        </div>
+
+        <div class="bg-gradient-to-br from-purple-100 to-pink-100 rounded-xl p-8 max-w-2xl mx-auto">
+          <div class="aspect-video bg-gray-800 rounded-lg flex items-center justify-center text-white">
+            <video controls class="w-full h-full rounded-lg" data-signup-wizard-target="video2">
+              <source src="/assets/wat.mp4" type="video/mp4">
+              magic link
+            </video>
+          </div>
+          <p class="text-sm text-gray-600 mt-3 italic">see how easy it is to sign in with the magic link</p>
+        </div>
+      </div>
+
+      <div data-signup-wizard-target="step3" class="hidden text-center space-y-6">
+        <div class="space-y-4">
+          <h3 class="text-xl font-bold text-forest">Step 3: Complete the Onboarding</h3>
+          <p class="text-saddle-taupe max-w-2xl mx-auto">
+            Our onboarding tutorial will guide you through the platform's features and help you get started.
+          </p>
+        </div>
+
+        <div class="bg-gradient-to-br from-green-100 to-emerald-100 rounded-xl p-8 max-w-2xl mx-auto">
+          <div class="aspect-video bg-gray-800 rounded-lg flex items-center justify-center text-white">
+            <video controls class="w-full h-full rounded-lg" data-signup-wizard-target="video3">
+              <source src="/assets/wat.mp4" type="video/mp4">
+              tutorial preview
+            </video>
+          </div>
+          <p class="text-sm text-gray-600 mt-3 italic">A quick preview of what you'll learn in the tutorial</p>
+        </div>
+      </div>
+
+      <div data-signup-wizard-target="step4" class="hidden text-center space-y-6">
+        <div class="space-y-4">
+          <h3 class="text-xl font-bold text-forest">Step 4: Ready to start building?</h3>
+          <p class="text-saddle-taupe max-w-2xl mx-auto">
+            We are done here, click next to finish the signup process and start building your projects!
+          </p>
+        </div>
+
+        <div class="bg-gradient-to-br from-yellow-100 to-orange-100 rounded-xl p-8 max-w-2xl mx-auto">
+          <div class="text-6xl mb-4">🚀</div>
+          <h4 class="text-lg font-semibold text-forest mb-2">Join a cool community</h4>
+          <p class="text-saddle-taupe">
+            Tons of people building cool stuff together
+          </p>
+        </div>
+      </div>
+
+    </div>
+
+    <div class="border-t border-saddle-taupe border-opacity-20 p-8 bg-[#F3ECD8]">
+      <div class="flex justify-between items-center">
+        <button type="button"
+                class="px-6 py-3 bg-gray-300 hover:bg-gray-400 text-gray-700 rounded-lg transition-colors duration-200 btn-pixel opacity-50"
+                data-signup-wizard-target="prevButton"
+                data-action="click->signup-wizard#prevStep"
+                disabled>
+          ← Back
+        </button>
+
+        <button type="button"
+                class="px-6 py-3 bg-forest hover:bg-forest/90 text-white rounded-lg transition-colors duration-200 btn-pixel"
+                data-signup-wizard-target="nextButton"
+                data-action="click->signup-wizard#nextStep">
+          Next →
+        </button>
+      </div>
+    </div>
+
+    </div>
+  </div>
+</div>

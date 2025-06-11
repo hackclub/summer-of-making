@@ -39,12 +39,17 @@ class TimerSession < ApplicationRecord
   validates :started_at, :status, presence: true
   validate :validate_no_changes_if_stopped, on: :update
   validate :validate_minimum_duration, on: :update
+  validate :prevent_new_timer_sessions, on: :create
 
   before_destroy :prevent_destroy_if_stopped
 
   MINIMUM_DURATION = 300 # 5 minutes
 
   private
+
+  def prevent_new_timer_sessions
+    errors.add(:base, "Timer sessions are currently disabled")
+  end
 
   def validate_no_changes_if_stopped
     return unless status_was == "stopped" && changed? && (changed - [ "devlog_id" ]).present?

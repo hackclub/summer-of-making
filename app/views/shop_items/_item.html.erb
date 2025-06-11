@@ -1,29 +1,84 @@
-<div class="bg-soft-bone card-pixel p-2 sm:p-4 w-fit">
-    <% admin_tool do %>
-        <p class="text-xs">Reload after hitting update bc i'm lazy</p>
-        <%= form_with(model: item, url: shop_item_path(item), scope: :shop_item, class: "flex flex-col items-start") do |f| %>
+<% ineligible = current_user.verification_status == :ineligible %>
+<% disabled = ineligible || (!current_user.ysws_verified? && !item.is_a?(ShopItem::FreeStickers)) || !item.can_afford?(current_user) %>
+
+<div class="bg-soft-bone card-pixel bg-surface0 shadow p-6 rounded-lg h-full flex flex-col text-center w-full">
+  <div class="flex-grow flex flex-col justify-between min-h-0">
+    <div class="flex-grow">
+      <% admin_tool do %>
+        <p class="text-xs mb-2">Reload after hitting update bc i'm lazy</p>
+        <%= form_with(model: item, url: shop_item_path(item), scope: :shop_item, class: "flex flex-col items-start mb-4") do |f| %>
             <%= f.select :type, [["Typeless (ILLEGAL)", nil], *@shop_item_types], selected: item.type %>
             <%= f.submit %>
         <% end %>
-    <% end %>
+      <% end %>
 
-  <%= text_field_editable(item, :name) %>
-  <%= text_field_editable(item, :description) %>
+      <%= text_field_editable(item, :name) %>
 
-  <% admin_tool do %>
-      <%= text_field_editable(item, :internal_description) %>
-  <% end %>
+      <div class="mb-4">
+        <%= text_field_editable(item, :description) %>
+      </div>
 
-  <%= image_tag item.image.variant(:thumb) if item.image.attached? %>
+      <% admin_tool do %>
+          <div class="mb-2">
+            <%= text_field_editable(item, :internal_description) %>
+          </div>
+          <div class="mb-2">
+            <%= number_field_editable(item, :ticket_cost, display_prefix: "🐚") %>
+          </div>
+          <p class="text-sm font-medium mt-4 mb-2">Actual IRL FR HC cost</p>
+          <div class="mb-4">
+            <%= number_field_editable(item, :usd_cost, display_prefix: "$") %>
+          </div>
+          <div class="mb-2">
+            <%= number_field_editable(item, :max_qty, display_prefix: "Max qty: ") %>
+          </div>
+          <div class="mb-2">
+            <%= checkbox_field_editable(item, :one_per_person_ever, display_name: "One per person ever") %>
+          </div>
+          <div class="mb-2">
+            <%= checkbox_field_editable(item, :requires_black_market, display_name: "Black market only") %>
+          </div>
+      <% end %>
 
-  <%= image_field_editable(item, :image) %>
+      <% if item.image.attached? %>
+        <div class="mb-4 flex justify-center">
+          <%= image_tag item.image.variant(:thumb), class: "rounded-lg max-w-full h-auto object-contain max-h-48" %>
+        </div>
+      <% end %>
 
-  <%= number_field_editable(item, :ticket_cost, display_prefix: "🐚") %>
+      <% if item.one_per_person_ever? %>
+        <div class="bg-vintage-red/10 p-2 card-pixel my-2">
+          <p class="text-xs text-vintage-red font-semibold">⚠️ Limited: One per person</p>
+        </div>
+      <% end %>
+    </div>
 
-  <% admin_tool do %>
-      <p>Actual IRL FR HC cost</p>
-      <%= number_field_editable(item, :usd_cost, display_prefix: "$") %>
-  <% end %>
+    <div class="mt-auto pt-4">
+      <% already_ordered = item.one_per_person_ever? && current_user.shop_orders.joins(:shop_item).where(shop_item: item).exists? %>
+
+      <% if already_ordered %>
+        <%= button_to "Already Ordered", "#", method: :get, disabled: true, class: "w-full px-4 sm:px-6 py-2 sm:py-3 bg-forest text-white text-base sm:text-lg 2xl:text-xl btn-pixel disabled:opacity-40 disabled:cursor-not-allowed block text-center" %>
+      <% else %>
+        <%= button_to order_shop_item_path(item), method: :get, data: { turbo: false }, class: "w-full px-4 sm:px-6 py-2 sm:py-3 bg-forest hover:scale-[1.02] text-white transition-transform duration-300 text-base sm:text-lg 2xl:text-xl btn-pixel disabled:opacity-40 disabled:cursor-not-allowed block text-center", disabled: do %>
+          <% if ineligible %>
+            <span>Not for you!</span>
+          <% elsif !current_user.ysws_verified? && !item.is_a?(ShopItem::FreeStickers) %>
+            <span>
+              You need your ID verified for this
+            </span>
+          <% elsif item.can_afford?(current_user) %>
+            <span>
+              Buy for 🐚 <%= item.ticket_cost == 0 ? 0 : item.ticket_cost %>
+            </span>
+          <% else %>
+            <span>
+              <%= 🐚 (item.ticket_cost - current_user.balance).ceil %> needed
+            </span>
+          <% end %>
+        <% end %>
+      <% end %>
+    </div>
+  </div>
 </div>
 
 <!-- <script>

@@ -44,17 +44,33 @@ class VotesController < ApplicationController
 
   private
 
+
   def set_projects
     voted_winner_ids = current_user.votes.pluck(:winner_id)
     voted_loser_ids = current_user.votes.pluck(:loser_id)
     voted_project_ids = voted_winner_ids + voted_loser_ids
 
-    @projects = Project.where(is_shipped: true)
-                       .where.not(id: voted_project_ids)
-                       .where.not(user_id: current_user.id)
-                       .where.not(demo_link: [ nil, "" ])
-                       .order("RANDOM()")
-                       .limit(2)
+    # TODO: Make sure to check for is_shipped: true before launch
+    eligible_user_ids = Project
+                         .where.not(id: voted_project_ids)
+                         .where.not(user_id: current_user.id)
+                         .distinct
+                         .pluck(:user_id)
+                         .shuffle
+                         .first(2)
+
+    if eligible_user_ids.size < 2
+      @projects = []
+      return
+    end
+
+    @projects = eligible_user_ids.map do |user_id|
+      Project
+        .where.not(id: voted_project_ids)
+        .where(user_id: user_id)
+        .order("RANDOM()")
+        .first
+    end.compact
   end
 
   def vote_params

@@ -1,19 +1,28 @@
 <%= stylesheet_link_tag "tutorial", "data-turbo-track": "reload" unless current_user.tutorial_progress.completed? %>
 
 <% if !current_user.tutorial_progress.step_completed?(tutorial_key) && current_page?(tutorial_path) %>
-  <div class="tutorial-step-content">
-    <div class="tutorial-step-content-bubble">
-      <h3 class="text-lg"><%= tutorial_title %></h3>
-      <p class="opacity-70"><%= tutorial_description %></p>
+  <div class="tutorial-overlay" aria-live="polite" role="dialog" aria-labelledby="tutorial-title">
+    <div class="tutorial-step-container">
+      <div class="tutorial-content-card">
+        <div class="tutorial-header">
+          <div class="tutorial-text">
+            <h3 id="tutorial-title" class="tutorial-title"><%= tutorial_title %></h3>
+            <p class="tutorial-description font-national-park font-bold tracking-tight"><%= tutorial_description %></p>
+          </div>
+        </div>
 
-      <%= form_with url: tutorial_complete_step_path, method: :post, local: true, data: { turbo: false } do |form| %>
-        <%= form.hidden_field :step_name, value: tutorial_key %>
-        <%= form.submit %w[whatever okay yeah understood i\ get\ it].sample, class: "tutorial-dismiss" %>
-      <% end %>
+        <div class="tutorial-actions">
+          <%= form_with url: tutorial_complete_step_path, method: :post, local: true, data: { turbo: false }, class: "tutorial-form" do |form| %>
+            <%= form.hidden_field :step_name, value: tutorial_key %>
+            <%= form.submit "Got it!", class: "tutorial-continue-btn" %>
+          <% end %>
+        </div>
 
-      <%= image_tag "bubble-penis.svg", class: "bubble-penis" %>
+      </div>
+
+      <div class="tutorial-mascot-container">
+        <%= image_tag "tutorial-mascot.png", width: 120, alt: "Tutorial mascot", class: "tutorial-mascot" %>
+      </div>
     </div>
-
-    <%= image_tag "tutorial-mascot.png", width: 200, class: "tutorial-mascot" %>
   </div>
 <% end %>
