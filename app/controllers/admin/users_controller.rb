@@ -8,7 +8,8 @@ module Admin
     end
 
     def show
-      @activities = @user.activities
+      @activities = @user.activities.order(created_at: :desc)
+      @payouts = @user.payouts.order(created_at: :desc)
     end
     def internal_notes
       @user.internal_notes = params[:internal_notes]

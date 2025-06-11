@@ -45,12 +45,6 @@
           <%= image_tag item.image.variant(:thumb), class: "rounded-lg max-w-full h-auto object-contain max-h-48" %>
         </div>
       <% end %>
-
-      <% if item.one_per_person_ever? %>
-        <div class="bg-vintage-red/10 p-2 card-pixel my-2">
-          <p class="text-xs text-vintage-red font-semibold">⚠️ Limited: One per person</p>
-        </div>
-      <% end %>
     </div>
 
     <div class="mt-auto pt-4">

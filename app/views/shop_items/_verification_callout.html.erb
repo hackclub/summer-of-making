@@ -1,3 +1,4 @@
+<% unless %i[not_linked, eligible].include?(current_verification_status) %>
 <div class="bg-soft-bone card-pixel p-2 sm:p-4 w-fit my-8">
     <h3 class="text-2xl">ID verification status</h3>
 
@@ -12,3 +13,4 @@
             <strong>You're ineligible for this program.</strong> This is either because you're over 18, or you submitted fake documents. Please do not try again. We are a nonprofit for teenagers!
     <% end %>
 </div>
+<% end %>

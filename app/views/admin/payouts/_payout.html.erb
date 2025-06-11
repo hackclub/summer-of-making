@@ -1,0 +1,13 @@
+<%#= payout.inspect %>
+<i><%= payout.created_at.in_time_zone("America/New_York") %>:</i>
+<%= number_to_currency(payout.amount).sub('$', '🐚') %> on
+<% case payout.payable %>
+<% when User %>
+  <%= link_to "👤 #{payout.payable.first_name} #{payout.payable.last_name}", admin_user_path(payout.payable) %>
+<% when ShopOrder %>
+  <%= link_to "🛒 Shop Order ##{payout.payable.id}", admin_shop_order_path(payout.payable) %>
+<% when nil %>
+  NOTHING! DAS IST EINE Orphanedpayouten. <b>For shame.</b>
+<% else %>
+  🥐 <%= payout.payable.model_name.human %> #<%= payout.payable.id %>
+<% end %>

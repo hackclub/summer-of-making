@@ -1,7 +1,15 @@
 <h1>User #<%= @user.id %></h1>
-<%= render @user %>
+<%= render @user %> <br/>
+<b>IDV ID:</b> <%= @user.identity_vault_id || "None" %>
 
 <br><br>
+<b>Payouts:</b>
+<ul>
+  <% @payouts.each do |payout| %>
+  <li id="<%= dom_id payout %>"><%= render payout %></li>
+
+  <% end %>
+</ul>
 <b>audit lawg (incomplete):</b>
 <%= render_activities(@activities, layout: "activity") %>
 
