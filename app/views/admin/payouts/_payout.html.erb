@@ -11,3 +11,6 @@
 <% else %>
   🥐 <%= payout.payable.model_name.human %> #<%= payout.payable.id %>
 <% end %>
+<% if payout.reason.present? %>
+  for <%= payout.reason %>.
+<% end %>

@@ -144,7 +144,8 @@ class ShopOrder < ApplicationRecord
 
     user.payouts.create!(
       amount: -total_cost,
-      payable: self
+      payable: self,
+      reason: "Shop order of #{shop_item.name.pluralize(quantity)}"
     )
   end
 end

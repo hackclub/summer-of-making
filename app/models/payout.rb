@@ -5,6 +5,7 @@
 #  id           :bigint           not null, primary key
 #  amount       :decimal(6, 2)
 #  payable_type :string
+#  reason       :string
 #  created_at   :datetime         not null
 #  updated_at   :datetime         not null
 #  payable_id   :bigint
