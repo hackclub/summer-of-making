@@ -28,7 +28,8 @@ module Admin
       begin
         @payout.save!
         @user.create_activity("manual_payout", parameters:)
-        redirect_to admin_user_path(@user), notice: 'Payout was successfully created.'
+        flash[:success] = "Successfully created payout!"
+        redirect_to admin_user_path(@user)
       rescue ActiveRecord::RecordInvalid => e
         redirect_to admin_user_path, notice: e.message
       end

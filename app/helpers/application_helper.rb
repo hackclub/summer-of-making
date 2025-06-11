@@ -29,4 +29,16 @@ module ApplicationHelper
   def indefinite_articlerize(params_word)
     %w[a e i o u].include?(params_word[0].downcase) ? "an #{params_word}" : "a #{params_word}"
   end
+
+  def shell_icon(width = "15px")
+    image_tag('/shell.png', width:, style: "vertical-align:text-top")
+  end
+
+  def render_shells(amount)
+    (number_to_currency(amount) || "$?.??")
+      .sub(
+        "$",
+        shell_icon
+      ).html_safe
+  end
 end

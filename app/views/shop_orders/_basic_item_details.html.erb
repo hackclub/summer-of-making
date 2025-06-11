@@ -29,7 +29,7 @@
           <div>
             <span class="font-semibold text-darker-taupe">Total Cost:</span>
             <span class="text-saddle-taupe flex items-center">
-              <span class="mr-1">🐚</span>
+              <span class="mr-1"><%= shell_icon %></span>
               <%= number_with_delimiter(@order.frozen_item_price * @order.quantity) %> tickets
             </span>
           </div>
