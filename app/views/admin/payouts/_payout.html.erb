@@ -13,3 +13,5 @@
 <% if payout.reason.present? %>
   for <%= payout.reason %>.
 <% end %>
+
+<%= render "admin/inspector", record: payout %>

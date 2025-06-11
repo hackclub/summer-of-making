@@ -102,6 +102,7 @@ GEM
       view_component (>= 3.7.0)
       zeitwerk (>= 2.6.12)
     avo-heroicons (0.1.1)
+    awesome_print (1.9.2)
     aws-eventstream (1.4.0)
     aws-partitions (1.1115.0)
     aws-sdk-core (3.225.2)
@@ -561,6 +562,7 @@ DEPENDENCIES
   airrecord
   annotaterb (~> 4.15)
   avo (>= 3.2)
+  awesome_print (~> 1.9)
   aws-sdk-s3
   blazer (~> 3.3)
   bootsnap

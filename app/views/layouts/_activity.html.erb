@@ -1,1 +1,1 @@
-<li><b><%= activity.created_at.in_time_zone('America/New_York') %></b>: <%= "⚡" if activity.owner&.is_admin? %><%= activity.owner&.first_name %> <%= yield %></li>
+<li><b><%= activity.created_at.in_time_zone('America/New_York') %></b>: <%= "⚡" if activity.owner&.is_admin? %><%= activity.owner&.first_name %> <%= yield %> <%= render "admin/inspector", record: activity %></li>
