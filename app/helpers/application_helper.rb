@@ -31,7 +31,7 @@ module ApplicationHelper
   end
 
   def shell_icon(width = "15px")
-    image_tag('/shell.png', width:, style: "vertical-align:text-top")
+    image_tag("/shell.png", width:, style: "vertical-align:text-top")
   end
 
   def render_shells(amount)

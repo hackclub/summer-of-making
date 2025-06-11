@@ -16,7 +16,7 @@ end
 
 # Load airtable data (works in all envs with find_or_create)
 if ENV['HIGHSEAS_AIRTABLE_KEY'].present?
-  #load Rails.root.join('db/seeds/airtable_data.rb')
+  # load Rails.root.join('db/seeds/airtable_data.rb')
 else
   puts "⚠️ HIGHSEAS_AIRTABLE_KEY not set, skipping Airtable import"
 end
