@@ -1,4 +1,14 @@
-<div class="mb-4 md:mb-6 px-4 md:px-8 pt-2 md:pt-8 pb-2 text-center w-full flex justify-center flex-col">
+<div class="mb-4 md:mb-6 px-4 md:px-8 pt-2 md:pt-8 pb-2 text-center w-full flex justify-center flex-col relative">
+  <!-- Music Button -->
+  <button id="music-toggle" class="fixed top-6 right-6 z-50 w-12 h-12 text-white rounded-full flex items-center justify-center transition-all duration-200 hover:scale-110" style="background: linear-gradient(135deg, #8b6f47 0%, #a0845c 50%, #8b6f47 100%); border: 2px solid #6b5439; box-shadow: 0 2px 4px rgba(107, 84, 57, 0.3);" title="Toggle Music">
+    <span id="music-icon" class="text-lg leading-none" style="display: flex; align-items: center; justify-content: center; height: 100%; width: 100%;">♪</span>
+  </button>
+  
+  <audio id="shop-music" loop preload="auto">
+    <source src="<%= asset_path('the_stash.mp3') %>" type="audio/mpeg">
+    Your browser does not support the audio element.
+  </audio>
+
   <h1 class="text-4xl sm:text-5xl mb-0">Shop</h1>
 
   <% admin_tool("mb-4") do %>
@@ -21,3 +31,30 @@
     </div>
   </div>
 </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  const musicToggle = document.getElementById('music-toggle');
+  const musicIcon = document.getElementById('music-icon');
+  const shopMusic = document.getElementById('shop-music');
+  let isPlaying = false;
+
+  musicToggle.addEventListener('click', function() {
+    if (isPlaying) {
+      shopMusic.pause();
+      shopMusic.muted = true;
+      musicIcon.textContent = '♫';
+      musicToggle.title = 'Play Music';
+      isPlaying = false;
+    } else {
+      shopMusic.muted = false;
+      shopMusic.play().catch(function(error) {
+        console.log('Audio play failed:', error);
+      });
+      musicIcon.textContent = '🔇';
+      musicToggle.title = 'Mute Music';
+      isPlaying = true;
+    }
+  });
+});
+</script>
