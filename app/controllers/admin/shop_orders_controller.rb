@@ -35,7 +35,7 @@ module Admin
     end
 
     def show
-      @activities = @shop_order.activities
+      @activities = @shop_order.activities.order(created_at: :desc).includes(:owner)
     end
 
     def internal_notes
