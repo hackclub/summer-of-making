@@ -17,11 +17,6 @@ class UsersController < ApplicationController
     end
   end
 
-  def update_hackatime_confirmation
-    current_user.update(hackatime_confirmation_shown: true)
-    redirect_back_or_to root_path
-  end
-
   def refresh_hackatime
     current_user.refresh_hackatime_data
     redirect_back_or_to root_path,
@@ -34,7 +29,6 @@ class UsersController < ApplicationController
     current_user.reload
 
     if current_user.has_hackatime
-      current_user.update(hackatime_confirmation_shown: true) unless current_user.hackatime_confirmation_shown
       redirect_back_or_to root_path,
                           notice: "Successfully connected to Hackatime! Your coding stats are now being tracked."
     else

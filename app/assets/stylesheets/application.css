@@ -136,13 +136,9 @@ main {
 
 /* Angry question mark. Chris calls it angry.¯\_(ツ)_/¯ */
 .tutorial-help-btn {
-  background: linear-gradient(135deg, #2563eb 0%, #3b82f6 50%, #2563eb 100%);
-  border: 2px solid #1d4ed8;
-  box-shadow: 0 2px 4px rgba(29, 78, 216, 0.3);
+  background: #2563eb;
 }
 
 .tutorial-help-btn:hover {
-  background: linear-gradient(135deg, #1d4ed8 0%, #2563eb 50%, #1d4ed8 100%);
-  box-shadow: 0 4px 8px rgba(29, 78, 216, 0.4);
-  border-color: #1e40af;
+  background: #2563eb;
 }

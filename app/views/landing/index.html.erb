@@ -181,6 +181,7 @@
     </div>
   </div>
 
+  <%# prize section %>
   <div class="max-w-9xl mx-auto mt-12 md:mt-25 px-2 md:px-0 rotate-0 md:-rotate-2">
     <%= render "shared/container", classes: 'mx-auto max-w-7xl w-full relative' do %>
       <div class="p-3 md:p-5 relative">
@@ -194,7 +195,7 @@
         </p>
 
         <div class="relative mx-2 md:mx-15 sm:mx-10 z-20 rotate-0 md:-rotate-3" data-controller="carousel" data-carousel-row-value="1">
-          <div class="carousel-track flex gap-2 md:gap-4 sm:gap-2" data-carousel-target="container">
+          <div class="carousel-track flex gap-2 md:gap-4 sm:gap-2 " data-carousel-target="container">
             <% @prizes.each_with_index do |prize, index| %>
               <div class="carousel-slide flex-none w-40 md:w-44 sm:w-36" style="transform: <%= prize[:random_transform] %>; animation-delay: <%= (index * 0.5) %>s;">
                 <div class="parchment-prize-card p-3 md:p-3 sm:p-2 text-center transition-all duration-300 hover:shadow-xl hover:-translate-y-2 hover:scale-105" style="animation-delay: <%= (index * 0.3) %>s;">
@@ -392,6 +393,36 @@
         </p>
       </div>
     </div>
+
+    <% reviews = @high_seas_reviews %>
+    <div class="py-12 md:py-20">
+      <div class="max-w-6xl mx-auto">
+        <h2 class="head-big text-4xl md:text-5xl lg:text-6xl font-bold text-center mb-8 md:mb-12 text-[#3a2f25] font-['DynaPuff',sans-serif]">
+          What High Seas Participants Say
+        </h2>
+        <div class="relative z-20 rotate-0 md:-rotate-3 w-screen ml-[calc(50%-50vw)]" data-controller="carousel">
+          <div class="carousel-track flex gap-6 md:gap-10 sm:gap-6 " data-carousel-target="container" style="animation: scroll-left 40s linear infinite;">
+            <% reviews.each_with_index do |review, index| %>
+              <% text = review["text"] || review[:text] %>
+              <% image = review["image"] || review[:image] %>
+              <div class="carousel-slide flex-none w-full max-w-md md:max-w-lg lg:max-w-xl">
+                <div class="parchment-prize-card p-0 md:p-0 sm:p-0 text-center transition-all duration-300 hover:scale-105 h-56 md:h-64 flex flex-row items-stretch justify-between min-h-[14rem] max-h-[16rem] w-full overflow-hidden">
+                  <div class="parchment-texture absolute inset-0 z-0"></div>
+                  <div class="flex-1 flex flex-col justify-center items-start px-6 py-6 md:px-10 md:py-8 z-10 text-left">
+                    <p class="font-['Fredoka',sans-serif] text-sm md:text-base text-[#3a2f25] mb-2"><%= text %></p>
+                  </div>
+                  <% if image.present? %>
+                    <div class="flex-shrink-0 flex items-center justify-center w-32 md:w-40 lg:w-48 h-full p-2 md:p-3">
+                      <img src="<%= image %>" alt="High Seas participant photo" class="object-contain rounded-lg max-h-40 md:max-h-48 max-w-full">
+                    </div>
+                  <% end %>
+                </div>
+              </div>
+            <% end %>
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
 </div>
 
@@ -508,3 +539,16 @@
 </div>
 
 <%= render "signup_wizard_modal" %>
+
+<%# Helper method for random transform, can be moved to a helper file %>
+<% content_for :page_specific_scripts do %>
+  <script type="text/javascript">
+    function prize_transform_for_review(index) {
+      // You can adjust these values for different effects
+      const rotation = Math.floor(Math.random() * 6) - 3; // -3 to 3 degrees
+      const scale = (Math.floor(Math.random() * 6) + 97) / 100; // 0.97 to 1.02
+      const translateY = Math.floor(Math.random() * 17) - 8; // -8 to 8 px
+      return `rotate(${rotation}deg) scale(${scale}) translateY(${translateY}px)`;
+    }
+  </script>
+<% end %>

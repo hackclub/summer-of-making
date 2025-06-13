@@ -82,15 +82,34 @@
           vote: new_vote_path,
           shop: shop_path
         } %>
-        <% current_soft_step = soft_step_paths.find { |k, v| current_page?(v) }&.first %>
+        <% current_soft_step = soft_step_paths.find { |k, v|
+          if k == :explore
+            request.path == '/explore' || current_page?(v)
+          else
+            current_page?(v)
+          end
+        }&.first %>
         <% should_shake = current_soft_step && !current_user.tutorial_progress.soft_step_completed?(current_soft_step) %>
-        <button id="tutorial-help-btn"
-                data-tutorial-target="helpButton"
-                data-action="click->tutorial#toggle"
-                class="tutorial-help-btn fixed bottom-6 right-6 z-50 w-16 h-16 text-white rounded-full flex items-center justify-center transition-all duration-200 hover:scale-110 <%= 'animate-bouncee scale-140 hover:scale-160' if should_shake %>"
-                title="Show tutorial for this page">
-          <span class="text-2xl font-bold <%= "scale-120" if should_shake %>">?</span>
-        </button>
+        <% if should_shake %>
+          <div class="fixed bottom-16 right-18 z-50" data-tutorial-target="helpButton" data-action="click->tutorial#toggle">
+            <div class="absolute -top-8 -left-24 p-3 bg-[#F3ECD8] rounded-2xl border-4 border-[#E4DCC6] max-w-[120px] animate-pulse -rotate-24">
+              <div class="text-sm text-[#4A2D24] font-bold text-center lg:text-lg">Click me!</div>
+              <div class="absolute top-full left-1/2 transform -translate-x-1/2 w-0 h-0 border-l-8 border-r-8 border-t-8 border-l-transparent border-r-transparent border-t-[#E4DCC6]"></div>
+              <div class="absolute top-full left-1/2 transform -translate-x-1/2 translate-y-[-2px] w-0 h-0 border-l-6 border-r-6 border-t-6 border-l-transparent border-r-transparent border-t-[#F3ECD8]"></div>
+            </div>
+            <%= image_tag "tutorial-mascot.png",
+                          class: "w-32 h-32 2xl:w-40 2xl:h-40 cursor-pointer transition-all duration-200 hover:scale-110 animate-bounce -rotate-12",
+                          title: "Show tutorial for this page" %>
+          </div>
+        <% else %>
+          <button id="tutorial-help-btn"
+                  data-tutorial-target="helpButton"
+                  data-action="click->tutorial#toggle"
+                  class="tutorial-help-btn fixed bottom-16 right-18 z-50 w-16 h-16 rounded-full flex items-center justify-center transition-all duration-200 hover:scale-110 bg-gray-600 text-white"
+                  title="Show tutorial for this page">
+            <span class="text-2xl font-bold">?</span>
+          </button>
+        <% end %>
       </div>
     <% else %>
       <div id="flash-container">

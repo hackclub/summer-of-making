@@ -21,7 +21,6 @@ module Avo
         field :avatar, as: :text
         field :has_commented, as: :boolean
         field :has_hackatime, as: :boolean
-        field :hackatime_confirmation_shown, as: :boolean
         field :is_admin, as: :boolean
         field :projects, as: :has_many
         field :devlogs, as: :has_many

@@ -60,7 +60,7 @@ class Project < ApplicationRecord
             allow_blank: true
 
   validates :category,
-            inclusion: { in: [ "Software", "Hardware", "Both Software & Hardware", "Something else" ],
+            inclusion: { in: [ "Web App", "Mobile App", "Command Line Tool", "Video Game", "Something else" ],
                          message: "%<value>s is not a valid category" }
 
   validate :cannot_change_category, on: :update

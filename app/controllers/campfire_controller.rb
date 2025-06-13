@@ -10,6 +10,11 @@ class CampfireController < ApplicationController
       @user.update!(has_clicked_completed_tutorial_modal: true)
     end
 
+    if params[:mark_video_seen] == "true" && @user.tutorial_progress.completed?
+      @user.update!(tutorial_video_seen: true)
+      redirect_to campfire_path and return
+    end
+
     if params[:reset].present? && @user&.tutorial_progress
       @user.tutorial_progress.reset_step!(params[:reset])
 
@@ -29,7 +34,8 @@ class CampfireController < ApplicationController
   def hackatime_status
     render json: {
       hackatime_linked: current_user.has_hackatime_account?,
-      hackatime_setup: current_user.has_hackatime?
+      hackatime_setup: current_user.has_hackatime?,
+      hackatime_projects: current_user.has_hackatime_projects?
     }
   end
 
@@ -59,20 +65,13 @@ class CampfireController < ApplicationController
   def build_account_status
     @account_status = {
       hackatime_linked: current_user.has_hackatime_account?,
-      hackatime_setup: current_user.has_hackatime?
+      hackatime_setup: current_user.has_hackatime?,
+      hackatime_projects: current_user.has_hackatime_projects?
     }
   end
 
   def get_announcements
     announcements = []
-
-    announcements << {
-      id: 1,
-      title: "Welcome to Summer of Making!",
-      content: "Complete the tutorials yada yada yada. I just created this section, but might put it at top because I remember campfire in HS had smth similar. Anyways, we have a space to post announcements and stuff. I'm not sure if we'll use it, but it's here. Need to implement dismiss",
-      type: "info",
-      created_at: Time.now
-    }
 
     announcements
   end

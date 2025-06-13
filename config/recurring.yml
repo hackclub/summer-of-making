@@ -30,3 +30,9 @@ production:
     command: "bundle exec rake active_storage:cleanup_unattached[7]"
     schedule: every day
     description: "Clean up unattached ActiveStorage blobs older than 7 days"
+
+  pull_airtable_high_seas_book_story_submissions:
+    class: PullHighSeasStoriesFromAirtableJob
+    queue: default
+    schedule: every day
+    description: "Pull new High Seas Book story submissions from Airtable"

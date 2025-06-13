@@ -322,6 +322,10 @@ GEM
       racc (~> 1.4)
     nokogiri (1.18.8-x86_64-linux-musl)
       racc (~> 1.4)
+    norairrecord (0.4.0)
+      faraday (>= 1.0, < 3.0)
+      faraday-net_http_persistent
+      net-http-persistent
     ostruct (0.6.1)
     pagy (9.3.4)
     parallel (1.27.0)
@@ -588,6 +592,7 @@ DEPENDENCIES
   jbuilder
   kamal
   lz_string (~> 0.3.0)
+  norairrecord
   pagy
   pg (~> 1.1)
   propshaft

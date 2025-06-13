@@ -96,6 +96,9 @@ gem "inline_svg"
 
 gem "airrecord"
 
+# Pull airtable for airtable-backed models
+gem "norairrecord"
+
 # Honeybadger for team's error tracking
 gem "honeybadger", "~> 5.28"
 

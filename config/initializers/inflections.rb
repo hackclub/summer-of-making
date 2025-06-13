@@ -15,4 +15,6 @@ ActiveSupport::Inflector.inflections(:en) do |inflect|
   inflect.acronym "AGH"
   inflect.acronym "HCB"
   inflect.acronym "HQ"
+
+  inflect.uncountable "HighSeas"
 end

@@ -10,7 +10,8 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_06_13_144837) do
+
+ActiveRecord::Schema[8.0].define(version: 2025_06_13_214348) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -59,6 +60,13 @@ ActiveRecord::Schema[8.0].define(version: 2025_06_13_144837) do
     t.index ["recipient_type", "recipient_id"], name: "index_activities_on_recipient"
     t.index ["trackable_id", "trackable_type"], name: "index_activities_on_trackable_id_and_trackable_type"
     t.index ["trackable_type", "trackable_id"], name: "index_activities_on_trackable"
+  end
+
+  create_table "airtable_high_seas_book_story_submissions", force: :cascade do |t|
+    t.string "airtable_id"
+    t.jsonb "airtable_fields"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
   end
 
   create_table "blazer_audits", force: :cascade do |t|
@@ -483,7 +491,6 @@ ActiveRecord::Schema[8.0].define(version: 2025_06_13_144837) do
     t.string "avatar"
     t.boolean "has_commented", default: false
     t.boolean "has_hackatime", default: false
-    t.boolean "hackatime_confirmation_shown", default: false
     t.boolean "is_admin", default: false, null: false
     t.string "identity_vault_id"
     t.string "identity_vault_access_token"
@@ -492,6 +499,8 @@ ActiveRecord::Schema[8.0].define(version: 2025_06_13_144837) do
     t.boolean "has_black_market"
     t.boolean "has_hackatime_account"
     t.boolean "has_clicked_completed_tutorial_modal", default: false, null: false
+    t.boolean "has_hackatime_projects", default: false, null: false
+    t.boolean "tutorial_video_seen", default: false, null: false
   end
 
   create_table "votes", force: :cascade do |t|

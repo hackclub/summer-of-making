@@ -9,17 +9,18 @@
 #  display_name                         :string
 #  email                                :string
 #  first_name                           :string
-#  hackatime_confirmation_shown         :boolean          default(FALSE)
 #  has_black_market                     :boolean
 #  has_clicked_completed_tutorial_modal :boolean          default(FALSE), not null
 #  has_commented                        :boolean          default(FALSE)
 #  has_hackatime                        :boolean          default(FALSE)
 #  has_hackatime_account                :boolean
+#  has_hackatime_projects               :boolean          default(FALSE), not null
 #  identity_vault_access_token          :string
 #  internal_notes                       :text
 #  is_admin                             :boolean          default(FALSE), not null
 #  last_name                            :string
 #  timezone                             :string
+#  tutorial_video_seen                  :boolean          default(FALSE), not null
 #  ysws_verified                        :boolean          default(FALSE)
 #  created_at                           :datetime         not null
 #  updated_at                           :datetime         not null
@@ -172,6 +173,12 @@ class User < ApplicationRecord
 
     unless has_hackatime?
       update!(has_hackatime: true)
+    end
+
+    Rails.logger.info("Hackatime projects:= #{result.dig("data", "total_seconds")}")
+
+    if result.dig("data", "total_seconds") > 10
+      update!(has_hackatime_projects: true)
     end
 
     stats = hackatime_stat || build_hackatime_stat

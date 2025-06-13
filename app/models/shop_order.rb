@@ -46,6 +46,8 @@ class ShopOrder < ApplicationRecord
   after_create :create_negative_payout
   after_initialize :set_initial_state_for_free_stickers
 
+  scope :worth_counting, -> {where.not(aasm_state: %w(rejected refunded))}
+
   def full_name
     "#{user.first_name} #{user.last_name}'s order for #{quantity} #{shop_item.name.pluralize(quantity)}"
   end
@@ -118,7 +120,12 @@ class ShopOrder < ApplicationRecord
   def check_one_per_person_ever_limit
     return unless shop_item&.one_per_person_ever?
 
-    existing_order = user.shop_orders.joins(:shop_item).where(shop_item: shop_item)
+    if quantity && quantity > 1
+      errors.add(:quantity, "can only be 1 for #{shop_item.name} (once per person item).")
+      return
+    end
+
+    existing_order = user.shop_orders.joins(:shop_item).where(shop_item: shop_item).worth_counting
     existing_order = existing_order.where.not(id: id) if persisted?
 
     if existing_order.exists?

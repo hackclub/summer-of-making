@@ -4,25 +4,10 @@
         subtitle: "Huddle around! Get your news here." %>
 
   <% if !current_user.tutorial_progress.completed? %>
-    <!-- Platform Limited Banner -->
-    <div class="mb-6 bg-red-50 border-2 border-red-200 rounded-lg p-6">
-      <div class="flex items-center">
-        <div class="flex-shrink-0">
-          <div class="w-10 h-10 rounded-full flex items-center justify-center">
-            <%= inline_svg "icons/lock.svg", class: "w-6 h-6 text-red-600" %>
-          </div>
-        </div>
-        <div class="ml-4">
-          <h3 class="text-lg font-semibold text-red-900">Platform Access Limited</h3>
-          <p class="text-red-800">Didja set up your account yet? No? Well, you can't do anything until you do because the platform is locked until you set up your account.</p>
-        </div>
-      </div>
-    </div>
-
     <!-- Set up your account! Section -->
     <div class="mb-8">
       <h2 class="text-2xl text-gray-900 mb-4">Set up your account!</h2>
-      <p class="text-gray-600 mb-6 text-xl">Complete these steps to start earning shells and get free stickers in the process!</p>
+      <p class="text-gray-600 mb-4 text-xl font-semibold">Complete these steps to start earning shells and get free stickers in the process! The platform is <span class="text-black font-bold">limited</span> while you set up your account.</p>
 
       <div class="space-y-4">
         <!-- Step 1: Hackatime -->
@@ -32,30 +17,38 @@
              data-hackatime-status-tutorial-active-value="<%= !current_user.tutorial_progress.completed? %>">
           <div class="flex items-start space-x-4">
             <div class="flex-shrink-0">
-              <% if @account_status[:hackatime_setup] %>
+              <% if @account_status[:hackatime_projects] %>
                 <div class="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center" data-hackatime-status-target="icon">
-                  <%= inline_svg "icons/check_fill.svg", class: "w-5 h-5 text-green-600" %>
+                  <%= inline_svg "icons/check_fill.svg", class: "w-5 h-5" %>
+                </div>
+              <% elsif @account_status[:hackatime_setup] %>
+                <div class="w-8 h-8 bg-yellow-100 rounded-full flex items-center justify-center" data-hackatime-status-target="icon">
+                  <%= inline_svg "icons/to_do_fill.svg", class: "w-5 h-5" %>
                 </div>
               <% elsif @account_status[:hackatime_linked] %>
                 <div class="w-8 h-8 bg-yellow-100 rounded-full flex items-center justify-center" data-hackatime-status-target="icon">
-                  <%= inline_svg "icons/to_do_fill.svg", class: "w-5 h-5 text-yellow-600" %>
+                  <%= inline_svg "icons/to_do_fill.svg", class: "w-5 h-5" %>
                 </div>
               <% else %>
                 <div class="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center" data-hackatime-status-target="icon">
-                  <%= inline_svg "icons/to_do_fill.svg", class: "w-5 h-5 text-blue-600" %>
+                  <%= inline_svg "icons/to_do_fill.svg", class: "w-5 h-5" %>
                 </div>
               <% end %>
             </div>
             <div class="flex-1">
               <h3 class="text-lg font-semibold text-gray-900 mb-2">Connect your Hackatime account</h3>
               <p class="text-gray-600 mb-4">Hackatime tracks how much you code, and we use that time to give you shells as a reward for all your hard work!</p>
-              <% if @account_status[:hackatime_setup] %>
+              <% if @account_status[:hackatime_projects] %>
                 <span class="inline-flex items-center px-3 py-1 rounded-full text-sm bg-green-100 text-green-800" data-hackatime-status-target="status">
-                  Connected & Setup done!
+                  Linked and projects tracked!
+                </span>
+              <% elsif @account_status[:hackatime_setup] %>
+                <span class="inline-flex items-center px-3 py-1 rounded-full text-sm bg-yellow-100 text-yellow-800" data-hackatime-status-target="status">
+                  Linked, now waiting for real data...
                 </span>
               <% elsif @account_status[:hackatime_linked] %>
                 <span class="inline-flex items-center px-3 py-1 rounded-full text-sm bg-yellow-100 text-yellow-800" data-hackatime-status-target="status">
-                  Waiting for data...
+                  Waiting for test data...
                 </span>
               <% else %>
                 <%= link_to "Connect Hackatime", hackatime_auth_redirect_path, class: "inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500", target: "_blank" %>
@@ -130,12 +123,6 @@
                 <span class="inline-flex items-center px-3 py-1 rounded-full text-sm bg-green-100 text-green-800">
                   Ordered
                 </span>
-              <% elsif current_verification_status == :not_linked %>
-                <div class="space-y-2">
-                  <span class="inline-flex items-center px-3 py-1 rounded-full text-sm bg-blue-100 text-blue-800">
-                    Will unlock once you Submit your identity....
-                  </span>
-                </div>
               <% else %>
                 <%= link_to "Order Stickers", shop_path, class: "inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500" %>
               <% end %>
@@ -146,13 +133,69 @@
     </div>
   <% end %>
 
-  <% if current_user.tutorial_progress.completed? %>
+  <% if current_user.tutorial_progress.completed? && !current_user.tutorial_video_seen? %>
+    <!-- Video Tutorial Section -->
+    <div class="mb-8">
+      <div class="bg-white rounded-lg border-2 border-blue-200 p-6">
+          <!-- Video Placeholder -->
+          <div class="bg-gray-100 rounded-lg border-2 border-dashed border-gray-300 p-12 mb-6">
+            <div class="text-center">
+              <div class="w-24 h-24 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <svg class="w-12 h-12 text-blue-600" fill="currentColor" viewBox="0 0 20 20">
+                  <path d="M8 5v10l8-5-8-5z" />
+                </svg>
+              </div>
+              <h3 class="text-xl font-semibold text-gray-700 mb-2">SoM Tutorial Video</h3>
+              <p class="text-gray-500">ask-a-pixi for video!!</p>
+            </div>
+          </div>
+
+          <div class="flex justify-center space-x-4">
+            <%= link_to "Next",
+                        campfire_path(mark_video_seen: true),
+                        method: :patch,
+                        class: "px-8 py-3 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-lg hover:from-blue-700 hover:to-blue-800 font-medium shadow-lg" %>
+          </div>
+        </div>
+      </div>
+    </div>
+  <% end %>
+
+  <% if current_user.tutorial_progress.completed? && current_user.tutorial_video_seen? %>
     <!-- Account Status Section -->
-    <% if current_verification_status == :not_linked || current_verification_status == :needs_resubmission || current_verification_status == :pending || current_verification_status == :ineligible %>
+    <% if current_verification_status == :not_linked || current_verification_status == :needs_resubmission || current_verification_status == :pending || current_verification_status == :ineligible || !@account_status[:hackatime_projects] %>
     <div class="mb-8">
       <h2 class="text-xl  text-gray-900 mb-4">Account Status</h2>
       <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
 
+        <!-- Hackatime Status Card -->
+        <% if !@account_status[:hackatime_projects] %>
+        <div class="bg-white rounded-lg border p-4">
+          <div class="flex items-center justify-between">
+            <div>
+              <h3 class=" text-gray-900">Hackatime</h3>
+            </div>
+            <% if @account_status[:hackatime_setup] %>
+              <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs bg-yellow-100 text-yellow-800">
+                Waiting for project data....
+              </span>
+            <% elsif @account_status[:hackatime_linked] %>
+              <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs bg-yellow-100 text-yellow-800">
+                Waiting for test data...
+              </span>
+            <% else %>
+              <div class="flex flex-col items-end space-y-2">
+                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs bg-red-100 text-red-800">
+                  Not Connected
+                </span>
+                <%= link_to "Connect", hackatime_auth_redirect_path, class: "inline-flex items-center px-3 py-1 border border-transparent text-xs rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500", target: "_blank" %>
+              </div>
+            <% end %>
+          </div>
+        </div>
+        <% end %>
+
+        <% if current_verification_status != :verified %>
         <div class="bg-white rounded-lg border p-4">
           <div class="flex items-center justify-between">
             <div>
@@ -183,18 +226,16 @@
                   Ineligible
                 </span>
               </div>
-            <% else %>
-              <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs  bg-green-100 text-green-800">
-                Verified
-              </span>
             <% end %>
           </div>
         </div>
+        <% end %>
       </div>
     </div>
     <% end %>
 
     <!-- Announcements Section -->
+    <% if @announcements.any? %>
     <div class="mb-8">
       <h2 class="text-xl  text-gray-900 mb-4">Announcements</h2>
       <div class="space-y-4">
@@ -229,6 +270,33 @@
             </div>
           </div>
         <% end %>
+      </div>
+    </div>
+    <% end %>
+  <% end %>
+
+  <!--Tutorial Video -->
+  <% if current_user.tutorial_progress.completed? %>
+    <div class="mb-8">
+      <div class="bg-white rounded-lg border p-4">
+        <div class="flex items-center justify-between mb-4">
+          <h2 class="text-lg font-semibold text-gray-900">Tutorial Video</h2>
+        </div>
+
+        <div id="tutorial-video-content">
+          <!-- Video Placeholder -->
+          <div class="bg-gray-100 rounded-lg border-2 border-dashed border-gray-300 p-8 mb-4">
+            <div class="text-center">
+              <div class="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-3">
+                <svg class="w-8 h-8 text-blue-600" fill="currentColor" viewBox="0 0 20 20">
+                  <path d="M8 5v10l8-5-8-5z" />
+                </svg>
+              </div>
+              <h3 class="text-lg font-semibold text-gray-700 mb-2">SoM Tutorial Video</h3>
+              <p class="text-gray-500">Ask-a-pixi for video!!</p>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   <% end %>

@@ -52,7 +52,7 @@
               }
           </style> -->
 
-          <div class="mb-2 md:mb-4" data-controller="category-selector">
+          <div class="mb-2 md:mb-4">
             <div class="tooltip-label-container">
               <%= f.label :category, class: "block text-sm" %>
               <div class="tooltip">
@@ -60,57 +60,21 @@
                 <span class="tooltiptext">Choose the category that best describes your project.</span>
               </div>
             </div>
-            <%= f.hidden_field :category, data: { category_selector_target: "hiddenField", project_form_target: "category" } %>
-              <div class="flex justify-between tab-container">
-                <%=
-                  render "shared/link",
-                    text: "Hardware",
-                    as_button: {
-                      data: {
-                        action: "click->category-selector#selectCategory",
-                        category: "Hardware",
-                        category_selector_target: "button"
-                      }
-                    }
-                %>
-
-                <%=
-                  render "shared/link",
-                    text: "Software",
-                    as_button: {
-                      data: {
-                        action: "click->category-selector#selectCategory",
-                        category: "Software",
-                        category_selector_target: "button"
-                      }
-                    }
-                %>
-
-                <%=
-                  render "shared/link",
-                    text: "Both",
-                    as_button: {
-                      data: {
-                        action: "click->category-selector#selectCategory",
-                        category: "Both Software & Hardware",
-                        category_selector_target: "button"
-                      }
-                    }
-                %>
-
-                <%=
-                  render "shared/link",
-                    text: "Something Else",
-                    as_button: {
-                      data: {
-                        action: "click->category-selector#selectCategory",
-                        category: "Something else",
-                        category_selector_target: "button"
-                      }
-                    }
-                %>
-              </div>
-            </div>
+            <%= f.select :category, 
+                options_for_select([
+                  ['Select a category...', ''],
+                  ['Web App', 'Web App'],
+                  ['Mobile App', 'Mobile App'], 
+                  ['Command Line Tool', 'Command Line Tool'],
+                  ['Video Game', 'Video Game'],
+                  ['Something else', 'Something else']
+                ]), 
+                {}, 
+                { 
+                  class: "w-full px-3 py-2 border border-saddle-taupe bg-bread border-opacity-50 focus:outline-none focus:ring-forest focus:border-forest text-sm md:text-base", 
+                  data: { project_form_target: "category" } 
+                } 
+            %>
             <div class="flex justify-end">
               <p class="mt-1 text-xs md:text-sm text-vintage-red">Required. You cannot change this later.</p>
             </div>
