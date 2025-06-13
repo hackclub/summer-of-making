@@ -42,7 +42,7 @@
 
       <% if item.image.attached? %>
         <div class="mb-4 flex justify-center">
-          <%= image_tag item.image.variant(:thumb), class: "rounded-lg max-w-full h-auto object-contain max-h-48" %>
+          <%= image_tag item.image.variant(:thumb), class: "rounded-lg max-w-full h-auto object-scale-down max-h-48" %>
         </div>
       <% end %>
 
