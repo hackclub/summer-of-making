@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 require "open-uri"
-CHANNEL_LIST = [ "C08MYN7HVN2", "C08N1NWKEF4", "C016DEDUL87", "C75M7C0SY", "C090JKDJYN8", "C090B3T9R9R", "C0M8PUPU6", "C05B6DBN802" ]
+CHANNEL_LIST = [ "C091CEW2CN9", "C091CEW2CN9", "C016DEDUL87", "C75M7C0SY", "C090JKDJYN8", "C090B3T9R9R", "C0M8PUPU6", "C05B6DBN802" ]
 class LandingController < ApplicationController
   skip_before_action :authenticate_user!, only: %i[index sign_up]
 
