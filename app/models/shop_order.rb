@@ -46,7 +46,7 @@ class ShopOrder < ApplicationRecord
   after_create :create_negative_payout
   after_initialize :set_initial_state_for_free_stickers
 
-  scope :worth_counting, -> {where.not(aasm_state: %w(rejected refunded))}
+  scope :worth_counting, -> { where.not(aasm_state: %w[rejected refunded]) }
 
   def full_name
     "#{user.first_name} #{user.last_name}'s order for #{quantity} #{shop_item.name.pluralize(quantity)}"
