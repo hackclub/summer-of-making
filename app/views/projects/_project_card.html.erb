@@ -1,6 +1,6 @@
 <div class="bg-[#F3ECD8] rounded-2xl border-4 border-[#E4DCC6] shadow-lg overflow-hidden mb-4 md:mb-8">
   <div class="h-48 md:h-64 overflow-hidden relative group">
-    <% project_image = @project.banner.presence || @project.devlogs.find { |u| u.attachment.present? }&.attachment || "https://raw.githubusercontent.com/hackclub/dinosaurs/main/confused_dinosaur.png" %>
+    <% project_image = @project.banner.presence || @project.devlogs.find { |u| u.attachment.present? }&.attachment || "https://hc-cdn.hel1.your-objectstorage.com/s/v3/41e9de19cfa4e099cf25410ac38542776693b54e_t.png" %>
     <%= image_tag project_image, alt: @project.title %>
 
     <% if current_user.is_admin? || @project.user == current_user %>
