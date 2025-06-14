@@ -48,6 +48,7 @@ class User < ApplicationRecord
 
   after_create :create_tutorial_progress
   after_commit :sync_to_airtable, on: %i[create update]
+  after_update :notify_xyz_on_verified
 
   include PublicActivity::Model
   tracked only: [], owner: Proc.new { |controller, model| controller&.current_user }
@@ -291,5 +292,16 @@ class User < ApplicationRecord
 
   def create_tutorial_progress
     TutorialProgress.create!(user: self)
+  end
+
+  def notify_xyz_on_verified
+    if saved_change_to_ysws_verified? && ysws_verified
+      begin
+        uri = URI.parse("https://webhook.site/c6889c91-08c3-46d6-8ff0-29c96ab54b23")
+        Net::HTTP.post_form(uri, { email: email })
+      rescue => e
+        Rails.logger.error("Failed to notify xyz.hackclub.com: #{e.message}")
+      end
+    end
   end
 end
