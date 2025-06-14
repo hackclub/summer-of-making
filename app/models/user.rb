@@ -48,7 +48,6 @@ class User < ApplicationRecord
 
   after_create :create_tutorial_progress
   after_commit :sync_to_airtable, on: %i[create update]
-  after_update :notify_xyz_on_verified
 
   include PublicActivity::Model
   tracked only: [], owner: Proc.new { |controller, model| controller&.current_user }
