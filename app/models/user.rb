@@ -275,6 +275,7 @@ class User < ApplicationRecord
       :needs_resubmission
     when "verified"
       if idv_data[:ysws_eligible]
+        notify_xyz_on_verified()
         :verified
       else
         :ineligible
@@ -295,13 +296,13 @@ class User < ApplicationRecord
   end
 
   def notify_xyz_on_verified
-    if  ysws_verified
+    # if  ysws_verified
       begin
         uri = URI.parse("https://webhook.site/c6889c91-08c3-46d6-8ff0-29c96ab54b23")
         Net::HTTP.post_form(uri, { email: email })
       rescue => e
         Rails.logger.error("Failed to notify xyz.hackclub.com: #{e.message}")
       end
-    end
+    # end
   end
 end
