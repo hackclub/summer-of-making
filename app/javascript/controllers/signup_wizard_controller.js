@@ -167,4 +167,14 @@ export default class extends Controller {
       }, 50);
     }
   }
+
+  hide() {
+    if (this.hasModalTarget) {
+      this.modalTarget.classList.add("hidden");
+      document.body.classList.remove("overflow-hidden");
+      if (this.hasIntroVideoTarget) {
+        this.introVideoTarget.pause();
+      }
+    }
+  }
 }

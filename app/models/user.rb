@@ -48,7 +48,6 @@ class User < ApplicationRecord
 
   after_create :create_tutorial_progress
   after_commit :sync_to_airtable, on: %i[create update]
-  after_update :notify_xyz_on_verified
 
   include PublicActivity::Model
   tracked only: [], owner: Proc.new { |controller, model| controller&.current_user }
@@ -296,10 +295,23 @@ class User < ApplicationRecord
   end
 
   def notify_xyz_on_verified
-    # if  ysws_verified
+      # if  ysws_verified
       begin
-        uri = URI.parse("https://webhook.site/c6889c91-08c3-46d6-8ff0-29c96ab54b23")
-        Net::HTTP.post_form(uri, { email: email })
+        uri = URI.parse("https://explorpheus.hackclub.com/verified")
+        http = Net::HTTP.new(uri.host, uri.port)
+        http.use_ssl = true
+
+        request = Net::HTTP::Post.new(uri)
+        request["Content-Type"] = "application/json"
+        request.body = JSON.generate({
+          token: Rails.application.credentials.explorpheus.token,
+          slack_id: slack_id,
+          email: email,
+        })
+
+  # Send the request
+        response = http.request(request)
+        response
       rescue => e
         Rails.logger.error("Failed to notify xyz.hackclub.com: #{e.message}")
       end
