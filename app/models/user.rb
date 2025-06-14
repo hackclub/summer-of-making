@@ -295,7 +295,7 @@ class User < ApplicationRecord
   end
 
   def notify_xyz_on_verified
-    if saved_change_to_ysws_verified? && ysws_verified
+    if  ysws_verified
       begin
         uri = URI.parse("https://webhook.site/c6889c91-08c3-46d6-8ff0-29c96ab54b23")
         Net::HTTP.post_form(uri, { email: email })
