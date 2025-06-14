@@ -495,6 +495,7 @@ ActiveRecord::Schema[8.0].define(version: 2025_06_13_223517) do
     t.string "identity_vault_access_token"
     t.boolean "ysws_verified", default: false
     t.text "internal_notes"
+    t.boolean "notified_verified", default: false
     t.boolean "has_black_market"
     t.boolean "has_hackatime_account"
     t.boolean "has_clicked_completed_tutorial_modal", default: false, null: false

@@ -18,6 +18,7 @@
 #  internal_notes                       :text
 #  is_admin                             :boolean          default(FALSE), not null
 #  last_name                            :string
+#  notified_verified                    :boolean          default(FALSE)
 #  timezone                             :string
 #  tutorial_video_seen                  :boolean          default(FALSE), not null
 #  ysws_verified                        :boolean          default(FALSE)
@@ -262,6 +263,31 @@ class User < ApplicationRecord
     end
   end
 
+  def check_and_notify_verified
+    if verification_status == :verified && !notified_verified
+      send_verified_notification
+    end
+  end
+
+  private
+
+  def send_verified_notification
+    uri = URI.parse("https://explorpheus.hackclub.com/verified")
+    Net::HTTP.post_form(uri, { email: email, token: ENV.fetch("SLACK_BOT_TOKEN", nil) })
+    update!(notified_verified: true)
+  rescue => e
+    Rails.logger.error("Failed to notify explorpheus: #{e.message}")
+    update!(notified_verified: false)
+  end
+
+  def sync_to_airtable
+    SyncUserToAirtableJob.perform_later(id)
+  end
+
+  def create_tutorial_progress
+    TutorialProgress.create!(user: self)
+  end
+
   def verification_status
     return :not_linked if identity_vault_id.blank?
 
@@ -274,6 +300,8 @@ class User < ApplicationRecord
       :needs_resubmission
     when "verified"
       if idv_data[:ysws_eligible]
+        # Notify if first time verified
+        check_and_notify_verified
         :verified
       else
         :ineligible
@@ -281,15 +309,5 @@ class User < ApplicationRecord
     else
       :ineligible
     end
-  end
-
-  private
-
-  def sync_to_airtable
-    SyncUserToAirtableJob.perform_later(id)
-  end
-
-  def create_tutorial_progress
-    TutorialProgress.create!(user: self)
   end
 end
