@@ -18,7 +18,8 @@ begin
   app_id = 'appNF8MGrk5KKcYZx'
   table_id = 'tblAbzAZb4pdWI1tC'
 
-  uri = URI("https://api.airtable.com/v0/#{app_id}/#{table_id}?filterByFormula={enabled}")
+  filter = "filterByFormula=enabled%3D1"
+  uri = URI("https://api.airtable.com/v0/#{app_id}/#{table_id}?#{filter}")
   http = Net::HTTP.new(uri.host, uri.port)
   http.use_ssl = true
 
@@ -35,6 +36,7 @@ begin
 
     records.each do |record|
       fields = record['fields']
+      next unless fields['enabled'] == true # if the logic before broke
 
       name_field = fields['Name'] || fields['name'] || fields['Title'] || fields['title'] || fields['Item Name']
 
