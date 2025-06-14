@@ -223,7 +223,8 @@ class User < ApplicationRecord
                                            first_name: first_name,
                                            last_name: last_name
                                          },
-                                         context: "stickers"
+                                         context: "stickers",
+                                         invalidate_session: "yeah"
                                        })
   end
 
