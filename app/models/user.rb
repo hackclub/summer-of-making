@@ -273,7 +273,7 @@ class User < ApplicationRecord
 
   def send_verified_notification
     uri = URI.parse("https://explorpheus.hackclub.com/verified")
-    Net::HTTP.post_form(uri, { email: email, token: ENV.fetch("SLACK_BOT_TOKEN", nil) })
+    Net::HTTP.post_form(uri, { email: email, token: ENV.fetch("SLACK_BOT_TOKEN") })
     update!(notified_verified: true)
   rescue => e
     Rails.logger.error("Failed to notify explorpheus: #{e.message}")
