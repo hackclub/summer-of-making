@@ -18,7 +18,6 @@
 #  internal_notes                       :text
 #  is_admin                             :boolean          default(FALSE), not null
 #  last_name                            :string
-#  notified_verified                    :boolean          default(FALSE)
 #  timezone                             :string
 #  tutorial_video_seen                  :boolean          default(FALSE), not null
 #  ysws_verified                        :boolean          default(FALSE)
