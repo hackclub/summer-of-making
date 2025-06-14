@@ -3,7 +3,7 @@
 class UsersController < ApplicationController
   before_action :authenticate_api_key, only: [ :check_user ]
   before_action :authenticate_user!,
-                only: %i[update_hackatime_confirmation refresh_hackatime check_hackatime_connection]
+                only: %i[refresh_hackatime check_hackatime_connection]
 
   def check_user
     user = User.find_by(slack_id: params[:slack_id])
