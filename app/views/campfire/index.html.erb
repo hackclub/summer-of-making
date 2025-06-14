@@ -137,25 +137,23 @@
     <!-- Video Tutorial Section -->
     <div class="mb-8">
       <div class="bg-white rounded-lg border-2 border-blue-200 p-6">
-          <!-- Video Placeholder -->
-          <div class="bg-gray-100 rounded-lg border-2 border-dashed border-gray-300 p-12 mb-6">
-            <div class="text-center">
-              <div class="w-24 h-24 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                <svg class="w-12 h-12 text-blue-600" fill="currentColor" viewBox="0 0 20 20">
-                  <path d="M8 5v10l8-5-8-5z" />
-                </svg>
-              </div>
-              <h3 class="text-xl font-semibold text-gray-700 mb-2">SoM Tutorial Video</h3>
-              <p class="text-gray-500">ask-a-pixi for video!!</p>
+        <!-- Video Placeholder -->
+        <div class="bg-gray-100 rounded-lg border-2 border-dashed border-gray-300 p-12 mb-6">
+          <div class="text-center">
+            <div class="w-24 h-24 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
+              <svg class="w-12 h-12 text-blue-600" fill="currentColor" viewBox="0 0 20 20">
+                <path d="M8 5v10l8-5-8-5z" />
+              </svg>
             </div>
+            <h3 class="text-xl font-semibold text-gray-700 mb-2">SoM Tutorial Video</h3>
+            <p class="text-gray-500">ask-a-pixi for video!!</p>
           </div>
-
-          <div class="flex justify-center space-x-4">
-            <%= link_to "Next",
-                        campfire_path(mark_video_seen: true),
-                        method: :patch,
-                        class: "px-8 py-3 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-lg hover:from-blue-700 hover:to-blue-800 font-medium shadow-lg" %>
-          </div>
+        </div>
+        <div class="flex justify-center space-x-4">
+          <%= link_to "Next",
+                      campfire_path(mark_video_seen: true),
+                      method: :patch,
+                      class: "px-8 py-3 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-lg hover:from-blue-700 hover:to-blue-800 font-medium shadow-lg" %>
         </div>
       </div>
     </div>
@@ -297,4 +295,30 @@
       </div>
     </div>
   <% end %>
+
+  <div class="mb-8">
+    <div class="bg-white rounded-lg border p-6">
+      <div class="flex items-start space-x-4">
+        <div class="flex-shrink-0">
+          <div class="w-8 h-8 bg-indigo-100 rounded-full flex items-center justify-center">
+            <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-indigo-600" viewBox="0 0 24 24">
+              <path fill="currentColor" d="M11.95 18q.525 0 .888-.363t.362-.887q0-.525-.362-.888t-.888-.362q-.525 0-.887.363t-.363.887q0 .525.363.888t.887.362m-.9-3.85h1.85q0-.825.188-1.3t1.062-1.3q.65-.65 1.025-1.238T15.55 8.9q0-1.4-1.025-2.15T12.1 6q-1.425 0-2.313.75T8.55 8.55l1.65.65q.125-.45.563-.975T12.1 7.7q.8 0 1.2.438t.4.962q0 .5-.3.938t-.75.812q-1.1.975-1.35 1.475t-.25 1.825M12 22q-2.075 0-3.9-.788t-3.175-2.137q-1.35-1.35-2.137-3.175T2 12q0-2.075.788-3.9t2.137-3.175q1.35-1.35 3.175-2.137T12 2q2.075 0 3.9.788t3.175 2.137q1.35 1.35 2.138 3.175T22 12q0 2.075-.788 3.9t-2.137 3.175q-1.35 1.35-3.175 2.138T12 22" />
+            </svg>
+          </div>
+        </div>
+        <div class="flex-1">
+          <h3 class="text-lg font-semibold text-gray-900 mb-2">Need Help?</h3>
+          <p class="text-gray-600 mb-4">Got questions or running into issues? The #summer-help channel is the perfect place to get support from the community!</p>
+          <a href="https://hackclub.slack.com/archives/C090JKDJYN8"
+             target="_blank"
+             class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+            <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 mr-2" viewBox="0 0 24 24">
+              <path fill="currentColor" d="M6 14q-.825 0-1.413-.588T4 12q0-.825.588-1.413T6 10q.825 0 1.413.588T8 12q0 .825-.588 1.413T6 14m4-8q-.825 0-1.413-.588T8 4q0-.825.588-1.413T10 2q.825 0 1.413.588T12 4q0 .825-.588 1.413T10 6m4 8q-.825 0-1.413-.588T12 12q0-.825.588-1.413T14 10q.825 0 1.413.588T16 12q0 .825-.588 1.413T14 14m4-8q-.825 0-1.413-.588T16 4q0-.825.588-1.413T18 2q.825 0 1.413.588T20 4q0 .825-.588 1.413T18 6" />
+            </svg>
+            Join #summer-help
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
 </div>
