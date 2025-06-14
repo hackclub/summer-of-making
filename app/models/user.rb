@@ -306,10 +306,10 @@ class User < ApplicationRecord
         request.body = JSON.generate({
           token: Rails.application.credentials.explorpheus.token,
           slack_id: slack_id,
-          email: email,
+          email: email
         })
 
-  # Send the request
+        # Send the request
         response = http.request(request)
         response
       rescue => e
