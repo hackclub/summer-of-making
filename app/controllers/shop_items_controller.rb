@@ -1,23 +1,21 @@
 # frozen_string_literal: true
 
 class ShopItemsController < ApplicationController
-  before_action :authenticate_user!
+  before_action :authenticate_user!, except: [ :index ]
   before_action :require_admin!, except: [ :index ]
 
   def index
     scope = ShopItem
-    scope = scope.not_black_market unless current_user.has_black_market?
+    scope = scope.not_black_market unless current_user&.has_black_market?
 
     # Filter out free stickers that have already been ordered by the current user
-    ordered_free_sticker_ids = current_user.shop_orders
-                                          .joins(:shop_item)
-                                          .where(shop_items: { type: "ShopItem::FreeStickers" })
-                                          .select(:shop_item_id)
+    ordered_free_sticker_ids = current_user&.shop_orders
+                                 &.joins(:shop_item)
+                                 &.where(shop_items: { type: "ShopItem::FreeStickers" })
+                                 &.select(:shop_item_id) || []
     scope = scope.where.not(id: ordered_free_sticker_ids)
 
     @shop_items = scope.order(ticket_cost: :asc).includes(:image_attachment)
-
-    @shop_item_types = available_shop_item_types
   end
 
   def new

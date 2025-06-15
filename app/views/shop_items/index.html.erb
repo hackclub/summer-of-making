@@ -8,20 +8,72 @@
     Your browser does not support the audio element.
   </audio>
 
-  <h1 class="text-4xl sm:text-5xl mb-0">Shop</h1>
+  <h1 class="text-4xl sm:text-5xl mb-0">
+    <% unless current_user %>Summer of Making
+    <% end %>Shop</h1>
 
   <% admin_tool("mb-4") do %>
     <p><%= @shop_items.count %> items - <%= link_to "edit them?", admin_shop_items_path, class: "underline" %></p>
   <% end %>
 
-  <div class="justify-center flex">
-    <%= render "verification_callout" unless current_verification_status == :verified %>
-  </div>
+  <% if current_user %>
+    <div class="justify-center flex">
+      <%= render "verification_callout" unless current_verification_status == :verified %>
+    </div>
+  <% end %>
 
-  <div class="justify-center flex">
+  <div class="justify-center flex mt-4">
     <i>(these are US prices for now, int'l prices coming soon!)</i>
   </div>
 
+  <% unless current_user %>
+    <div id="how-it-works" class="mt-15">
+      <div class="relative mb-8 md:mb-16 flex flex-col items-center">
+        <div class="relative flex flex-col md:flex-row gap-4 md:gap-8 mx-auto justify-center items-center md:items-stretch">
+          <%= render "shared/card", classes: 'h-full max-w-96 sm:max-w-lg md:max-w-80 lg:max-w-96 animate-wave' do %>
+            <div class="p-4 md:p-5 relative text-center">
+              <h3 class="text-xl md:text-2xl font-bold mb-3 md:mb-4 text-[#3a2f25] font-['DynaPuff',sans-serif]">Build
+                Stuff</h3>
+              <p class="font-['Fredoka',sans-serif] font-normal text-base md:text-lg text-[#3a2f25]">
+                Build websites, games, apps, or any other personal open-source coding projects to showcase your skills
+                and earn precious
+                <span class="italic">shells<img src="/shell.png" class="inline-block mx-1 mb-1 w-5 h-5" alt="shell"></span>
+              </p>
+            </div>
+          <% end %>
+
+          <%= render "shared/card", classes: 'h-full max-w-96 sm:max-w-lg md:max-w-80 lg:max-w-96 animate-wave-offset' do %>
+            <div class="p-4 md:p-5 relative text-center">
+              <h3 class="text-xl md:text-2xl font-bold mb-3 md:mb-4 text-[#3a2f25] font-['DynaPuff',sans-serif]">Get
+                Stuff</h3>
+              <p class="font-['Fredoka',sans-serif] font-normal text-base md:text-lg text-[#3a2f25]">
+                Redeem your
+                <span class="">shells<img src="/shell.png" class="inline-block mx-1 mb-1 w-5 h-5" alt="shell"></span>for
+                prizes! <br/><br/> You can see what's available so far below...
+              </p>
+            </div>
+          <% end %>
+
+          <div class="absolute mx-auto md:hidden block left-0">
+            <img src="/arc_arrow_top_bottom.png" class="relative max-h-40 sm:max-h-48 -left-4 sm:-left-16 aspect-auto rotate-180" alt="arrow">
+          </div>
+
+          <div class="absolute mx-auto md:hidden block right-0">
+            <img src="/arc_arrow_top_bottom.png" class="relative max-h-40 sm:max-h-48 -right-4 sm:-right-16 aspect-auto" alt="arrow">
+          </div>
+
+          <div class="absolute mx-auto -top-8 hidden md:block">
+            <img src="/arc_arrow_left_right.png" class="max-w-48 aspect-auto" alt="arrow">
+          </div>
+
+          <div class="absolute mx-auto -bottom-8 hidden md:block">
+            <img src="/arc_arrow_left_right.png" class="max-w-48 aspect-auto rotate-180" alt="arrow">
+          </div>
+        </div>
+      </div>
+      <%#= render "example_project" %>
+    </div>
+  <% end %>
   <div class="my-6 text-center flex justify-center flex-col">
     <div class="flex flex-col sm:grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
       <%= render partial: "item", collection: @shop_items.sort_by(&:ticket_cost), as: :item %>
@@ -29,29 +81,42 @@
   </div>
 </div>
 
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-  const musicToggle = document.getElementById('music-toggle');
-  const musicIcon = document.getElementById('music-icon');
-  const shopMusic = document.getElementById('shop-music');
-  let isPlaying = false;
+<% unless current_user %>
+  <div class="my-6 text-center flex justify-center flex-col">
+    <div class="max-w-2xl mx-auto">
+      <h2 class="text-3xl md:text-4xl font-bold mb-4 text-[#3a2f25] font-['DynaPuff',sans-serif]">Sound good?</h2>
+      <p class="text-lg md:text-xl mb-6 font-['Fredoka',sans-serif] text-[#3a2f25]">You could have it
+        all...</p> <!--my empire of dirt-->
+      <%= link_to root_path, class: "inline-block px-8 py-4 bg-[#E06540] hover:bg-[#d55a35] text-white font-bold text-xl rounded-lg transition-colors duration-300 shadow-lg hover:shadow-xl transform hover:scale-105" do %>
+        Go build something awesome this summer →
+      <% end %>
+    </div>
+  </div>
+<% end %>
 
-  musicToggle.addEventListener('click', function() {
-    if (isPlaying) {
-      shopMusic.pause();
-      shopMusic.muted = true;
-      musicIcon.textContent = '♫';
-      musicToggle.title = 'Play Music';
-      isPlaying = false;
-    } else {
-      shopMusic.muted = false;
-      shopMusic.play().catch(function(error) {
-        console.log('Audio play failed:', error);
-      });
-      musicIcon.textContent = '🔇';
-      musicToggle.title = 'Mute Music';
-      isPlaying = true;
-    }
-  });
-});
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const musicToggle = document.getElementById('music-toggle');
+        const musicIcon = document.getElementById('music-icon');
+        const shopMusic = document.getElementById('shop-music');
+        let isPlaying = false;
+
+        musicToggle.addEventListener('click', function () {
+            if (isPlaying) {
+                shopMusic.pause();
+                shopMusic.muted = true;
+                musicIcon.textContent = '♫';
+                musicToggle.title = 'Play Music';
+                isPlaying = false;
+            } else {
+                shopMusic.muted = false;
+                shopMusic.play().catch(function (error) {
+                    console.log('Audio play failed:', error);
+                });
+                musicIcon.textContent = '🔇';
+                musicToggle.title = 'Mute Music';
+                isPlaying = true;
+            }
+        });
+    });
 </script>
