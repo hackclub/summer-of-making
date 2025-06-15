@@ -22,7 +22,7 @@ module Admin
       @shop_item = ShopItem.new(shop_item_params)
 
       if @shop_item.save
-        redirect_to [:admin, @shop_item.becomes(ShopItem)], notice: "Shop item was successfully created."
+        redirect_to [ :admin, @shop_item.becomes(ShopItem) ], notice: "Shop item was successfully created."
       else
         @shop_item_types = available_shop_item_types
         render :new, status: :unprocessable_entity
@@ -35,7 +35,7 @@ module Admin
 
     def update
       if @shop_item.update(shop_item_params)
-        redirect_to [:admin, @shop_item.becomes(ShopItem)], notice: "Shop item was successfully updated."
+        redirect_to [ :admin, @shop_item.becomes(ShopItem) ], notice: "Shop item was successfully updated."
       else
         @shop_item_types = available_shop_item_types
         render :edit, status: :unprocessable_entity
