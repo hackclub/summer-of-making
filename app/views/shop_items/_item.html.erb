@@ -15,7 +15,7 @@
       <h3 class="text-xl font-bold mb-2"><%= item.name %></h3>
 
       <div class="mb-4">
-        <p class="text-gray-700"><%= item.description&.html_safe %></p>
+        <p class="text-gray-700"><%= raw(item.description) %></p>
       </div>
 
       <% if item.image.attached? %>
