@@ -3,6 +3,80 @@
         title: "Campfire",
         subtitle: "Huddle around! Get your news here." %>
 
+    <!-- Hackatime Dashboard Section -->
+  <% if @account_status[:hackatime_setup] && @hackatime_dashboard.present? %>
+    <div class="mb-8">
+      <div class="bg-white rounded-xl overflow-hidden">
+        <div class="bg-white border-b px-6 py-4">
+          <div class="flex items-center gap-3">
+            <div class="flex-shrink-0">
+              <div class="w-10 h-10 bg-blue-500 rounded-lg flex items-center justify-center">
+                <%= inline_svg "icons/time_fill.svg", class: "w-6 h-6 text-white" %>
+              </div>
+            </div>
+            <div class="flex-1">
+              <h3 class="text-xl font-bold text-gray-900">
+                <a href="https://hackatime.hackclub.com/" target="_blank" class="hover:text-blue-600 transition-all duration-200 flex items-center gap-2">
+                  Hackatime
+                  <%= inline_svg "icons/external_link_line.svg", class: "w-4 h-4 text-gray-400" %>
+                </a>
+              </h3>
+            </div>
+          </div>
+        </div>
+
+        <div class="p-6">
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div class="bg-white rounded-xl p-6">
+              <div class="flex items-center justify-between mb-3">
+                <div class="w-12 h-12 bg-[#51A373] rounded-lg flex items-center justify-center">
+                  <%= inline_svg "icons/chart_bar_fill.svg", class: "w-6 h-6 text-white" %>
+                </div>
+              </div>
+              <div class="text-3xl font-bold text-gray-900 mb-1">
+                <%= current_user.format_seconds(@hackatime_dashboard[:today_time]) %>
+              </div>
+              <div class="text-sm font-medium text-gray-600">Today's Coding Time</div>
+            </div>
+
+            <div class="bg-white rounded-xl p-6">
+              <div class="flex items-center justify-between mb-3">
+                <div class="w-12 h-12 bg-[#523A52] rounded-lg flex items-center justify-center">
+                  <%= inline_svg "icons/chart_pie_2_fill.svg", class: "w-6 h-6 text-white" %>
+                </div>
+              </div>
+              <div class="text-3xl font-bold text-gray-900 mb-1">
+                <%= current_user.format_seconds(@hackatime_dashboard[:total_time]) %>
+              </div>
+              <div class="text-sm font-medium text-gray-600">Total Coding Time</div>
+            </div>
+          </div>
+          
+          <% unless @hackatime_dashboard[:has_time_recorded] %>
+            <div class="mt-6 bg-amber-50 border border-amber-200 rounded-xl p-4">
+              <div class="flex items-start gap-3">
+                <div class="flex-shrink-0">
+                  <div class="w-10 h-10 bg-amber-500 rounded-lg flex items-center justify-center">
+                    <svg class="w-5 h-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                  </div>
+                </div>
+                <div class="flex-1">
+                  <h4 class="text-sm font-semibold text-amber-800 mb-1">Get Started with Time Tracking</h4>
+                  <p class="text-sm text-amber-700 leading-relaxed">
+                    No time recorded yet! Install Hackatime on at least one code editor, then start coding for a few minutes to see your stats here. 
+                    <span class="font-medium">Every hour of coding = 1 shell</span>
+                  </p>
+                </div>
+              </div>
+            </div>
+          <% end %>
+        </div>
+      </div>
+    </div>
+  <% end %>
+
   <% if !current_user.tutorial_progress.completed? %>
     <!-- Set up your account! Section -->
     <div class="mb-4">

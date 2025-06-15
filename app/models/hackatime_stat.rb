@@ -36,6 +36,23 @@ class HackatimeStat < ApplicationRecord
     end
   end
 
+  def total_seconds_across_all_projects
+    return 0 if data.blank? || !data["data"]["projects"].is_a?(Array)
+
+    data["data"]["projects"].sum do |hackatime_project|
+      hackatime_project["total_seconds"] || 0
+    end
+  end
+
+  def today_seconds_across_all_projects
+    return 0 if data.blank?
+    response = Faraday.get("https://hackatime.hackclub.com/api/v1/users/#{user.slack_id}/stats?features=projects&start_date=#{Date.current.strftime("%Y-%m-%d")}")
+    result = JSON.parse(response.body)
+    return unless result["data"]["status"] == "ok"
+    total_seconds = result["data"]["total_seconds"] || 0
+    total_seconds
+  end
+
   def seconds_since_last_update
     return 0 unless last_updated_at
 

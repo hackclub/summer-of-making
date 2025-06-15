@@ -26,6 +26,15 @@ class CampfireController < ApplicationController
     @announcements = get_announcements
     @tutorials = get_tutorials
     @tutorial_progress = get_tutorial_progress
+
+    # Hackatime dashboard data
+    if @account_status[:hackatime_setup] && @user.hackatime_stat.present?
+      @hackatime_dashboard = {
+        total_time: @user.hackatime_stat.total_seconds_across_all_projects,
+        today_time: @user.hackatime_stat.today_seconds_across_all_projects,
+        has_time_recorded: @user.hackatime_stat.total_seconds_across_all_projects > 0
+      }
+    end
   end
 
   def show
