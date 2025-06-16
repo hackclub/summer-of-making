@@ -20,7 +20,10 @@ class LandingController < ApplicationController
       ahoy.track "tutorial_step_landing_first_visit"
     end
 
-    @prizes = ShopItem.shown_in_carousel.order(ticket_cost: :asc).map do |item|
+    @prizes = ShopItem.shown_in_carousel
+      .with_attached_image
+      .order(ticket_cost: :asc)
+      .map do |item|
       hours = item.average_hours_estimated.to_i
       {
         name: item.name,
