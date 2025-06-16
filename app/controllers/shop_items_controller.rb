@@ -6,30 +6,31 @@ class ShopItemsController < ApplicationController
   before_action :refresh_verf!, only: :index
 
   def index
-    # Load all shop items from cache with properly preloaded attachments
-    all_shop_items = Rails.cache.fetch("all_shop_items_with_variants_v2", expires_in: 10.minutes) do
-      ShopItem.with_attached_image
-              .includes(image_attachment: { blob: { variant_records: :image_attachment } })
-              .order(ticket_cost: :asc)
-              .to_a
-    end
+  # Load all shop items from cache with properly preloaded attachments
+  all_shop_items = Rails.cache.fetch("all_shop_items_with_variants_v2", expires_in: 10.minutes) do
+  ShopItem.with_attached_image
+  .includes(image_attachment: { blob: { variant_records: :image_attachment } })
+  .order(ticket_cost: :asc)
+  .to_a
+  end
 
-    # Filter in memory
-    filtered_items = all_shop_items.dup
+  # Filter in memory based on user-specific logic
+  filtered_items = all_shop_items.dup
 
-    # Filter out black market items unless user has access
-    unless current_user&.has_black_market?
-      filtered_items.reject! { |item| item.requires_black_market? }
-    end
+  # Filter out black market items unless user has access
+  unless current_user&.has_black_market?
+  filtered_items.reject! { |item| item.requires_black_market? }
+  end
 
-    # Filter out free stickers that have already been ordered by the current user
-    if current_user
-      ordered_free_sticker_ids = current_user.shop_orders
-                                  .joins(:shop_item)
-                                  .where(shop_items: { type: "ShopItem::FreeStickers" })
-                                  .pluck(:shop_item_id)
-      filtered_items.reject! { |item| ordered_free_sticker_ids.include?(item.id) }
-    end
+  # Filter out free stickers that have already been ordered by the current user
+  # This filtering must happen at runtime, not in cache, since it's user-specific
+  if current_user
+  ordered_free_sticker_ids = current_user.shop_orders
+  .joins(:shop_item)
+  .where(shop_items: { type: "ShopItem::FreeStickers" })
+                              .pluck(:shop_item_id)
+    filtered_items.reject! { |item| item.is_a?(ShopItem::FreeStickers) && ordered_free_sticker_ids.include?(item.id) }
+  end
 
     @shop_items = filtered_items
   end
