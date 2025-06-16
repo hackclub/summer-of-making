@@ -1,11 +1,7 @@
-.tooltip {
-  position: relative;
-  display: inline-block;
-}
-
 .tooltip .tooltiptext {
   visibility: hidden;
-  width: 200px;
+  max-width: 200px;
+  width: max-content;
   background-color: #2d3748;
   color: white;
   text-align: center;
@@ -13,9 +9,7 @@
   padding: 8px;
   position: absolute;
   z-index: 1000;
-  top: 50%;
-  left: 120%;
-  transform: translateY(-50%);
+  transform: translate(12px, -37%);
   opacity: 0;
   transition: opacity 0.3s;
   font-size: 12px;
