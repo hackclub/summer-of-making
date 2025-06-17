@@ -35,6 +35,12 @@ module Admin
       end
     end
 
+    def nuke_idv_data
+      @user.nuke_idv_data!
+      flash[:success] = "what have you done"
+      redirect_to admin_user_path(@user)
+    end
+
     private
 
     def set_user

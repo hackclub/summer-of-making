@@ -1,6 +1,7 @@
 <% if current_user %>
   <% ineligible = current_verification_status == :ineligible %>
-  <% disabled = ineligible || (!current_user.ysws_verified? && !item.is_a?(ShopItem::FreeStickers)) || !item.can_afford?(current_user) %>
+  <% out_of_stock = item.out_of_stock? %>
+  <% disabled = ineligible || (!current_user.ysws_verified? && !item.is_a?(ShopItem::FreeStickers)) || !item.can_afford?(current_user) || out_of_stock %>
 <% end %>
 <%= render "shared/card", classes: "#{"col-span-full" if item.is_free?}" do %>
   <!-- <div class="bg-soft-bone card-pixel bg-surface0 shadow p-6 rounded-lg h-full flex flex-col text-center w-full <%= "col-span-full" if item.is_free? %>"> -->
@@ -16,6 +17,18 @@
 
       <div class="mb-4">
         <p class="text-gray-700"><%= raw item.description %></p> <%# erb_lint:disable ErbSafety %>
+        <% if item.limited? %>
+          <% remaining = item.remaining_stock %>
+          <% if remaining && remaining > 0 %>
+            <p class="text-sm text-orange-600 font-semibold mt-2">
+              <%= remaining %> left
+            </p>
+          <% elsif remaining && remaining <= 0 %>
+            <p class="text-sm text-red-600 font-semibold mt-2">
+              Out of Stock
+            </p>
+          <% end %>
+        <% end %>
       </div>
 
       <% if item.image.attached? %>
@@ -35,7 +48,9 @@
         <%= button_to "Already Ordered", "#", method: :get, disabled: true, class: "w-full px-4 sm:px-6 py-2 sm:py-3 bg-forest text-white text-base sm:text-lg 2xl:text-xl btn-pixel disabled:opacity-40 disabled:cursor-not-allowed block text-center" %>
       <% else %>
         <%= button_to order_shop_item_path(item), method: :get, data: { turbo: false }, class: "w-full px-4 sm:px-6 py-2 sm:py-3 bg-forest hover:scale-[1.02] text-white transition-transform duration-300 text-base sm:text-lg 2xl:text-xl btn-pixel disabled:opacity-40 disabled:cursor-not-allowed block text-center cursor-pointer", disabled: do %>
-          <% if ineligible %>
+          <% if out_of_stock %>
+            <span>Out of Stock</span>
+          <% elsif ineligible %>
             <span>Not for you!</span>
           <% elsif !current_user.ysws_verified? && !item.is_a?(ShopItem::FreeStickers) %>
             <span>

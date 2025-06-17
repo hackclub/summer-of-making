@@ -77,8 +77,10 @@ class UsersController < ApplicationController
                }
              }
            ).body
-    pp res
-    redirect_to res[:magic_link] || root_path, allow_other_host: true
+    pp "HACKATIMEAUTHREDIRECTRESULT", res
+
+    magic_link = res.is_a?(Hash) ? res[:magic_link] : nil # There was an issue with a malformed hackatime response. TODO: talk to @msw to fix.
+    redirect_to magic_link || root_path, allow_other_host: true
   end
 
   private

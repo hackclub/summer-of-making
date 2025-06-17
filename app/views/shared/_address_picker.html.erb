@@ -83,7 +83,7 @@
     </div>
   <% end %>
   <div class="mt-3">
-    <%= link_to "Manage addresses", "#{Rails.application.credentials.identity_vault.host}/addresses",
+    <%= link_to "Manage addresses", "#{IdentityVaultService.host}/addresses",
         class: "text-blue-600 hover:text-blue-800 underline text-sm",
         target: "_blank" %>
   </div>

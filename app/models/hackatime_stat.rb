@@ -23,11 +23,11 @@ class HackatimeStat < ApplicationRecord
   belongs_to :user
 
   def total_seconds_for_project(project)
-    return 0 if data.blank? || data["data"].blank? || !data["data"]["projects"].is_a?(Array)
+    return 0 if data.blank? || data.dig("data").blank? || !data.dig("data", "projects").is_a?(Array)
     project_keys = project.hackatime_keys
     return 0 if project_keys.blank?
 
-    data["data"]["projects"].sum do |hackatime_project|
+    data.dig("data", "projects").sum do |hackatime_project|
       if project_keys.include?(hackatime_project["name"])
         hackatime_project["total_seconds"]
       else
@@ -36,12 +36,22 @@ class HackatimeStat < ApplicationRecord
     end
   end
 
-  def total_seconds_across_all_projects
-    return 0 if data.blank? || data["data"].blank? || !data["data"]["projects"].is_a?(Array)
+  def projects
+    projects = data&.dig("data", "projects") || []
 
-    data["data"]["projects"].sum do |hackatime_project|
-      hackatime_project["total_seconds"] || 0
-    end
+    projects
+      .map { |project| {
+        key: project["name"], # Deprecated
+        name: project["name"],
+        total_seconds: project["total_seconds"],
+        formatted_time: project["text"]
+      }}
+      .reject { |p| [ "<<LAST_PROJECT>>", "Other" ].include?(p[:name]) }
+      .sort_by { |p| p[:name] }
+  end
+
+  def total_seconds_across_all_projects
+    projects.sum { |p| p[:total_seconds] }
   end
 
   def today_seconds_across_all_projects

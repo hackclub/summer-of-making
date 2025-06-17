@@ -304,6 +304,7 @@ Rails.application.routes.draw do
       member do
         post :internal_notes
         post :create_payout
+        post :nuke_idv_data
       end
     end
     resources :shop_items

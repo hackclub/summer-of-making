@@ -2,22 +2,6 @@
 <html lang="en">
   <head>
     <title><%= content_for(:title) || "Summer of Making" %></title>
-    <meta name="viewport" content="width=device-width,initial-scale=1">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="mobile-web-app-capable" content="yes">
-    <meta name="description" content="Build stuff. Get stuff. Repeat. Summer of Making is a global event for teenagers 18 and under to build open-source projects, earn prizes, and join a worldwide community. Ends August 31, 2025.">
-    <meta property="og:title" content="Summer of Making">
-    <meta property="og:description" content="Build stuff. Get stuff. Repeat. Summer of Making is a global event for teenagers 18 and under to build open-source projects, earn prizes, and join a worldwide community. Ends August 31, 2025.">
-    <meta property="og:type" content="website">
-    <meta property="og:url" content="https://summer.hackclub.com/">
-    <meta property="og:image" content="https://summer.hackclub.com/social-splash.jpg">
-    <meta property="og:site_name" content="Summer of Making">
-    <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:title" content="Summer of Making">
-    <meta name="twitter:description" content="Build stuff. Get stuff. Repeat. Summer of Making is a global event for teenagers 18 and under to build open-source projects, earn prizes, and join a worldwide community. Ends August 31, 2025.">
-    <meta name="twitter:image" content="https://summer.hackclub.com/social-splash.jpg">
-    <meta name="twitter:site" content="@hackclub">
-    <meta name="theme-color" content="#E06540">
     <link rel="canonical" href="https://summer.hackclub.com/">
     <%= csrf_meta_tags %>
     <%= csp_meta_tag %>
@@ -41,6 +25,20 @@
 
     <script defer data-domain="summer.hackclub.com" src="https://plausible.io/js/script.file-downloads.hash.outbound-links.tagged-events.js"></script>
     <script>window.plausible = window.plausible || function() { (window.plausible.q = window.plausible.q || []).push(arguments) }</script>
+
+    <!-- Social Card Meta Tags -->
+    <meta property="og:title" content="Hack Club Summer of Making">
+    <meta property="og:description" content="Build stuff, Get stuff, Repeat! Win awesome prizes for building personal coding projects, from June 16 - August 31, 2025">
+    <meta property="og:image" content="<%= asset_url('social_card.png') %>">
+    <meta property="og:url" content="<%= request.original_url %>">
+    <meta property="og:type" content="website">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <!-- Twitter Card Meta Tags -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Hack Club Summer of Making">
+    <meta name="twitter:description" content="Build stuff, Get stuff, Repeat! Win awesome prizes for building personal coding projects, from June 16 - August 31, 2025">
+    <meta name="twitter:image" content="<%= asset_url('social_card.png') %>">
   </head>
 
   <body class="min-h-screen font-national-park font-bold text-[#4A2D24]">

@@ -112,6 +112,19 @@
         </div>
       </div>
 
+      <div class="mb-3">
+        <div class="form-check">
+          <%= form.check_box :limited, class: "form-check-input", id: "shop_item_limited" %>
+          <%= form.label :limited, "Limited Stock", class: "form-check-label" %>
+        </div>
+      </div>
+
+      <div class="mb-3" id="stock_field_container">
+        <%= form.label :stock, "Stock Quantity", class: "form-label" %>
+        <%= form.number_field :stock, min: 0, class: "form-control", id: "shop_item_stock" %>
+        <small class="form-text text-muted">Number of items available for purchase</small>
+      </div>
+
       <h5>HCB Locks</h5>
       <div class="mb-3">
         <%= form.label :hcb_merchant_lock, "HCB Merchant Lock", class: "form-label" %>
@@ -193,5 +206,23 @@
 
         // Initial calculation on page load
         updateCalculations();
+
+        // Handle limited stock checkbox
+        const limitedCheckbox = document.getElementById('shop_item_limited');
+        const stockFieldContainer = document.getElementById('stock_field_container');
+
+        function toggleStockField() {
+            if (limitedCheckbox.checked) {
+                stockFieldContainer.style.display = 'block';
+            } else {
+                stockFieldContainer.style.display = 'none';
+            }
+        }
+
+        if (limitedCheckbox) {
+            limitedCheckbox.addEventListener('change', toggleStockField);
+            // Initial state on page load
+            toggleStockField();
+        }
     });
 </script>

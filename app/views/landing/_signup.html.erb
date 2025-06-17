@@ -8,6 +8,7 @@
              autocomplete="email"
              class="marble-textarea with-icon w-full"
              data-signup-wizard-target="emailInput"
+             id="sei"
              onkeydown="if(event.key==='Enter'){event.preventDefault();var btn=this.closest('[data-controller=signup-wizard]').querySelector('.marble-button');if(btn){btn.click();}}">
     </div>
     <div class="hidden bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded-lg text-sm"
@@ -20,3 +21,13 @@
     </button>
   </div>
 </div>
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    var params = new URLSearchParams(window.location.search);
+    var email = params.get('e');
+    if (email) {
+      var input = document.getElementById('sei');
+      if (input) input.value = email;
+    }
+  });
+</script>

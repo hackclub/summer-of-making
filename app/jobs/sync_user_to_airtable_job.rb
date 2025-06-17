@@ -20,6 +20,8 @@ class SyncUserToAirtableJob < ApplicationJob
       "avatar_url" => user.avatar,
       "has_commented" => user.has_commented,
       "is_admin" => user.is_admin,
+      "hours" => user.hackatime_stat&.total_seconds_across_all_projects&.fdiv(3600),
+      # "verification_status" => user.verification_status.to_s,
       "created_at" => user.created_at
     }
 
@@ -27,7 +29,7 @@ class SyncUserToAirtableJob < ApplicationJob
 
     if existing_record
       updated = false
-      %w[first_name last_name email slack_id avatar_url has_commented is_admin created_at].each do |field|
+      %w[first_name last_name email slack_id avatar_url has_commented is_admin hours created_at].each do |field|
         new_value = user_data[field]
         if existing_record[field] != new_value
           existing_record[field] = new_value

@@ -38,7 +38,7 @@ namespace :projects do
     active_projects.each do |project|
       next if project.user.slack_id.blank?
 
-      message = "Heya! You're receiving this DM because your project fulfills the primary criteria to be eligible for the giftcard. However, for your project to enter matchmaking, you need to ship it! Just click the Ship button on https://journey.hackclub.com/my_projects and make sure everything is valid. Then you're good to go"
+      message = "Heya! You're receiving this DM because your project fulfills the primary criteria to be eligible for the giftcard. However, for your project to enter matchmaking, you need to ship it! Just click the Ship button on https://summer.hackclub.com/my_projects and make sure everything is valid. Then you're good to go"
       SendSlackDmJob.perform_later(project.user.slack_id, message)
       puts "Sent DM to #{project.user.display_name} about project: #{project.title}"
     end

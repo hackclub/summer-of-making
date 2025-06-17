@@ -3,7 +3,10 @@
 <b>IDV ID:</b> <%= @user.identity_vault_id || "None" %> <br>
 <b>Slack ID:</b> <%= (link_to @user.slack_id, "https://hackclub.slack.com/team/#{@user.slack_id}") || "None?!" %> <br>
 <b>Email:</b> <%= (link_to @user.email, "mailto:#{@user.email}") || "None" %>
-
+<div style="border: 1px dashed red; width: fit-content; padding: 1rem">
+  <b style="color: red;">DON'T DO THIS:</b>
+  <%= button_to "nuke IDV data", nuke_idv_data_admin_user_path(@user) %>
+</div>
 <br><br>
 <b>Payouts:</b>
 <ul>

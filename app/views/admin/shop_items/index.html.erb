@@ -10,6 +10,7 @@
       <th>Type</th>
       <th>Ticket Cost</th>
       <th>USD Cost</th>
+      <th>Stock</th>
       <th>Black Market</th>
       <th>Carousel</th>
       <th>Actions</th>
@@ -34,6 +35,16 @@
         <td><%= shop_item.type&.demodulize || "ShopItem" %></td>
         <td><%= shop_item.ticket_cost %></td>
         <td><%= shop_item.usd_cost %></td>
+        <td>
+          <% if shop_item.limited? %>
+            <% remaining = shop_item.remaining_stock %>
+            <span class="badge <%= remaining && remaining > 0 ? 'bg-success' : 'bg-danger' %>">
+              <%= remaining || shop_item.stock || 0 %> left
+            </span>
+          <% else %>
+            <span class="text-muted">Unlimited</span>
+          <% end %>
+        </td>
         <td>
           <% if shop_item.requires_black_market %>
             <span class="badge bg-dark">Black Market</span>

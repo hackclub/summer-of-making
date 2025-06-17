@@ -102,7 +102,7 @@
     <% if devlog.file.attached? %>
       <div class="mt-2 sm:mt-3">
         <% if devlog.file.image? %>
-          <%= image_tag devlog.file, alt: "Update attachment", class: "w-full object-contain cursor-pointer hover:opacity-90 transition-opacity rounded-lg", data: { action: "click->image-viewer#open" } %>
+          <%= image_tag devlog.file, alt: "Update attachment", class: "w-full object-contain cursor-pointer hover:opacity-90 transition-opacity rounded-lg max-h-64", data: { action: "click->image-viewer#open" } %>
         <% elsif devlog.file.video? %>
           <div class="w-full flex items-center justify-center bg-black rounded-lg">
             <%= video_tag url_for(devlog.file), class: "w-full object-contain rounded-lg", playsinline: true, controls: true do %>

@@ -148,7 +148,7 @@
                 <span class="tooltiptext">Link to your project's GitHub, GitLab, or other remote repository.</span>
               </div>
             </div>
-            <%= f.url_field :repo_link, placeholder: "https://github.com/hackclub/journey", class: "w-full px-3 py-2 border border-saddle-taupe bg-bread border-opacity-50 focus:outline-none focus:ring-forest focus:border-forest text-sm md:text-base", id: "repo", data: { project_form_target: "repo", repo_autofill_target: "repoInput", action: "input->repo-autofill#repoInputChanged" } %>
+            <%= f.url_field :repo_link, placeholder: "https://github.com/username/repo", class: "w-full px-3 py-2 border border-saddle-taupe bg-bread border-opacity-50 focus:outline-none focus:ring-forest focus:border-forest text-sm md:text-base", id: "repo", data: { project_form_target: "repo", repo_autofill_target: "repoInput", action: "input->repo-autofill#repoInputChanged" } %>
             <div class="flex justify-end">
               <p class="mt-1 text-xs md:text-sm text-gray-700">Optional</p>
             </div>
@@ -163,7 +163,7 @@
                 <span class="tooltiptext">Direct link to your README file (usually the raw GitHub URL). This will be rendered in the arena.</span>
               </div>
             </div>
-            <%= f.url_field :readme_link, placeholder: "https://raw.githubusercontent.com/hackclub/journey/main/README.md", class: "w-full px-3 py-2 border border-saddle-taupe bg-bread border-opacity-50 focus:outline-none focus:ring-forest focus:border-forest text-sm md:text-base", id: "readme", data: { project_form_target: "readme", repo_autofill_target: "readmeInput", action: "input->repo-autofill#validateReadmeUrl" } %>
+            <%= f.url_field :readme_link, placeholder: "https://raw.githubusercontent.com/username/repo/main/README.md", class: "w-full px-3 py-2 border border-saddle-taupe bg-bread border-opacity-50 focus:outline-none focus:ring-forest focus:border-forest text-sm md:text-base", id: "readme", data: { project_form_target: "readme", repo_autofill_target: "readmeInput", action: "input->repo-autofill#validateReadmeUrl" } %>
             <div class="flex justify-end">
               <p class="mt-1 text-xs md:text-sm text-gray-700">Optional</p>
             </div>
@@ -178,7 +178,7 @@
                 <span class="tooltiptext">Link to a live demo, deployed version, or video demonstration of your project in action.</span>
               </div>
             </div>
-            <%= f.url_field :demo_link, placeholder: "https://journey.hackclub.com", class: "w-full px-3 py-2 border border-saddle-taupe bg-bread border-opacity-50 focus:outline-none focus:ring-forest focus:border-forest text-sm md:text-base", id: "demo", data: { project_form_target: "demo" } %>
+            <%= f.url_field :demo_link, placeholder: "https://summer.hackclub.com", class: "w-full px-3 py-2 border border-saddle-taupe bg-bread border-opacity-50 focus:outline-none focus:ring-forest focus:border-forest text-sm md:text-base", id: "demo", data: { project_form_target: "demo" } %>
             <div class="flex justify-end">
               <p class="mt-1 text-xs md:text-sm text-gray-700">Optional</p>
             </div>

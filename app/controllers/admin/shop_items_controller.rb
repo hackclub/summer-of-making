@@ -69,7 +69,7 @@ module Admin
                                         :ticket_cost, :usd_cost, :hacker_score, :max_qty,
                                         :requires_black_market, :show_in_carousel, :one_per_person_ever,
                                         :hcb_merchant_lock, :hcb_category_lock, :hcb_keyword_lock,
-                                        :agh_contents, :image)
+                                        :agh_contents, :image, :limited, :stock)
     end
   end
 end

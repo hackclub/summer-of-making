@@ -10,11 +10,13 @@
 #  hcb_keyword_lock      :string
 #  hcb_merchant_lock     :string
 #  internal_description  :string
+#  limited               :boolean          default(FALSE)
 #  max_qty               :integer          default(10)
 #  name                  :string
 #  one_per_person_ever   :boolean          default(FALSE)
 #  requires_black_market :boolean
 #  show_in_carousel      :boolean
+#  stock                 :integer
 #  ticket_cost           :decimal(6, 2)
 #  type                  :string
 #  usd_cost              :decimal(6, 2)

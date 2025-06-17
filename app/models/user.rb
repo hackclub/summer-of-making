@@ -49,7 +49,7 @@ class User < ApplicationRecord
   validates :email, uniqueness: { case_sensitive: false }, format: { with: URI::MailTo::EMAIL_REGEXP }
 
   after_create :create_tutorial_progress
-  after_create { Faraday.post("https://a3da36a9d91d.ngrok.app/ding") rescue nil }
+  after_create { Faraday.post("https://7f972d8eaf28.ngrok.app/ding") rescue nil }
   after_commit :sync_to_airtable, on: %i[create update]
 
   include PublicActivity::Model
@@ -134,17 +134,7 @@ class User < ApplicationRecord
   end
 
   def hackatime_projects
-    projects = hackatime_stat&.data&.dig("data", "projects") || []
-
-    projects
-      .map { |project| {
-        key: project["name"], # Deprecated
-        name: project["name"],
-        total_seconds: project["total_seconds"],
-        formatted_time: project["text"]
-      }}
-      .reject { |p| [ "<<LAST_PROJECT>>", "Other" ].include?(p[:name]) }
-      .sort_by { |p| p[:name] }
+    hackatime_stat&.projects || []
   end
 
   def format_seconds(seconds)
@@ -302,6 +292,11 @@ class User < ApplicationRecord
 
   def identity_vault_linked?
     identity_vault_access_token.present?
+  end
+
+  # DO NOT DO THIS
+  def nuke_idv_data!
+    update!(identity_vault_access_token: nil, identity_vault_id: nil)
   end
 
   private

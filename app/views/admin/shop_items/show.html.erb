@@ -68,6 +68,31 @@
           <% end %>
         </td>
       </tr>
+      <tr>
+        <th>Limited Stock</th>
+        <td>
+          <% if @shop_item.limited? %>
+            <span class="badge bg-info">Yes</span>
+          <% else %>
+            <span class="badge bg-light text-dark">No</span>
+          <% end %>
+        </td>
+      </tr>
+      <% if @shop_item.limited? %>
+        <tr>
+          <th>Stock</th>
+          <td>
+            <% remaining = @shop_item.remaining_stock %>
+            <% total_stock = @shop_item.stock || 0 %>
+            <% ordered = total_stock - (remaining || 0) %>
+            <%= total_stock %> total
+            <span class="badge <%= remaining && remaining > 0 ? 'bg-success' : 'bg-danger' %>">
+              <%= remaining || 0 %> remaining
+            </span>
+            <small class="text-muted">(<%= ordered %> ordered)</small>
+          </td>
+        </tr>
+      <% end %>
       <% if @shop_item.hcb_merchant_lock.present? %>
         <tr>
           <th>HCB Merchant Lock</th>
