@@ -4,6 +4,7 @@ class ProjectsController < ApplicationController
   include ActionView::RecordIdentifier
   before_action :authenticate_user!, except: %i[index show]
   skip_before_action :verify_authenticity_token, only: [ :check_link ]
+  before_action :preload_user_follows, only: [:index], if: :user_signed_in?
   before_action :set_project,
                 only: %i[show edit update follow unfollow ship stake_stonks unstake_stonks destroy]
   before_action :check_if_shipped, only: %i[edit update]
@@ -558,5 +559,9 @@ class ProjectsController < ApplicationController
   def project_params
     params.expect(project: [ :title, :description, :used_ai, :readme_link, :demo_link, :repo_link,
                              :banner, :ysws_submission, :ysws_type, :category, { hackatime_project_keys: [] } ])
+  end
+
+  def preload_user_follows
+    @user_followed_project_ids = current_user.project_follows.pluck(:project_id).to_set
   end
 end
