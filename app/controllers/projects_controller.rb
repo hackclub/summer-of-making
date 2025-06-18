@@ -33,7 +33,7 @@ class ProjectsController < ApplicationController
     elsif params[:tab] == "following"
       @followed_projects = current_user.followed_projects.includes(:user)
       @recent_devlogs = Devlog.joins(:project)
-                              .includes(:project, :user, 
+                              .includes(:project, :user,
                                        comments: :user)
                               .where(project_id: @followed_projects.pluck(:id))
                               .where(projects: { is_deleted: false })
@@ -43,7 +43,7 @@ class ProjectsController < ApplicationController
     elsif params[:tab] == "stonked"
       @stonked_projects = current_user.staked_projects.includes(:user)
       @recent_devlogs = Devlog.joins(:project)
-                              .includes(:project, :user, 
+                              .includes(:project, :user,
                                        comments: :user)
                               .where(project_id: @stonked_projects.pluck(:id))
                               .where(projects: { is_deleted: false })
@@ -52,7 +52,7 @@ class ProjectsController < ApplicationController
       @pagy, @recent_devlogs = pagy(@recent_devlogs, items: 5)
     else
       devlogs_query = Devlog.joins(:project)
-                            .includes(:project, :user, 
+                            .includes(:project, :user,
                                      comments: :user)                            .where(projects: { is_deleted: false })
                             .order(created_at: :desc)
 
