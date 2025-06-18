@@ -13,7 +13,7 @@ class ProjectsController < ApplicationController
 
   def index
     if params[:action] == "my_projects"
-      @projects = Project.includes(:user)
+      @projects = Project.includes(:user, :devlogs, :banner_attachment)
                          .where.not(user_id: current_user.id)
                          .order(rating: :asc)
 
@@ -37,11 +37,11 @@ class ProjectsController < ApplicationController
 
     @pagy, @recent_devlogs = pagy(devlogs_query, items: 5)
 
-    @projects = Project.includes(:user).limit(5)
+    @projects = Project.includes(:user, :devlogs, :banner_attachment, devlogs: :file_attachment, user: :hackatime_stat).limit(5)
   end
 
   def gallery
-    @projects = Project.includes(:user, :devlogs)
+    @projects = Project.includes(:user, :devlogs, :banner_attachment)
 
     @projects = @projects.sort_by do |project|
       weight = rand + (project.devlogs.any? ? 1.5 : 0)
@@ -52,7 +52,7 @@ class ProjectsController < ApplicationController
   def following
     @followed_projects = current_user.followed_projects.includes(:user)
     @recent_devlogs = Devlog.joins(:project)
-                            .includes(:project, :user)
+                            .includes(:project, :user) # I wonder if file attachments are needed here?
                             .where(project_id: @followed_projects.pluck(:id))
                             .where(projects: { is_deleted: false })
                             .order(created_at: :desc)
