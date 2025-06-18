@@ -24,7 +24,7 @@ class ProjectsController < ApplicationController
 
       @show_create_project = true if @projects.empty?
     elsif params[:tab] == "gallery"
-      @projects = Project.includes(:user, devlogs: :file_attachment)
+      @projects = Project.includes(:user, :banner_attachment, devlogs: :file_attachment)
 
       @projects = @projects.sort_by do |project|
         weight = rand + (project.devlogs.any? ? 1.5 : 0)
@@ -58,7 +58,7 @@ class ProjectsController < ApplicationController
 
       @pagy, @recent_devlogs = pagy(devlogs_query, items: 5)
 
-      @projects = Project.includes(:user, devlogs: :file_attachment)
+      @projects = Project.includes(:user, :banner_attachment, devlogs: :file_attachment)
       @projects = @projects.sort_by do |project|
         weight = rand + (project.devlogs.any? ? 1.5 : 0)
         -weight
@@ -120,7 +120,7 @@ class ProjectsController < ApplicationController
   end
 
   def my_projects
-    @projects = current_user.projects.includes(devlogs: :file_attachment).order(created_at: :desc)
+    @projects = current_user.projects.includes(:banner_attachment, devlogs: :file_attachment).order(created_at: :desc)
 
     current_user.refresh_hackatime_data if current_user.has_hackatime?
   end
