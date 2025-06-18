@@ -25,9 +25,7 @@
               <p class="mb-4 md:mb-6 line-clamp-3 text-sm md:text-base 2xl:text-lg text-gray-600 break-words overflow-wrap-anywhere"><%= project.description %></p>
 
               <%
-                timer_total_time = project.timer_sessions.where(status: :stopped).sum(:net_time)
-                hackatime_total_time = project.hackatime_total_time
-                total_time_seconds = timer_total_time + hackatime_total_time
+                total_time_seconds = project.hackatime_total_time
               %>
               <p class="text-gray-400">
                 <%= format_seconds(total_time_seconds) %>
