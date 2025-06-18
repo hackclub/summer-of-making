@@ -17,29 +17,29 @@
   %>
 
   <div class="flex flex-col h-full gap-3">
-    <%# project_image = project.banner.attached? ? url_for(project.banner) : (project.devlogs.find { |u| u.file.attached? && u.file.image? }&.file&.then { |f| url_for(f) } || "https://hc-cdn.hel1.your-objectstorage.com/s/v3/42eb885e3ebc20bd5e94782b7b4bcb31bcc956d3_i.png") %>
+    <% project_image = project.banner.attached? ? url_for(project.banner) : (project.devlogs.find { |u| u.file.attached? && u.file.image? }&.file&.then { |f| url_for(f) } || "https://hc-cdn.hel1.your-objectstorage.com/s/v3/42eb885e3ebc20bd5e94782b7b4bcb31bcc956d3_i.png") %>
     <div class="h-36 md:h-48">
-      <img src="<%# project_image %>" alt="<%= project.title %>" class="w-full h-full object-cover">
+      <img src="<%= project_image %>" alt="<%= project.title %>" class="w-full h-full object-cover">
     </div>
 
     <div class="flex flex-col flex-grow py-2 px-4">
       <%
-        timer_total_time = 0 # project.timer_sessions.where(status: :stopped).sum(:net_time)
-        hackatime_total_time = 0 # project.hackatime_total_time
-        total_time_seconds = 0 # timer_total_time + hackatime_total_time
+        timer_total_time = project.timer_sessions.where(status: :stopped).sum(:net_time)
+        hackatime_total_time = project.hackatime_total_time
+        total_time_seconds = timer_total_time + hackatime_total_time
       %>
 
       <div class="flex items-center justify-between">
       <h2 class="text-xl md:text-2xl 2xl:text-3xl line-clamp-1"><%= project.title %></h2>
       <% if user_signed_in? && current_user != project.user %>
           <div>
-          <%# render "projects/follow_button", project: project %>
+          <%= render "projects/follow_button", project: project %>
           </div>
       <% end %>
       </div>
 
       <p class="mb-2 line-clamp-3 text-sm md:text-base 2xl:text-lg text-[#B89576] break-words overflow-wrap-anywhere">
-        <%= "by #{project.user.display_name}  •  " if show_author %><%= project.devlogs.size %> devlogs  •  <%= format_seconds(total_time_seconds) %>
+        <%= "by #{project.user.display_name}  •  " if show_author %><%= project.devlogs.count %> devlogs  •  <%= format_seconds(total_time_seconds) %>
       </p>
 
       <p class="line-clamp-3 text-sm md:text-base 2xl:text-lg overflow-hidden mb-4">
