@@ -10,8 +10,6 @@
     <h3 class="text-xl md:text-2xl 2xl:text-3xl mb-3 md:mb-4">Add Devlog</h3>
 
     <%
-      has_unlinked_timer_sessions = @unlinked_timer_sessions && @unlinked_timer_sessions.any?
-
       time_since_last = @project.user.hackatime_stat.time_since_last_update_for_project(@project)
       has_hackatime_time = time_since_last > 0 # Only count as having time if more than 5 minutes (300 seconds)
     %>
@@ -36,7 +34,7 @@
       <% end %>
 
       <div class="<%= 'hidden' if !has_hackatime_time %>">
-        <% if has_unlinked_timer_sessions && @project.hackatime_project_keys.present? && @project.user.has_hackatime && has_hackatime_time %>
+        <% if @project.hackatime_project_keys.present? && @project.user.has_hackatime && has_hackatime_time %>
           <div data-controller="time-source" class="mb-6">
             <label class="block text-base md:text-lg 2xl:text-xl mb-2">Choose Time Tracking Source</label>
             <div class="space-y-4">
@@ -107,31 +105,6 @@
             </div>
           </div>
         <% else %>
-          <% if has_unlinked_timer_sessions %>
-            <div class="mb-6">
-              <label class="block text-base md:text-lg 2xl:text-xl mb-2">Select Timer Session</label>
-              <div class="space-y-3">
-                <% @unlinked_timer_sessions.each do |session| %>
-                  <div class="flex items-center p-3 border border-saddle-taupe">
-                    <input type="radio" id="timer_session_<%= session.id %>" name="devlog[timer_session_id]" value="<%= session.id %>"
-                          class="mr-3" <%= 'checked' if @unlinked_timer_sessions.first.id == session.id %>>
-                    <label for="timer_session_<%= session.id %>" class="flex-grow cursor-pointer">
-                      <div class="text-base md:text-lg">
-                        <% hours = session.net_time / 3600 %>
-                        <% minutes = (session.net_time % 3600) / 60 %>
-                        <% seconds = session.net_time % 60 %>
-                        <div>Duration: <%= "#{hours}h #{minutes}m #{seconds}s" %></div>
-                        <div class="text-xs md:text-sm text-gray-600">
-                          Created: <%= session.created_at.in_time_zone(current_user.timezone).strftime("%b %d, %Y at %I:%M %p") %>
-                        </div>
-                      </div>
-                    </label>
-                  </div>
-                <% end %>
-              </div>
-            </div>
-          <% end %>
-
           <% if @project.hackatime_project_keys.present? && @project.user.has_hackatime && has_hackatime_time %>
             <div class="mb-6">
               <label class="block text-base md:text-lg 2xl:text-xl mb-2">Time tracked with Hackatime</label>
