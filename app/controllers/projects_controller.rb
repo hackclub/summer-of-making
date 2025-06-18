@@ -17,51 +17,58 @@ class ProjectsController < ApplicationController
                          .where.not(user_id: current_user.id)
                          .order(rating: :asc)
 
-      # @projects = @projects.sort_by do |project|
-      #     weight = rand + (project.updates.count > 0 ? 1.5 : 0)
-      #     -weight
-      # end
-
       @show_create_project = true if @projects.empty?
     elsif params[:tab] == "gallery"
-      @projects = Project.includes(:user, :devlogs)
-
-      @projects = @projects.sort_by do |project|
-        weight = rand + (project.devlogs.any? ? 1.5 : 0)
-        -weight
-      end
+      gallery
     elsif params[:tab] == "following"
-      @followed_projects = current_user.followed_projects.includes(:user)
-      @recent_devlogs = Devlog.joins(:project)
-                              .includes(:project, :user)
-                              .where(project_id: @followed_projects.pluck(:id))
-                              .where(projects: { is_deleted: false })
-                              .order(created_at: :desc)
-
-      @pagy, @recent_devlogs = pagy(@recent_devlogs, items: 5)
+      following
     elsif params[:tab] == "stonked"
-      @stonked_projects = current_user.staked_projects.includes(:user)
-      @recent_devlogs = Devlog.joins(:project)
-                              .includes(:project, :user)
-                              .where(project_id: @stonked_projects.pluck(:id))
-                              .where(projects: { is_deleted: false })
-                              .order(created_at: :desc)
-
-      @pagy, @recent_devlogs = pagy(@recent_devlogs, items: 5)
+      stonked
     else
-      devlogs_query = Devlog.joins(:project)
-                            .includes(:project, :user, comments: :user)
+      devlog
+    end
+  end
+
+  def devlog
+    devlogs_query = Devlog.joins(:project)
+                          .includes(:project, :user, comments: :user)
+                          .where(projects: { is_deleted: false })
+                          .order(created_at: :desc)
+
+    @pagy, @recent_devlogs = pagy(devlogs_query, items: 5)
+
+    @projects = Project.includes(:user).limit(5)
+  end
+
+  def gallery
+    @projects = Project.includes(:user, :devlogs)
+
+    @projects = @projects.sort_by do |project|
+      weight = rand + (project.devlogs.any? ? 1.5 : 0)
+      -weight
+    end
+  end
+
+  def following
+    @followed_projects = current_user.followed_projects.includes(:user)
+    @recent_devlogs = Devlog.joins(:project)
+                            .includes(:project, :user)
+                            .where(project_id: @followed_projects.pluck(:id))
                             .where(projects: { is_deleted: false })
                             .order(created_at: :desc)
 
-      @pagy, @recent_devlogs = pagy(devlogs_query, items: 5)
+    @pagy, @recent_devlogs = pagy(@recent_devlogs, items: 5)
+  end
 
-      @projects = Project.includes(:user, :devlogs)
-      @projects = @projects.sort_by do |project|
-        weight = rand + (project.devlogs.any? ? 1.5 : 0)
-        -weight
-      end
-    end
+  def stonked
+    @stonked_projects = current_user.staked_projects.includes(:user)
+    @recent_devlogs = Devlog.joins(:project)
+                            .includes(:project, :user)
+                            .where(project_id: @stonked_projects.pluck(:id))
+                            .where(projects: { is_deleted: false })
+                            .order(created_at: :desc)
+
+    @pagy, @recent_devlogs = pagy(@recent_devlogs, items: 5)
   end
 
   def show

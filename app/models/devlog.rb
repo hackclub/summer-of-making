@@ -27,7 +27,7 @@
 #
 class Devlog < ApplicationRecord
   belongs_to :user
-  belongs_to :project
+  belongs_to :project, counter_cache: true
   has_many :comments, -> { order(created_at: :desc) }, dependent: :destroy
   has_many :timer_sessions, dependent: :nullify
   has_many :likes, as: :likeable, dependent: :destroy
