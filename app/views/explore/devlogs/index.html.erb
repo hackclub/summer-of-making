@@ -1,0 +1,9 @@
+<% content_for :title, "Explore Devlogs" %>
+
+<h1 class="text-4xl sm:text-5xl mb-0">Devlog</h1>
+
+<%== pagy_nav(@pagy) if @pagy.pages > 1 %>
+
+<%= render partial: "devlogs/devlog", collection: @devlogs %>
+
+<%== pagy_nav(@pagy) if @pagy.pages > 1 %>

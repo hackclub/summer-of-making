@@ -114,14 +114,14 @@
     <!-- Action buttons -->
     <div class="mt-3 sm:mt-4 flex flex-row items-center justify-left gap-x-4 max-w-prose w-full">
       <!-- Like button -->
-      <% if show_likes && user_signed_in? %>
-        <%= render "likes/button", likeable: devlog %>
-      <% end %>
+      <%# if show_likes && user_signed_in? %>
+        <%# render "likes/button", likeable: devlog %>
+      <%# end %>
 
       <!-- Comment button -->
-      <% if show_comment_modal && user_signed_in? %>
-        <%= render "comments/button", devlog: devlog %>
-      <% end %>
+      <%# if show_comment_modal && user_signed_in? %>
+        <%# render "comments/button", devlog: devlog %>
+      <%# end %>
 
       <!-- More button -->
       <% if user_signed_in? && current_user == devlog.user %>
@@ -148,15 +148,15 @@
   <!-- Inline comments -->
   <% if show_comments_inline %>
     <div id="comments-<%= devlog.id %>" class="mt-4 ml-4 sm:ml-6 space-y-3">
-    <%= render devlog.comments %>
+    <%= render partial: "comments/comment", collection: devlog.comments %>
     </div>
   <% end %>
 </div>
 
 <!-- Render comment modal based on context -->
-<% if show_comment_modal || context == 'project' %>
-  <%= render "comments/modal", devlog: devlog %>
-<% end %>
+<%# if show_comment_modal || context == 'project' %>
+  <%# render "comments/modal", devlog: devlog %>
+<%# end %>
 
 <!-- Edit Modal (only for project owner) -->
 <% if user_signed_in? && current_user == devlog.user %>

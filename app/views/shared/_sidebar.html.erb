@@ -37,11 +37,11 @@
 
         <li class="flex justify-start">
           <%= render partial: "shared/link", locals: {
-            target: explore_path,
+            target: explore_devlogs_path,
             text: "Explore",
             icon: tab_unlocked?(:explore) ? "compass" : "lock",
             large: true,
-            highlight: current_page?(explore_path),
+            highlight: current_page?(explore_devlogs_path),
             text_attr: {
               data: { sidebar_target: "collapseFade" },
               class: "text-3xl"

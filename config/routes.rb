@@ -208,7 +208,12 @@ Rails.application.routes.draw do
   # Dashboard
   # get "dashboard", to: "dashboard#index"
 
-  get "explore", to: "projects#index"
+  namespace :explore do
+    # resources :projects, only: [ :index ]
+    resources :devlogs, only: [ :index ]
+  end
+
+  # get "explore", to: "projects#index"
   get "my_projects", to: "projects#my_projects"
   post "check_link", to: "projects#check_link"
   get "check_github_readme", to: "projects#check_github_readme"
