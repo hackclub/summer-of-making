@@ -209,7 +209,7 @@ Rails.application.routes.draw do
   # get "dashboard", to: "dashboard#index"
 
   namespace :explore do
-    # resources :projects, only: [ :index ]
+    resources :projects, only: [ :index ]
     resources :devlogs, only: [ :index ]
   end
 

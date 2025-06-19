@@ -1,0 +1,9 @@
+<% content_for :title, "Explore Projects" %>
+
+<h1 class="text-4xl sm:text-5xl mb-0">Projects</h1>
+
+<%== pagy_nav(@pagy) if @pagy.pages > 1 %>
+
+<%= render partial: "projects/project_v2", collection: @projects, as: :project %>
+
+<%== pagy_nav(@pagy) if @pagy.pages > 1 %>
