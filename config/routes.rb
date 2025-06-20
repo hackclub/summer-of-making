@@ -315,7 +315,7 @@ Rails.application.routes.draw do
     resources :shop_orders do
       collection do
         get :pending
-        get :to_be_fulfilled
+        get :awaiting_fulfillment
       end
       member do
         post :internal_notes

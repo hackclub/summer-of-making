@@ -3,7 +3,7 @@
 module Admin
   class ShopOrdersController < ApplicationController
     include Pagy::Backend
-    before_action :set_shop_order, except: [ :index, :pending ]
+    before_action :set_shop_order, except: [ :index, :pending, :awaiting_fulfillment ]
 
     def scope
       ShopOrder.all.includes(:user, :shop_item).order(created_at: :desc)
@@ -30,8 +30,8 @@ module Admin
     end
 
     def awaiting_fulfillment
-      @pagy, @shop_orders = pagy(filtered_scope.pending)
-      render :index, locals: { title: "pending " }
+      @pagy, @shop_orders = pagy(filtered_scope.manually_fulfilled.awaiting_periodical_fulfillment)
+      render :index, locals: { title: "fulfillment queue – " }
     end
 
     def show
@@ -48,7 +48,7 @@ module Admin
       @shop_order.approve!
       @shop_order.create_activity("approve")
       flash[:success] = "awesome!"
-      redirect_to [ :admin, @shop_order ]
+      redirect_to pending_admin_shop_orders_path
     end
 
     def reject

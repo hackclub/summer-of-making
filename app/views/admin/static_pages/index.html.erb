@@ -5,7 +5,7 @@
   <div class="agrid" style="max-width: 700px; margin: 0 2em 2em 2em; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1.2em;">
     <%= link_to "All Orders", admin_shop_orders_path, class: 'abtn secondary' %>
     <%= link_to "Pending Acceptance", pending_admin_shop_orders_path, class: 'abtn secondary' %>
-    <%= link_to "Manual Fulfillment", pending_admin_shop_orders_path, class: 'abtn secondary' %>
+    <%= link_to "Manual Fulfillment", awaiting_fulfillment_admin_shop_orders_path, class: 'abtn secondary' %>
     <%= link_to "Shop Items", admin_shop_items_path, class: 'abtn secondary' %>
     <%= link_to "Users", admin_users_path, class: 'abtn secondary' %>
     <%= link_to "Blazer", admin_blazer_path, class: 'abtn secondary' %>
