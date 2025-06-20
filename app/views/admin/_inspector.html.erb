@@ -1,4 +1,4 @@
-<% if params[:inspect] && current_user&.is_admin? %>
+<% if (params[:inspect] || Rails.env.development?) && current_user&.is_admin? %>
 <details style="border: 1px solid deeppink; display: inline-block">
   <summary style="font-family: 'Comic Sans MS'"><%= record.model_name.human %> record #<%= record.id %></summary>
   <%== ap record %>
