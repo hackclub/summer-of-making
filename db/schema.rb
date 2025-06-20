@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_06_20_214216) do
+ActiveRecord::Schema[8.0].define(version: 2025_06_20_215713) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -351,6 +351,18 @@ ActiveRecord::Schema[8.0].define(version: 2025_06_20_214216) do
     t.boolean "limited", default: false
     t.integer "stock"
     t.text "under_the_fold_description"
+    t.boolean "enabled_us", default: false
+    t.boolean "enabled_eu", default: false
+    t.boolean "enabled_in", default: false
+    t.boolean "enabled_ca", default: false
+    t.boolean "enabled_au", default: false
+    t.boolean "enabled_xx", default: false
+    t.decimal "price_offset_us", precision: 6, scale: 2, default: "0.0"
+    t.decimal "price_offset_eu", precision: 6, scale: 2, default: "0.0"
+    t.decimal "price_offset_in", precision: 6, scale: 2, default: "0.0"
+    t.decimal "price_offset_ca", precision: 6, scale: 2, default: "0.0"
+    t.decimal "price_offset_au", precision: 6, scale: 2, default: "0.0"
+    t.decimal "price_offset_xx", precision: 6, scale: 2, default: "0.0"
     t.check_constraint "hacker_score >= 0 AND hacker_score <= 100", name: "hacker_score_percentage_check"
   end
 

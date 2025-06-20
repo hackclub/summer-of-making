@@ -1,14 +1,17 @@
 <% if current_user %>
   <% ineligible = current_verification_status == :ineligible %>
   <% out_of_stock = item.out_of_stock? %>
-  <% disabled = ineligible || (!current_user.ysws_verified? && !item.is_a?(ShopItem::FreeStickers)) || !item.can_afford?(current_user) || out_of_stock %>
+  <% regional_price = @selected_region ? item.price_for_region(@selected_region) : item.ticket_cost %>
+  <% disabled = ineligible || (!current_user.ysws_verified? && !item.is_a?(ShopItem::FreeStickers)) || (current_user.balance < regional_price) || out_of_stock %>
+<% else %>
+  <% regional_price = @selected_region ? item.price_for_region(@selected_region) : item.ticket_cost %>
 <% end %>
 <%= render "shared/card", classes: "#{"col-span-full" if item.is_free?}" do %>
   <!-- <div class="bg-soft-bone card-pixel bg-surface0 shadow p-6 rounded-lg h-full flex flex-col text-center w-full <%= "col-span-full" if item.is_free? %>"> -->
   <div class="flex-grow flex flex-col justify-between min-h-0 relative">
-    <% if item.ticket_cost > 0 %>
+    <% if regional_price > 0 %>
       <div class="absolute top-2 right-2 text-lg font-bold whitespace-nowrap flex items-center">
-        <%= render_shells item.ticket_cost %>
+        <%= render_shells regional_price %>
       </div>
     <% end %>
     <div class="flex-grow">
@@ -56,14 +59,14 @@
             <span>
               You need your ID verified for this
             </span>
-          <% elsif item.can_afford?(current_user) %>
+          <% elsif current_user.balance >= regional_price %>
             <span>
-              <% if item.is_free? %>
+              <% if regional_price == 0 %>
                 Acquire!
               <% else %>
                 <span class="flex items-center justify-center gap-1">Buy for
                   <span class="flex items-center gap-1">
-                    <%= render_shells item.ticket_cost %>
+                    <%= render_shells regional_price %>
                   </span>
                 </span>
               <% end %>
@@ -75,7 +78,7 @@
                 <source srcset="/shell.webp" type="image/webp">
                 <img src="/shell.png" width="15px" style="vertical-align:text-top" alt="shell">
               </picture>
-              <span><%= (item.ticket_cost - current_user.balance).ceil %> needed</span>
+              <span><%= (regional_price - current_user.balance).ceil %> needed</span>
             </span>
           <% end %>
         <% end %>

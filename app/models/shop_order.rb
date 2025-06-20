@@ -48,6 +48,7 @@ class ShopOrder < ApplicationRecord
   validate :check_max_quantity_limit
   validate :check_black_market_access
   validate :check_user_balance
+  validate :check_regional_availability
   after_create :create_negative_payout
   before_create :set_initial_state_for_free_stickers
 
@@ -170,6 +171,19 @@ class ShopOrder < ApplicationRecord
     if user&.balance&.< total_cost
       shortage = total_cost - (user.balance || 0)
       errors.add(:base, "Insufficient balance. You need #{shortage} more tickets.")
+    end
+  end
+
+  def check_regional_availability
+    return unless shop_item.present? && frozen_address.present?
+
+    address_country = frozen_address["country"]
+    return unless address_country.present?
+
+    address_region = Shop::Regionalizable.country_to_region(address_country)
+
+    unless shop_item.enabled_in_region?(address_region)
+      errors.add(:base, "This item is not available for shipping to #{address_country}.")
     end
   end
 

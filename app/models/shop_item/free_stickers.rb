@@ -5,6 +5,12 @@
 #  id                         :bigint           not null, primary key
 #  agh_contents               :jsonb
 #  description                :string
+#  enabled_au                 :boolean          default(FALSE)
+#  enabled_ca                 :boolean          default(FALSE)
+#  enabled_eu                 :boolean          default(FALSE)
+#  enabled_in                 :boolean          default(FALSE)
+#  enabled_us                 :boolean          default(FALSE)
+#  enabled_xx                 :boolean          default(FALSE)
 #  hacker_score               :integer          default(0)
 #  hcb_category_lock          :string
 #  hcb_keyword_lock           :string
@@ -14,6 +20,12 @@
 #  max_qty                    :integer          default(10)
 #  name                       :string
 #  one_per_person_ever        :boolean          default(FALSE)
+#  price_offset_au            :decimal(6, 2)    default(0.0)
+#  price_offset_ca            :decimal(6, 2)    default(0.0)
+#  price_offset_eu            :decimal(6, 2)    default(0.0)
+#  price_offset_in            :decimal(6, 2)    default(0.0)
+#  price_offset_us            :decimal(6, 2)    default(0.0)
+#  price_offset_xx            :decimal(6, 2)    default(0.0)
 #  requires_black_market      :boolean
 #  show_in_carousel           :boolean
 #  stock                      :integer

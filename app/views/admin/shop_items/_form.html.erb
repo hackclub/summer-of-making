@@ -154,6 +154,72 @@
     </div>
   </div>
 
+  <!-- Regional Availability Matrix -->
+  <div class="row mt-4">
+    <div class="col-12">
+      <h4>Regional Availability & Pricing</h4>
+      <div class="table-responsive">
+        <table class="table table-bordered table-striped">
+          <thead>
+            <tr>
+              <th>Region</th>
+              <th>Enabled</th>
+              <th>Δ <%= shell_icon %></th>
+              <th>Δ Hours</th>
+              <th>Δ USD</th>
+              <th>Final Price</th>
+              <th>Est. Hours</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% Shop::Regionalizable::REGIONS.each do |code, config| %>
+              <tr>
+                <td>
+                  <strong><%= config[:name] %></strong>
+                  <br><small class="text-muted"><%= code %></small>
+                </td>
+                <td>
+                  <div class="form-check">
+                    <%= form.check_box "enabled_#{code.downcase}", class: "form-check-input region-enabled", data: { region: code.downcase } %>
+                  </div>
+                </td>
+                <td>
+                  <div class="input-group">
+                    <span class="input-group-text"><%= shell_icon %></span>
+                    <%= form.number_field "price_offset_#{code.downcase}", step: 0.01, class: "form-control price-offset", data: { region: code.downcase }, placeholder: "0.00" %>
+                  </div>
+                </td>
+                <td>
+                  <div class="input-group input-group-sm">
+                    <input type="number" step="0.1" class="form-control delta-hours-input" data-region="<%= code.downcase %>" placeholder="0.0">
+                    <span class="input-group-text">hrs</span>
+                  </div>
+                </td>
+                <td>
+                  <div class="input-group input-group-sm">
+                    <span class="input-group-text">$</span>
+                    <input type="number" step="0.01" class="form-control delta-dollars-input" data-region="<%= code.downcase %>" placeholder="0.00">
+                  </div>
+                </td>
+                <td>
+                  <%= shell_icon %><span class="final-price" data-region="<%= code.downcase %>">
+                    <%= ((@shop_item.ticket_cost || 0) + (@shop_item.send("price_offset_#{code.downcase}") || 0)).round(2) %>
+                  </span>
+                </td>
+                <td>
+                  <span class="estimated-hours text-muted" data-region="<%= code.downcase %>">
+                    0.0
+                  </span>
+                  <small class="d-block text-muted">average hours</small>
+                </td>
+              </tr>
+            <% end %>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
   <div class="actions">
     <%= form.submit class: "btn btn-primary" %>
     <%= link_to 'Cancel', admin_shop_items_path, class: "btn btn-secondary" %>
@@ -230,5 +296,110 @@
             // Initial state on page load
             toggleStockField();
         }
+
+        // Handle regional pricing updates from price offset changes
+        function updateFromPriceOffset(region, skipHours = false, skipDollars = false) {
+            const basePrice = parseFloat(ticketCostField.value) || 0;
+            const offsetField = document.querySelector(`[data-region="${region}"].price-offset`);
+            const offset = parseFloat(offsetField.value) || 0;
+            const finalPrice = basePrice + offset;
+            
+            // Update final price
+            const finalPriceSpan = document.querySelector(`[data-region="${region}"].final-price`);
+            if (finalPriceSpan) {
+                finalPriceSpan.textContent = `${finalPrice.toFixed(2)}`;
+            }
+            
+            // Calculate and update estimated total hours
+            const estimatedHours = finalPrice / (gameConstants.doubloons_per_dollar * gameConstants.dollars_per_mean_hour);
+            const estimatedHoursSpan = document.querySelector(`[data-region="${region}"].estimated-hours`);
+            if (estimatedHoursSpan) {
+                estimatedHoursSpan.textContent = `${estimatedHours.toFixed(1)}`;
+            }
+            
+            // Calculate and update delta hours
+            if (!skipHours) {
+                const deltaHours = offset / (gameConstants.doubloons_per_dollar * gameConstants.dollars_per_mean_hour);
+                const deltaHoursInput = document.querySelector(`[data-region="${region}"].delta-hours-input`);
+                if (deltaHoursInput) {
+                    deltaHoursInput.value = deltaHours.toFixed(1);
+                }
+            }
+            
+            // Update delta dollars (convert shells to USD: offset / doubloons_per_dollar)
+            if (!skipDollars) {
+                const deltaDollars = offset / gameConstants.doubloons_per_dollar;
+                const deltaDollarsInput = document.querySelector(`[data-region="${region}"].delta-dollars-input`);
+                if (deltaDollarsInput) {
+                    deltaDollarsInput.value = deltaDollars.toFixed(2);
+                }
+            }
+        }
+
+        // Handle updates from delta hours changes
+        function updateFromDeltaHours(region) {
+            const deltaHoursInput = document.querySelector(`[data-region="${region}"].delta-hours-input`);
+            const deltaHours = parseFloat(deltaHoursInput.value) || 0;
+            
+            // Calculate price offset from hours: offset = deltaHours * (doubloons_per_dollar * dollars_per_mean_hour)
+            const offset = deltaHours * (gameConstants.doubloons_per_dollar * gameConstants.dollars_per_mean_hour);
+            
+            // Update price offset field
+            const offsetField = document.querySelector(`[data-region="${region}"].price-offset`);
+            if (offsetField) {
+                offsetField.value = offset.toFixed(2);
+            }
+            
+            // Update other fields (skip hours since we're editing it, but update dollars)
+            updateFromPriceOffset(region, true, false);
+        }
+
+        // Handle updates from delta dollars changes  
+        function updateFromDeltaDollars(region) {
+            const deltaDollarsInput = document.querySelector(`[data-region="${region}"].delta-dollars-input`);
+            const deltaDollars = parseFloat(deltaDollarsInput.value) || 0;
+            
+            // Convert dollars to shells: offset = deltaDollars * doubloons_per_dollar
+            const offset = deltaDollars * gameConstants.doubloons_per_dollar;
+            const offsetField = document.querySelector(`[data-region="${region}"].price-offset`);
+            if (offsetField) {
+                offsetField.value = offset.toFixed(2);
+            }
+            
+            // Update other fields (skip dollars since we're editing it, but update hours)
+            updateFromPriceOffset(region, false, true);
+        }
+
+        // Update all regions
+        function updateAllRegionalPricing() {
+            document.querySelectorAll('.price-offset').forEach(offsetField => {
+                updateFromPriceOffset(offsetField.dataset.region);
+            });
+        }
+
+        // Add event listeners for all pricing inputs
+        document.querySelectorAll('.price-offset').forEach(field => {
+            field.addEventListener('input', function() {
+                updateFromPriceOffset(this.dataset.region);
+            });
+        });
+
+        document.querySelectorAll('.delta-hours-input').forEach(field => {
+            field.addEventListener('input', function() {
+                updateFromDeltaHours(this.dataset.region);
+            });
+        });
+
+        document.querySelectorAll('.delta-dollars-input').forEach(field => {
+            field.addEventListener('input', function() {
+                updateFromDeltaDollars(this.dataset.region);
+            });
+        });
+
+        // Update regional pricing when base price changes
+        if (ticketCostField) ticketCostField.addEventListener('input', updateAllRegionalPricing);
+
+        // Initial regional pricing calculation
+        updateAllRegionalPricing();
     });
 </script>

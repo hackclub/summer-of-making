@@ -6,28 +6,35 @@ class ShopItemsController < ApplicationController
   before_action :refresh_verf!, only: :index
 
   def index
-    # Load all shop items from cache with properly preloaded attachments
-    all_shop_items = Rails.cache.fetch("all_shop_items_with_variants_v2", expires_in: 10.minutes) do
-      ShopItem.with_attached_image
-              .includes(image_attachment: { blob: { variant_records: :image_attachment } })
-              .order(ticket_cost: :asc)
+  @selected_region = determine_user_region
+
+  # Load all shop items from cache with properly preloaded attachments
+  all_shop_items = Rails.cache.fetch("all_shop_items_with_variants_v2", expires_in: 10.minutes) do
+  ShopItem.with_attached_image
+  .includes(image_attachment: { blob: { variant_records: :image_attachment } })
+            .order(ticket_cost: :asc)
               .to_a
-    end
+  end
 
-    # Filter in memory
-    filtered_items = all_shop_items.dup
+  # Filter in memory
+  filtered_items = all_shop_items.dup
 
-    # Filter out black market items unless user has access
-    unless current_user&.has_black_market?
-      filtered_items.reject! { |item| item.requires_black_market? }
-    end
+  # Filter by region availability
+  if @selected_region
+      filtered_items.select! { |item| item.enabled_in_region?(@selected_region) }
+  end
+
+  # Filter out black market items unless user has access
+  unless current_user&.has_black_market?
+  filtered_items.reject! { |item| item.requires_black_market? }
+  end
 
     # Filter out free stickers that have already been ordered by the current user
     if current_user
-      ordered_free_sticker_ids = current_user.shop_orders
-                                  .joins(:shop_item)
-                                  .where(shop_items: { type: "ShopItem::FreeStickers" })
-                                  .pluck(:shop_item_id)
+    ordered_free_sticker_ids = current_user.shop_orders
+                                 .joins(:shop_item)
+                                 .where(shop_items: { type: "ShopItem::FreeStickers" })
+                                 .pluck(:shop_item_id)
       filtered_items.reject! { |item| ordered_free_sticker_ids.include?(item.id) }
     end
 
@@ -56,6 +63,23 @@ class ShopItemsController < ApplicationController
   end
 
   private
+
+  def determine_user_region
+    return params[:region] if params[:region].present? && Shop::Regionalizable::REGION_CODES.include?(params[:region].upcase)
+    return session[:selected_region] if session[:selected_region].present?
+
+    if current_user&.identity_vault_linked?
+      addresses = current_user.addresses || []
+      primary_address = addresses.find { |addr| addr["primary"] } || addresses.first
+      if primary_address && primary_address["country"]
+        region = Shop::Regionalizable.country_to_region(primary_address["country"])
+        session[:selected_region] = region
+        return region
+      end
+    end
+
+    "US"
+  end
 
   def require_admin!
     return if current_user&.is_admin?
