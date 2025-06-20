@@ -43,6 +43,10 @@ class ShopItem < ApplicationRecord
   scope :shown_in_carousel, -> { where(show_in_carousel: true) }
   scope :manually_fulfilled, -> { where(type: MANUAL_FULFILLMENT_TYPES) }
 
+  def fulfill!(shop_order)
+    shop_order.queue_for_nightly!
+  end
+
   validates_presence_of :ticket_cost, :name, :description
   def manually_fulfilled?
     MANUAL_FULFILLMENT_TYPES.include? self.class
