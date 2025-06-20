@@ -19,6 +19,12 @@
         <p class="text-saddle-taupe mb-4"><%= order.shop_item.description %></p>
       <% end %>
 
+      <% if order.shop_item.under_the_fold_description.present? %>
+        <div class="bg-soft-bone/50 p-3 card-pixel mb-4">
+          <p class="text-sm text-saddle-taupe leading-relaxed"><%= simple_format(order.shop_item.under_the_fold_description) %></p>
+        </div>
+      <% end %>
+
       <div class="grid md:grid-cols-2 gap-4">
         <div>
           <span class="font-semibold text-darker-taupe">Quantity:</span>

@@ -29,6 +29,12 @@
           <% if @item.description.present? %>
             <p class="text-lg text-saddle-taupe leading-relaxed"><%= @item.description %></p>
           <% end %>
+
+          <% if @item.under_the_fold_description.present? %>
+            <div class="bg-white/50 p-4 card-pixel">
+              <p class="text-base text-saddle-taupe leading-relaxed"><%= simple_format(@item.under_the_fold_description) %></p>
+            </div>
+          <% end %>
           <% if @item.is_a?(ShopItem::FreeStickers) %>
             <%= image_tag "free_stickers.png" %>
           <% end %>

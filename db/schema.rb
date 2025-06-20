@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_06_20_193759) do
+ActiveRecord::Schema[8.0].define(version: 2025_06_20_214216) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -350,6 +350,7 @@ ActiveRecord::Schema[8.0].define(version: 2025_06_20_193759) do
     t.boolean "show_in_carousel"
     t.boolean "limited", default: false
     t.integer "stock"
+    t.text "under_the_fold_description"
     t.check_constraint "hacker_score >= 0 AND hacker_score <= 100", name: "hacker_score_percentage_check"
   end
 
