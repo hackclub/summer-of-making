@@ -27,14 +27,14 @@
   <tbody>
     <tr>
       <td><%= current_user.id %></td>
-      <td><span style="color: var(--color-primary); font-weight: bold;">the girl(?) reading this &lt;3</span></td>
+      <td><%= link_to admin_user_path(current_user) do %><span style="color: var(--color-primary); font-weight: bold;">the girl(?) reading this &lt;3</span><% end %></td>
       <td><%= current_user.email %></td>
       <td><%= link_to "View", admin_user_path(current_user), class: 'abtn secondary', style: 'padding: 0.3em 0.8em; font-size: 0.95em;' %></td>
     </tr>
     <% @users.each do |user| %>
       <tr>
         <td><%= user.id %></td>
-        <td><span style="color: var(--color-primary);"><%= user.display_name || "????" %></span></td>
+        <td><%= link_to admin_user_path(user) do %><span style="color: var(--color-primary);"><%= user.display_name || "????" %></span><% end %></td>
         <td><%= user.email %></td>
         <td><%= link_to "View", admin_user_path(user), class: 'abtn secondary', style: 'padding: 0.3em 0.8em; font-size: 0.95em;' %></td>
       </tr>
