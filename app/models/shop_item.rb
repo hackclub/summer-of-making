@@ -26,6 +26,12 @@
 #  updated_at            :datetime         not null
 #
 class ShopItem < ApplicationRecord
+  MANUAL_FULFILLMENT_TYPES = [
+    ShopItem::ThirdPartyPhysical,
+    ShopItem::HQMailItem,
+    ShopItem::SpecialFulfillmentItem
+  ]
+
   has_one_attached :image do |attachable|
     attachable.variant :thumb, resize_to_limit: [ 256, 256 ]
   end
@@ -35,11 +41,12 @@ class ShopItem < ApplicationRecord
   scope :black_market, -> { where(requires_black_market: true) }
   scope :not_black_market, -> { where(requires_black_market: [ false, nil ]) }
   scope :shown_in_carousel, -> { where(show_in_carousel: true) }
+  scope :manually_fulfilled, -> { where(type: MANUAL_FULFILLMENT_TYPES) }
 
   validates_presence_of :ticket_cost, :name, :description
 
   def manually_fulfilled?
-    true
+    MANUAL_FULFILLMENT_TYPES.include? self.class
   end
 
   def can_afford?(user)
