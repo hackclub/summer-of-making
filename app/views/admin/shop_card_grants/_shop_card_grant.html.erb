@@ -1,0 +1,55 @@
+<% if shop_order.shop_item.is_a?(ShopItem::HCBGrant) %>
+  <div style="border: 1px solid #007bff; margin-top: 1rem; margin-bottom: 1rem; padding: 0.5em;">
+    <h4 style="color: #007bff; margin-top: 0;">💳 HCB Card Grant</h4>
+
+    <% if shop_order.shop_card_grant %>
+      <% grant = shop_order.shop_card_grant %>
+      <strong>Grant ID:</strong>
+      <%= link_to "##{grant.id}", [:admin, grant] %>
+      <br>
+
+      <% if grant.hcb_grant_hashid %>
+        <strong>HCB Grant:</strong>
+       <%= link_to grant.hcb_grant_hashid, grant.hcb_url, target: "_blank" %>
+        <br>
+      <% end %>
+
+      <strong>Expected Amount:</strong> $<%= sprintf("%.2f", (grant.expected_amount_cents || 0) / 100.0) %>
+      <br>
+
+      <% begin %>
+        <% if grant.hcb_grant_hashid && (hcb_data = grant.hcb_data) %>
+          <strong>HCB Status:</strong>
+          <span style="<%= hcb_data['status'] == 'active' ? 'color: green;' : 'color: orange;' %>">
+            <%= hcb_data['status']&.humanize || 'Unknown' %>
+          </span>
+          <br>
+          <strong>Current Balance:</strong> $<%= sprintf("%.2f", (hcb_data['balance_cents'] || 0) / 100.0) %>
+          <br>
+          <% if hcb_data['merchant_lock'] || hcb_data['keyword_lock'] || hcb_data['category_lock'] %>
+            <strong>Locks:</strong>
+            <% locks = [] %>
+            <% locks << "Merchant: #{hcb_data['merchant_lock']}" if hcb_data['merchant_lock'] %>
+            <% locks << "Keyword: #{hcb_data['keyword_lock']}" if hcb_data['keyword_lock'] %>
+            <% locks << "Category: #{hcb_data['category_lock']}" if hcb_data['category_lock'] %>
+            <%= locks.join(', ') %>
+            <br>
+          <% end %>
+        <% else %>
+          <em style="color: #666;">HCB grant not yet created</em>
+          <br>
+        <% end %>
+      <% rescue => e %>
+        <em style="color: #dc3545;">Error loading HCB data: <%= e.message %></em>
+        <br>
+      <% end %>
+
+      <small>Grant created: <%= grant.created_at.strftime("%m/%d/%Y %I:%M %p") %></small>
+    <% else %>
+      <em style="color: #666;">No card grant associated with this order yet</em>
+      <br>
+      <small>Grant will be created when order is fulfilled</small>
+    <% end %>
+    <%= render "admin/inspector", record: grant %>
+  </div>
+<% end %>

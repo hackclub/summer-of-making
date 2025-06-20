@@ -1,0 +1,32 @@
+# frozen_string_literal: true
+
+class Shop::UpdateHCBLocksJob < ApplicationJob
+  queue_as :default
+
+  def perform(shop_item_id)
+    shop_item = ShopItem.find(shop_item_id)
+    return unless shop_item.is_a?(ShopItem::HCBGrant)
+
+    # Find all active card grants for this shop item
+    shop_item.shop_card_grants.each do |grant|
+      next unless grant.hcb_grant_hashid
+
+      begin
+        Rails.logger.info "Updating HCB locks for grant #{grant.hcb_grant_hashid}"
+
+        HCBService.update_card_grant(
+          hashid: grant.hcb_grant_hashid,
+          merchant_lock: shop_item.hcb_merchant_lock,
+          keyword_lock: shop_item.hcb_keyword_lock,
+          category_lock: shop_item.hcb_category_lock,
+          purpose: "SOM: #{shop_item.name}"
+        )
+
+        Rails.logger.info "Successfully updated locks for grant #{grant.hcb_grant_hashid}"
+      rescue => e
+        Rails.logger.error "Failed to update HCB locks for grant #{grant.hcb_grant_hashid}: #{e.message}"
+        # Continue processing other grants even if one fails
+      end
+    end
+  end
+end

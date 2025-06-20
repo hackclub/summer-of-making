@@ -23,4 +23,18 @@
 class ShopCardGrant < ApplicationRecord
   belongs_to :user
   belongs_to :shop_item
+
+  def hcb_data
+    @hcb_data ||= HCBService.show_card_grant(hashid: hcb_grant_hashid)
+  end
+
+  def hcb_url
+    "#{HCBService.base_url}/grants/#{stripped_hashid}"
+  end
+
+  private
+
+  def stripped_hashid
+    hcb_grant_hashid[4..]
+  end
 end

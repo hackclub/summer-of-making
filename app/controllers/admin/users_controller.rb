@@ -46,6 +46,13 @@ module Admin
       redirect_to admin_user_path(@user)
     end
 
+    def cancel_card_grants
+      CancelUserCardGrantsJob.perform_later(@user)
+      @user.create_activity("cancel_card_grants")
+      flash[:success] = "Card grant cancellation job has been queued"
+      redirect_to admin_user_path(@user)
+    end
+
     def freeze
       @user.update!(freeze_shop_activity: true)
       @user.create_activity("freeze")

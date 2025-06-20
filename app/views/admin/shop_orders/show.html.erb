@@ -24,6 +24,9 @@
 <%= addy["line_2"] %> <br>
 <%= addy["city"] %>, <%= addy["state"] %> <%= addy["postal_code"] %><br>
 <%= addy["country"] %> <br>
+
+<%= render "admin/shop_card_grants/shop_card_grant", shop_order: @shop_order %>
+
 <br>
 <br>
 <% state = @shop_order.aasm.current_state %>

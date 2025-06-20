@@ -1,0 +1,101 @@
+<h1>Shop Card Grant #<%= @shop_card_grant.id %></h1>
+
+<%= link_to "← back to grants", admin_shop_card_grants_path %>
+<br><br>
+
+<div style="border: 1px solid; margin-bottom: 1rem; padding: 0.5em">
+  <h3>Grant Details</h3>
+  <strong>User:</strong>
+  <%= link_to @shop_card_grant.user.display_name, [:admin, @shop_card_grant.user] %>
+  (<%= @shop_card_grant.user.email %>)
+  <br>
+  <strong>Shop Item:</strong>
+  <%= link_to @shop_card_grant.shop_item.name, [:admin, @shop_card_grant.shop_item.becomes(ShopItem)] %>
+  <br>
+  <strong>Expected Amount:</strong> $<%= sprintf("%.2f", (@shop_card_grant.expected_amount_cents || 0) / 100.0) %>
+  <br>
+  <strong>Created:</strong> <%= @shop_card_grant.created_at.strftime("%m/%d/%Y %I:%M %p") %>
+  <br>
+  <strong>Updated:</strong> <%= @shop_card_grant.updated_at.strftime("%m/%d/%Y %I:%M %p") %>
+</div>
+
+<% if @shop_card_grant.hcb_grant_hashid %>
+  <div style="border: 1px solid; margin-bottom: 1rem; padding: 0.5em">
+    <h3>HCB Grant Information</h3>
+    <strong>HCB Grant ID:</strong>
+    <%= link_to @shop_card_grant.hcb_grant_hashid, @shop_card_grant.hcb_url %>
+    <br>
+
+    <% if @hcb_data %>
+      <br><br>
+      <strong>HCB Status:</strong> <%= @hcb_data['status']&.humanize || 'Unknown' %>
+      <br>
+      <strong>Balance:</strong> $<%= sprintf("%.2f", (@hcb_data['balance_cents'] || 0) / 100.0) %>
+      <br>
+      <strong>Total Granted:</strong> $<%= sprintf("%.2f", (@hcb_data['total_granted_cents'] || 0) / 100.0) %>
+      <br>
+      <% if @hcb_data['user'] %>
+        <strong>HCB User:</strong> <%= @hcb_data.dig('user', 'name') || @hcb_data.dig('user', 'email') %>
+        <br>
+      <% end %>
+      <% if @hcb_data['purpose'] %>
+        <strong>Purpose:</strong> <%= @hcb_data['purpose'] %>
+        <br>
+      <% end %>
+      <% if @hcb_data['merchant_lock'] %>
+        <strong>Merchant Lock:</strong> <%= @hcb_data['merchant_lock'] %>
+        <br>
+      <% end %>
+      <% if @hcb_data['keyword_lock'] %>
+        <strong>Keyword Lock:</strong> <%= @hcb_data['keyword_lock'] %>
+        <br>
+      <% end %>
+      <% if @hcb_data['category_lock'] %>
+        <strong>Category Lock:</strong> <%= @hcb_data['category_lock'] %>
+        <br>
+      <% end %>
+
+      <% if @hcb_data['disbursements']&.any? %>
+        <br>
+        <strong>Recent Disbursements:</strong>
+        <ul>
+          <% @hcb_data['disbursements'].first(5).each do |disbursement| %>
+            <li>
+              $<%= sprintf("%.2f", (disbursement['amount_cents'] || 0) / 100.0) %>
+              <% if disbursement['memo'] %>
+                - <%= disbursement['memo'] %>
+              <% end %>
+              <% if disbursement['created_at'] %>
+                (<%= Time.parse(disbursement['created_at']).strftime("%m/%d/%Y") %>)
+              <% end %>
+            </li>
+          <% end %>
+        </ul>
+      <% end %>
+    <% end %>
+  </div>
+<% else %>
+  <div style="border: 1px solid; margin-bottom: 1rem; padding: 0.5em; background-color: #fff3cd;">
+    <h3>⚠️ No HCB Grant Created</h3>
+    <p>This shop card grant record exists but no HCB grant has been created yet.</p>
+  </div>
+<% end %>
+
+<div style="border: 1px solid; margin-bottom: 1rem; padding: 0.5em">
+  <h3>Related Shop Orders</h3>
+  <% related_orders = ShopOrder.joins(:shop_card_grant).where(shop_card_grant: @shop_card_grant) %>
+  <% if related_orders.any? %>
+    <% related_orders.each do |order| %>
+      <div style="margin-bottom: 0.5em;">
+        <%= link_to "Order ##{order.id}", [:admin, order] %>
+        - <%= order.aasm_state.humanize %>
+        - Qty: <%= order.quantity %>
+        <small>(<%= order.created_at.strftime("%m/%d/%Y") %>)</small>
+      </div>
+    <% end %>
+  <% else %>
+    <em>No related shop orders found</em>
+  <% end %>
+</div>
+
+<%= render "admin/inspector", record: @shop_card_grant %>

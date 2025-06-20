@@ -6,6 +6,7 @@
 <div style="border: 1px dashed red; width: fit-content; padding: 1rem">
   <b style="color: red;">DON'T DO THIS:</b>
   <%= button_to "nuke IDV data", nuke_idv_data_admin_user_path(@user) %>
+  <%= button_to "cancel all card grants (only do this if you're banning somebody)", cancel_card_grants_admin_user_path(@user) %>
 </div>
 <br><br>
 <% if @user.freeze_shop_activity? %>
@@ -13,7 +14,7 @@
 <% else %>
   <%= button_to "freeze (don't allow shop activity)", freeze_admin_user_path(@user) %>
 <% end %>
-<br/><br/>
+<br><br>
 <b>Payouts:</b>
 <ul>
   <% @payouts.each do |payout| %>

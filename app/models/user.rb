@@ -42,6 +42,7 @@ class User < ApplicationRecord
   has_one :tutorial_progress, dependent: :destroy
   has_one :magic_link, dependent: :destroy
   has_many :shop_orders
+  has_many :shop_card_grants
   has_many :hackatime_projects
 
   before_validation { self.email = email.to_s.downcase.strip }

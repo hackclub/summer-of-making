@@ -1,0 +1,29 @@
+<h1>Shop Card Grants</h1>
+
+<%= link_to "← back", admin_root_path %>
+<br><br>
+
+<% @shop_card_grants.each do |grant| %>
+  <div style="border: 1px solid; margin-bottom: 1rem; padding: 0.5em">
+    <strong>Grant #<%= grant.id %></strong>
+    <%= link_to "view", [:admin, grant] %>
+    <br>
+    <strong>User:</strong> <%= grant.user.display_name %> (<%= grant.user.email %>)
+    <br>
+    <strong>Item:</strong> <%= grant.shop_item.name %>
+    <br>
+    <strong>Expected Amount:</strong> $<%= sprintf("%.2f", (grant.expected_amount_cents || 0) / 100.0) %>
+    <br>
+    <% if grant.hcb_grant_hashid %>
+      <strong>HCB Grant ID:</strong>
+      <%= link_to grant.hcb_grant_hashid, grant.hcb_url %>
+    <% else %>
+      <em>No HCB grant created yet</em>
+    <% end %>
+    <br>
+    <small>Created: <%= grant.created_at.strftime("%m/%d/%Y %I:%M %p") %></small>
+  </div>
+<% end %>
+
+<%= pagy_info(@pagy) if @pagy.pages > 1 %>
+<%= pagy_nav(@pagy) if @pagy.pages > 1 %>

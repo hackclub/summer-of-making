@@ -150,7 +150,7 @@
           </td>
           <td><%= order.quantity %></td>
           <td><%= order.total_cost %></td>
-          <td><%= order.status&.humanize %></td>
+          <td><%= order.aasm_state&.humanize %></td>
           <td><%= order.created_at.strftime("%m/%d/%Y") %></td>
         </tr>
       <% end %>

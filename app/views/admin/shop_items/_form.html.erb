@@ -1,4 +1,4 @@
-<%= form_with(model: @shop_item, url: (@shop_item.persisted? ? admin_shop_item_path(@shop_item) : admin_shop_items_path), method: (@shop_item.persisted? ? :patch : :post), local: true) do |form| %>
+<%= form_with(model: @shop_item.becomes(ShopItem), url: (@shop_item.persisted? ? admin_shop_item_path(@shop_item) : admin_shop_items_path), method: (@shop_item.persisted? ? :patch : :post), local: true) do |form| %>
   <% if @shop_item.errors.any? %>
     <div class="alert alert-danger">
       <h4><%= pluralize(@shop_item.errors.count, "error") %> prohibited this shop item from being saved:</h4>

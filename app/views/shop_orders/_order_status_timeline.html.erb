@@ -79,8 +79,13 @@
           <p class="text-sm text-saddle-taupe"><%= order.fulfilled_at.strftime("%B %d, %Y at %I:%M %p") %></p>
           <% if order.external_ref.present? %>
             <div class="mt-2 p-3 bg-forest/10 rounded">
-              <p class="text-sm font-semibold text-forest">Tracking:</p>
-              <p class="text-lg font-mono text-forest"><%= order.external_ref %></p>
+              <% if order.shop_card_grant.present? %>
+                <p class="text-sm font-semibold text-forest">HCB grant:</p>
+                <p class="text-lg font-mono text-forest"><%= link_to "click here!", order.shop_card_grant.hcb_url %></p>
+              <% else %>
+                <p class="text-sm font-semibold text-forest">Tracking:</p>
+                <p class="text-lg font-mono text-forest"><%= order.external_ref %></p>
+              <% end %>
             </div>
           <% end %>
         <% else %>
@@ -121,7 +126,7 @@
           <% end %>
         <% else %>
           <% case order.shop_item.type %>
-          <% when /Grant/i %>
+        <% when /Grant/i %>
             <li>• Grant requests are reviewed by our team</li>
             <li>• Approved grants are automatically processed</li>
           <% when /HQMail/i %>

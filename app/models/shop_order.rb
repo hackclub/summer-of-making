@@ -41,6 +41,7 @@ class ShopOrder < ApplicationRecord
   belongs_to :shop_item
 
   has_many :payouts, as: :payable, dependent: :destroy
+  belongs_to :shop_card_grant, optional: true
 
   validates :quantity, presence: true, numericality: { greater_than: 0 }
   validate :check_one_per_person_ever_limit
@@ -110,9 +111,11 @@ class ShopOrder < ApplicationRecord
   end
 
   def approve!
-    if shop_item.manually_fulfilled?
-      queue_for_nightly!
-    end
+    shop_item.fulfill!(self)
+  end
+
+  def total_cost
+    frozen_item_price * quantity
   end
 
   private
@@ -173,7 +176,6 @@ class ShopOrder < ApplicationRecord
   def create_negative_payout
     return unless frozen_item_price.present? && frozen_item_price > 0 && quantity.present?
 
-    total_cost = frozen_item_price * quantity
 
     user.payouts.create!(
       amount: -total_cost,

@@ -44,7 +44,6 @@ class ShopItem < ApplicationRecord
   scope :manually_fulfilled, -> { where(type: MANUAL_FULFILLMENT_TYPES) }
 
   validates_presence_of :ticket_cost, :name, :description
-
   def manually_fulfilled?
     MANUAL_FULFILLMENT_TYPES.include? self.class
   end

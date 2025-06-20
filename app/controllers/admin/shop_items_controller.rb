@@ -53,7 +53,7 @@ module Admin
     private
 
     def set_shop_item
-      @shop_item = ShopItem.find(params[:id]).becomes(ShopItem)
+      @shop_item = ShopItem.find(params[:id])
     end
 
     def available_shop_item_types
