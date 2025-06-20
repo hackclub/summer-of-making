@@ -307,6 +307,8 @@ Rails.application.routes.draw do
         post :internal_notes
         post :create_payout
         post :nuke_idv_data
+        post :freeze
+        post :defrost
       end
     end
     resources :shop_items
