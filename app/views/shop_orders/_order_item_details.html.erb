@@ -4,8 +4,8 @@
     <% if order.shop_item.image.attached? %>
       <div class="w-32 h-32 bg-soft-bone card-pixel p-4 flex-shrink-0">
         <%= image_tag order.shop_item.image.variant(:thumb),
-            class: "w-full h-full object-contain",
-            alt: order.shop_item.name %>
+                      class: "w-full h-full object-contain",
+                      alt: order.shop_item.name %>
       </div>
     <% else %>
       <div class="w-32 h-32 bg-soft-bone card-pixel p-4 flex-shrink-0 flex items-center justify-center">
@@ -29,8 +29,7 @@
           <div>
             <span class="font-semibold text-darker-taupe">Total Cost:</span>
             <span class="text-saddle-taupe flex items-center">
-              <span class="mr-1">🐚</span>
-              <%= number_with_delimiter(order.frozen_item_price * order.quantity) %> tickets
+              <%= render_shells order.total_cost %>
             </span>
           </div>
         <% end %>

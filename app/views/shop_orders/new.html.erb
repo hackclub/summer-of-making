@@ -52,8 +52,7 @@
             <div class="flex items-center justify-between py-3 border-b border-saddle-taupe/20">
               <span class="text-lg">Price:</span>
               <span class="text-2xl font-bold text-forest flex items-center">
-                <span class="mr-2">🐚</span>
-                <%= number_with_delimiter(@item.ticket_cost) %>
+                <%= render_shells(@item.ticket_cost) %>
               </span>
             </div>
           <% end %>
@@ -106,7 +105,7 @@
                 <div class="flex justify-between">
                   <span class="text-saddle-taupe">Item Price:</span>
                   <span class="font-semibold flex items-center">
-                    <span class="mr-1">🐚</span>
+                    <span class="mr-1"><%= shell_icon %></span>
                     <span id="item-price"><%= number_with_delimiter(@item.ticket_cost) %></span>
                   </span>
                 </div>
@@ -118,12 +117,11 @@
                   <div class="flex justify-between">
                     <span class="text-forest font-bold">Total Cost:</span>
                     <span class="text-xl font-bold flex items-center" id="total-cost-container">
-                      <span class="mr-1">🐚</span>
-                      <span id="total-cost"><%= number_with_delimiter(@item.ticket_cost) %></span>
+                      <%= render_shells(@item.ticket_cost) %>
                     </span>
                   </div>
                   <div id="insufficient-funds-warning" class="mt-2 text-sm text-vintage-red font-semibold hidden">
-                    ⚠️ Insufficient funds! Need <span id="shortage-amount">0</span> more tickets.
+                    ⚠️ Insufficient funds! Need <span id="shortage-amount">0</span> more shells.
                   </div>
                 </div>
               </div>
@@ -136,14 +134,14 @@
               <div class="flex items-center justify-between">
                 <span class="text-forest font-semibold">Your Current Balance:</span>
                 <span class="text-xl font-bold text-forest flex items-center">
-                  <span class="mr-2">🐚</span>
+                  <span class="mr-2"><%= shell_icon %></span>
                   <%= number_with_delimiter(current_user.balance) %>
                 </span>
               </div>
               <% if current_user.balance < @item.ticket_cost %>
                 <p class="text-vintage-red text-sm mt-2 font-semibold">
-                  ⚠️ Insufficient tickets! You
-                  need <%= number_with_delimiter(@item.ticket_cost - current_user.balance) %> more tickets.
+                  ⚠️ Insufficient shells! You
+                  need <%= number_with_delimiter(@item.ticket_cost - current_user.balance) %> more shells.
                 </p>
               <% end %>
             </div>
@@ -260,7 +258,7 @@
                     }
                     if (submitButton) {
                         submitButton.disabled = true;
-                        submitButton.value = 'Insufficient Tickets';
+                        submitButton.value = 'Insufficient Shells';
                         submitButton.className = 'w-full bg-saddle-taupe/30 text-saddle-taupe/60 font-bold py-4 px-6 btn-pixel text-lg cursor-not-allowed';
                     }
                 }
