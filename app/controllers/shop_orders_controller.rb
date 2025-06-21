@@ -11,13 +11,16 @@ class ShopOrdersController < ApplicationController
 
   def new
     @order = ShopOrder.new
-    @selected_region = determine_user_region
-    @regional_price = @item.price_for_region(@selected_region)
+    @regionalization_enabled = Flipper.enabled?(:shop_regionalization)
+    @selected_region = @regionalization_enabled ? determine_user_region : nil
+    @regional_price = @regionalization_enabled ? @item.price_for_region(@selected_region) : @item.ticket_cost
 
-    # Check if item is available in user's region
-    unless @item.enabled_in_region?(@selected_region)
-      redirect_to shop_path, alert: "#{@item.name} is not available in your region (#{Shop::Regionalizable.region_name(@selected_region)})."
-      return
+    # Check if item is available in user's region (XX items are available everywhere) - only if regionalization enabled
+    if @regionalization_enabled && @selected_region
+      unless @item.enabled_in_region?(@selected_region) || @item.enabled_in_region?("XX")
+        redirect_to shop_path, alert: "#{@item.name} is not available in your region (#{Shop::Regionalizable.region_name(@selected_region)})."
+        return
+      end
     end
 
     # Special handling for free stickers - require IDV linking through OAuth
@@ -36,8 +39,9 @@ class ShopOrdersController < ApplicationController
   def create
     @order = current_user.shop_orders.build(shop_order_params)
     @order.shop_item = @item
-    @selected_region = determine_user_region
-    @regional_price = @item.price_for_region(@selected_region)
+    @regionalization_enabled = Flipper.enabled?(:shop_regionalization)
+    @selected_region = @regionalization_enabled ? determine_user_region : nil
+    @regional_price = @regionalization_enabled ? @item.price_for_region(@selected_region) : @item.ticket_cost
     @order.frozen_item_price = @regional_price
 
     # Use selected address from IDV data if provided, fallback to user's address
@@ -66,19 +70,37 @@ class ShopOrdersController < ApplicationController
   private
 
   def determine_user_region
-    return params[:region] if params[:region].present? && Shop::Regionalizable::REGION_CODES.include?(params[:region].upcase)
+    # URL parameter takes precedence (manual override)
+    if params[:region].present? && Shop::Regionalizable::REGION_CODES.include?(params[:region].upcase)
+      session[:selected_region] = params[:region].upcase
+      session[:region_auto_detected] = false # Clear auto-detection flag
+      return params[:region].upcase
+    end
+
+    # Check if user has previously selected a region
     return session[:selected_region] if session[:selected_region].present?
 
+    # Try to auto-detect from IDV primary address
     if current_user&.identity_vault_linked?
-      addresses = current_user.addresses || []
-      primary_address = addresses.find { |addr| addr["primary"] } || addresses.first
-      if primary_address && primary_address["country"]
-        region = Shop::Regionalizable.country_to_region(primary_address["country"])
-        session[:selected_region] = region
-        return region
+      begin
+        idv_data = current_user.fetch_idv
+        addresses = idv_data.dig(:identity, :addresses) || []
+        primary_address = addresses.find { |addr| addr[:primary] } || addresses.first
+
+        if primary_address && primary_address[:country]
+          region = Shop::Regionalizable.country_to_region(primary_address[:country])
+          session[:selected_region] = region
+          session[:region_auto_detected] = true # Mark as auto-detected
+          return region
+        end
+      rescue => e
+        Rails.logger.warn "Failed to fetch IDV data for region detection: #{e.message}"
       end
     end
 
+    # Default to US if no region detected
+    session[:selected_region] = "US"
+    session[:region_auto_detected] = false
     "US"
   end
 

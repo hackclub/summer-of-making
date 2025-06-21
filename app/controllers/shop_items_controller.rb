@@ -4,39 +4,43 @@ class ShopItemsController < ApplicationController
   before_action :authenticate_user!, except: [ :index ]
   before_action :require_admin!, except: [ :index ]
   before_action :refresh_verf!, only: :index
+  before_action do
+    @regionalization_enabled = Flipper.enabled?(:shop_regionalization)
+  end
 
   def index
-  @selected_region = determine_user_region
+  @selected_region = @regionalization_enabled ? determine_user_region : nil
+    @region_auto_detected = @regionalization_enabled && session[:region_auto_detected]
 
   # Load all shop items from cache with properly preloaded attachments
   all_shop_items = Rails.cache.fetch("all_shop_items_with_variants_v2", expires_in: 10.minutes) do
   ShopItem.with_attached_image
   .includes(image_attachment: { blob: { variant_records: :image_attachment } })
-            .order(ticket_cost: :asc)
-              .to_a
-  end
+  .order(ticket_cost: :asc)
+            .to_a
+    end
 
-  # Filter in memory
-  filtered_items = all_shop_items.dup
+    # Filter in memory
+    filtered_items = all_shop_items.dup
 
-  # Filter by region availability
-  if @selected_region
-      filtered_items.select! { |item| item.enabled_in_region?(@selected_region) }
+  # Filter by region availability (include XX items in all regions) - only if regionalization is enabled
+  if @regionalization_enabled && @selected_region
+      filtered_items.select! { |item| item.enabled_in_region?(@selected_region) || item.enabled_in_region?("XX") }
   end
 
   # Filter out black market items unless user has access
   unless current_user&.has_black_market?
-  filtered_items.reject! { |item| item.requires_black_market? }
+    filtered_items.reject! { |item| item.requires_black_market? }
   end
 
-    # Filter out free stickers that have already been ordered by the current user
-    if current_user
-    ordered_free_sticker_ids = current_user.shop_orders
-                                 .joins(:shop_item)
-                                 .where(shop_items: { type: "ShopItem::FreeStickers" })
-                                 .pluck(:shop_item_id)
-      filtered_items.reject! { |item| ordered_free_sticker_ids.include?(item.id) }
-    end
+  # Filter out free stickers that have already been ordered by the current user
+  if current_user
+  ordered_free_sticker_ids = current_user.shop_orders
+  .joins(:shop_item)
+  .where(shop_items: { type: "ShopItem::FreeStickers" })
+                             .pluck(:shop_item_id)
+    filtered_items.reject! { |item| ordered_free_sticker_ids.include?(item.id) }
+  end
 
     @shop_items = filtered_items
   end
@@ -65,19 +69,37 @@ class ShopItemsController < ApplicationController
   private
 
   def determine_user_region
-    return params[:region] if params[:region].present? && Shop::Regionalizable::REGION_CODES.include?(params[:region].upcase)
+    # URL parameter takes precedence (manual override)
+    if params[:region].present? && Shop::Regionalizable::REGION_CODES.include?(params[:region].upcase)
+      session[:selected_region] = params[:region].upcase
+      session[:region_auto_detected] = false # Clear auto-detection flag
+      return params[:region].upcase
+    end
+
+    # Check if user has previously selected a region
     return session[:selected_region] if session[:selected_region].present?
 
+    # Try to auto-detect from IDV primary address
     if current_user&.identity_vault_linked?
-      addresses = current_user.addresses || []
-      primary_address = addresses.find { |addr| addr["primary"] } || addresses.first
-      if primary_address && primary_address["country"]
-        region = Shop::Regionalizable.country_to_region(primary_address["country"])
-        session[:selected_region] = region
-        return region
+      begin
+        idv_data = current_user.fetch_idv
+        addresses = idv_data.dig(:identity, :addresses) || []
+        primary_address = addresses.find { |addr| addr[:primary] } || addresses.first
+
+        if primary_address && primary_address[:country]
+          region = Shop::Regionalizable.country_to_region(primary_address[:country])
+          session[:selected_region] = region
+          session[:region_auto_detected] = true # Mark as auto-detected
+          return region
+        end
+      rescue => e
+        Rails.logger.warn "Failed to fetch IDV data for region detection: #{e.message}"
       end
     end
 
+    # Default to US if no region detected
+    session[:selected_region] = "US"
+    session[:region_auto_detected] = false
     "US"
   end
 

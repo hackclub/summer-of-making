@@ -54,11 +54,16 @@
 
         <!-- Price display -->
         <div class="space-y-4 mb-6">
-          <% if @item.ticket_cost.present? && @item.ticket_cost > 0 %>
+          <% if @regional_price.present? && @regional_price > 0 %>
             <div class="flex items-center justify-between py-3 border-b border-saddle-taupe/20">
               <span class="text-lg">Price:</span>
               <span class="text-2xl font-bold text-forest flex items-center">
-                <%= render_shells(@item.ticket_cost) %>
+                <%= render_shells(@regional_price) %>
+                <% if @regionalization_enabled && @selected_region && @regional_price != @item.ticket_cost %>
+                  <span class="ml-2 text-sm text-gray-500 line-through">
+                    <%= render_shells(@item.ticket_cost) %>
+                  </span>
+                <% end %>
               </span>
             </div>
           <% end %>
@@ -100,11 +105,14 @@
                        user: current_user,
                        form: f,
                        field_name: 'shipping_address_id',
-                       label_text: 'Shipping Address' %>
+                       label_text: 'Shipping Address',
+                       selected_region: @selected_region,
+                       regionalization_enabled: @regionalization_enabled,
+                       shop_item: @item %>
           </div>
 
           <!-- Cost preview -->
-          <% if @item.ticket_cost.present? && @item.ticket_cost > 0 %>
+          <% if @regional_price.present? && @regional_price > 0 %>
             <div class="bg-forest/10 p-4 card-pixel">
               <h3 class="font-semibold text-forest mb-3">Order Summary</h3>
               <div class="space-y-2">
@@ -112,7 +120,7 @@
                   <span class="text-saddle-taupe">Item Price:</span>
                   <span class="font-semibold flex items-center">
                     <span class="mr-1"><%= shell_icon %></span>
-                    <span id="item-price"><%= number_with_delimiter(@item.ticket_cost) %></span>
+                    <span id="item-price"><%= number_with_delimiter(@regional_price) %></span>
                   </span>
                 </div>
                 <div class="flex justify-between">
@@ -123,7 +131,7 @@
                   <div class="flex justify-between">
                     <span class="text-forest font-bold">Total Cost:</span>
                     <span class="text-xl font-bold flex items-center" id="total-cost-container">
-                      <%= render_shells(@item.ticket_cost) %>
+                      <%= render_shells(@regional_price) %>
                     </span>
                   </div>
                   <div id="insufficient-funds-warning" class="mt-2 text-sm text-vintage-red font-semibold hidden">
@@ -135,7 +143,7 @@
           <% end %>
 
           <!-- User balance info (if tickets) -->
-          <% if @item.ticket_cost.present? && @item.ticket_cost > 0 %>
+          <% if @regional_price.present? && @regional_price > 0 %>
             <div class="bg-forest/10 p-4 card-pixel">
               <div class="flex items-center justify-between">
                 <span class="text-forest font-semibold">Your Current Balance:</span>
@@ -144,10 +152,10 @@
                   <%= number_with_delimiter(current_user.balance) %>
                 </span>
               </div>
-              <% if current_user.balance < @item.ticket_cost %>
+              <% if current_user.balance < @regional_price %>
                 <p class="text-vintage-red text-sm mt-2 font-semibold">
                   ⚠️ Insufficient shells! You
-                  need <%= number_with_delimiter(@item.ticket_cost - current_user.balance) %> more shells.
+                  need <%= number_with_delimiter(@regional_price - current_user.balance) %> more shells.
                 </p>
               <% end %>
             </div>
@@ -173,9 +181,22 @@
             is_one_per_person = @item.one_per_person_ever?
             has_existing_order = current_user.shop_orders.where(shop_item_id: @item.id).exists?
             already_ordered = is_one_per_person && has_existing_order
-            button_disabled = already_ordered
-            button_text = already_ordered ? "Already Purchased" : "Get!"
+
+            # Check if regionalization requires valid address selection
+            requires_valid_address = @regionalization_enabled && @selected_region
+            button_disabled = already_ordered || requires_valid_address
+
+            button_text = if already_ordered
+                           "Already Purchased"
+                         elsif requires_valid_address
+                           "Select Valid Address"
+                         else
+                           "Get!"
+                         end
+
             button_classes = if already_ordered
+                               "w-full bg-gray-400 text-gray-600 font-bold py-4 px-6 btn-pixel text-lg cursor-not-allowed"
+                             elsif requires_valid_address
                                "w-full bg-gray-400 text-gray-600 font-bold py-4 px-6 btn-pixel text-lg cursor-not-allowed"
                              else
                                "w-full bg-forest hover:bg-forest/90 text-white font-bold py-4 px-6 btn-pixel text-lg transition-colors duration-200 cursor-pointer"
@@ -184,7 +205,8 @@
           <%= f.submit button_text,
                        id: "purchase-button",
                        disabled: button_disabled,
-                       class: button_classes %>
+                       class: button_classes,
+                       data: { initial_disabled: requires_valid_address } %>
         <% end %>
         <% if @item.is_a?(ShopItem::FreeStickers) %>
           <div class="text-sm text-saddle-taupe mt-4">
@@ -218,27 +240,44 @@
     document.addEventListener('DOMContentLoaded', function () {
         const quantityInput = document.querySelector('input[name="quantity"]');
         const quantityDisplay = document.getElementById('quantity-display');
-        const totalCostDisplay = document.getElementById('total-cost');
+        const totalCostDisplay = document.getElementById('total-cost-container');
         const totalCostContainer = document.getElementById('total-cost-container');
         const insufficientFundsWarning = document.getElementById('insufficient-funds-warning');
         const shortageAmount = document.getElementById('shortage-amount');
         const submitButton = document.getElementById('purchase-button');
         const orderSummary = totalCostContainer?.closest('.bg-forest\\/10');
 
-        const itemPrice = <%= (@item.ticket_cost || 0).to_json %>;
-        const userBalance = <%= (current_user.balance || 0).to_json %>;
+        const itemPrice = <%= raw((@regional_price || 0).to_json) %>;
+        const userBalance = <%= raw((current_user.balance || 0).to_json) %>;
+
+        console.log('Elements found:', {
+            quantityInput: !!quantityInput,
+            quantityDisplay: !!quantityDisplay,
+            totalCostDisplay: !!totalCostDisplay,
+            totalCostContainer: !!totalCostContainer
+        });
 
         if (quantityInput && quantityDisplay && totalCostDisplay && totalCostContainer) {
+            console.log('All elements found, setting up updateCostPreview');
             function updateCostPreview() {
+                console.log('updateCostPreview called');
                 const quantity = parseInt(quantityInput.value) || 1;
                 const totalCost = itemPrice * quantity;
                 const canAfford = userBalance >= totalCost;
 
                 quantityDisplay.textContent = quantity;
-                totalCostDisplay.textContent = totalCost.toLocaleString();
+                totalCostDisplay.innerHTML = totalCost.toLocaleString() + ' <i class="fa-solid fa-shell text-forest"></i>';
 
-                // Update styling based on affordability
-                if (canAfford) {
+                // Check if regional restriction is in effect or if we're waiting for address selection
+                const hasRegionalRestriction = submitButton && submitButton.hasAttribute('data-region-invalid');
+                const waitingForAddress = submitButton && submitButton.dataset.initialDisabled === 'true' && submitButton.disabled;
+                const regionalizationEnabled = <%= raw((@regionalization_enabled || false).to_json) %>;
+
+                // Update styling based on affordability and regional restrictions
+                if (regionalizationEnabled && (hasRegionalRestriction || waitingForAddress)) {
+                    // Regional restriction or address selection takes precedence - don't override
+                    return;
+                } else if (canAfford) {
                     // Can afford - green styling
                     totalCostContainer.className = 'text-xl font-bold text-forest flex items-center';
                     if (orderSummary) {
@@ -270,11 +309,15 @@
                 }
             }
 
+            console.log('Adding event listeners to quantity input');
             quantityInput.addEventListener('input', updateCostPreview);
             quantityInput.addEventListener('change', updateCostPreview);
 
             // Run initial update
+            console.log('Running initial updateCostPreview');
             updateCostPreview();
+        } else {
+            console.log('Missing required elements - quantity update will not work');
         }
     });
 </script>

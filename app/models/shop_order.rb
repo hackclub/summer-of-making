@@ -175,6 +175,7 @@ class ShopOrder < ApplicationRecord
   end
 
   def check_regional_availability
+    return unless Flipper.enabled?(:shop_regionalization)
     return unless shop_item.present? && frozen_address.present?
 
     address_country = frozen_address["country"]
@@ -182,7 +183,8 @@ class ShopOrder < ApplicationRecord
 
     address_region = Shop::Regionalizable.country_to_region(address_country)
 
-    unless shop_item.enabled_in_region?(address_region)
+    # Allow items enabled for the address region OR for XX (Rest of World)
+    unless shop_item.enabled_in_region?(address_region) || shop_item.enabled_in_region?("XX")
       errors.add(:base, "This item is not available for shipping to #{address_country}.")
     end
   end

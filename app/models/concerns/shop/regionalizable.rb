@@ -39,8 +39,20 @@ module Shop
     def price_for_region(region_code)
       return ticket_cost unless REGION_CODES.include?(region_code.upcase)
 
-      offset = send("price_offset_#{region_code.downcase}") || 0
-      ticket_cost + offset
+      # If item is enabled for this region, use regional pricing
+      if enabled_in_region?(region_code)
+        offset = send("price_offset_#{region_code.downcase}") || 0
+        return ticket_cost + offset
+      end
+
+      # If item is not enabled for this region but is enabled for XX, use XX pricing
+      if enabled_in_region?("XX")
+        offset = send("price_offset_xx") || 0
+        return ticket_cost + offset
+      end
+
+      # Fallback to base price (though this shouldn't happen in practice)
+      ticket_cost
     end
 
     def regions_enabled

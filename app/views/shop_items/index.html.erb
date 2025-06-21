@@ -22,27 +22,40 @@
     </div>
   <% end %>
 
-  <div class="justify-center flex mt-4 flex-col items-center gap-4">
-    <div class="region-selector bg-white p-4 rounded-lg shadow-md border-2 border-[#8b6f47]">
-      <div class="flex flex-col sm:flex-row items-center gap-4">
-        <label class="font-medium text-[#3a2f25] font-['Fredoka',sans-serif]">
-          Select your region:
-        </label>
-        <select id="region-selector" class="px-3 py-2 border border-[#8b6f47] rounded-md focus:outline-none focus:ring-2 focus:ring-[#8b6f47] focus:border-transparent">
-          <% Shop::Regionalizable::REGIONS.each do |code, config| %>
-            <option value="<%= code %>" <%= 'selected' if @selected_region == code %>>
-              <%= config[:name] %>
-            </option>
-          <% end %>
-        </select>
+  <% if @regionalization_enabled %>
+    <div class="justify-center flex mt-4 flex-col items-center gap-4">
+      <div class="region-selector bg-white p-4 rounded-lg shadow-md border-2 border-[#8b6f47] max-w-md w-full">
+        <div class="text-center mb-3">
+          <h3 class="text-lg font-semibold text-[#3a2f25] font-['DynaPuff',sans-serif] mb-1">🌍 Choose Your Region</h3>
+          <p class="text-sm text-[#666] font-['Fredoka',sans-serif]">Prices and availability vary by region</p>
+        </div>
+        <div class="flex flex-col gap-3">
+          <select id="region-selector" class="w-full px-4 py-3 border-2 border-[#8b6f47] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#8b6f47] focus:border-transparent text-center font-medium">
+            <% Shop::Regionalizable::REGIONS.each do |code, config| %>
+              <option value="<%= code %>" <%= 'selected' if @selected_region == code %>>
+                <%= config[:name] %>
+              </option>
+            <% end %>
+          </select>
+          <div class="text-center">
+            <div class="text-sm font-medium text-[#3a2f25]">
+              Current region: <span class="text-[#E06540]"><%= Shop::Regionalizable.region_name(@selected_region) %></span>
+              <% if @region_auto_detected %>
+                <span class="ml-1 text-xs bg-blue-100 text-blue-700 px-2 py-0.5 rounded-full animate-pulse">auto-detected</span>
+              <% end %>
+            </div>
+            <div class="text-xs text-[#666] mt-1">
+              <% if @region_auto_detected %>
+                Detected from your verified address • Change anytime
+              <% else %>
+                Your selection is saved for this session
+              <% end %>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
-    <% if @selected_region != 'US' %>
-      <div class="text-sm text-[#666] italic">
-        Prices shown for <%= Shop::Regionalizable.region_name(@selected_region) %>
-      </div>
-    <% end %>
-  </div>
+  <% end %>
 
   <% unless current_user %>
     <div id="how-it-works" class="mt-15">
@@ -106,11 +119,35 @@
     </div>
   <% end %>
   <div class="my-6 text-center flex justify-center flex-col">
-    <div class="flex flex-col sm:grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
-      <% @shop_items.sort_by(&:ticket_cost).each do |item| %>
-          <%= render partial: "item", locals: { item: } %>
-      <% end %>
-    </div>
+    <% if @shop_items.empty? %>
+      <div class="max-w-md mx-auto bg-yellow-50 border border-yellow-200 rounded-lg p-6">
+        <div class="text-yellow-600 text-lg font-semibold mb-2">
+          <% if @regionalization_enabled %>
+            🚫 No items available in <%= Shop::Regionalizable.region_name(@selected_region) %>
+          <% else %>
+            🚫 No items available
+          <% end %>
+        </div>
+        <p class="text-yellow-700 text-sm mb-4">
+          <% if @regionalization_enabled %>
+            None of our shop items are currently enabled for your region. Try selecting a different region or check back later!
+          <% else %>
+            No shop items are currently available. Check back later!
+          <% end %>
+        </p>
+        <% if @regionalization_enabled %>
+          <button onclick="document.getElementById('region-selector').focus()" class="bg-yellow-200 hover:bg-yellow-300 text-yellow-800 px-4 py-2 rounded-md text-sm font-medium transition-colors">
+            Change Region
+          </button>
+        <% end %>
+      </div>
+    <% else %>
+      <div class="flex flex-col sm:grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
+        <% @shop_items.sort_by(&:ticket_cost).each do |item| %>
+            <%= render partial: "item", locals: { item: } %>
+        <% end %>
+      </div>
+    <% end %>
   </div>
 </div>
 
@@ -152,13 +189,18 @@
             }
         });
 
-        // Region selector
+        // Region selector (only if regionalization is enabled)
         const regionSelector = document.getElementById('region-selector');
         if (regionSelector) {
             regionSelector.addEventListener('change', function() {
                 const selectedRegion = this.value;
                 const currentUrl = new URL(window.location.href);
                 currentUrl.searchParams.set('region', selectedRegion);
+
+                // Show loading state
+                regionSelector.disabled = true;
+                regionSelector.style.opacity = '0.6';
+
                 window.location.href = currentUrl.toString();
             });
         }

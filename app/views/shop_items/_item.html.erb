@@ -1,10 +1,10 @@
 <% if current_user %>
   <% ineligible = current_verification_status == :ineligible %>
   <% out_of_stock = item.out_of_stock? %>
-  <% regional_price = @selected_region ? item.price_for_region(@selected_region) : item.ticket_cost %>
+  <% regional_price = (@regionalization_enabled && @selected_region) ? item.price_for_region(@selected_region) : item.ticket_cost %>
   <% disabled = ineligible || (!current_user.ysws_verified? && !item.is_a?(ShopItem::FreeStickers)) || (current_user.balance < regional_price) || out_of_stock %>
 <% else %>
-  <% regional_price = @selected_region ? item.price_for_region(@selected_region) : item.ticket_cost %>
+  <% regional_price = (@regionalization_enabled && @selected_region) ? item.price_for_region(@selected_region) : item.ticket_cost %>
 <% end %>
 <%= render "shared/card", classes: "#{"col-span-full" if item.is_free?}" do %>
   <!-- <div class="bg-soft-bone card-pixel bg-surface0 shadow p-6 rounded-lg h-full flex flex-col text-center w-full <%= "col-span-full" if item.is_free? %>"> -->

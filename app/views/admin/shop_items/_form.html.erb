@@ -158,6 +158,12 @@
   <div class="row mt-4">
     <div class="col-12">
       <h4>Regional Availability & Pricing</h4>
+      <div class="alert alert-info mb-3">
+        <strong>💡 Regional Logic:</strong>
+        <br><strong>XX (Rest of World):</strong> Items enabled for XX appear in <em>all</em> regions using XX pricing
+        <br><strong>Specific Regions:</strong> Items enabled for specific regions (US, EU, etc.) only appear in those regions
+        <br><strong>Priority:</strong> Regional pricing takes precedence over XX pricing when both are enabled
+      </div>
       <div class="table-responsive">
         <table class="table table-bordered table-striped">
           <thead>
@@ -303,20 +309,20 @@
             const offsetField = document.querySelector(`[data-region="${region}"].price-offset`);
             const offset = parseFloat(offsetField.value) || 0;
             const finalPrice = basePrice + offset;
-            
+
             // Update final price
             const finalPriceSpan = document.querySelector(`[data-region="${region}"].final-price`);
             if (finalPriceSpan) {
                 finalPriceSpan.textContent = `${finalPrice.toFixed(2)}`;
             }
-            
+
             // Calculate and update estimated total hours
             const estimatedHours = finalPrice / (gameConstants.doubloons_per_dollar * gameConstants.dollars_per_mean_hour);
             const estimatedHoursSpan = document.querySelector(`[data-region="${region}"].estimated-hours`);
             if (estimatedHoursSpan) {
                 estimatedHoursSpan.textContent = `${estimatedHours.toFixed(1)}`;
             }
-            
+
             // Calculate and update delta hours
             if (!skipHours) {
                 const deltaHours = offset / (gameConstants.doubloons_per_dollar * gameConstants.dollars_per_mean_hour);
@@ -325,7 +331,7 @@
                     deltaHoursInput.value = deltaHours.toFixed(1);
                 }
             }
-            
+
             // Update delta dollars (convert shells to USD: offset / doubloons_per_dollar)
             if (!skipDollars) {
                 const deltaDollars = offset / gameConstants.doubloons_per_dollar;
@@ -340,32 +346,32 @@
         function updateFromDeltaHours(region) {
             const deltaHoursInput = document.querySelector(`[data-region="${region}"].delta-hours-input`);
             const deltaHours = parseFloat(deltaHoursInput.value) || 0;
-            
+
             // Calculate price offset from hours: offset = deltaHours * (doubloons_per_dollar * dollars_per_mean_hour)
             const offset = deltaHours * (gameConstants.doubloons_per_dollar * gameConstants.dollars_per_mean_hour);
-            
+
             // Update price offset field
             const offsetField = document.querySelector(`[data-region="${region}"].price-offset`);
             if (offsetField) {
                 offsetField.value = offset.toFixed(2);
             }
-            
+
             // Update other fields (skip hours since we're editing it, but update dollars)
             updateFromPriceOffset(region, true, false);
         }
 
-        // Handle updates from delta dollars changes  
+        // Handle updates from delta dollars changes
         function updateFromDeltaDollars(region) {
             const deltaDollarsInput = document.querySelector(`[data-region="${region}"].delta-dollars-input`);
             const deltaDollars = parseFloat(deltaDollarsInput.value) || 0;
-            
+
             // Convert dollars to shells: offset = deltaDollars * doubloons_per_dollar
             const offset = deltaDollars * gameConstants.doubloons_per_dollar;
             const offsetField = document.querySelector(`[data-region="${region}"].price-offset`);
             if (offsetField) {
                 offsetField.value = offset.toFixed(2);
             }
-            
+
             // Update other fields (skip dollars since we're editing it, but update hours)
             updateFromPriceOffset(region, false, true);
         }
