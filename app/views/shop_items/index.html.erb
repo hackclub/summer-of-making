@@ -37,21 +37,6 @@
               </option>
             <% end %>
           </select>
-          <div class="text-center">
-            <div class="text-sm font-medium text-[#3a2f25]">
-              Current region: <span class="text-[#E06540]"><%= Shop::Regionalizable.region_name(@selected_region) %></span>
-              <% if @region_auto_detected %>
-                <span class="ml-1 text-xs bg-blue-100 text-blue-700 px-2 py-0.5 rounded-full animate-pulse">auto-detected</span>
-              <% end %>
-            </div>
-            <div class="text-xs text-[#666] mt-1">
-              <% if @region_auto_detected %>
-                Detected from your verified address • Change anytime
-              <% else %>
-                Your selection is saved for this session
-              <% end %>
-            </div>
-          </div>
         </div>
       </div>
     </div>
