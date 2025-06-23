@@ -22,8 +22,8 @@
   --color-sheet: var(--color-dark);
   --color-sunken: var(--color-darker);
   --color-border: #42191f;
-  --color-primary: #ec3750;
-  --color-secondary: #42191f;
+  --color-primary: #8837ec;
+  --color-secondary: #3b1942;
 }
 
 body.adash {
@@ -160,10 +160,19 @@ body.adash {
 
 .atable tr {
   border-bottom: 1px solid var(--color-border);
+  transition: background-color 0.2s ease;
 }
 
 .atable tr:last-child {
   border-bottom: none;
+}
+
+.atable tbody tr:nth-child(even) {
+  background: rgba(255, 255, 255, 0.02);
+}
+
+.atable tbody tr:hover {
+  background: var(--color-darkless);
 }
 
 .atable td {
@@ -179,4 +188,28 @@ body.adash {
 
 .atable a:hover {
   text-decoration: underline;
+}
+
+.pill {
+  display: inline-block;
+  background: var(--color-primary);
+  color: var(--color-white);
+  padding: 0.2em 0.6em;
+  border-radius: 12px;
+  font-size: 0.85em;
+  font-weight: 600;
+  margin-left: 0.5em;
+}
+
+.pill-green {
+  background: var(--color-green);
+}
+
+.pill-blue {
+  background: var(--color-blue);
+}
+
+.pill-yellow {
+  background: var(--color-yellow);
+  color: var(--color-black);
 }

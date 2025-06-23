@@ -9,9 +9,20 @@
 <%= render "shared/card", classes: "#{"col-span-full" if item.is_free?}" do %>
   <!-- <div class="bg-soft-bone card-pixel bg-surface0 shadow p-6 rounded-lg h-full flex flex-col text-center w-full <%= "col-span-full" if item.is_free? %>"> -->
   <div class="flex-grow flex flex-col justify-between min-h-0 relative">
+    <% admin_tool do %>
+      <div class="">
+        <%= link_to "cfg", admin_shop_item_path(item), class: "underline text-sm", target: "_blank" %>
+      </div>
+    <% end %>
+
     <% if regional_price > 0 %>
       <div class="absolute top-2 right-2 text-lg font-bold whitespace-nowrap flex items-center">
-        <%= render_shells regional_price %>
+        <picture class="inline-block mx-1 mb-2 w-5 h-5 mr-2">
+          <source srcset="/shell.avif" type="image/avif">
+          <source srcset="/shell.webp" type="image/webp">
+          <img src="/shell.png" class="inline-block mx-1 mb-1 w-5 h-5" alt="shell">
+          </picture>
+        <%= regional_price.round %>
       </div>
     <% end %>
     <div class="flex-grow">
@@ -93,9 +104,6 @@
     <% end %>
 
   </div>
-  <% admin_tool do %>
-    <%= link_to "administrate it?", admin_shop_item_path(item), class: "underline", target: "_blank" %>
-  <% end %>
 <% end %>
 
 <!-- <script>

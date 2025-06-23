@@ -1,0 +1,17 @@
+<%= render "shared/page_title",
+    title: "New Ship Feedback",
+    subtitle: "Feedback for #{@feedback.ship_event.project.title}'s ship event id #{@feedback.ship_event.id}" %>
+
+<%= link_to "Go to #{@feedback.ship_event.project.title}", project_path(@feedback.ship_event.project) %>
+
+<%= render "shared/card" do %>
+  <%= form_with model: @feedback, class: "flex flex-col" do |f| %>
+    <%= f.label :comment %>
+    <%= f.text_area :comment %>
+
+    <%= f.label :demo, "Demo video" %>
+    <%= f.file_field :demo %>
+
+    <%= f.submit %>
+  <% end %>
+<% end %>

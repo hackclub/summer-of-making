@@ -119,6 +119,30 @@
         total_time_seconds = @project.hackatime_total_time
       %>
       <span class="text-gray-800"><%= format_seconds(total_time_seconds) %></span>
+      <% if @project.certification_visible_to?(current_user) %>
+        •&nbsp;
+        <% if current_user && (current_user == @project.user || current_user.is_admin?) %>
+          <button data-controller="modal" data-action="click->modal#open" data-modal-id="<%= @project.id %>" data-modal-type="certification" class="hover:underline cursor-pointer duration-200
+            <%= if @latest_ship_certification&.pending?
+                  'text-amber-600'
+                elsif @latest_ship_certification&.approved?
+                  'text-green-600'
+                elsif @latest_ship_certification&.rejected?
+                  'text-red-600'
+                end %>">
+            <%= @project.certification_status_text %>
+          </button>
+        <% else %>
+          <span class="
+            <%= case @project.certification_status
+                when 'pending' then 'text-amber-600'
+                when 'approved' then 'text-green-600'
+                when 'rejected' then 'text-red-600'
+                end %>">
+            <%= @project.certification_status_text %>
+          </span>
+        <% end %>
+      <% end %>
     </div>
 
     <div class="text-black mb-3 md:mb-4 text-base md:text-lg 2xl:text-xl [p]:text-inherit">
@@ -197,6 +221,80 @@
     </div>
   </div>
 </div>
+
+<% if current_user && (current_user == @project.user || current_user.is_admin?) %>
+  <div id="certification-modal-<%= @project.id %>" data-controller="modal" class="hidden fixed inset-0 z-50 overflow-auto bg-black/30 flex items-center justify-center p-2 md:p-4">
+    <div class="bg-[#F3ECD8] rounded-2xl border-4 border-[#E4DCC6] w-full max-w-lg mx-2 md:mx-auto relative max-h-[80vh] flex flex-col" data-modal-target="container">
+      <div class="p-3 md:p-4 border-b border-saddle-taupe border-opacity-30 flex-shrink-0">
+        <div class="flex justify-between items-center">
+          <h3 class="text-lg md:text-2xl">Ship Certification Status</h3>
+          <button type="button" class="text-gray-600 hover:text-vintage-red cursor-pointer" data-action="click->modal#close">
+            <%= inline_svg_tag "close.svg", class: "h-6 w-6 2xl:h-8 2xl:w-8" %>
+          </button>
+        </div>
+      </div>
+
+      <div class="p-3 md:p-4 overflow-y-auto">
+        <% if @latest_ship_certification %>
+          <div class="mb-4">
+            <% if @latest_ship_certification.approved? && @latest_ship_certification.proof_video.attached? %>
+              <div class="mb-4">
+                <p class="font-medium text-sm mb-2">Proof Video:</p>
+                <div class="bg-soft-bone/50 border border-saddle-taupe/30 rounded-lg p-3">
+                  <video controls class="w-full max-h-64 rounded">
+                    <source src="<%= url_for(@latest_ship_certification.proof_video) %>" type="<%= @latest_ship_certification.proof_video.content_type %>">
+                    Your browser does not support the video tag.
+                  </video>
+                  <p class="text-xs text-gray-600 mt-2">
+                    <%= @latest_ship_certification.proof_video.filename %> • <%= number_to_human_size(@latest_ship_certification.proof_video.byte_size) %>
+                  </p>
+                </div>
+              </div>
+            <% end %>
+
+            <% if @latest_ship_certification.notes.present? %>
+              <div class="bg-soft-bone/50 border border-saddle-taupe/30 rounded-lg p-3 mb-4">
+                <p class="font-medium text-sm mb-2">
+                  <% if @latest_ship_certification.approved? %>
+                    Review Summary:
+                  <% else %>
+                    Reviewer Notes:
+                  <% end %>
+                </p>
+                <p class="text-sm text-gray-700"><%= simple_format(@latest_ship_certification.notes) %></p>
+              </div>
+            <% end %>
+
+            <% if @latest_ship_certification.pending? %>
+              <div class="mt-4 p-3 bg-amber-50 border border-amber-200 rounded-lg">
+                <p class="text-sm text-amber-700">
+                  Your project is in line to be certified. Make sure its play link works and that people can try it out for themselves!
+                </p>
+              </div>
+            <% elsif @latest_ship_certification.approved? %>
+              <div class="mt-4 p-3 bg-green-50 border border-green-200 rounded-lg">
+                <p class="text-sm text-green-700">
+                  🎉 Congratulations! Your project has been certified & can now go up for vote!
+                </p>
+              </div>
+            <% elsif @latest_ship_certification.rejected? %>
+              <div class="mt-4 p-3 bg-red-50 border border-red-200 rounded-lg">
+                <p class="text-sm text-red-700">
+                  Your project didn't get certified. Check the feedback above.
+                </p>
+              </div>
+            <% end %>
+          </div>
+        <% else %>
+          <div class="text-center py-8">
+            <p class="text-gray-600 mb-4">No ship certification submitted yet.</p>
+            <p class="text-sm text-gray-500">Ship your project to request certification!</p>
+          </div>
+        <% end %>
+      </div>
+    </div>
+  </div>
+<% end %>
 
 <!-- Ship Modal -->
 <div id="ship-modal-<%= @project.id %>" data-controller="ship" class="hidden fixed inset-0 z-50 overflow-auto bg-black/30 flex items-center justify-center p-2 md:p-4" data-ship-target="modal" data-action="click->ship#closeBackground">

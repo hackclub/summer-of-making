@@ -1,0 +1,51 @@
+<%= form_with model: [:admin, ship_certification], local: true do |f| %>
+  <% if ship_certification.errors.any? %>
+    <div id="error_explanation">
+      <h2><%= pluralize(ship_certification.errors.count, "error") %> prohibited this ship certification from being saved:</h2>
+      <ul>
+        <% ship_certification.errors.full_messages.each do |message| %>
+          <li><%= message %></li>
+        <% end %>
+      </ul>
+    </div>
+  <% end %>
+
+  <div class="field">
+    <b>Project:</b> <%= link_to ship_certification.project.title, ship_certification.project %><br>
+    <b>User:</b> <%= ship_certification.project.user.email %><br>
+    <b>Ship Events:</b> <%= ship_certification.project.ship_events.count %><br>
+  </div>
+
+  <div class="field">
+    <%= f.label :judgement %>
+    <%= f.select :judgement, options_for_select([
+      ['Pending', 'pending'],
+      ['Approved', 'approved'],
+      ['Rejected', 'rejected']
+    ], ship_certification.judgement), {}, { class: 'form-control' } %>
+  </div>
+
+  <div class="field">
+    <%= f.label :notes %>
+    <%= f.text_area :notes, rows: 4, class: 'form-control' %>
+  </div>
+
+  <div class="field">
+    <%= f.label :proof_video, "Proof Video" %>
+    <%= f.file_field :proof_video, class: 'form-control' %>
+    <% if ship_certification.proof_video.attached? %>
+      <p>Current: <%= link_to ship_certification.proof_video.filename, ship_certification.proof_video, target: "_blank" %></p>
+    <% end %>
+  </div>
+
+  <div class="field">
+    <%= f.label :reviewer_id, "Reviewer" %>
+    <%= f.collection_select :reviewer_id, User.where(is_admin: true), :id, :email,
+                           { prompt: 'Select reviewer', selected: ship_certification.reviewer_id || current_user.id },
+                           { class: 'form-control' } %>
+  </div>
+
+  <div class="actions">
+    <%= f.submit "Update Ship Certification", class: 'btn btn-primary' %>
+  </div>
+<% end %>

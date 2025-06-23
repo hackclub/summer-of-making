@@ -14,7 +14,8 @@ RUN --mount=target=/var/lib/apt/lists,type=cache,sharing=locked \
     libvips \
     pkg-config \
     curl \
-    vim
+    vim \
+    ffmpeg
 
 # Set working directory
 WORKDIR /app

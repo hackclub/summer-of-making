@@ -4,7 +4,7 @@
     subtitle: "Vote on others' projects to get payouts!" %>
 
   <%= render "shared/card", classes: "text-lg text-center", padding: "lg" do %>
-    <p class="mb-4">Voting will begin after 100 certified projects with at least 10 hours of coding time have been shipped!</p>
-    <p class="text-2xl">0 / 100 approved projects</p>
+    <p class="mb-4">Voting will begin globally after 100 certified projects with at least 10 hours of coding time have been shipped!</p>
+    <p class="text-2xl"><%= @projects_count %> / 100 approved projects</p>
   <% end %>
 </div>

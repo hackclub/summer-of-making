@@ -76,6 +76,7 @@ class ProjectsController < ApplicationController
     @timeline = (@devlogs + @ship_events).sort_by(&:created_at)
 
     @stonks = @project.stonks.includes(:user).order(amount: :desc)
+    @latest_ship_certification = @project.latest_ship_certification
 
     return unless current_user
 

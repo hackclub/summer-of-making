@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
 Rails.application.config.after_initialize do
-  HackatimeStatRefreshJob.perform_later if defined? Rails::Server
+  if defined?(Rails::Server) && Rails.env.production?
+    HackatimeStatRefreshJob.perform_later
+  end
 end

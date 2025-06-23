@@ -1,0 +1,13 @@
+<h1>Edit Ship Certification</h1>
+
+<div class="project-links">
+  <b>Project Links:</b>
+  <%= link_to "Play", @ship_certification.project.demo_link, target: "_blank" if @ship_certification.project.demo_link.present? %>
+  <%= link_to "Repo", @ship_certification.project.repo_link, target: "_blank" if @ship_certification.project.repo_link.present? %>
+  <%= link_to "Readme", @ship_certification.project.readme_link, target: "_blank" if @ship_certification.project.readme_link.present? %>
+</div>
+
+<%= render 'form', ship_certification: @ship_certification %>
+
+<%= link_to "Show", [:admin, @ship_certification] %> |
+<%= link_to "Back", admin_ship_certifications_path %>

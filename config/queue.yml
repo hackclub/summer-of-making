@@ -7,6 +7,10 @@ default: &default
       threads: 3
       processes: <%= ENV.fetch("JOB_CONCURRENCY", 1) %>
       polling_interval: 0.1
+    - queues: "video_conversion"
+      threads: 1
+      processes: 1
+      polling_interval: 1
 
 development:
   <<: *default

@@ -1,0 +1,46 @@
+<%= render "shared/page_title",
+    title: "Ship events awaiting feedback",
+    subtitle: "bleh" %>
+
+<div class="space-y-6">
+  <% @projects.each do |project| %>
+    <%= render "shared/card" do %>
+      <div class="mb-4">
+        <h2 class="text-xl font-semibold"><%= project.title %></h2>
+        <p class="text-gray-600 mt-1"><%= project.description %></p>
+        <div class="text-sm text-gray-500 mt-2">
+          <span>By: <%= project.user.display_name %></span>
+          <% if project.repo_link.present? %>
+            | <a href="<%= project.repo_link %>" target="_blank" class="text-blue-600 hover:underline">Repository</a>
+          <% end %>
+          <% if project.demo_link.present? %>
+            | <a href="<%= project.demo_link %>" target="_blank" class="text-blue-600 hover:underline">Demo</a>
+          <% end %>
+        </div>
+      </div>
+
+      <div class="space-y-3">
+        <h3 class="text-lg font-medium text-gray-900">Ship Events</h3>
+        <% project.ship_events.each do |ship_event| %>
+          <div class="<%= ship_event.ship_event_feedback.present? ? 'border border-gray-200' : 'border-2 border-red-500' %> rounded p-4 bg-gray-50">
+            <div class="flex justify-between items-center">
+              <div>
+                <span class="text-sm text-gray-600">Shipped on:</span>
+                <span class="font-medium"><%= ship_event.created_at.strftime("%B %d, %Y at %I:%M %p") %></span>
+              </div>
+              <% unless ship_event.ship_event_feedback.present? %>
+                <%= link_to "Add Feedback", new_ship_event_feedback_path(ship_event_id: ship_event.id),
+                    class: "bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded" %>
+              <% end %>
+            </div>
+            <% if ship_event.ship_event_feedback.present? %>
+              <div class="mt-2 text-sm text-green-600">✓ Feedback provided</div>
+            <% else %>
+              <div class="mt-2 text-sm text-red-600">⚠ Awaiting feedback</div>
+            <% end %>
+          </div>
+        <% end %>
+      </div>
+    <% end %>
+  <% end %>
+</div>

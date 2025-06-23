@@ -59,6 +59,9 @@ export default class extends Controller {
       case 'delete':
         modalElement = document.getElementById(`delete-modal-${modalId}`)
         break
+      case 'certification':
+        modalElement = document.getElementById(`certification-modal-${modalId}`)
+        break
     }
     
     if (!modalElement) {
@@ -97,6 +100,7 @@ export default class extends Controller {
           this.element.id.startsWith('timer-modal-') || 
           this.element.id.startsWith('stonks-modal-') ||
           this.element.id.startsWith('delete-modal-') ||
+          this.element.id.startsWith('certification-modal-') ||
           this.element.id === 'create-project-modal' ||
           this.element.id === 'hackatime-modal')) {
         this.close()

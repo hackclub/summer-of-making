@@ -236,7 +236,9 @@ Rails.application.routes.draw do
   end
 
   get "devlogs", to: "devlogs#index"
-  resources :votes, only: [ :new, :create ]
+  resources :votes, only: [ :new, :create ] do
+    get :locked, on: :collection
+  end
 
   scope :shop do
     get "/", to: "shop_items#index", as: :shop
@@ -302,6 +304,7 @@ Rails.application.routes.draw do
     mount Flipper::UI.app(Flipper), at: "flipper", as: :flipper
     # mount_avo
     get "/", to: "static_pages#index", as: :root
+    resources :ship_certifications, only: [ :index, :show, :edit, :update ]
     resources :users, only: [ :index, :show ] do
       member do
         post :internal_notes

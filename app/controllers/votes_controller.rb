@@ -5,7 +5,7 @@ class VotesController < ApplicationController
   before_action :set_projects, only: %i[new create]
   before_action :check_identity_verification
 
-  before_action -> { render :locked } # For the first week
+  before_action :redirect_to_locked, except: [ :locked ] # For the first week
 
   def new
     @vote = Vote.new
@@ -46,9 +46,20 @@ class VotesController < ApplicationController
   end
 
   def locked
+    @projects_count = Project.joins(:ship_certifications, :devlogs)
+                    .where(ship_certifications: { judgement: :approved })
+                    .group("projects.id")
+                    .having("SUM(COALESCE(devlogs.seconds_coded, 0)) > ?", 10 * 3600)
+                    .count
+                    .keys
+                    .size
   end
 
   private
+
+  def redirect_to_locked
+    redirect_to locked_votes_path
+  end
 
 
   def check_identity_verification

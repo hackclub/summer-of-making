@@ -1,5 +1,23 @@
 # Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
 
+# == Schema Information
+#
+# Table name: ship_event_feedbacks
+#
+#  id            :bigint           not null, primary key
+#  comment       :string
+#  created_at    :datetime         not null
+#  updated_at    :datetime         not null
+#  ship_event_id :bigint           not null
+#
+# Indexes
+#
+#  index_ship_event_feedbacks_on_ship_event_id  (ship_event_id)
+#
+# Foreign Keys
+#
+#  fk_rails_...  (ship_event_id => ship_events.id)
+#
 one:
   ship_event: one
   comment: MyString

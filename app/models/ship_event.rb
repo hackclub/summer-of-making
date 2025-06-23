@@ -19,6 +19,8 @@ class ShipEvent < ApplicationRecord
   belongs_to :project
   has_one :ship_event_feedback
 
+  after_create :maybe_create_ship_certification
+
   def user
     project.user
   end
@@ -36,5 +38,14 @@ class ShipEvent < ApplicationRecord
       Devlog.where(project: project)
             .where("created_at > ? AND created_at < ?", last_ship_date, created_at)
     end
+  end
+
+  private
+
+  def maybe_create_ship_certification
+    return if project.ship_certifications.approved.exists?
+    return if project.ship_certifications.pending.exists?
+
+    project.ship_certifications.create!
   end
 end
