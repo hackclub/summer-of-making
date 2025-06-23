@@ -4,7 +4,7 @@ class ShopItemsController < ApplicationController
   before_action :authenticate_user!, except: [ :index ]
   before_action :require_admin!, except: [ :index ]
   before_action :refresh_verf!, only: :index
-  before_action do
+  prepend_before_action do
     @regionalization_enabled = Flipper.enabled?(:shop_regionalization)
   end
 
