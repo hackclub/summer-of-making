@@ -304,6 +304,18 @@ ActiveRecord::Schema[8.0].define(version: 2025_06_20_215713) do
     t.index ["project_id"], name: "index_readme_checks_on_project_id"
   end
 
+  create_table "ship_certifications", force: :cascade do |t|
+    t.bigint "reviewer_id"
+    t.bigint "project_id", null: false
+    t.integer "judgement", default: 0, null: false
+    t.text "notes"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["project_id", "judgement"], name: "index_ship_certifications_on_project_id_and_judgement"
+    t.index ["project_id"], name: "index_ship_certifications_on_project_id"
+    t.index ["reviewer_id"], name: "index_ship_certifications_on_reviewer_id"
+  end
+
   create_table "ship_event_feedbacks", force: :cascade do |t|
     t.bigint "ship_event_id", null: false
     t.string "comment"
@@ -637,6 +649,8 @@ ActiveRecord::Schema[8.0].define(version: 2025_06_20_215713) do
   add_foreign_key "project_follows", "users"
   add_foreign_key "projects", "users"
   add_foreign_key "readme_checks", "projects"
+  add_foreign_key "ship_certifications", "projects"
+  add_foreign_key "ship_certifications", "users", column: "reviewer_id"
   add_foreign_key "ship_event_feedbacks", "ship_events"
   add_foreign_key "ship_events", "projects"
   add_foreign_key "shop_card_grants", "shop_items"
