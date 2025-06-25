@@ -93,6 +93,7 @@ class Project < ApplicationRecord
     waffles: "Waffles",
     waveband: "Waveband",
     fixit: "FIX IT!",
+    twist: "Twist",
     other: "Other"
   }
 
