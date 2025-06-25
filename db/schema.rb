@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_06_24_205930) do
+ActiveRecord::Schema[8.0].define(version: 2025_06_25_151410) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -290,8 +290,8 @@ ActiveRecord::Schema[8.0].define(version: 2025_06_24_205930) do
     t.boolean "is_deleted", default: false
     t.boolean "used_ai"
     t.boolean "ysws_submission", default: false, null: false
-    t.string "ysws_type"
     t.integer "devlogs_count", default: 0, null: false
+    t.integer "ysws_type"
     t.index ["user_id"], name: "index_projects_on_user_id"
   end
 

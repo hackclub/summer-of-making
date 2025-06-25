@@ -75,26 +75,41 @@ class Project < ApplicationRecord
                          message: "%<value>s is not a valid category" }
 
   enum :ysws_type, {
-    athena: "Athena",
-    boba_drops: "Boba Drops",
-    cider: "Cider",
-    grub: "Grub",
-    hackaccino: "Hackaccino",
-    highway: "Highway",
-    neighborhood: "Neighborhood",
-    shipwrecked: "Shipwrecked",
-    solder: "Solder",
-    sprig: "Sprig",
-    swirl: "Swirl",
-    terminalcraft: "Terminalcraft",
-    thunder: "Thunder",
-    tonic: "Tonic",
-    toppings: "Toppings",
-    waffles: "Waffles",
-    waveband: "Waveband",
-    fixit: "FIX IT!",
-    other: "Other"
+    ysws_other: 0,
+    athena: 1,
+    boba_drops: 2,
+    cider: 3,
+    grub: 4,
+    hackaccino: 5,
+    highway: 6,
+    neighborhood: 7,
+    shipwrecked: 8,
+    solder: 9,
+    sprig: 10,
+    swirl: 11,
+    terminalcraft: 12,
+    thunder: 13,
+    tonic: 14,
+    toppings: 15,
+    waffles: 16,
+    waveband: 17,
+    fixit: 18
   }
+
+  def self.ysws_type_display_name(key)
+    exceptions = {
+      "ysws_other" => "Other",
+      "boba_drops" => "Boba Drops",
+      "fixit" => "FIX IT!"
+    }
+    exceptions.fetch(key) { key.humanize }
+  end
+
+  def self.ysws_type_options_for_select
+    [ [ "Select a YSWS program...", "" ] ] + ysws_types.map do |key, _value|
+      [ ysws_type_display_name(key), key ]
+    end
+  end
 
   validates :ysws_type, presence: true, if: :ysws_submission?
 

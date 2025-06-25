@@ -516,7 +516,7 @@ class ProjectsController < ApplicationController
   private
 
   def ysws_type_options
-    [ [ "Select a YSWS program...", "" ] ] + Project.ysws_types.map { |key, value| [ value, value ] }
+    Project.ysws_type_options_for_select
   end
   helper_method :ysws_type_options
 
