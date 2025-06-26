@@ -124,6 +124,6 @@ class Vote < ApplicationRecord
     winner = vote_changes.where(result: "win").first
     loser = vote_changes.where(result: "loss").first
 
-    if winner.
+    # if winner.
   end
 end

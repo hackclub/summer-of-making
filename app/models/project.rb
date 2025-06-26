@@ -279,11 +279,11 @@ class Project < ApplicationRecord
       hours = ship.hours_covered
 
       Rails.logger.info ">>> \##{vote_count} | #{min},#{max} | << #{rating} >>| #{pc} | #{mult} | #{hours} | YAY"
+      
+      amount = (hours * mult).ceil
+
+      Payout.create!(payable: ship, amount: amount, reason: "Payout for #{title}.")
     end
-
-    # amount = calculate_payout.ceil
-
-    # Payout.create(payable_type: ShipEvent, amount:, reason: "Payout for #{title}.")
   end
 
   private

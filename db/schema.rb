@@ -11,16 +11,6 @@
 # It's strongly recommended that you check this file into your version control system.
 
 ActiveRecord::Schema[8.0].define(version: 2025_06_25_203358) do
-  create_schema "auth"
-  create_schema "extensions"
-  create_schema "graphql"
-  create_schema "graphql_public"
-  create_schema "pgbouncer"
-  create_schema "pgsodium"
-  create_schema "realtime"
-  create_schema "storage"
-  create_schema "vault"
-
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -205,9 +195,9 @@ ActiveRecord::Schema[8.0].define(version: 2025_06_25_203358) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.integer "last_hackatime_time"
-    t.integer "seconds_coded"
     t.integer "likes_count", default: 0, null: false
     t.integer "comments_count", default: 0, null: false
+    t.integer "seconds_coded"
     t.datetime "hackatime_pulled_at"
     t.index ["project_id"], name: "index_devlogs_on_project_id"
     t.index ["user_id"], name: "index_devlogs_on_user_id"
@@ -300,8 +290,9 @@ ActiveRecord::Schema[8.0].define(version: 2025_06_25_203358) do
     t.boolean "is_deleted", default: false
     t.boolean "used_ai"
     t.boolean "ysws_submission", default: false, null: false
-    t.string "ysws_type"
     t.integer "devlogs_count", default: 0, null: false
+    t.integer "ysws_type"
+    t.integer "certification_type"
     t.index ["user_id"], name: "index_projects_on_user_id"
   end
 
