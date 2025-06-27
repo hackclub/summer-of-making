@@ -292,6 +292,7 @@ ActiveRecord::Schema[8.0].define(version: 2025_06_25_151410) do
     t.boolean "ysws_submission", default: false, null: false
     t.integer "devlogs_count", default: 0, null: false
     t.integer "ysws_type"
+    t.integer "certification_type"
     t.index ["user_id"], name: "index_projects_on_user_id"
   end
 
@@ -390,6 +391,7 @@ ActiveRecord::Schema[8.0].define(version: 2025_06_25_151410) do
     t.decimal "price_offset_ca", precision: 6, scale: 2, default: "0.0"
     t.decimal "price_offset_au", precision: 6, scale: 2, default: "0.0"
     t.decimal "price_offset_xx", precision: 6, scale: 2, default: "0.0"
+    t.boolean "enabled"
     t.check_constraint "hacker_score >= 0 AND hacker_score <= 100", name: "hacker_score_percentage_check"
   end
 

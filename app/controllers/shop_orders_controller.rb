@@ -109,7 +109,7 @@ class ShopOrdersController < ApplicationController
   end
 
   def set_shop_item
-    scope = ShopItem.all
+    scope = ShopItem.enabled
     scope = scope.not_black_market unless current_user.has_black_market?
     @item = scope.find(params[:id])
   rescue ActiveRecord::RecordNotFound

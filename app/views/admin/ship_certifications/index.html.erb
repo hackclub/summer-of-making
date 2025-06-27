@@ -62,6 +62,8 @@
           <% end %>
         </td>
         <td><%= time_ago_in_words(ship_certification.created_at) %></td>
+        <td><%= ship_certification.project.certification_type || 'N/A' %></td>
+        <td><%= format_seconds ship_certification.devlogs_seconds_total %></td>
       </tr>
     <% end %>
   </tbody>

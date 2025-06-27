@@ -1,0 +1,13 @@
+services:
+  mole:
+    build: .
+    ports:
+      - "5001:5001"    # Flask API
+      - "5901:5901"    # VNC server port
+      - "6080:6080"    # noVNC web interface
+    volumes:
+      - .:/app
+    environment:
+      - BROWSER_USE_DISABLE_TELEMETRY=true
+      - DISPLAY=:1     # Virtual display
+    privileged: true   # Required for VNC operations

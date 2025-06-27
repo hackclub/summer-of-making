@@ -7,15 +7,15 @@
   </head>
   <body>
     <% flash.each do |type, message| %>
-      <% color = case type.to_sym
+      <% clazz = case type.to_sym
         when :success
-          "green"
+          "success"
         when :notice
-          "red"
+          "caution"
         else
           ""
         end %>
-      <div style="border: 1px solid <%= color %>;  padding: 1rem; color: <%= color %>">
+      <div class="notice <%= clazz %>">
         <%= message %>
       </div>
     <% end %>

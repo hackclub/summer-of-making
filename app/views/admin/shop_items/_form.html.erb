@@ -120,6 +120,13 @@
 
       <div class="mb-3">
         <div class="form-check">
+          <%= form.check_box :enabled, class: "form-check-input" %>
+          <%= form.label :enabled, "Enabled", class: "form-check-label" %>
+        </div>
+      </div>
+
+      <div class="mb-3">
+        <div class="form-check">
           <%= form.check_box :limited, class: "form-check-input", id: "shop_item_limited" %>
           <%= form.label :limited, "Limited Stock", class: "form-check-label" %>
         </div>

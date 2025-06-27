@@ -41,6 +41,8 @@ class Vote < ApplicationRecord
   validates :explanation, presence: true, length: { minimum: 10 }
   validates :user_id, uniqueness: { scope: :winner_id, message: "has already voted for this project" }
 
+  after_create :potentially_pay_out_yayyyyy
+
   attr_accessor :token
 
   def authorized_with_token?(token_data)
@@ -49,5 +51,18 @@ class Vote < ApplicationRecord
     token_data["user_id"] == user_id &&
       token_data["project_id"].to_s == winner_id.to_s &&
       Time.zone.parse(token_data["expires_at"]) > Time.current
+  end
+
+  private
+
+  def potentially_pay_out_yayyyyy
+    # if loser.votes.count == Payout::VOTE_COUNT_REQUIRED
+
+    # end
+  end
+
+  def unlerp(start, stop, value)
+    return 0.0 if start == stop
+    (value - start) / (stop - start).to_f
   end
 end

@@ -53,6 +53,10 @@ class IdentityVaultService
       conn.get("/api/v1/identities/#{identity_id}").body
     end
 
+    def set_slack_id(identity_id, slack_id)
+      conn.post("api/v1/identities/#{identity_id}/set_slack_id", { slack_id: }).body
+    end
+
     def build_address_creation_url(sneaky_params = nil)
       params = {
         stash_data: encode_sneaky_params(sneaky_params)

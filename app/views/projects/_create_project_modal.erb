@@ -81,6 +81,40 @@
             <p class="mt-1 text-xs md:text-sm text-vintage-red hidden" id="categoryError" data-project-form-target="categoryError"></p>
           </div>
 
+          <div class="mb-2 md:mb-4">
+            <div class="tooltip-label-container">
+              <%= f.label :certification_type, "Certification Type", class: "block text-sm" %>
+              <div class="tooltip">
+                <span class="question-mark">?</span>
+                <span class="tooltiptext">Choose the type that best matches your project for certification purposes.</span>
+              </div>
+            </div>
+            <%= f.select :certification_type,
+                options_for_select([
+                  ['Select certification type...', ''],
+                  ['Other', 'cert_other'],
+                  ['Static Site', 'static_site'],
+                  ['Web App', 'web_app'],
+                  ['Browser Extension', 'browser_extension'],
+                  ['Userscript', 'userscript'],
+                  ['iPhone App', 'iphone_app'],
+                  ['Android App', 'android_app'],
+                  ['Desktop App', 'desktop_app'],
+                  ['Command Line Tool', 'command_line_tool'],
+                  ['Game Mod', 'game_mod']
+                ]),
+                {},
+                {
+                  class: "w-full px-3 py-2 border border-saddle-taupe bg-bread border-opacity-50 focus:outline-none focus:ring-forest focus:border-forest text-sm md:text-base",
+                  data: { project_form_target: "certificationType" }
+                }
+            %>
+            <div class="flex justify-end">
+              <p class="mt-1 text-xs md:text-sm text-vintage-red">Required</p>
+            </div>
+            <p class="mt-1 text-xs md:text-sm text-vintage-red hidden" id="certificationTypeError" data-project-form-target="certificationTypeError"></p>
+          </div>
+
           <!-- YSWS Submission Section -->
           <div class="mb-3 md:mb-6">
             <div class="tooltip-label-container flex items-center space-x-2">

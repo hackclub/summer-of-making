@@ -4,7 +4,7 @@ class VideoConversionJob < ApplicationJob
   def self.perform_unique(ship_certification_id)
     return if SolidQueue::Job.where(
       class_name: "VideoConversionJob"
-    ).where(finished_at: nil, arguments: [ship_certification_id])
+    ).where(finished_at: nil, arguments: [ ship_certification_id ])
 
     perform_later(ship_certification_id)
   end

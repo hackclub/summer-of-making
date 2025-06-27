@@ -1,4 +1,5 @@
 <%= form_with model: [:admin, ship_certification], local: true do |f| %>
+  <% project = ship_certification.project %>
   <% if ship_certification.errors.any? %>
     <div id="error_explanation">
       <h2><%= pluralize(ship_certification.errors.count, "error") %> prohibited this ship certification from being saved:</h2>
@@ -11,9 +12,14 @@
   <% end %>
 
   <div class="field">
-    <b>Project:</b> <%= link_to ship_certification.project.title, ship_certification.project %><br>
-    <b>User:</b> <%= ship_certification.project.user.email %><br>
-    <b>Ship Events:</b> <%= ship_certification.project.ship_events.count %><br>
+    <b>Project ID:</b> <%= project.id %><br>
+    <b>Project:</b> <%= link_to project.title, project %> | <%= link_to "View on Platform", project_path(project), target: "_blank" %><br>
+    <b>User:</b> <%= project.user.email %> | <%= link_to "Admin Profile", admin_user_path(project.user), target: "_blank" %><br>
+    <b>Ship Events:</b> <%= project.ship_events.size %><br>
+    <b>Category:</b> <%= project.category&.humanize %><br>
+    <b>Certification Type:</b> <%= project.certification_type&.humanize %><br>
+    <b>Created:</b> <%= project.created_at.strftime("%m/%d/%Y at %I:%M %p") %><br>
+    <b>Last Updated:</b> <%= project.updated_at.strftime("%m/%d/%Y at %I:%M %p") %><br>
   </div>
 
   <div class="field">

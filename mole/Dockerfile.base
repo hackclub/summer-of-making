@@ -1,0 +1,20 @@
+# Base image with Playwright browsers pre-installed
+FROM python:3.11-slim as browser-base
+
+WORKDIR /app
+
+# Install system dependencies for browser automation
+RUN apt-get update && apt-get install -y \
+    chromium \
+    chromium-driver \
+    && rm -rf /var/lib/apt/lists/*
+
+# Install Playwright and browsers (this layer will be cached)
+RUN pip install playwright>=1.40.0
+RUN playwright install chromium --with-deps
+
+# Set environment variables
+ENV CHROME_BIN=/usr/bin/chromium
+ENV CHROMEDRIVER_PATH=/usr/bin/chromedriver
+ENV BROWSER_USE_DISABLE_TELEMETRY=true
+ENV BROWSER_USE_SYNC_ENABLED=false

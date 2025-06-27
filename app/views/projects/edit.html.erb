@@ -35,6 +35,33 @@
       </div>
 
       <div class="space-y-1 sm:space-y-2">
+        <%= f.label :certification_type, "Certification Type", class: "block text-base sm:text-lg font-medium" %>
+        <%= f.select :certification_type,
+            options_for_select([
+              ['Select certification type...', ''],
+              ['Other', 'cert_other'],
+              ['Static Site', 'static_site'],
+              ['Web App', 'web_app'],
+              ['Browser Extension', 'browser_extension'],
+              ['Userscript', 'userscript'],
+              ['iPhone App', 'iphone_app'],
+              ['Android App', 'android_app'],
+              ['Desktop App', 'desktop_app'],
+              ['Command Line Tool', 'command_line_tool'],
+              ['Game Mod', 'game_mod']
+            ], @project.certification_type),
+            {},
+            {
+              class: "w-full px-3 py-2 border border-saddle-taupe bg-bread border-opacity-50 focus:outline-none focus:ring-forest focus:border-forest text-sm sm:text-base",
+              data: { project_form_target: "certificationType" }
+            } %>
+        <div class="flex justify-end">
+          <p class="mt-1 text-xs sm:text-sm text-vintage-red">Required</p>
+        </div>
+        <p class="text-xs sm:text-sm text-vintage-red hidden" id="certificationTypeError" data-project-form-target="certificationTypeError"></p>
+      </div>
+
+      <div class="space-y-1 sm:space-y-2">
         <%= f.label :readme_link, "Readme Link", class: "block text-base sm:text-lg font-medium" %>
         <%= f.url_field :readme_link, id: "readme", class: "w-full px-3 py-2 border border-saddle-taupe bg-bread border-opacity-50 focus:outline-none focus:ring-forest focus:border-forest text-sm sm:text-base ", data: { project_form_target: "readme" } %>
         <p class="text-xs sm:text-sm text-vintage-red hidden" id="readmeError" data-project-form-target="readmeError"></p>

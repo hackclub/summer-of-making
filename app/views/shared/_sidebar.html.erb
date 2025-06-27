@@ -118,6 +118,15 @@
   </div>
 
     <div class="flex flex-col gap-4">
+      <div class="flex items-center justify-center bg-[#4A2D24]/10 rounded-full p-2 relative min-w-[40px]">
+        <picture class="inline-block w-6 h-6 flex-shrink-0">
+          <source srcset="/shell.avif" type="image/avif">
+          <source srcset="/shell.webp" type="image/webp">
+          <img src="/shell.png" class="inline-block w-6 h-6" alt="shell">
+        </picture>
+        <span class="text-xl font-semibold whitespace-nowrap" data-sidebar-target="collapseFade"><span class="ml-1"><%= current_user.balance.to_i %></span></span>
+      </div>
+
       <div class="relative flex flex-col items-start">
         <div class="flex items-center w-full">
           <%= image_tag current_user.avatar, class: "h-12 w-12 rounded-full flex-shrink-0" %>

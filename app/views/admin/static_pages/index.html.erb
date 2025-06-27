@@ -1,4 +1,6 @@
 <%= stylesheet_link_tag 'admin_dashboard' %>
+<%= javascript_importmap_tags %>
+
 <body class="adash" style="background: var(--color-background); color: var(--color-text); min-height: 100vh;">
   <h1 style="margin: 2em 0 0.5em 1em; color: var(--color-primary); font-size: 2rem;">admin dashboard!</h1>
   <p style="margin: 0 0 2em 2em; color: var(--color-muted);">you look great today :-)</p>
@@ -18,6 +20,15 @@
     <%= link_to admin_readme_certifications_path, class: 'abtn secondary' do %>
       README certs <span class="pill"><%= ReadmeCertification.pending.size %></span>
     <% end %>
+  </div>
+  <div style="margin: 2em; max-width: 800px;">
+    <h2 style="color: var(--color-primary); margin-bottom: 1em;">Payout multiplier</h2>
+    <%= line_chart @multiplier_data,
+        title: "Payout.calculate_multiplier(x) where x = ELO percentile (0-1)",
+        xtitle: "ELO Percentile",
+        ytitle: "Multiplier",
+        width: "100%",
+        height: "400px" %>
   </div>
   <div style="margin: 2em 2em 0 2em;">
     <%= link_to "← escape hatch", root_path, class: 'aout' %>

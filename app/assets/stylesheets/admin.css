@@ -53,3 +53,35 @@ body {
     border-style: none;
     background-color: #f3f4f6;
 }
+
+.notice {
+    background: #d1e1ef;
+    font-size: 14px;
+    border: 1px solid #c2d2df;
+    color: black;
+    font-family: "Lucida Grande", "Lucida Sans Unicode", Verdana, Helvetica, sans-serif, "GNU Unifont";
+    margin: 0.643em auto;
+    padding: 0.25em 0.375em;
+    clear: right;
+    box-shadow: inset 1px 1px 2px;
+    border-radius: 0.25em;
+    word-wrap: break-word;
+}
+
+.notice.success {
+    background: #08e54c;
+    color: #000000;
+    border-color: #14a514;
+}
+
+.notice.caution {
+    background: #ffe34e;
+    color: #000;
+    border-color: #d89e36;
+}
+
+.notice.error {
+    background: #efd1d1;
+    border-color: #900;
+    box-shadow: 1px 1px 2px;
+}

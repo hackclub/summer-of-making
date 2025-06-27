@@ -53,7 +53,7 @@ class ShopOrder < ApplicationRecord
   before_create :set_initial_state_for_free_stickers
 
   scope :worth_counting, -> { where.not(aasm_state: %w[rejected refunded]) }
-  scope :manually_fulfilled, -> { joins(:shop_item).where(shop_items: { type: ShopItem::MANUAL_FULFILLMENT_TYPES }) }
+  scope :manually_fulfilled, -> { joins(:shop_item).where(shop_items: { type: ShopItem::MANUAL_FULFILLMENT_TYPES.map(&:name) }) }
 
   def full_name
     "#{user.display_name}'s order for #{quantity} #{shop_item.name.pluralize(quantity)}"
@@ -82,9 +82,12 @@ class ShopOrder < ApplicationRecord
     end
 
     event :mark_rejected do
-      transitions to: :rejected
+      transitions from: %i[pending awaiting_periodical_fulfillment], to: :rejected
       before do |rejection_reason|
         self.rejection_reason = rejection_reason
+      end
+      after do
+        create_refund_payout
       end
     end
 
@@ -197,6 +200,16 @@ class ShopOrder < ApplicationRecord
       amount: -total_cost,
       payable: self,
       reason: "Shop order of #{shop_item.name.pluralize(quantity)}"
+    )
+  end
+
+  def create_refund_payout
+    return unless frozen_item_price.present? && frozen_item_price > 0 && quantity.present?
+
+    user.payouts.create!(
+      amount: total_cost,
+      payable: self,
+      reason: "Refund for rejected order of #{shop_item.name.pluralize(quantity)}"
     )
   end
 end

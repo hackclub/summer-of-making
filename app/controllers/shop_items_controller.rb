@@ -14,7 +14,7 @@ class ShopItemsController < ApplicationController
 
   # Load all shop items from cache with properly preloaded attachments
   all_shop_items = Rails.cache.fetch("all_shop_items_with_variants_v2", expires_in: 10.minutes) do
-  ShopItem.with_attached_image
+  ShopItem.enabled.with_attached_image
   .includes(image_attachment: { blob: { variant_records: :image_attachment } })
   .order(ticket_cost: :asc)
             .to_a

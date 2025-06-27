@@ -5,6 +5,7 @@
 #  id                         :bigint           not null, primary key
 #  agh_contents               :jsonb
 #  description                :string
+#  enabled                    :boolean
 #  enabled_au                 :boolean          default(FALSE)
 #  enabled_ca                 :boolean          default(FALSE)
 #  enabled_eu                 :boolean          default(FALSE)

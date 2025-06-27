@@ -41,6 +41,11 @@ class UsersController < ApplicationController
   def identity_vault_callback
     begin
       current_user.link_identity_vault_callback(identity_vault_callback_url, params[:code])
+      begin
+        current_user.sync_slack_id_into_idv!
+      rescue => e
+        Honeybadger.notify(e)
+      end
       ahoy.track "tutorial_step_identity_vault_linked", user_id: current_user.id
     rescue StandardError => e
       uuid = Honeybadger.notify(e)

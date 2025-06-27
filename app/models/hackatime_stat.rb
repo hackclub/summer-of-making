@@ -56,8 +56,10 @@ class HackatimeStat < ApplicationRecord
 
   def today_seconds_across_all_projects
     return 0 if data.blank?
-    response = Faraday.get("https://hackatime.hackclub.com/api/v1/users/#{user.slack_id}/stats?features=projects&start_date=#{Date.current.strftime("%Y-%m-%d")}")
+
+    response = user.fetch_raw_hackatime_stats(from: Time.now.beginning_of_day)
     result = JSON.parse(response.body)
+
     return unless result["data"]["status"] == "ok"
     total_seconds = result["data"]["total_seconds"] || 0
     total_seconds

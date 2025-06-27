@@ -67,7 +67,7 @@ module Admin
     def shop_item_params
       params.require(:shop_item).permit(:type, :name, :description, :under_the_fold_description, :internal_description,
                                         :ticket_cost, :usd_cost, :hacker_score, :max_qty,
-                                        :requires_black_market, :show_in_carousel, :one_per_person_ever,
+                                        :requires_black_market, :show_in_carousel, :one_per_person_ever, :enabled,
                                         :hcb_merchant_lock, :hcb_category_lock, :hcb_keyword_lock,
                                         :agh_contents, :image, :limited, :stock,
                                         *ShopItem.region_columns)

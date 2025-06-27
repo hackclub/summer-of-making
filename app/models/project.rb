@@ -6,6 +6,7 @@
 #
 #  id                     :bigint           not null, primary key
 #  category               :string
+#  certification_type     :integer
 #  demo_link              :string
 #  description            :text
 #  devlogs_count          :integer          default(0), not null
@@ -52,12 +53,10 @@ class Project < ApplicationRecord
 
   default_scope { where(is_deleted: false) }
 
+  scope :with_ship_event, -> { joins(:ship_events) }
+
   def self.with_deleted
     unscoped
-  end
-
-  def self.find_with_deleted(id)
-    with_deleted.find(id)
   end
 
   scope :pending_certification, -> {
@@ -67,33 +66,50 @@ class Project < ApplicationRecord
   validates :title, :description, :category, presence: true
 
   validates :readme_link, :demo_link, :repo_link,
-            format: { with: URI::DEFAULT_PARSER.make_regexp, message: "must be a valid URL" },
+            format: { with: /\A(?:https?:\/\/).*\z/i, message: "must be a valid HTTP or HTTPS URL" },
             allow_blank: true
 
   validates :category,
             inclusion: { in: [ "Web App", "Mobile App", "Command Line Tool", "Video Game", "Something else" ],
                          message: "%<value>s is not a valid category" }
 
+  enum :certification_type, {
+    cert_other: 0,
+    static_site: 1,
+    web_app: 2,
+    browser_extension: 3,
+    userscript: 4,
+    iphone_app: 5,
+    android_app: 6,
+    desktop_app: 7,
+    command_line_tool: 8,
+    game_mod: 9,
+    chat_bot: 10,
+    video: 11,
+    hardware_or_pcb_project: 12
+  }
+
   enum :ysws_type, {
-    ysws_other: 0,
-    athena: 1,
-    boba_drops: 2,
-    cider: 3,
-    grub: 4,
-    hackaccino: 5,
-    highway: 6,
-    neighborhood: 7,
-    shipwrecked: 8,
-    solder: 9,
-    sprig: 10,
-    swirl: 11,
-    terminalcraft: 12,
-    thunder: 13,
-    tonic: 14,
-    toppings: 15,
-    waffles: 16,
-    waveband: 17,
-    fixit: 18
+    athena: "Athena",
+    boba_drops: "Boba Drops",
+    cider: "Cider",
+    grub: "Grub",
+    hackaccino: "Hackaccino",
+    highway: "Highway",
+    neighborhood: "Neighborhood",
+    shipwrecked: "Shipwrecked",
+    solder: "Solder",
+    sprig: "Sprig",
+    swirl: "Swirl",
+    terminalcraft: "Terminalcraft",
+    thunder: "Thunder",
+    tonic: "Tonic",
+    toppings: "Toppings",
+    waffles: "Waffles",
+    waveband: "Waveband",
+    fixit: "FIX IT!",
+    twist: "Twist",
+    other: "Other"
   }
 
   def self.ysws_type_display_name(key)
@@ -120,6 +136,7 @@ class Project < ApplicationRecord
   before_save :filter_hackatime_keys
 
   before_save :remove_duplicate_hackatime_keys
+  before_save :set_default_certification_type
 
   def total_votes
     won_votes.count + lost_votes.count
@@ -241,6 +258,24 @@ class Project < ApplicationRecord
     false
   end
 
+  def self.cumulative_elo_bounds_at_vote_count(count)
+    [ 100, 2000 ]
+  end
+
+  def calculate_payout
+    min, max = Project.cumulative_elo_bounds_at_vote_count 1
+
+    pc = unlerp(min, max, rating)
+
+    mult = Payout.calculate_multiplier pc
+
+    puts "mult", mult
+
+    hours = devlogs.sum(:seconds_coded).fdiv(3600)
+
+    payout = hours * mult
+  end
+
   private
 
   def set_default_rating
@@ -267,5 +302,9 @@ class Project < ApplicationRecord
     return if readme_certifications.exists?
 
     readme_certifications.create!
+  end
+
+  def set_default_certification_type
+    self.certification_type = :cert_other if certification_type.blank?
   end
 end

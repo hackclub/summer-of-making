@@ -37,11 +37,6 @@ production:
     concurrency: 1
     description: "Recalculate devlogs' seconds_coded columns"
 
-  sync_user_idv_verification_statuses_to_airtable:
-    class: SyncUsersIdvVerificationStatusInAirtableJob
-    schedule: every hour
-    description: "Update all users' verification_status values in the Summer of Making 2025 Airtable `_users` table."
-
   sync_user_to_airtable:
     class: SyncUserToAirtableJob
     schedule: every minute
