@@ -1,5 +1,3 @@
-# Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
-
 # == Schema Information
 #
 # Table name: shop_items
@@ -40,30 +38,24 @@
 #  created_at                 :datetime         not null
 #  updated_at                 :datetime         not null
 #
-one:
-  type: 
-  name: MyString
-  description: MyString
-  internal_description: MyString
-  actual_irl_fr_cost: 9.99
-  cost: 9.99
-  hacker_score{1.2}: MyString
-  requires_black_market: false
-  hcb_merchant_lock: MyString
-  hcb_category_lock: MyString
-  hcb_keyword_lock: MyString
-  agh_contents: 
+class ShopItem::SiteActionItem < ShopItem
+  def self.fulfill_immediately?
+    true
+  end
 
-two:
-  type: 
-  name: MyString
-  description: MyString
-  internal_description: MyString
-  actual_irl_fr_cost: 9.99
-  cost: 9.99
-  hacker_score{1.2}: MyString
-  requires_black_market: false
-  hcb_merchant_lock: MyString
-  hcb_category_lock: MyString
-  hcb_keyword_lock: MyString
-  agh_contents: 
+  enum :site_action, {
+    taco_bell_bong: 2
+  }
+  
+  def fulfill!(shop_order)
+    case site_action
+    when "taco_bell_bong"
+      puts "bonging..."
+      ActionCable.server.broadcast("shenanigans", {type: "bong", responsible_individual: shop_order.user.display_name })
+    else
+      raise "unknown site action: #{site_action.inspect}"
+    end
+
+    shop_order.mark_fulfilled!("it is done.")
+  end
+end

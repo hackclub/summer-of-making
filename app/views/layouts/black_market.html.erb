@@ -1,0 +1,52 @@
+<html>
+<head>
+  <%= yield :head %>
+  <%= stylesheet_link_tag "black_market.css" %>
+  <%= javascript_importmap_tags %>
+  <link rel="icon" href="/favicon.png" type="image/png">
+  <script src="https://unpkg.com/htmx.org@2.0.4" integrity="sha384-HGfztofotfshcF7+8n44JQL2oJmowVChPTg48S+jvZoztPfvwD79OC/LTtG6dMp+" crossorigin="anonymous"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      setTimeout(function() {
+        const loader = document.querySelector('.loader');
+
+        if (loader) {
+          loader.classList.add('fade-out');
+        }
+        document.body.classList.remove("no_scroll")
+      }, Math.random()*3783);
+    });
+  </script>
+</head>
+<body class="no_scroll">
+<div class="loader">
+  <div class="inner">
+    <div style="font-size: 30px; font-weight: 700;">heidimarket</div>
+    <p>please wait....gathering trash.........,,,,</p>
+    <%= image_tag "rac_yap.gif", style: "width: 73px; margin: 17px;" %>
+    <p class="lg">
+      Your estimated wait time is <span class="eta">&lt;10 seconds</span>
+    </p>
+    <p>
+      Please do not refresh the page, you will be automatically redirected.
+    </p>
+  </div>
+</div>
+<div id="flash-container">
+<% flash.each do |type, message| %>
+  <% clazz = case type.to_sym
+             when :success
+               "success"
+             when :notice
+               "caution"
+             else
+               ""
+             end %>
+  <div class="notice <%= clazz %>">
+    <%= message %>
+  </div>
+<% end %>
+</div>
+<%= yield %>
+</body>
+</html>

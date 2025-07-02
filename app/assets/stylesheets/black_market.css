@@ -1,0 +1,271 @@
+/* Black Market Order Page - 90s Style */
+body {
+    background: #000;
+    color: lime;
+}
+
+a { 
+    color: #00ffff;
+}
+
+.hidden {
+    display: none;
+}
+
+blink, .blink {
+    animation: blink 1s step-end infinite;
+}
+
+@keyframes blink {
+    50% { opacity: 0; }
+}
+
+.container {
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+.back-link {
+    display: block;
+    margin-bottom: 20px;
+    color: cyan;
+}
+
+.order-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 20px;
+}
+
+@media (min-width: 768px) {
+    .order-grid {
+        grid-template-columns: 1fr 1fr;
+    }
+}
+
+.product-image {
+    border: 1px solid #fff;
+    padding: 10px;
+    background: #111;
+    text-align: center;
+}
+
+.product-image img {
+    max-width: 100%;
+}
+
+.product-info {
+    margin-top: 20px;
+}
+
+.order-form {
+    border: 3px double #fff;
+    margin: 10px;
+}
+
+.form-row {
+    margin-bottom: 15px;
+}
+
+.form-label {
+    display: block;
+    margin-bottom: 5px;
+}
+
+.form-input {
+    width: 100%;
+    background: #000;
+    color: #fff;
+    border: 1px solid #333;
+}
+
+.price-box {
+    border: 1px solid #333;
+    padding: 15px;
+    margin: 15px 0;
+    background: #111;
+}
+
+.price-row {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 10px;
+    border-bottom: 1px solid #333;
+    padding-bottom: 5px;
+}
+
+.balance-box {
+    border: 1px solid #333;
+    padding: 10px;
+    margin: 15px 0;
+    background: #111;
+}
+
+.submit-btn {
+    width: 100%;
+    padding: 10px;
+    background: #333;
+    color: #fff;
+    border: none;
+    cursor: pointer;
+}
+
+.submit-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.warning-box {
+    color: yellow;
+    border: 2px dashed yellow;
+}
+
+.error-box {
+    color: red;
+    border: 2px dashed red;
+}
+
+/* Shell icon styles */
+.shell-icon {
+    display: inline-block;
+    vertical-align: middle;
+    margin-right: 5px;
+}
+
+/* Quantity controls */
+.quantity-input {
+    text-align: center;
+    width: 80px;
+    padding: 5px;
+    background: #000;
+    border: 1px solid #333;
+    color: #fff;
+    font-family: "Courier New", Courier, monospace;
+}
+
+/* Address picker styles */
+.address-select {
+    width: 100%;
+    padding: 8px;
+    background: #000;
+    border: 1px solid #333;
+    color: #fff;
+    font-family: "Courier New", Courier, monospace;
+    margin-bottom: 10px;
+}
+
+body.no_scroll {
+    overflow: hidden;
+}
+
+main {
+    padding: 2rem;
+    font-family: sans-serif;
+}
+
+.loader {
+    width: 100vw;
+    height: 100%;
+    background-color: #1a1e23;
+    position: absolute;
+    top: 0;
+    left: 0;
+    z-index: 1000;
+    font-family: roboto, helvetica, sans-serif, arial, verdana, tahoma;
+    color: #fff;
+    opacity: 1;
+    transition: opacity 0.3s ease-out;
+}
+
+a[href] {
+    color: cyan;
+    text-decoration: underline;
+}
+
+.loader.fade-out {
+    opacity: 0;
+    pointer-events: none;
+}
+
+.loader>.inner {
+    position: absolute;
+    top: 50%;
+    left: 0;
+    right: 0;
+    margin: 0 auto;
+    text-align: center;
+    transform: translateY(-50%);
+    padding: 0 20px;
+}
+
+.loader p {
+    margin-bottom: 10px;
+}
+
+.loader p.lg {
+    height: 26px;
+    line-height: 26px;
+    font-size: 22px;
+}
+
+.loader .eta {
+    display: inline-block;
+    vertical-align: top;
+    padding: 0 8px;
+    height: 26px;
+    border-radius: 2px;
+    background-color: #9b59b6;
+    color: #fff;
+    font-weight: 700;
+    line-height: 26px;
+  }
+
+.notice {
+    background: #d1e1ef;
+    font-size: 14px;
+    border: 1px solid #c2d2df;
+    color: black;
+    font-family: "Lucida Grande", "Lucida Sans Unicode", Verdana, Helvetica, sans-serif, "GNU Unifont";
+    margin: 0.643em auto;
+    padding: 0.25em 0.375em;
+    clear: right;
+    box-shadow: inset 1px 1px 2px;
+    border-radius: 0.25em;
+    word-wrap: break-word;
+}
+
+.notice.success {
+    background: #08e54c;
+    color: #000000;
+    border-color: #14a514;
+}
+
+.notice.caution {
+    background: #ffe34e;
+    color: #000;
+    border-color: #d89e36;
+}
+
+.notice.error {
+    background: #efd1d1;
+    border-color: #900;
+    box-shadow: 1px 1px 2px;
+}
+
+.black-market-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 24px;
+}
+
+@media (min-width: 640px) {
+  .black-market-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (min-width: 1024px) {
+  .black-market-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}

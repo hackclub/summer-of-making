@@ -1,9 +1,9 @@
 # frozen_string_literal: true
 
 class ShopItemsController < ApplicationController
-  before_action :authenticate_user!, except: [ :index ]
-  before_action :require_admin!, except: [ :index ]
-  before_action :refresh_verf!, only: :index
+  before_action :authenticate_user!, except: [ :index, :black_market ]
+  before_action :require_admin!, except: [ :index, :black_market ]
+  before_action :refresh_verf!, only: [ :index, :black_market ]
   prepend_before_action do
     @regionalization_enabled = true
   end
@@ -14,7 +14,7 @@ class ShopItemsController < ApplicationController
 
   # Load all shop items from cache with properly preloaded attachments
   all_shop_items = Rails.cache.fetch("all_shop_items_with_variants_v2", expires_in: 10.minutes) do
-  ShopItem.enabled.with_attached_image
+  ShopItem.enabled.with_attached_image.not_black_market
   .includes(image_attachment: { blob: { variant_records: :image_attachment } })
   .order(ticket_cost: :asc)
             .to_a
@@ -26,11 +26,6 @@ class ShopItemsController < ApplicationController
   # Filter by region availability (include XX items in all regions) - only if regionalization is enabled
   if @regionalization_enabled && @selected_region
       filtered_items.select! { |item| item.enabled_in_region?(@selected_region) || item.enabled_in_region?("XX") }
-  end
-
-  # Filter out black market items unless user has access
-  unless current_user&.has_black_market?
-    filtered_items.reject! { |item| item.requires_black_market? }
   end
 
   # Filter out free stickers that have already been ordered by the current user
@@ -45,25 +40,27 @@ class ShopItemsController < ApplicationController
     @shop_items = filtered_items
   end
 
-  def new
-    @shop_item = ShopItem.new
-    @shop_item_types = available_shop_item_types
-  end
+  def black_market
+    return redirect_to shop_path unless current_user&.has_black_market? || current_user&.is_admin?
 
-  def create
-    @shop_item = ShopItem.new(shop_item_params)
-    Rails.logger.debug @shop_item
+    @selected_region = @regionalization_enabled ? determine_user_region : nil
+    @region_auto_detected = @regionalization_enabled && session[:region_auto_detected]
 
-    if @shop_item.save
-      redirect_to shop_items_path, notice: "Shop item was successfully created."
-    else
-      @shop_item_types = available_shop_item_types
-      render :new, status: :unprocessable_entity
+    all_shop_items = Rails.cache.fetch("all_black_market_shop_items_with_variants", expires_in: 2.minutes) do
+      ShopItem.enabled.with_attached_image.black_market
+        .includes(image_attachment: { blob: { variant_records: :image_attachment } })
+        .order(ticket_cost: :asc)
+        .to_a
     end
-  end
 
-  def update
-    ShopItem.find(params[:id]).update!(shop_item_params)
+    filtered_items = all_shop_items.dup
+
+    if @regionalization_enabled && @selected_region
+      filtered_items.select! { |item| item.enabled_in_region?(@selected_region) || item.enabled_in_region?("XX") }
+    end
+
+    @shop_items = filtered_items
+    render layout: "black_market"
   end
 
   private

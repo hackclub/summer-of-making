@@ -31,6 +31,7 @@
 #  price_offset_xx            :decimal(6, 2)    default(0.0)
 #  requires_black_market      :boolean
 #  show_in_carousel           :boolean
+#  site_action                :integer
 #  stock                      :integer
 #  ticket_cost                :decimal(6, 2)
 #  type                       :string

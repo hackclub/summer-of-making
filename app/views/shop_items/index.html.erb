@@ -22,6 +22,14 @@
     </div>
   <% end %>
 
+  <% if current_user&.has_black_market? %>
+    <div style="background-color: #000; padding: 10px 20px; margin-bottom: 10px; max-width: fit-content; align-self: center; font-family: serif; font-size: 20px; transform: rotate(-4deg);">
+      <h1 style="color: #fff; font-size: 32px; text-decoration: underline;">
+        <%= link_to "visit the black market", black_market_path, class: "text-white" %>
+      </h1>
+    </div>
+  <% end %>
+
   <% if @regionalization_enabled %>
     <div class="justify-center flex mt-4 flex-col items-center gap-4">
       <%= render "shared/card", classes: 'max-w-md w-full' do %>

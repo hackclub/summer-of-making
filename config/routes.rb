@@ -246,6 +246,7 @@ Rails.application.routes.draw do
 
   scope :shop do
     get "/", to: "shop_items#index", as: :shop
+    get "/black_market", to: "shop_items#black_market", as: :black_market
     resources :shop_items, except: [ :index ], path: :items do
       member do
         get :buy, to: "shop_orders#new", as: :order

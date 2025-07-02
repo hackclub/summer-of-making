@@ -31,9 +31,11 @@ class ShopOrdersController < ApplicationController
 
     # Check if user can afford this item at regional price
     if @regional_price.present? && @regional_price > 0 && current_user.balance < @regional_price
-      redirect_to shop_path, alert: "You don't have enough tickets to purchase #{@item.name}. You need #{@regional_price - current_user.balance} more tickets."
+      return redirect_to shop_path, alert: "You don't have enough tickets to purchase #{@item.name}. You need #{@regional_price - current_user.balance} more tickets."
       nil
     end
+
+    render :new_black_market, layout: "black_market" if @item.requires_black_market?
   end
 
   def create
@@ -55,6 +57,9 @@ class ShopOrdersController < ApplicationController
     end
 
     if @order.save
+      if @item.class.fulfill_immediately?
+        @item.fulfill!(@order)
+      end
       if @item.is_a? ShopItem::FreeStickers
         ahoy.track "tutorial_step_free_stickers_ordered", user_id: current_user.id, order_id: @order.id
         flash[:success] = "We'll send your stickers out when your verification is approved!"
@@ -65,6 +70,11 @@ class ShopOrdersController < ApplicationController
     else
       render :new, status: :unprocessable_entity
     end
+
+  rescue StandardError => e
+    uuid = Honeybadger.notify(e)
+    flash[:alert] = "error! #{e.message} – report #{uuid} plz"
+    redirect_to(@item.requires_black_market? ? black_market_path : shop_path)
   end
 
   private

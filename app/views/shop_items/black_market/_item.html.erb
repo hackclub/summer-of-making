@@ -1,0 +1,82 @@
+<% if current_user %>
+  <% ineligible = current_verification_status == :ineligible %>
+  <% out_of_stock = item.out_of_stock? %>
+  <% regional_price = (@regionalization_enabled && @selected_region) ? item.price_for_region(@selected_region) : item.ticket_cost %>
+  <% disabled = ineligible || (!current_user.ysws_verified? && !item.is_a?(ShopItem::FreeStickers)) || (current_user.balance < regional_price) || out_of_stock %>
+<% else %>
+  <% regional_price = (@regionalization_enabled && @selected_region) ? item.price_for_region(@selected_region) : item.ticket_cost %>
+<% end %>
+<div style="border: 1px double white; padding: 10px; max-width: 300px">
+  <!-- <div class="bg-soft-bone card-pixel bg-surface0 shadow p-6 rounded-lg h-full flex flex-col text-center w-full <%= "col-span-full" if item.is_free? %>"> -->
+  <div class="flex-grow flex flex-col justify-between min-h-0 relative">
+    <div class="flex-grow">
+      <h3 class="text-xl font-bold mb-2"><%= item.name %> <% if item.created_at > 24.hours.ago %><blink style="color: red">(NEW!!)</blink><% end %></h3>
+
+      <div class="mb-4">
+        <p class="text-gray-700"><%= raw item.description %></p> <%# erb_lint:disable ErbSafety %>
+        <% if item.limited? %>
+          <% remaining = item.remaining_stock %>
+          <% if remaining && remaining > 0 %>
+            <p class="text-sm text-orange-600 font-semibold mt-2">
+              <%= remaining %> left
+            </p>
+          <% elsif remaining && remaining <= 0 %>
+            <p class="text-sm text-red-600 font-semibold mt-2">
+              Out of Stock
+            </p>
+          <% end %>
+        <% end %>
+      </div>
+
+      <% if item.image.attached? %>
+        <div class="mb-4 flex justify-center">
+          <%= image_tag item.image.variant(:thumb), class: "rounded-lg w-full h-auto object-scale-down aspect-square max-h-48" %>
+        </div>
+      <% end %>
+
+    </div>
+
+    <% if current_user %>
+      <div class="mt-auto pt-4">
+        <% already_ordered = item.one_per_person_ever? && current_user.shop_orders.joins(:shop_item).where(shop_item: item).exists? %>
+
+        <% if already_ordered %>
+          <%= button_to "Already Ordered", "#", method: :get, disabled: true, class: "w-full px-4 sm:px-6 py-2 sm:py-3 bg-forest text-white text-base sm:text-lg 2xl:text-xl btn-pixel disabled:opacity-40 disabled:cursor-not-allowed block text-center" %>
+        <% else %>
+          <%= button_to order_shop_item_path(item), method: :get, data: { turbo: false }, class: "w-full px-4 sm:px-6 py-2 sm:py-3 bg-forest hover:scale-[1.02] text-white transition-transform duration-300 text-base sm:text-lg 2xl:text-xl btn-pixel disabled:opacity-40 disabled:cursor-not-allowed block text-center cursor-pointer", disabled: do %>
+            <% if out_of_stock %>
+              <span>Out of Stock</span>
+            <% elsif ineligible %>
+              <span>Not for you!</span>
+            <% elsif !current_user.ysws_verified? && !item.is_a?(ShopItem::FreeStickers) %>
+            <span>
+              You need your ID verified for this
+            </span>
+            <% elsif current_user.balance >= regional_price %>
+            <span>
+              <% if regional_price == 0 %>
+                Acquire!
+              <% else %>
+                <span class="flex items-center justify-center gap-1">Buy for
+                  <span class="flex items-center gap-1">
+                    <%= render_shells regional_price %>
+                  </span>
+                </span>
+              <% end %>
+            </span>
+            <% else %>
+            <span class="flex items-center gap-1 justify-center">
+              <picture>
+                <source srcset="/shell.avif" type="image/avif">
+                <source srcset="/shell.webp" type="image/webp">
+                <img src="/shell.png" width="15px" style="vertical-align:text-top" alt="shell" loading="lazy">
+              </picture>
+              <span><%= (regional_price - current_user.balance).ceil %> needed</span>
+            </span>
+            <% end %>
+          <% end %>
+        <% end %>
+      </div>
+    <% end %>
+  </div>
+</div>

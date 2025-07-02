@@ -1,0 +1,117 @@
+<% content_for :title, "Buy #{@item.name}" %>
+
+<center>
+<blink>***i'm like if a raccoon was a girl***</blink>
+<br><br>
+<%= link_to "<<< BACK TO MARKET >>>", black_market_path, data: { turbo: false } %>
+<hr>
+
+<% if @item.image.attached? %>
+  <%= image_tag @item.image.variant(:thumb), alt: @item.name %>
+<% else %>
+  <img src="construction.gif" alt="under construction">
+<% end %>
+
+<br><br>
+<font size="+2"><%= @item.name %></font>
+<br><br>
+
+<% if @item.description.present? %>
+  <%= @item.description %>
+  <br><br>
+<% end %>
+
+<% if @item.under_the_fold_description.present? %>
+  <%= simple_format(@item.under_the_fold_description) %>
+<% end %>
+
+<% if current_user&.is_admin? && @item.internal_description.present? %>
+  <blink>!!! ADMIN ONLY !!!</blink><br>
+  <%= @item.internal_description %>
+<% end %>
+
+<hr>
+
+<!-- Purchase form -->
+<font size="+1">$$$ COMPLETE YOUR ORDER $$$</font>
+<br><br>
+
+<%= form_with url: checkout_shop_item_path(@item), method: :post do |f| %>
+  <% if @order&.errors&.any? %>
+    <blink>!!! ERRORS !!!</blink>
+    <ul>
+      <% @order.errors.full_messages.each do |message| %>
+        <li>* <%= message %></li>
+      <% end %>
+    </ul>
+  <% end %>
+
+  <!-- Quantity -->
+  <b>QUANTITY:</b><br>
+  <% max_quantity = @item.one_per_person_ever? ? 1 : (@item.max_qty || 10) %>
+  <%= f.number_field :quantity, value: 1, min: 1, max: max_quantity %>
+  <br><br>
+
+  <!-- Address -->
+  <b>SHIPPING ADDRESS:</b><br>
+  <%= render 'shared/address_picker',
+             user: current_user,
+             form: f,
+             field_name: 'shipping_address_id',
+             label_text: 'where to?',
+             selected_region: @selected_region,
+             regionalization_enabled: @regionalization_enabled,
+             shop_item: @item %>
+  <br><br>
+
+  <!-- Price info -->
+  <% if @regional_price.present? && @regional_price > 0 %>
+    <b>PRICE:</b> <%= render_shells(@regional_price) %>
+    <br>
+    <b>QUANTITY:</b> <span id="quantity-display">1</span>
+    <br>
+    <b>TOTAL:</b> <span id="total-cost-container"><%= render_shells(@regional_price) %></span>
+    
+    <div id="insufficient-funds-warning" class="hidden">
+      <br>
+      <blink>!!! NOT ENOUGH SHELLS !!!</blink>
+      <br>
+      Need <span id="shortage-amount">0</span> more shells!
+    </div>
+
+    <br><br>
+    <b>YOUR BALANCE:</b> <%= render_shells(current_user.balance) %>
+    <% if current_user.balance < @regional_price %>
+      <br><br>
+      <blink>!!! INSUFFICIENT FUNDS !!!</blink>
+      <br>
+      You need <%= number_with_delimiter(@regional_price - current_user.balance) %> more shells!
+    <% end %>
+  <% end %>
+
+  <br><br>
+  <%
+    is_one_per_person = @item.one_per_person_ever?
+    has_existing_order = current_user.shop_orders.where(shop_item_id: @item.id).exists?
+    already_ordered = is_one_per_person && has_existing_order
+    requires_valid_address = @regionalization_enabled && @selected_region
+    button_disabled = already_ordered || requires_valid_address
+    button_text = if already_ordered
+                   "ALREADY PURCHASED!"
+                 elsif requires_valid_address
+                   "NEED VALID ADDRESS!"
+                 else
+                   "!!! GET IT NOW !!!"
+                 end
+  %>
+  <%= f.submit button_text,
+               id: "purchase-button",
+               disabled: button_disabled,
+               data: { initial_disabled: requires_valid_address } %>
+<% end %>
+
+<br><br>
+<marquee>~*~*~*~ i love my wife... ~*~*~*~</marquee>
+</center>
+
+<%= javascript_include_tag "black_market_order" %>
