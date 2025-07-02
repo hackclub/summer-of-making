@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_07_02_173333) do
+ActiveRecord::Schema[8.0].define(version: 2025_07_02_191636) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -656,7 +656,7 @@ ActiveRecord::Schema[8.0].define(version: 2025_07_02_173333) do
     t.boolean "tutorial_video_seen", default: false, null: false
     t.boolean "freeze_shop_activity", default: false
     t.datetime "synced_at", precision: nil
-    t.text "permissions", default: "[]", null: false
+    t.text "permissions", default: "[]"
   end
 
   create_table "vote_changes", force: :cascade do |t|

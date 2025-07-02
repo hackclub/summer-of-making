@@ -19,7 +19,7 @@
 #  internal_notes                       :text
 #  is_admin                             :boolean          default(FALSE), not null
 #  last_name                            :string
-#  permissions                          :text             default([]), not null
+#  permissions                          :text             default([])
 #  synced_at                            :datetime
 #  timezone                             :string
 #  tutorial_video_seen                  :boolean          default(FALSE), not null
@@ -252,20 +252,17 @@ class User < ApplicationRecord
 
   # we can add more cooler stuff, and more fine grained access controls for other parts later
   def has_permission?(permission)
-    ensure_permissions_initialized
-    return false if permissions.blank?
+    return false if permissions.nil? || permissions.empty?
     permissions.include?(permission.to_s)
   end
 
   def add_permission(permission)
-    ensure_permissions_initialized
     current_permissions = permissions || []
     current_permissions << permission.to_s unless current_permissions.include?(permission.to_s)
     update!(permissions: current_permissions)
   end
 
   def remove_permission(permission)
-    ensure_permissions_initialized
     current_permissions = permissions || []
     current_permissions.delete(permission.to_s)
     update!(permissions: current_permissions)
