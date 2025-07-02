@@ -53,3 +53,6 @@ pin "prosemirror-gapcursor" # @1.3.2
 pin "prosemirror-history" # @1.4.1
 pin "rope-sequence" # @1.3.4
 pin "@tiptap/extension-typography", to: "@tiptap--extension-typography.js" # @2.12.0
+pin "@rails/actioncable", to: "actioncable.esm.js"
+pin_all_from "app/javascript/channels", under: "channels"
+pin "howler" # @2.2.4
