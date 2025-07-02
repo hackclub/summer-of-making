@@ -6,7 +6,7 @@ module Api
       def index
         @comments = Comment.all.map do |comment|
           {
-            text: comment.text,
+            text: comment.display_content,
             devlog_id: comment.devlog_id,
             slack_id: comment.user.slack_id,
             created_at: comment.created_at
@@ -18,7 +18,7 @@ module Api
       def show
         @comment = Comment.find(params[:id])
         render json: {
-          text: @comment.text,
+          text: @comment.display_content,
           devlog_id: @comment.devlog_id,
           slack_id: @comment.user.slack_id,
           created_at: @comment.created_at
