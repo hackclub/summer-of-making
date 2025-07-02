@@ -4,7 +4,9 @@ module Api
   module V1
     class CommentsController < ApplicationController
       def index
-        @comments = Comment.all.map do |comment|
+        @comments = Comment.includes(:user)
+                          .select(:id, :rich_content, :devlog_id, :created_at, :user_id)
+                          .map do |comment|
           {
             text: comment.display_content,
             devlog_id: comment.devlog_id,
@@ -16,7 +18,9 @@ module Api
       end
 
       def show
-        @comment = Comment.find(params[:id])
+        @comment = Comment.includes(:user)
+                         .select(:id, :rich_content, :devlog_id, :created_at, :user_id)
+                         .find(params[:id])
         render json: {
           text: @comment.display_content,
           devlog_id: @comment.devlog_id,
