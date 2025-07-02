@@ -62,7 +62,7 @@ module ApplicationHelper
 
   def admin_user_visit(user)
     admin_tool("", "span") do
-      link_to "🔨", admin_user_path(user)
+      render "shared/user_twiddles", user:
     end
   end
 end

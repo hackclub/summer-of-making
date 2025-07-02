@@ -321,6 +321,8 @@ Rails.application.routes.draw do
         post :defrost
         post :grant_ship_certifier
         post :revoke_ship_certifier
+        post :give_black_market
+        post :take_away_black_market
       end
     end
     resources :shop_items

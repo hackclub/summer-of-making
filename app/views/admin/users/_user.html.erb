@@ -3,5 +3,7 @@
 <b>Verified: </b> <%= !!user.ysws_verified %> <br>
 <b>Balance: </b> <%= render_shells user.balance %><br>
 <b>Shop frozen: </b> <%= user.freeze_shop_activity ? "yes" : "no" %><br>
+<b>Black market access: </b> <%= user.has_black_market? ? "yes" : "no" %><br>
+
 <%= render "admin/shared/internal_notes", record: user %>
 <%# link_to "visit on Avo?", "/avo/resources/users/#{user.id}" %>

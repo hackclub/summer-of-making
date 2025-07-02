@@ -67,6 +67,20 @@ module Admin
       redirect_to admin_user_path(@user)
     end
 
+    def give_black_market
+      @user.update!(has_black_market: true)
+      @user.create_activity("give_black_market")
+      flash[:success] = "they're in!"
+      redirect_back_or_to admin_user_path(@user)
+    end
+
+    def take_away_black_market
+      @user.update!(has_black_market: false)
+      @user.create_activity("take_away_black_market")
+      flash[:success] = "unfortunate."
+      redirect_to admin_user_path(@user)
+    end
+
     def grant_ship_certifier
       if @user.ship_certifier?
         flash[:notice] = "#{@user.email} nothing changed, they already have ship certifier permissions"

@@ -24,6 +24,13 @@
 <% end %>
 <br><br>
 
+<% if @user.has_black_market? %>
+  <%= button_to "remove black market access", take_away_black_market_admin_user_path(@user) %>
+<% else %>
+  <%= button_to "give black market access", give_black_market_admin_user_path(@user) %>
+<% end %>
+<br><br>
+
 <% if @user.ship_certifier? %>
   <%= button_to "revoke ship certifier permissions", revoke_ship_certifier_admin_user_path(@user),
       confirm: "ya sure you wanna do that?",

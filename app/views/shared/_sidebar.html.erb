@@ -151,6 +151,7 @@
             <% end %>
             <div class="h-4">Hello,</div>
             <div class="text-xl whitespace-nowrap overflow-ellipsis"><%= current_user.display_name %>!</div>
+            <% admin_user_visit(current_user) %>
           </div>
         </div>
 
