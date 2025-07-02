@@ -2,5 +2,5 @@
 <% if user.has_black_market? %>
   <button style="display: inline" class="btn" disabled>B☑</button>
 <% else %>
-  <%= button_to "+B", give_black_market_admin_user_path(user), form_class: "inline"  %>
+  <%= button_to "+B", give_black_market_admin_user_path(user), form_class: "inline" %>
 <% end %>

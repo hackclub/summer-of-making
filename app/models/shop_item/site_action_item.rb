@@ -46,12 +46,12 @@ class ShopItem::SiteActionItem < ShopItem
   enum :site_action, {
     taco_bell_bong: 2
   }
-  
+
   def fulfill!(shop_order)
     case site_action
     when "taco_bell_bong"
       puts "bonging..."
-      ActionCable.server.broadcast("shenanigans", {type: "bong", responsible_individual: shop_order.user.display_name })
+      ActionCable.server.broadcast("shenanigans", { type: "bong", responsible_individual: shop_order.user.display_name })
     else
       raise "unknown site action: #{site_action.inspect}"
     end
