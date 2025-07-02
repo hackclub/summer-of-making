@@ -56,9 +56,7 @@ class User < ApplicationRecord
 
   serialize :permissions, type: Array, coder: JSON
 
-  after_initialize :ensure_permissions_initialized
   after_create :create_tutorial_progress
-  after_create { Faraday.post("https://7f972d8eaf28.ngrok.app/ding") rescue nil }
 
   include PublicActivity::Model
   tracked only: [], owner: Proc.new { |controller, model| controller&.current_user }
@@ -283,8 +281,6 @@ class User < ApplicationRecord
   def ensure_permissions_initialized
     if permissions.nil?
       self.permissions = []
-
-      update_column(:permissions, "[]") if persisted?
     end
   end
 
@@ -405,6 +401,12 @@ class User < ApplicationRecord
 
   def create_tutorial_progress
     TutorialProgress.create!(user: self)
+  end
+
+  def permissions_must_not_be_nil
+    if permissions.nil?
+      ensure_permissions_initialized
+    end
   end
 
   def notify_xyz_on_verified
