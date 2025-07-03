@@ -1,0 +1,39 @@
+readme_check:
+  ai_usage:
+    description: The mole finds your readme but thinks you used AI to write it.
+    flavor:
+      - "Eh... this README kinda looks like AI"
+      - "I don't really wanna read this if it's so AI written"
+      - "I'm not really sure but this README feels like AI"
+      - "this has that weird robot smell... you sure this wasn't made by an AI?"
+  template:
+    description: The mole finds your readme but can't figure out what your project is.
+    flavor:
+      - "my #{self.mole_parts.sample} tell me this is a bit templated"
+  missing:
+    description: The mole can't find your README text.
+    flavor:
+      - "ummm... hummm, i can't seem to find that, it just says 404"
+      - "where did the readme go? it's like looking for a worm in an empty tunnel"
+      - "this hole seems empty... no readme to dig up here"
+      - "i was expecting to find something but there's just... nothing?"
+      - "looks like someone forgot to leave a message at this burrow"
+      - "my little paws can't grab onto anything here - no readme in sight!"
+      - "either my #{self.mole_parts.sample} aren't working or this link doesn't work!"
+      - "I can't... see anything here? (I am legally blind though)"
+  specific:
+    description: The mole finds your README text.
+    flavor:
+      - "Ooooh, nice! That's a juicy find"
+      - "now THIS is what i'm talking about! clear and specific"
+      - "my whiskers are tingling - this readme actually tells me stuff!"
+      - "finally, someone who knows how to explain their burrow properly"
+      - "this is the good stuff! i can actually understand what this does"
+      - "mmm, tasty! this readme has all the details a mole could want"
+      - "perfect! now i know exactly what treasure lives in this tunnel"
+
+mole_parts:
+  - tiny paws
+  - whiskers
+  - tiny eyes
+  - long nose
