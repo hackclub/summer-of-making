@@ -48,3 +48,4 @@ public/temp/*
 *.env
 *.log
 mole/gifs/*
+csv_data/*.csv
