@@ -100,6 +100,7 @@ class Project < ApplicationRecord
     athena: "Athena",
     boba_drops: "Boba Drops",
     cider: "Cider",
+    converge: "Converge (Discord/Slackbot YSWS)",
     grub: "Grub",
     hackaccino: "Hackaccino",
     highway: "Highway",
