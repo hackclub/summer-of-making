@@ -1,15 +1,15 @@
 # frozen_string_literal: true
 
 namespace :users do
-    # we don't perform any actions, yet.
+  # we don't perform any actions, yet.
   desc "Assess damage for buggy code"
   task assess_damage_ig: :environment do
     # July 2, 2025 4:50 PM EST, but we're checking from July 2, 2025 12:00 AM EST just to be safe.
     cutoff_date = Time.zone.parse("2025-07-02 00:00:00 EST")
     end_date = Time.zone.parse("2025-07-07 00:00:00 EST") # just to be safe.
-    
+
     users_since_july_2 = User.where("created_at >= ?", cutoff_date).where("created_at <= ?", end_date).where.not(identity_vault_id: nil)
-    
+
     puts "Total users created since cutoff_date: #{users_since_july_2.count}"
     puts
 
@@ -36,11 +36,11 @@ namespace :users do
     users_since_july_2.find_each do |user|
       puts "User ID: #{user.id}, Slack ID: #{user.slack_id}, Email: #{user.email}"
       puts "  IDV ID: #{user.identity_vault_id || 'None'}"
-      
+
       begin
         verification_status = user.verification_status
         puts "  Verification Status: #{verification_status}"
-        
+
         case verification_status
         when :pending
           stats[:pending] += 1
@@ -59,21 +59,21 @@ namespace :users do
 
       # check for free stickers
       free_stickers_orders = user.shop_orders.joins(:shop_item).where(shop_items: { type: "ShopItem::FreeStickers" })
-      
+
       if free_stickers_orders.any?
         stats[:has_free_stickers] += 1
-        
+
         free_stickers_orders.each do |order|
           puts "Order ID: #{order.id}, Status: #{order.aasm_state}, Created: #{order.created_at}"
-          
+
           case order.aasm_state
-          when 'pending'
+          when "pending"
             stats[:free_stickers_pending] += 1
-          when 'fulfilled'
+          when "fulfilled"
             stats[:free_stickers_fulfilled] += 1
-          when 'awaiting_periodical_fulfillment'
+          when "awaiting_periodical_fulfillment"
             stats[:free_stickers_awaiting] += 1
-          when 'in_verification_limbo'
+          when "in_verification_limbo"
             stats[:free_stickers_in_limbo] += 1
           end
         end
@@ -84,21 +84,21 @@ namespace :users do
       # determine actions that need to be taken – nothing is being done, yet.
       if verification_status == :ineligible || verification_status == :needs_resubmission
         stats[:actions_needed] += 1
-        
+
         actions = []
-        
+
         if free_stickers_orders.any?
           free_stickers_orders.each do |order|
-            if order.aasm_state == 'fulfilled'
+            if order.aasm_state == "fulfilled"
               actions << "LOG: Free stickers order #{order.id} was already fulfilled - cannot cancel"
-            elsif order.aasm_state != 'rejected'
+            elsif order.aasm_state != "rejected"
               actions << "CANCEL: Free stickers order #{order.id} (currently #{order.aasm_state})"
             end
           end
         end
-        
+
         actions << "DOWNGRADE: Account to MCG"
-        
+
         # Slack DM action
         message = if verification_status == :ineligible
           "blah blah i fucked up sorry - you're ineligible"
@@ -106,7 +106,7 @@ namespace :users do
           "blah blah i fucked up sorry - you need to resubmit"
         end
         actions << "SEND_DM: '#{message}'"
-        
+
         actions_log << {
           user_id: user.id,
           slack_id: user.slack_id,
@@ -114,11 +114,11 @@ namespace :users do
           verification_status: verification_status,
           actions: actions
         }
-        
+
         puts "ACTIONS NEEDED FOR USER:"
         actions.each { |action| puts "    - #{action}" }
       end
-      
+
       puts
     end
 
@@ -145,7 +145,7 @@ namespace :users do
     puts "  - Users needing action: #{stats[:actions_needed]}"
     puts "  - Users that would be unaffected: #{stats[:total_users] - stats[:actions_needed]}"
     puts
-        
+
     puts "=" * 80
     puts "done."
     puts "=" * 80
