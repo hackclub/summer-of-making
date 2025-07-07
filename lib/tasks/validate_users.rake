@@ -150,4 +150,17 @@ namespace :users do
     puts "done."
     puts "=" * 80
   end
+
+  desc "fix ysws_verified"
+  task fix_ysws_verified: :environment do
+    users_with_ysws_verified = User.where.not(ysws_verified: nil)
+
+    users_with_ysws_verified.find_each do |user|
+      idv_data = user.fetch_idv
+
+      if idv_data[:verification_status] != "verified" && !idv_data[:ysws_eligible]
+        user.update(ysws_verified: false)
+      end
+    end
+  end
 end
