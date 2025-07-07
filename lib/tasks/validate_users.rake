@@ -157,10 +157,122 @@ namespace :users do
 
     users_with_ysws_verified.find_each do |user|
       idv_data = user.fetch_idv
-
+      
       if idv_data[:verification_status] != "verified" && !idv_data[:ysws_eligible]
+        puts "fixing ysws_verified for user #{user.id}"
         user.update(ysws_verified: false)
       end
     end
+  end
+
+  # run fix_ysws_verified first
+  desc "Demote users created since July 2 and cancel free stickers orders"
+  task demote_and_cancel_free_stickers: :environment do
+    # July 2, 2025 4:50 PM EST, but we're checking from July 2, 2025 12:00 AM EST just to be safe.
+    cutoff_date = Time.zone.parse("2025-07-02 00:00:00 EST")
+    end_date = Time.zone.parse("2025-07-07 00:00:00 EST") # just to be safe.
+
+    users_since_july_2 = User.where("created_at >= ?", cutoff_date)
+                              .where("created_at <= ?", end_date)
+                              .where.not(identity_vault_id: nil)
+
+    puts "Starting remediation for #{users_since_july_2.count} users created since July 2"
+    puts "=" * 80
+
+    stats = {
+      total_processed: 0,
+      ineligible: 0,
+      needs_resubmission: 0,
+      verified: 0,
+      pending: 0,
+      error_checking: 0,
+      orders_canceled: 0,
+      orders_already_fulfilled: 0,
+      accounts_downgraded: 0,
+      errors: 0
+    }
+
+    users_since_july_2.find_each do |user|
+      begin
+        stats[:total_processed] += 1
+        puts "Processing User ID: #{user.id}, Slack ID: #{user.slack_id}, Email: #{user.email}"
+
+        # Check verification status
+        verification_status = user.verification_status
+        puts "  Verification Status: #{verification_status}"
+
+        case verification_status
+        when :pending
+          stats[:pending] += 1
+          puts "  User is pending - no action needed"
+          next
+        when :verified
+          stats[:verified] += 1
+          puts "  User is verified - no action needed"
+          next
+        when :ineligible
+          stats[:ineligible] += 1
+        when :needs_resubmission
+          stats[:needs_resubmission] += 1
+        else
+          puts "  Unknown verification status: #{verification_status}"
+          stats[:error_checking] += 1
+          next
+        end
+
+        free_stickers_orders = user.shop_orders.joins(:shop_item)
+                                   .where(shop_items: { type: "ShopItem::FreeStickers" })
+
+        free_stickers_orders.each do |order|
+          puts "  Found free stickers order #{order.id} with status: #{order.aasm_state}"
+
+          case order.aasm_state
+          when "fulfilled"
+            puts "    Order already fulfilled - logging but cannot cancel"
+            stats[:orders_already_fulfilled] += 1
+          when "rejected"
+            puts "    Order already rejected - no action needed"
+          else
+            puts "    Canceling order #{order.id}"
+            order.reject!
+            stats[:orders_canceled] += 1
+          end
+        end
+
+        puts "  Downgrading account to Multi-channel guest"
+
+        # sending stuff to neon's slack not yet implemented
+
+        # if response.ok? stats[:accounts_downgraded] += 1
+
+        # TODO: figure out what to do with devlogs, projects, ship_events, etc.
+
+        puts "Remediation complete for user #{user.id}"
+
+      rescue => e
+        puts "Error processing user #{user.id}: #{e.message}"
+        stats[:errors] += 1
+      end
+
+      puts
+    end
+
+    puts "=" * 80
+    puts "DONE"
+    puts "=" * 80
+    puts "Total users processed: #{stats[:total_processed]}"
+    puts "Verification status breakdown:"
+    puts "  - Ineligible: #{stats[:ineligible]}"
+    puts "  - Needs resubmission: #{stats[:needs_resubmission]}"
+    puts "  - Verified (no action): #{stats[:verified]}"
+    puts "  - Pending (no action): #{stats[:pending]}"
+    puts "  - Error checking: #{stats[:error_checking]}"
+    puts
+    puts "Actions taken:"
+    puts "  - Orders canceled: #{stats[:orders_canceled]}"
+    puts "  - Orders already fulfilled (logged): #{stats[:orders_already_fulfilled]}"
+    puts "  - Errors encountered: #{stats[:errors]}"
+    puts
+    puts "=" * 80
   end
 end
