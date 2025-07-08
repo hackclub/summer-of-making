@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_07_07_183912) do
+ActiveRecord::Schema[8.0].define(version: 2025_07_08_172426) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -664,6 +664,7 @@ ActiveRecord::Schema[8.0].define(version: 2025_07_07_183912) do
     t.boolean "freeze_shop_activity", default: false
     t.datetime "synced_at", precision: nil
     t.text "permissions", default: "[]"
+    t.jsonb "shenanigans_state", default: {}
   end
 
   create_table "view_events", force: :cascade do |t|

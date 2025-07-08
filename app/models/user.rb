@@ -20,6 +20,7 @@
 #  is_admin                             :boolean          default(FALSE), not null
 #  last_name                            :string
 #  permissions                          :text             default([])
+#  shenanigans_state                    :jsonb
 #  synced_at                            :datetime
 #  timezone                             :string
 #  tutorial_video_seen                  :boolean          default(FALSE), not null
@@ -303,6 +304,10 @@ class User < ApplicationRecord
 
   def admin_or_ship_certifier?
     is_admin? || ship_certifier?
+  end
+
+  def blue_check?
+    !!shenanigans_state["blue_check"]
   end
 
   def projects_left_to_stake

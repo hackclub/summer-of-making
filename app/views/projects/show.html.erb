@@ -61,7 +61,7 @@
                     <div>
                       <p class="text-gray-600 text-xs sm:text-sm 2xl:text-base"><%= time_ago_in_words item.created_at %> ago</p>
 
-                      <span class="font-medium text-base sm:text-lg 2xl:text-xl"><%= item.user.display_name %><% admin_user_visit(item.user) %></span>
+                      <span class="font-medium text-base sm:text-lg 2xl:text-xl"><%= render "shared/user_display_name", user: item.user %><% admin_user_visit(item.user) %></span>
 
                       <span class="text-gray-600 text-xs sm:text-sm 2xl:text-base">•</span>
 

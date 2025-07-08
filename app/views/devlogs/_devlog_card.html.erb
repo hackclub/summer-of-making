@@ -34,14 +34,14 @@
           <div>
             <% if show_project_link %>
               <span class="text-base sm:text-lg 2xl:text-xl text-[#4a2d24]">
-                <%= devlog.user.display_name %><% admin_user_visit(devlog.user) %> <span class="text-[#865c39]">worked on</span>
+                <%= render "shared/user_display_name", user: devlog.user %><% admin_user_visit(devlog.user) %> <span class="text-[#865c39]">worked on</span>
                 <a href="<%= project_path(devlog.project) %>" class="transition-colors duration-200 hover:underline decoration-1 underline-offset-2">
                   <%= devlog.project.title %>
                 </a>
               </span>
             <% else %>
               <span class="text-base sm:text-lg 2xl:text-xl">
-                <%= devlog.user.display_name %><% admin_user_visit(devlog.user) %>
+                <%= render "shared/user_display_name", user: devlog.user %><% admin_user_visit(devlog.user) %>
               </span>
             <% end %>
 

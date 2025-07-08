@@ -7,7 +7,7 @@
             <% if comment.user.avatar.present? %>
               <img src="<%= comment.user.avatar %>" alt="<%= comment.user.display_name %>" class="w-5 h-5 sm:w-6 sm:h-6 md:w-8 md:h-8 rounded-full flex-shrink-0">
             <% end %>
-            <span class="font-medium text-xs sm:text-sm md:text-base truncate"><%= comment.user.display_name %><% admin_user_visit(comment.user) %></span>
+            <span class="font-medium text-xs sm:text-sm md:text-base truncate"><%= render "shared/user_display_name", user: comment.user %><% admin_user_visit(comment.user) %></span>
             <span class="text-gray-600 text-[10px] sm:text-xs md:text-sm flex-shrink-0"><%= time_ago_in_words(comment.created_at) %> ago</span>
           </div>
         </div>
