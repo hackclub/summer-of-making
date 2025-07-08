@@ -1,0 +1,175 @@
+<% content_for :head do %>
+  <%= javascript_include_tag "gork/elizabot" %>
+  <%= javascript_include_tag "gork/elizadata" %>
+<% end %>
+
+<div class="min-h-screen bg-[#15202b] flex flex-col text-white">
+  <!-- Header -->
+  <div class="bg-[#1d2c3d] backdrop-blur-md bg-opacity-70 px-4 py-3 flex items-center sticky top-0 z-10 border-b border-gray-700">
+    <div class="flex items-center space-x-3">
+      <div class="w-8 h-8 bg-[#1d9bf0] rounded-full flex items-center justify-center">
+        <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+        </svg>
+      </div>
+      <h1 class="text-xl font-bold">Chat with Gork</h1>
+    </div>
+  </div>
+
+  <!-- Chat Container -->
+  <div class="flex-1 overflow-hidden flex flex-col">
+    <div class="flex-1 overflow-y-auto p-4">
+      <div id="messages" class="space-y-4">
+        <div id="chat-messages"></div>
+        <!-- Loading indicator -->
+        <div id="loading-indicator" class="hidden">
+          <div class="flex items-center space-x-2 text-gray-400">
+            <div class="flex space-x-1">
+              <div class="w-2 h-2 bg-[#1d9bf0] rounded-full animate-bounce"></div>
+              <div class="w-2 h-2 bg-[#1d9bf0] rounded-full animate-bounce" style="animation-delay: 0.2s"></div>
+              <div class="w-2 h-2 bg-[#1d9bf0] rounded-full animate-bounce" style="animation-delay: 0.4s"></div>
+            </div>
+            <span class="text-sm">Gork is pondering</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Input Area -->
+    <div class="border-t border-gray-700 bg-[#1d2c3d] p-4">
+      <form id="meow" onsubmit="elizaStep();return false" class="flex space-x-3">
+        <div class="flex-1 relative">
+          <input
+            type="text"
+            id="input"
+            class="w-full px-4 py-3 bg-[#273340] border border-gray-700 rounded-full text-white placeholder-gray-500 focus:ring-2 focus:ring-[#1d9bf0] focus:border-transparent"
+            placeholder="Send a message"
+            autofocus="true">
+        </div>
+        <div class="flex space-x-2">
+          <button
+            type="submit"
+            class="px-5 py-2.5 bg-[#1d9bf0] text-white font-bold rounded-full hover:bg-[#1a8cd8] focus:outline-none focus:ring-2 focus:ring-[#1d9bf0] focus:ring-offset-2 focus:ring-offset-[#15202b] transition-colors">
+            Send
+          </button>
+          <button
+            type="reset"
+            onclick="window.setTimeout('elizaReset()',100);"
+            class="px-5 py-2.5 bg-[#273340] text-white font-bold rounded-full hover:bg-[#323e4c] focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 focus:ring-offset-[#15202b] transition-colors">
+            Reset
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<script>
+    var username = <%= current_user.display_name.to_json.html_safe %>;
+    var eliza = new ElizaBot();
+    var elizaLines = new Array();
+
+    const inp = document.getElementById("input");
+    const chatMessages = document.getElementById("chat-messages");
+    const loadingIndicator = document.getElementById("loading-indicator");
+
+    function createMessageElement(content, isUser = false) {
+        const div = document.createElement('div');
+        div.className = `flex ${isUser ? 'justify-end' : 'justify-start'} mb-4`;
+
+        const innerDiv = document.createElement('div');
+        innerDiv.className = `${isUser ? 'bg-[#1d9bf0]' : 'bg-[#273340]'} rounded-2xl px-4 py-2 max-w-[80%]`;
+
+        const text = document.createElement('p');
+        text.className = 'text-white text-[15px] whitespace-pre-wrap';
+        text.textContent = content;
+
+        innerDiv.appendChild(text);
+        div.appendChild(innerDiv);
+        return div;
+    }
+
+    async function streamText(text, element) {
+        const words = text.replace("$username", username).split(' ');
+        let currentText = '';
+
+        for (let i = 0; i < words.length; i++) {
+            currentText += (i > 0 ? ' ' : '') + words[i];
+            element.textContent = currentText;
+            await new Promise(resolve => setTimeout(resolve, 50 + Math.random() * 50));
+        }
+    }
+
+    function showLoading() {
+        loadingIndicator.classList.remove('hidden');
+        chatMessages.scrollTop = chatMessages.scrollHeight;
+    }
+
+    function hideLoading() {
+        loadingIndicator.classList.add('hidden');
+    }
+
+    async function elizaStep() {
+        var userinput = inp.value;
+        if (eliza.quit) {
+            inp.value = '';
+            if (confirm("This session is over.\nStart over?")) elizaReset();
+            inp.focus();
+            return;
+        }
+        else if (userinput != '') {
+            // Add user message immediately
+            const userMessage = createMessageElement(userinput, true);
+            chatMessages.appendChild(userMessage);
+
+            // Show loading indicator
+            showLoading();
+
+            // Simulate AI thinking
+            await new Promise(resolve => setTimeout(resolve, 500 + Math.random() * 1000));
+
+            // Hide loading and show AI response
+            hideLoading();
+
+            const response = eliza.transform(userinput);
+            const aiMessage = createMessageElement(response);
+            const responseText = aiMessage.querySelector('p');
+            responseText.textContent = '';
+            chatMessages.appendChild(aiMessage);
+
+            // Stream in the response
+            await streamText(response, responseText);
+
+            // Store in history
+            elizaLines.push(`${username}: ${userinput}`);
+            elizaLines.push(`Gork: ${response}`);
+        }
+        else if (elizaLines.length == 0) {
+            showLoading();
+            await new Promise(resolve => setTimeout(resolve, 500));
+            hideLoading();
+
+            const initial = eliza.getInitial();
+            const aiMessage = createMessageElement(initial);
+            const responseText = aiMessage.querySelector('p');
+            responseText.textContent = '';
+            chatMessages.appendChild(aiMessage);
+
+            await streamText(initial, responseText);
+            elizaLines.push(`Gork: ${initial}`);
+        }
+
+        inp.value = '';
+        inp.focus();
+        chatMessages.scrollTop = chatMessages.scrollHeight;
+    }
+
+    function elizaReset() {
+        eliza.reset();
+        elizaLines.length = 0;
+        chatMessages.innerHTML = '';
+        elizaStep();
+    }
+
+    window.setTimeout(elizaReset, 100);
+</script>

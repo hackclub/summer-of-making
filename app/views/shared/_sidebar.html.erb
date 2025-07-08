@@ -97,6 +97,23 @@
             underline_attr: { data: { sidebar_target: "underline" } }
           } %>
         </li>
+        <% if current_user&.blue_check? %>
+        <li class="flex justify-start">
+            <%= render partial: "shared/link", locals: {
+              target: gork_path,
+              text: "gork",
+              icon: "ai",
+              large: true,
+              highlight: current_page?(gork_path),
+              text_attr: {
+                data: { sidebar_target: "collapseFade", turbo: false },
+                class: "text-3xl",
+                style: "font-family: serif"
+              },
+              underline_attr: { data: { sidebar_target: "underline" } }
+            } %>
+        </li>
+        <% end %>
 
         <% if current_user&.is_admin? %>
           <li class="flex justify-start border-2 border-dashed border-orange-500 bg-orange-500/10" style="margin-right: 10px; border-radius: 10px;">
