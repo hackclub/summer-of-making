@@ -310,6 +310,10 @@ class User < ApplicationRecord
     !!shenanigans_state["blue_check"]
   end
 
+  def neon_flair?
+    !!shenanigans_state["neon_flair"]
+  end
+
   def projects_left_to_stake
     5 - staked_projects_count
   end
