@@ -340,17 +340,6 @@ class Project < ApplicationRecord
 
       puts "Ship #{ship.id} created at #{ship.created_at}: votes_before=#{votes_before_ship}, cumulative=#{cumulative_vote_count_at_payout}"
 
-      # Get cumulative ELO bounds for this vote count
-      if all_time
-        # Genesis: use cumulative range up to this vote count (no time filtering)
-        min, max = VoteChange.cumulative_elo_range_for_vote_count(cumulative_vote_count_at_payout)
-      else
-        # Normal: use cumulative range up to this vote count AND created before ship event
-        min, max = VoteChange.cumulative_elo_range_for_vote_count(cumulative_vote_count_at_payout, ship.created_at)
-      end
-
-      next if min.nil? || max.nil?
-
       # Find when this ship event got its 18th vote
       # This is when votes_before_ship + votes after ship creation = cumulative_vote_count_at_payout
       ship_votes_needed = 18
@@ -361,6 +350,17 @@ class Project < ApplicationRecord
 
       if vote_change_at_target
         current_rating = vote_change_at_target.elo_after
+
+        # Get cumulative ELO bounds for this vote count
+        if all_time
+          # Genesis: use cumulative range up to this vote count (no time filtering)
+          min, max = [VoteChange.minimum(:elo_after), VoteChange.maximum(:elo_after)]
+        else
+          # Normal: use cumulative range up to this vote count AND created before the vote that triggered payout
+          min, max = VoteChange.cumulative_elo_range_for_vote_count(cumulative_vote_count_at_payout, vote_change_at_target.created_at)
+        end
+
+        next if min.nil? || max.nil?
 
         # Check if this project's ELO at this vote count is included in the cumulative range
         all_elos_at_count = VoteChange.where("project_vote_count <= ?", cumulative_vote_count_at_payout).pluck(:elo_after)
