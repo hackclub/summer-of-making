@@ -45,27 +45,25 @@ class OneTime::InitiateGenesisPayoutsJob < ApplicationJob
       # This should be the vote count when this ship event received its 18th vote
       votes_before_ship = VoteChange.where(project: project).where("created_at <= ?", ship_event.created_at).count
 
-      # For genesis payouts, assume each qualifying ship event got exactly 18 votes
-      # So cumulative count = votes before this ship + 18
+      # For genesis payouts, we use the project's final ELO rating and full ELO range
+      # Still track cumulative vote count for consistency tracking
       cumulative_vote_count_at_payout = votes_before_ship + 18
 
-      # Use the new cumulative elo range method
-      min, max = VoteChange.cumulative_elo_range_for_vote_count(cumulative_vote_count_at_payout)
+      # Genesis: use full ELO range across all projects ever
+      min, max = [VoteChange.minimum(:elo_after), VoteChange.maximum(:elo_after)]
 
-      # Get the project's ELO at the specific target vote count (same logic as payout calculation)
-      target_vote_count = votes_before_ship + 18
-      vote_change_at_target = VoteChange.where(project: project, project_vote_count: target_vote_count).first
-      current_elo = vote_change_at_target&.elo_after
+      # Genesis: use project's final ELO rating (not ELO at 18th vote)
+      current_elo = project.rating
       elo_percentile = min == max ? 0.0 : (current_elo - min) / (max - min).to_f
 
-      # Check for consistency in bounds for same cumulative vote count
-      if vote_count_bounds[cumulative_vote_count_at_payout]
-        existing_min, existing_max = vote_count_bounds[cumulative_vote_count_at_payout]
+      # Genesis consistency check: all projects should have the same ELO bounds (full range)
+      if vote_count_bounds[:genesis_bounds]
+        existing_min, existing_max = vote_count_bounds[:genesis_bounds]
         if existing_min != min || existing_max != max
-          raise "INCONSISTENT ELO BOUNDS! Project #{project.id} with #{cumulative_vote_count_at_payout} cumulative votes has bounds [#{min}, #{max}] but previous project with same cumulative vote count had bounds [#{existing_min}, #{existing_max}]"
+          raise "INCONSISTENT GENESIS ELO BOUNDS! Project #{project.id} has bounds [#{min}, #{max}] but previous project had bounds [#{existing_min}, #{existing_max}]"
         end
       else
-        vote_count_bounds[cumulative_vote_count_at_payout] = [ min, max ]
+        vote_count_bounds[:genesis_bounds] = [ min, max ]
       end
 
       if min > current_elo || max < current_elo
@@ -75,20 +73,21 @@ class OneTime::InitiateGenesisPayoutsJob < ApplicationJob
       payout_data << [
         project.title,
         project.id,
+        "https://summer.hackclub.com/projects/#{project.id}",
         ship_event.id,
         p.amount,
         current_elo,
         max,
         min,
         elo_percentile,
-        cumulative_vote_count_at_payout,
+        project.total_votes,
         votes_before_ship
       ]
     end
 
     # If we get here, all bounds are consistent, so write the CSV
     CSV.open("genesis_payouts.csv", "w") do |csv|
-      csv << [ "Project", "Project ID", "Ship ID", "Payout amount", "elo", "cumulative elo max", "cumulative elo min", "elo percentile", "ship event cumulative vote count", "votes before ship" ]
+      csv << [ "Project", "Project ID", "Project Link", "Ship ID", "Payout amount", "final elo", "global elo max", "global elo min", "elo percentile", "total votes", "votes before ship" ]
       payout_data.each { |row| csv << row }
     end
 
