@@ -50,7 +50,7 @@ class OneTime::InitiateGenesisPayoutsJob < ApplicationJob
       cumulative_vote_count_at_payout = votes_before_ship + 18
 
       # Genesis: use full ELO range across all projects ever
-      min, max = [VoteChange.minimum(:elo_after), VoteChange.maximum(:elo_after)]
+      min, max = [ VoteChange.minimum(:elo_after), VoteChange.maximum(:elo_after) ]
 
       # Genesis: use project's final ELO rating (not ELO at 18th vote)
       current_elo = project.rating
@@ -81,13 +81,16 @@ class OneTime::InitiateGenesisPayoutsJob < ApplicationJob
         min,
         elo_percentile,
         project.total_votes,
-        votes_before_ship
+        votes_before_ship,
+        ship_event.hours_at_payout,
+        ship_event.shells_earned,
+        ship_event.payouts.exists?
       ]
     end
 
     # If we get here, all bounds are consistent, so write the CSV
     CSV.open("genesis_payouts.csv", "w") do |csv|
-      csv << [ "Project", "Project ID", "Project Link", "Ship ID", "Payout amount", "final elo", "global elo max", "global elo min", "elo percentile", "total votes", "votes before ship" ]
+      csv << [ "Project", "Project ID", "Project Link", "Ship ID", "Payout amount", "final elo", "global elo max", "global elo min", "elo percentile", "total votes", "votes before ship", "hours paid", "shells earned", "is paid" ]
       payout_data.each { |row| csv << row }
     end
 

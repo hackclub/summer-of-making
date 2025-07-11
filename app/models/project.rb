@@ -353,7 +353,7 @@ class Project < ApplicationRecord
         if all_time
           # Genesis: use cumulative range up to this vote count (no time filtering)
           current_rating = self.rating
-          min, max = [VoteChange.minimum(:elo_after), VoteChange.maximum(:elo_after)]
+          min, max = [ VoteChange.minimum(:elo_after), VoteChange.maximum(:elo_after) ]
         else
           current_rating = vote_change_at_target.elo_after
           # Normal: use cumulative range up to this vote count AND created before the vote that triggered payout
@@ -394,6 +394,8 @@ class Project < ApplicationRecord
       reason = "Payout#{" recalculation" if ship.payouts.count > 0} for #{title}'s #{ship.created_at} ship."
 
       payout = Payout.create!(amount: current_payout_difference, payable: ship, user:, reason:)
+
+      ship.update!(shells_earned: amount, hours_at_payout: hours)
 
       puts "PAYOUTCREASED(#{payout.id}) ship.id:#{ship.id} min:#{min} max:#{max} rating_at_vote_count:#{current_rating} pc:#{pc} mult:#{mult} hours:#{hours} amount:#{amount} current_payout_sum:#{current_payout_sum} current_payout_difference:#{current_payout_difference}"
     end
