@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_07_11_203503) do
+ActiveRecord::Schema[8.0].define(version: 2025_07_11_203829) do
   create_schema "auth"
   create_schema "extensions"
   create_schema "graphql"
@@ -393,6 +393,7 @@ ActiveRecord::Schema[8.0].define(version: 2025_07_11_203503) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.integer "shells_earned", default: 0, null: false
+    t.decimal "hours_at_payout", precision: 10, scale: 4, default: "0.0", null: false
     t.index ["project_id"], name: "index_ship_events_on_project_id"
   end
 
