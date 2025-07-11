@@ -2,10 +2,11 @@
 #
 # Table name: ship_events
 #
-#  id         :bigint           not null, primary key
-#  created_at :datetime         not null
-#  updated_at :datetime         not null
-#  project_id :bigint           not null
+#  id            :bigint           not null, primary key
+#  shells_earned :integer          default(0), not null
+#  created_at    :datetime         not null
+#  updated_at    :datetime         not null
+#  project_id    :bigint           not null
 #
 # Indexes
 #
