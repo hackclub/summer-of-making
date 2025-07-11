@@ -331,8 +331,8 @@ class Project < ApplicationRecord
     ship_events.each_with_index do |ship, idx|
       ship_event_vote_count = VoteChange.where(project: self).where("created_at > ?", ship.created_at).count
 
-      # Only process ship events that have 18 or more votes
-      next unless ship_event_vote_count >= 18
+      # Only process ship events that have exactly 18 votes (trigger payout on 18th vote only)
+      next unless ship_event_vote_count == 18
 
       # Calculate cumulative vote count for this ship event payout
       votes_before_ship = VoteChange.where(project: self).where("created_at <= ?", ship.created_at).count
