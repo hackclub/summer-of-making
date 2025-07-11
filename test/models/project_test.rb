@@ -19,6 +19,7 @@
 #  title                  :string
 #  used_ai                :boolean
 #  views_count            :integer          default(0), not null
+#  vote_changes_count     :integer          default(0), not null
 #  ysws_submission        :boolean          default(FALSE), not null
 #  ysws_type              :string
 #  created_at             :datetime         not null

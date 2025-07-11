@@ -29,7 +29,7 @@
 #
 class VoteChange < ApplicationRecord
   belongs_to :vote
-  belongs_to :project
+  belongs_to :project, counter_cache: :vote_changes_count
 
   validates :elo_before, :elo_after, :elo_delta, presence: true
   validates :result, presence: true, inclusion: { in: %w[win loss tie] }

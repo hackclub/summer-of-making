@@ -2,10 +2,11 @@
 #
 # Table name: ship_events
 #
-#  id         :bigint           not null, primary key
-#  created_at :datetime         not null
-#  updated_at :datetime         not null
-#  project_id :bigint           not null
+#  id          :bigint           not null, primary key
+#  votes_count :integer          default(0), not null
+#  created_at  :datetime         not null
+#  updated_at  :datetime         not null
+#  project_id  :bigint           not null
 #
 # Indexes
 #
@@ -19,11 +20,17 @@ class ShipEvent < ApplicationRecord
   belongs_to :project
   has_one :ship_event_feedback
   has_many :payouts, as: :payable
+  has_many :votes_as_ship_event_1, class_name: "Vote", foreign_key: "ship_event_1_id"
+  has_many :votes_as_ship_event_2, class_name: "Vote", foreign_key: "ship_event_2_id"
 
   after_create :maybe_create_ship_certification
 
   def user
     project.user
+  end
+
+  def votes
+    Vote.where("ship_event_1_id = ? OR ship_event_2_id = ?", id, id)
   end
 
   def devlogs_since_last

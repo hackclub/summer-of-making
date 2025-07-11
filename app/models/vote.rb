@@ -49,8 +49,8 @@ class Vote < ApplicationRecord
   belongs_to :user
   belongs_to :project_1, class_name: "Project", optional: true
   belongs_to :project_2, class_name: "Project", optional: true
-  belongs_to :ship_event_1, class_name: "ShipEvent"
-  belongs_to :ship_event_2, class_name: "ShipEvent"
+  belongs_to :ship_event_1, class_name: "ShipEvent", counter_cache: :votes_count
+  belongs_to :ship_event_2, class_name: "ShipEvent", counter_cache: :votes_count
   belongs_to :marked_invalid_by, class_name: "User", optional: true
 
   has_many :vote_changes, dependent: :destroy
