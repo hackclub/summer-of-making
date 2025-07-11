@@ -349,13 +349,13 @@ class Project < ApplicationRecord
       vote_change_at_target = VoteChange.where(project: self, project_vote_count: target_vote_count).first
 
       if vote_change_at_target
-        current_rating = vote_change_at_target.elo_after
-
         # Get cumulative ELO bounds for this vote count
         if all_time
           # Genesis: use cumulative range up to this vote count (no time filtering)
+          current_rating = self.rating
           min, max = [VoteChange.minimum(:elo_after), VoteChange.maximum(:elo_after)]
         else
+          current_rating = vote_change_at_target.elo_after
           # Normal: use cumulative range up to this vote count AND created before the vote that triggered payout
           min, max = VoteChange.cumulative_elo_range_for_vote_count(cumulative_vote_count_at_payout, vote_change_at_target.created_at)
         end
