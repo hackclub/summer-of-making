@@ -1,0 +1,74 @@
+<div class="container mx-auto px-4 py-6 max-w-2xl">
+  <%= render "shared/card" do %>
+    <div class="space-y-6">
+      <div class="flex items-center justify-between">
+        <h1 class="text-2xl font-bold text-gray-800">Edit Profile</h1>
+        <%= link_to "Cancel", user_path(@user), class: "text-gray-600 hover:text-gray-800" %>
+      </div>
+      
+      <%= form_with model: @user, local: true do |form| %>
+        <% if @user.errors.any? %>
+          <div class="bg-red-50 border border-red-200 rounded-md p-4 mb-6">
+            <h2 class="text-red-800 font-semibold mb-2">There were some errors with your submission:</h2>
+            <ul class="text-red-700 text-sm space-y-1">
+              <% @user.errors.full_messages.each do |message| %>
+                <li>• <%= message %></li>
+              <% end %>
+            </ul>
+          </div>
+        <% end %>
+        
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div class="space-y-4">
+            <div>
+              <%= form.label :display_name, class: "block text-sm font-medium text-gray-700 mb-1" %>
+              <%= form.text_field :display_name, class: "w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent" %>
+            </div>
+            
+            <div>
+              <%= form.label :first_name, class: "block text-sm font-medium text-gray-700 mb-1" %>
+              <%= form.text_field :first_name, class: "w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent" %>
+            </div>
+            
+            <div>
+              <%= form.label :last_name, class: "block text-sm font-medium text-gray-700 mb-1" %>
+              <%= form.text_field :last_name, class: "w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent" %>
+            </div>
+            
+            <div>
+              <%= form.label :timezone, class: "block text-sm font-medium text-gray-700 mb-1" %>
+              <%= form.select :timezone, 
+                  ActiveSupport::TimeZone.all.map { |tz| [tz.to_s, tz.name] },
+                  { include_blank: "Select timezone..." },
+                  { class: "w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent" }
+              %>
+            </div>
+          </div>
+          
+          <div class="space-y-4">
+            <%= form.fields_for :user_profile do |profile_form| %>
+              <div>
+                <%= profile_form.label :bio, class: "block text-sm font-medium text-gray-700 mb-1" %>
+                <%= profile_form.text_area :bio, 
+                    rows: 6, 
+                    placeholder: "Tell us about yourself...",
+                    class: "w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-vertical" %>
+              </div>
+            <% end %>
+            
+            <div class="text-sm text-gray-500">
+              <p><strong>Note:</strong> Your email cannot be changed here. Contact support if you need to update your email address.</p>
+            </div>
+          </div>
+        </div>
+        
+        <div class="mt-8 pt-6 border-t border-gray-200">
+          <div class="flex justify-end space-x-3">
+            <%= link_to "Cancel", user_path(@user), class: "px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 transition-colors" %>
+            <%= form.submit "Update Profile", class: "px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-md transition-colors" %>
+          </div>
+        </div>
+      <% end %>
+    </div>
+  <% end %>
+</div> 

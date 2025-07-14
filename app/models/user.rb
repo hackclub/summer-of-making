@@ -43,10 +43,13 @@ class User < ApplicationRecord
   has_many :ship_events, through: :projects
   has_many :payouts
   has_one :user_hackatime_data, dependent: :destroy
+  has_one :user_profile, :class_name => 'User::Profile', dependent: :destroy
   has_one :tutorial_progress, dependent: :destroy
   has_one :magic_link, dependent: :destroy
   has_many :shop_orders
   has_many :shop_card_grants
+
+  accepts_nested_attributes_for :user_profile
   has_many :hackatime_projects
   has_many :fraud_reports, foreign_key: :user_id, class_name: "FraudReport", dependent: :destroy
 

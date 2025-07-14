@@ -257,6 +257,10 @@ Rails.application.routes.draw do
     resources :shop_orders, path: :orders, except: %i[edit update new]
   end
 
+  resources :users, only: [ :show ] do
+    resource :profile, controller: 'user/profiles', only: [ :edit, :update ]
+  end
+
   # Payouts etc
   get "/payouts/:slack_id", to: "payouts#index"
 
