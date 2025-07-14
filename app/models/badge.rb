@@ -63,6 +63,7 @@ class Badge
       icon: "👥",
       color: "border-yellow-500 bg-yellow-500/10 text-yellow-800",
       criteria: ->(user) { user.followed_projects.count >= 100 }
+    },
     spider: {
       name: "Spider",
       flavor_text: "this user has a pet!",
