@@ -66,22 +66,22 @@ class Badge
 
   def self.award_badges_for(user, backfill: false)
     newly_earned = []
-    
+
     BADGES.each do |badge_key, badge_definition|
       next if user.user_badges.exists?(badge_key: badge_key)
-      
+
       if badge_definition[:criteria].call(user)
         user.user_badges.create!(
           badge_key: badge_key,
           earned_at: Time.current
         )
         newly_earned << badge_key
-        
+
         # Send Slack DM notification
         send_badge_notification(user, badge_key, badge_definition, backfill: backfill)
       end
     end
-    
+
     newly_earned
   end
 

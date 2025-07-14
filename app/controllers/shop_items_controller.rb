@@ -40,7 +40,7 @@ class ShopItemsController < ApplicationController
     # Separate badge items from regular items
     @badge_items = filtered_items.select { |item| item.is_a?(ShopItem::BadgeItem) }
     @regular_items = filtered_items.reject { |item| item.is_a?(ShopItem::BadgeItem) }
-    
+
     # Keep original @shop_items for compatibility with any existing logic
     @shop_items = filtered_items
   end

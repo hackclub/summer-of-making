@@ -9,14 +9,14 @@ class UsersController < ApplicationController
   def show
     authorize @user
     @user.user_profile ||= @user.build_user_profile
-    
+
     # All projects for the sidebar
     @all_projects = @user.projects.includes(:user, :banner_attachment, :ship_events)
                          .order(created_at: :desc)
-    
+
     # Get all activities from cache
     @activities = get_cached_activities
-    
+
     respond_to do |format|
       format.html
     end
@@ -146,30 +146,30 @@ class UsersController < ApplicationController
   def get_cached_activities
     # Create cache key based on user and their content timestamps
     cache_key = "user_activities_#{@user.id}_#{@user.updated_at.to_i}_#{@user.projects.maximum(:updated_at)&.to_i}_#{@user.devlogs.maximum(:updated_at)&.to_i}"
-    
+
     Rails.cache.fetch(cache_key, expires_in: 1.hour) do
       # Get user's devlogs and projects with includes
       devlogs = @user.devlogs.includes(:project, :user, :comments, :likes, :file_attachment)
                             .order(created_at: :desc)
-      
+
       projects = @user.projects.includes(:user, :banner_attachment)
                              .order(created_at: :desc)
-      
+
       # Combine and sort chronologically
       combined_activities = []
-      
+
       # Add devlogs with type marker
       devlogs.each { |devlog| combined_activities << { type: :devlog, item: devlog, created_at: devlog.created_at } }
-      
+
       # Add projects with type marker
       projects.each { |project| combined_activities << { type: :project, item: project, created_at: project.created_at } }
-      
+
       # Add user joined activity
       combined_activities << { type: :user_joined, item: @user, created_at: @user.created_at }
-      
+
       # Sort by created_at descending (newest first)
       combined_activities.sort! { |a, b| b[:created_at] <=> a[:created_at] }
-      
+
       combined_activities
     end
   end
@@ -188,6 +188,4 @@ class UsersController < ApplicationController
       User.includes(:user_profile).find(params[:id])
     end
   end
-
-
 end

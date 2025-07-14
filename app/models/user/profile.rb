@@ -27,7 +27,7 @@ class User::Profile < ApplicationRecord
 
   def custom_css_requires_badge
     return if custom_css.blank?
-    
+
     unless user.has_badge?(:graphic_design_is_my_passion)
       errors.add(:custom_css, "requires the 'Graphic Design is My Passion' badge")
     end

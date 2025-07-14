@@ -258,7 +258,7 @@ Rails.application.routes.draw do
   end
 
   resources :users, only: [ :show ] do
-    resource :profile, controller: 'user/profiles', only: [ :edit, :update ]
+    resource :profile, controller: "user/profiles", only: [ :edit, :update ]
   end
 
   # Payouts etc

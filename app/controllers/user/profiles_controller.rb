@@ -13,9 +13,9 @@ class User::ProfilesController < ApplicationController
 
   def update
     authorize @profile
-    
+
     if @profile.update(profile_params)
-      redirect_to user_path(@user), notice: 'Profile was successfully updated.'
+      redirect_to user_path(@user), notice: "Profile was successfully updated."
     else
       render :edit
     end
@@ -38,4 +38,4 @@ class User::ProfilesController < ApplicationController
   def profile_params
     params.require(:user_profile).permit(:bio, :custom_css)
   end
-end 
+end

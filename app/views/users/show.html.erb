@@ -19,12 +19,11 @@
                 <span class="text-gray-500 text-2xl">👤</span>
               </div>
             <% end %>
-            
+
             <h1 class="text-2xl font-bold text-gray-800 mb-2 profile-name">
               <%= render "shared/user_display_name", user: @user %>
             </h1>
-            
-            
+
             <% if @user == current_user %>
                <%= link_to "edit your profile!", edit_user_profile_path(@user), class: "inline-flex items-center px-3 py-2 border border-gray-300 shadow-sm text-sm leading-4 font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500" %>
             <% else %>
@@ -32,13 +31,13 @@
                <%= link_to "edit their profile.", edit_user_profile_path(@user), class: "inline-flex items-center px-3 py-2 border border-gray-300 shadow-sm text-sm leading-4 font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500" %>
             <%= render "shared/user_twiddles", user: @user %>
 
-             <% end %>             
+             <% end %>
              <% end %>
 
              <div>
             </div>
           </div>
-          
+
           <!-- Bio -->
           <% if @user.user_profile&.bio.present? %>
             <div class="profile-bio-section">
@@ -48,7 +47,7 @@
               </div>
             </div>
           <% end %>
-          
+
           <!-- Stats -->
           <div class="profile-stats">
             <h3 class="text-sm font-medium text-gray-700 mb-3">Stats</h3>
@@ -57,24 +56,24 @@
                 <div class="text-xl font-bold text-blue-600"><%= @user.projects.count %></div>
                 <div class="text-xs text-gray-600">Projects</div>
               </div>
-              
+
               <div class="text-center profile-stat">
                 <div class="text-xl font-bold text-green-600"><%= @user.devlogs.count %></div>
                 <div class="text-xs text-gray-600">Devlogs</div>
               </div>
-              
+
               <div class="text-center profile-stat">
                 <div class="text-xl font-bold text-purple-600"><%= @user.votes.count %></div>
                 <div class="text-xs text-gray-600">Votes</div>
               </div>
-              
+
               <div class="text-center profile-stat">
                 <div class="text-xl font-bold text-orange-600"><%= @user.projects.joins(:ship_events).distinct.count %></div>
                 <div class="text-xs text-gray-600">Ships</div>
               </div>
             </div>
           </div>
-          
+
           <!-- Coding Time (if has Hackatime) -->
           <% if @user.has_hackatime? %>
             <div>
@@ -95,7 +94,7 @@
               </div>
             </div>
           <% end %>
-          
+
           <!-- Member Since -->
           <div>
             <h3 class="text-sm font-medium text-gray-700 mb-2">Member Since</h3>
@@ -107,7 +106,7 @@
 <% end %>
         </div>
       <% end %>
-      
+
       <!-- Badges -->
       <% if @user.badges.any? %>
         <%= render "shared/card" do %>
@@ -116,14 +115,14 @@
               <h3 class="text-lg font-semibold text-gray-800">Badges</h3>
               <span class="text-sm text-gray-500"><%= @user.badges.count %></span>
             </div>
-            
+
             <div class="flex flex-wrap gap-3 justify-center">
               <%= render "shared/user_badges", user: @user %>
             </div>
           </div>
         <% end %>
       <% end %>
-      
+
       <!-- Projects List -->
       <% if @all_projects.any? %>
         <%= render "shared/card" do %>
@@ -132,7 +131,7 @@
               <h3 class="text-lg font-semibold text-gray-800">Projects</h3>
               <span class="text-sm text-gray-500"><%= @all_projects.count %></span>
             </div>
-            
+
             <div class="space-y-3">
               <% @all_projects.each do |project| %>
                 <div class="flex items-center space-x-3 p-2 rounded-lg hover:bg-gray-50 transition-colors">
@@ -145,7 +144,7 @@
                       <span class="text-gray-400 text-sm">🚀</span>
                     </div>
                   <% end %>
-                  
+
                   <div class="flex-1 min-w-0">
                     <div class="flex items-center space-x-2">
                       <h4 class="text-sm font-medium text-gray-900 truncate">
@@ -157,7 +156,7 @@
                         <span class="text-xs px-2 py-1 bg-green-100 text-green-800 rounded-full">Shipped</span>
                       <% end %>
                     </div>
-                    
+
                     <div class="flex items-center space-x-2 mt-1 text-xs text-gray-500">
                       <span><%= pluralize(project.devlogs.count, 'devlog') %></span>
                       <span>•</span>
@@ -171,14 +170,14 @@
         <% end %>
       <% end %>
     </div>
-    
+
     <!-- Activity Feed -->
     <div class="lg:col-span-2">
       <div class="space-y-6">
         <div class="flex items-center justify-between">
           <h2 class="text-2xl font-bold text-gray-800">Activity</h2>
         </div>
-        
+
                  <% if @activities.any? %>
            <div class="space-y-6" data-controller="view-tracker">
              <!-- Combined Activity Feed -->
@@ -195,7 +194,7 @@
                            <% end %>
                            <div>
                              <span class="text-base sm:text-lg 2xl:text-xl text-[#4a2d24]">
-                               <%= render "shared/user_display_name", user: project.user %> 
+                               <%= render "shared/user_display_name", user: project.user %>
                                <span class="text-[#865c39]">created a project</span>
                              </span>
                              <div class="text-[#B89576]">
@@ -219,25 +218,25 @@
                            </div>
                          </div>
                        </div>
-                       
+
                        <div class="prose max-w-[32em] text-[#4a2d24] mb-2 sm:mb-3 text-base sm:text-lg 2xl:text-xl break-words overflow-wrap-anywhere">
                          <h3 class="text-lg font-semibold text-[#4a2d24] mb-2 m-0">
                            <a href="<%= project_path(project) %>" class="hover:text-blue-600 transition-colors no-underline">
                              <%= project.title %>
                            </a>
                          </h3>
-                         
+
                          <p class="text-[#4a2d24] text-base sm:text-lg 2xl:text-xl m-0">
                            <%= project.description %>
                          </p>
                        </div>
-                       
+
                        <% if project.banner.attached? %>
                          <div class="mt-2 sm:mt-3">
                            <%= image_tag project.banner, alt: project.title, class: "w-full object-contain cursor-pointer hover:opacity-90 transition-opacity rounded-lg max-h-96", loading: "lazy" %>
                          </div>
                        <% end %>
-                       
+
                        <div class="flex items-center space-x-4 mt-3 text-sm text-[#B89576]">
                          <span><%= pluralize(project.devlogs.count, 'devlog') %></span>
                          <span><%= pluralize(project.followers.count, 'follower') %></span>
@@ -268,7 +267,7 @@
                            <% end %>
                            <div>
                              <span class="text-base sm:text-lg 2xl:text-xl text-[#4a2d24]">
-                               <%= render "shared/user_display_name", user: user %> 
+                               <%= render "shared/user_display_name", user: user %>
                                <span class="text-[#865c39]">joined Summer of Making</span>
                              </span>
                              <div class="text-[#B89576]">
@@ -292,7 +291,7 @@
                            </div>
                          </div>
                        </div>
-                       
+
                        <div class="prose max-w-[32em] text-[#4a2d24] mb-2 sm:mb-3 text-base sm:text-lg 2xl:text-xl break-words overflow-wrap-anywhere">
                          <p class="text-[#4a2d24] text-base sm:text-lg 2xl:text-xl m-0">
                            This was widely regarded as a great move by everyone.
@@ -303,7 +302,6 @@
                  <% end %>
                <% end %>
              </div>
-             
 
            </div>
         <% else %>
@@ -330,4 +328,4 @@
       </div>
     </div>
   </div>
-</div> 
+</div>
