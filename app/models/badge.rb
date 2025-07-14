@@ -49,6 +49,20 @@ class Badge
       icon: "sunglasses.png",
       color: "border-gray-500 bg-gray-500/10 text-gray-800",
       criteria: ->(user) { false } # Badge must be granted manually
+    },
+    popular: {
+      name: "Popular",
+      flavor_text: "Mrs popular over here with 100+ combined followers",
+      icon: "🌟",
+      color: "border-yellow-500 bg-yellow-500/10 text-yellow-800",
+      criteria: ->(user) { user.project_follows.count >= 100 }
+    },
+    follower: {
+      name: "Follower",
+      flavor_text: "Following more then 100 projects!",
+      icon: "👥",
+      color: "border-yellow-500 bg-yellow-500/10 text-yellow-800",
+      criteria: ->(user) { user.followed_projects.count >= 100 }
     }
   }.freeze
 
