@@ -686,6 +686,7 @@ DEPENDENCIES
   rubocop-rails-omakase
   ruby-lsp
   ruby-openai (~> 8.1)
+  sanitize (~> 7.0)
   selenium-webdriver
   skylight
   slack-ruby-client

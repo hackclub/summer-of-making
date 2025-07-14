@@ -60,4 +60,9 @@ module ApplicationHelper
       render "shared/user_twiddles", user:
     end
   end
+
+  def sanitize_css(css)
+    return "" if css.blank?
+    Sanitize::CSS.stylesheet(css, Sanitize::Config::RELAXED)
+  end
 end

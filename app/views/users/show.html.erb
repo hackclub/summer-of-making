@@ -1,20 +1,26 @@
-<div class="container mx-auto px-4 py-6 max-w-7xl">
+<% if @user.user_profile&.custom_css.present? && @user.has_badge?(:graphic_design_is_my_passion) && !current_user&.has_badge?(:sunglasses) %>
+  <style>
+    <%= sanitize_css(@user.user_profile.custom_css).html_safe %>
+  </style>
+<% end %>
+
+<div class="container mx-auto px-4 py-6 max-w-7xl profile-container">
   <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-8">
     <!-- Profile Info Sidebar -->
     <div class="lg:col-span-1 space-y-6">
       <%= render "shared/card" do %>
         <div class="space-y-6">
           <!-- Profile Header -->
-          <div class="text-center">
+          <div class="text-center profile-header">
             <% if @user.avatar.present? %>
-              <img src="<%= @user.avatar %>" alt="<%= @user.display_name %>" class="w-24 h-24 rounded-full mx-auto mb-4" loading="lazy">
+              <img src="<%= @user.avatar %>" alt="<%= @user.display_name %>" class="w-24 h-24 rounded-full mx-auto mb-4 profile-avatar" loading="lazy">
             <% else %>
-              <div class="w-24 h-24 bg-gray-200 rounded-full mx-auto mb-4 flex items-center justify-center">
+              <div class="w-24 h-24 bg-gray-200 rounded-full mx-auto mb-4 flex items-center justify-center profile-avatar">
                 <span class="text-gray-500 text-2xl">👤</span>
               </div>
             <% end %>
             
-            <h1 class="text-2xl font-bold text-gray-800 mb-2">
+            <h1 class="text-2xl font-bold text-gray-800 mb-2 profile-name">
               <%= render "shared/user_display_name", user: @user %>
             </h1>
             
@@ -35,34 +41,34 @@
           
           <!-- Bio -->
           <% if @user.user_profile&.bio.present? %>
-            <div>
+            <div class="profile-bio-section">
               <h3 class="text-sm font-medium text-gray-700 mb-2">Bio</h3>
-              <div class="text-gray-900 text-sm whitespace-pre-wrap leading-relaxed">
+              <div class="text-gray-900 text-sm whitespace-pre-wrap leading-relaxed profile-bio">
                 <%= @user.user_profile.bio %>
               </div>
             </div>
           <% end %>
           
           <!-- Stats -->
-          <div>
+          <div class="profile-stats">
             <h3 class="text-sm font-medium text-gray-700 mb-3">Stats</h3>
             <div class="grid grid-cols-2 gap-4">
-              <div class="text-center">
+              <div class="text-center profile-stat">
                 <div class="text-xl font-bold text-blue-600"><%= @user.projects.count %></div>
                 <div class="text-xs text-gray-600">Projects</div>
               </div>
               
-              <div class="text-center">
+              <div class="text-center profile-stat">
                 <div class="text-xl font-bold text-green-600"><%= @user.devlogs.count %></div>
                 <div class="text-xs text-gray-600">Devlogs</div>
               </div>
               
-              <div class="text-center">
+              <div class="text-center profile-stat">
                 <div class="text-xl font-bold text-purple-600"><%= @user.votes.count %></div>
                 <div class="text-xs text-gray-600">Votes</div>
               </div>
               
-              <div class="text-center">
+              <div class="text-center profile-stat">
                 <div class="text-xl font-bold text-orange-600"><%= @user.projects.joins(:ship_events).distinct.count %></div>
                 <div class="text-xs text-gray-600">Ships</div>
               </div>
@@ -95,6 +101,10 @@
             <h3 class="text-sm font-medium text-gray-700 mb-2">Member Since</h3>
             <p class="text-sm text-gray-900"><%= @user.created_at.strftime("%B %d, %Y") %></p>
           </div>
+
+          <% if @user.user_profile&.custom_css.present? && @user.has_badge?(:graphic_design_is_my_passion) && current_user&.has_badge?(:sunglasses) %>
+          <b> This user has custom CSS, but you're spared from it by your sunglasses.</b>
+<% end %>
         </div>
       <% end %>
       

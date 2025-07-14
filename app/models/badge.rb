@@ -35,6 +35,20 @@ class Badge
       icon: "i_voted.png",
       color: "border-green-500 bg-green-500/10 text-green-800",
       criteria: ->(user) { user.votes.count >= 100 }
+    },
+    graphic_design_is_my_passion: {
+      name: "Graphic Design is My Passion",
+      flavor_text: "Oh God How Did This Get Here I Am Not Good With Computer",
+      icon: "🎨",
+      color: "border-pink-500 bg-pink-500/10 text-pink-800",
+      criteria: ->(user) { false } # Badge must be granted manually
+    },
+    sunglasses: {
+      name: "Sunglasses",
+      flavor_text: "protect your eyes from other people's... creative... CSS choices.",
+      icon: "sunglasses.png",
+      color: "border-gray-500 bg-gray-500/10 text-gray-800",
+      criteria: ->(user) { false } # Badge must be granted manually
     }
   }.freeze
 
