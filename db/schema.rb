@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_07_14_155614) do
+ActiveRecord::Schema[8.0].define(version: 2025_07_14_180443) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -640,6 +640,17 @@ ActiveRecord::Schema[8.0].define(version: 2025_07_14_155614) do
     t.index ["user_id"], name: "index_tutorial_progresses_on_user_id"
   end
 
+  create_table "user_badges", force: :cascade do |t|
+    t.bigint "user_id", null: false
+    t.string "badge_key", null: false
+    t.datetime "earned_at", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["badge_key"], name: "index_user_badges_on_badge_key"
+    t.index ["user_id", "badge_key"], name: "index_user_badges_on_user_id_and_badge_key", unique: true
+    t.index ["user_id"], name: "index_user_badges_on_user_id"
+  end
+
   create_table "user_hackatime_data", force: :cascade do |t|
     t.bigint "user_id", null: false
     t.jsonb "data", default: {}
@@ -783,6 +794,7 @@ ActiveRecord::Schema[8.0].define(version: 2025_07_14_155614) do
   add_foreign_key "timer_sessions", "projects"
   add_foreign_key "timer_sessions", "users"
   add_foreign_key "tutorial_progresses", "users"
+  add_foreign_key "user_badges", "users"
   add_foreign_key "user_hackatime_data", "users"
   add_foreign_key "user_profiles", "users"
   add_foreign_key "view_events", "users"

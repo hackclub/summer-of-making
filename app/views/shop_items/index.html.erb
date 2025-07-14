@@ -127,11 +127,39 @@
         <% end %>
       <% end %>
     <% else %>
-      <div class="flex flex-col sm:grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
-        <% @shop_items.sort_by { |item| item.price_for_region(@selected_region) }.each do |item| %>
-          <%= render partial: "item", locals: { item: } %>
-        <% end %>
-      </div>
+      <!-- Regular Items Section -->
+      <% if @regular_items.any? %>
+        <div class="mb-12">
+          <% if @badge_items.any? %>
+            <div class="text-center mb-8">
+              <h2 class="text-3xl font-bold text-[#3a2f25] font-['DynaPuff',sans-serif] mb-2">🛍️ Shop Items</h2>
+              <p class="text-lg text-[#666] font-['National Park',sans-serif]">Physical items, digital rewards, and more!</p>
+            </div>
+          <% end %>
+          <div class="flex flex-col sm:grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
+            <% @regular_items.sort_by { |item| item.price_for_region(@selected_region) }.each do |item| %>
+              <%= render partial: "item", locals: { item: } %>
+            <% end %>
+          </div>
+        </div>
+      <% end %>
+
+      <!-- Badge Items Section -->
+      <% if @badge_items.any? %>
+        <div class="mb-12">
+          <%= render "shared/card", classes: 'max-w-5xl mx-auto mb-8', padding: 'md' do %>
+            <div class="text-center">
+              <h2 class="text-3xl font-bold text-[#3a2f25] font-['DynaPuff',sans-serif] mb-2">🏆 Badge Collection</h2>
+              <p class="text-lg text-[#666] font-['National Park',sans-serif]">buy glory! buy fame! buy power.</p>
+            </div>
+          <% end %>
+          <div class="flex flex-col sm:grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
+            <% @badge_items.sort_by { |item| item.price_for_region(@selected_region) }.each do |item| %>
+              <%= render partial: "item", locals: { item: } %>
+            <% end %>
+          </div>
+        </div>
+      <% end %>
 
       <% if current_user&.has_black_market? %>
         <div class="bg-black p-4 mt-12 text-3xl" style="transform:rotate(-4deg);max-width:fit-content;align-self:center;">

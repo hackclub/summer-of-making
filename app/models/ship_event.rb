@@ -2,12 +2,10 @@
 #
 # Table name: ship_events
 #
-#  id              :bigint           not null, primary key
-#  hours_at_payout :decimal(10, 4)   default(0.0), not null
-#  shells_earned   :integer          default(0), not null
-#  created_at      :datetime         not null
-#  updated_at      :datetime         not null
-#  project_id      :bigint           not null
+#  id         :bigint           not null, primary key
+#  created_at :datetime         not null
+#  updated_at :datetime         not null
+#  project_id :bigint           not null
 #
 # Indexes
 #
@@ -23,6 +21,7 @@ class ShipEvent < ApplicationRecord
   has_many :payouts, as: :payable
 
   after_create :maybe_create_ship_certification
+  after_create :award_user_badges
 
   def user
     project.user
@@ -65,5 +64,9 @@ class ShipEvent < ApplicationRecord
     return if project.ship_certifications.pending.exists?
 
     project.ship_certifications.create!
+  end
+
+  def award_user_badges
+    user.award_badges_async!("ship_event_created")
   end
 end

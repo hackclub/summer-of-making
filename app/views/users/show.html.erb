@@ -98,6 +98,22 @@
         </div>
       <% end %>
       
+      <!-- Badges -->
+      <% if @user.badges.any? %>
+        <%= render "shared/card" do %>
+          <div class="space-y-4">
+            <div class="flex items-center justify-between">
+              <h3 class="text-lg font-semibold text-gray-800">Badges</h3>
+              <span class="text-sm text-gray-500"><%= @user.badges.count %></span>
+            </div>
+            
+            <div class="flex flex-wrap gap-3 justify-center">
+              <%= render "shared/user_badges", user: @user %>
+            </div>
+          </div>
+        <% end %>
+      <% end %>
+      
       <!-- Projects List -->
       <% if @all_projects.any? %>
         <%= render "shared/card" do %>
@@ -156,7 +172,7 @@
                  <% if @activities.any? %>
            <div class="space-y-6" data-controller="view-tracker">
              <!-- Combined Activity Feed -->
-             <div id="activities-list" class="space-y-6">
+             <div id="activities-list" class="space-y-6 max-h-[calc(100vh-200px)] overflow-y-auto pr-2">
                <% @activities.each do |activity| %>
                  <% if activity[:type] == :project %>
                    <% project = activity[:item] %>

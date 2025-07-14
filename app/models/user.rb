@@ -48,6 +48,7 @@ class User < ApplicationRecord
   has_one :magic_link, dependent: :destroy
   has_many :shop_orders
   has_many :shop_card_grants
+  has_many :user_badges, dependent: :destroy
 
   accepts_nested_attributes_for :user_profile
   has_many :hackatime_projects
@@ -335,7 +336,7 @@ class User < ApplicationRecord
   end
 
   def blue_check?
-    !!shenanigans_state["blue_check"]
+    has_badge?(:verified)
   end
 
   def neon_flair?
@@ -486,6 +487,23 @@ class User < ApplicationRecord
     update!(is_banned: false)
     create_activity("unban_user")
     Rails.logger.info("user #{id} (#{slack_id}) is back")
+  end
+
+  # Badge methods
+  def badges
+    Badge.earned_by(self)
+  end
+
+  def has_badge?(badge_key)
+    user_badges.exists?(badge_key: badge_key)
+  end
+
+  def award_badges!(backfill: false)
+    Badge.award_badges_for(self, backfill: backfill)
+  end
+
+  def award_badges_async!(trigger_event = nil, backfill: false)
+    AwardBadgesJob.perform_later(id, trigger_event, backfill)
   end
 
   private

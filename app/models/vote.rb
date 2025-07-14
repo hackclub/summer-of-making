@@ -72,6 +72,7 @@ class Vote < ApplicationRecord
   before_save :normalize_ship_event_order
 
   after_create :process_vote_results
+  after_create :queue_badge_award
 
   # Helper methods to get winner/loser/tied projects
   def winner_project
@@ -114,6 +115,10 @@ class Vote < ApplicationRecord
   end
 
   private
+
+  def queue_badge_award
+    AwardBadgesJob.perform_later(user_id, "vote_created")
+  end
 
   def normalize_ship_event_order
     # always store ship events with smaller ID first to prevent order-based replay attacks

@@ -1,3 +1,3 @@
 <%= link_to user_path(user) do %>
-  <span<% if user.neon_flair? %> style="color: deeppink; font-family: Comic Sans MS"<% end %>><%= user.display_name %></span><%= image_tag("verified.png", width: "15px", style: "vertical-align:text-middle; display: inline; margin: 0px 3px") if user.blue_check? %>
+  <span<% if user.neon_flair? %> style="color: deeppink; font-family: Comic Sans MS"<% end %>><%= user.display_name %></span><%= image_tag("verified.png", width: "15px", style: "vertical-align:text-middle; display: inline; margin: 0px 3px", title: "this user is verified (i.e. gave us $8)", class: "cursor-help") if user.blue_check? %>
 <% end %>
