@@ -154,6 +154,22 @@ module Admin
 
       @pending_to_approved_seconds = pending_to_approved&.to_i
       @awaiting_to_fulfilled_seconds = awaiting_to_fulfilled&.to_i
+
+      base_scope_count = scope
+      unless params[:show_free_stickers] == "true"
+        base_scope_count = base_scope_count.joins(:shop_item).where.not(shop_items: { type: "ShopItem::FreeStickers" })
+      end
+
+      @counts = {
+        pending: base_scope_count.where(aasm_state: "pending").count,
+        awaiting_fulfillment: base_scope_count.where(aasm_state: "awaiting_periodical_fulfillment").count,
+        fulfilled: base_scope_count.where(aasm_state: "fulfilled").count,
+        rejected: base_scope_count.where(aasm_state: "rejected").count
+      }
+
+      if params[:show_free_stickers] == "true"
+        @counts[:in_verification_limbo] = base_scope_count.where(aasm_state: "in_verification_limbo").count
+      end
     end
 
     def format_duration(seconds)

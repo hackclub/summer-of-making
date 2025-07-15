@@ -2,6 +2,19 @@
 <h1 style="color: var(--color-primary);"><%= local_assigns[:title] %>shopped orders:</h1>
 
 <div style="margin-bottom: 2em; padding: 1em; background: var(--color-darker); border-radius: 8px;">
+  <div style="margin-bottom: 1.5em;">
+    <strong style="color: var(--color-text); display: block; margin-bottom: 0.5em;">by the numbers:</strong>
+    <div style="display: flex; flex-wrap: wrap; gap: 0.5em; align-items: center;">
+      <span class="pill pill-yellow">pending: <%= @counts[:pending] %></span>
+      <span class="pill pill-blue">awaiting fulfillment: <%= @counts[:awaiting_fulfillment] %></span>
+      <span class="pill pill-green">fulfilled: <%= @counts[:fulfilled] %></span>
+      <span class="pill pill-red">rejected: <%= @counts[:rejected] %></span>
+      <% if params[:show_free_stickers] == "true" %>
+        <span class="pill pill-gray">idv limbo: <%= @counts[:in_verification_limbo] %></span>
+      <% end %>
+    </div>
+  </div>
+
   <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1em;">
     <div>
       <strong style="color: var(--color-text);">time until approved:</strong><br>
@@ -172,7 +185,7 @@
           <% when 'on_hold' %>
             <span class="pill pill-gray">on hold</span>
           <% when 'in_verification_limbo' %>
-            <span class="pill pill-dark">verification limbo</span>
+            <span class="pill pill-gray">verification limbo</span>
           <% else %>
             <span class="pill"><%= order.aasm_state.humanize %></span>
           <% end %>
