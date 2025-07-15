@@ -10,73 +10,72 @@ module Admin
     end
 
     def filtered_scope
-      base_scope = scope
+      base = scope
 
-      # Hide free stickers orders by default unless explicitly requested
       unless params[:show_free_stickers] == "true"
-        base_scope = base_scope.joins(:shop_item).where.not(shop_items: { type: "ShopItem::FreeStickers" })
+        base = base.joins(:shop_item).where.not(shop_items: { type: "ShopItem::FreeStickers" })
       end
 
       if params[:user_search].present?
         query = "%#{params[:user_search]}%"
-        base_scope = base_scope.joins(:user).where(
+        base = base.joins(:user).where(
           "users.display_name ILIKE ? OR users.email ILIKE ? OR users.slack_id ILIKE ?",
           query, query, query
         )
       end
 
       if params[:shop_item_id].present?
-        base_scope = base_scope.where(shop_item_id: params[:shop_item_id])
+        base = base.where(shop_item_id: params[:shop_item_id])
       end
 
       if params[:status].present?
-        base_scope = base_scope.where(aasm_state: params[:status])
+        base = base.where(aasm_state: params[:status])
       end
 
       if params[:date_from].present?
-        base_scope = base_scope.where("created_at >= ?", Date.parse(params[:date_from]).beginning_of_day)
+        base = base.where("created_at >= ?", Date.parse(params[:date_from]).beginning_of_day)
       end
 
       if params[:date_to].present?
-        base_scope = base_scope.where("created_at <= ?", Date.parse(params[:date_to]).end_of_day)
+        base = base.where("created_at <= ?", Date.parse(params[:date_to]).end_of_day)
       end
 
       case params[:sort]
       when "id_asc"
-        base_scope = base_scope.order(id: :asc)
+        base = base.order(id: :asc)
       when "id_desc"
-        base_scope = base_scope.order(id: :desc)
+        base = base.order(id: :desc)
       when "shells_asc"
-        base_scope = base_scope.order(frozen_item_price: :asc)
+        base = base.order(frozen_item_price: :asc)
       when "shells_desc"
-        base_scope = base_scope.order(frozen_item_price: :desc)
+        base = base.order(frozen_item_price: :desc)
       when "created_at_asc"
-        base_scope = base_scope.order(created_at: :asc)
+        base = base.order(created_at: :asc)
       when "created_at_desc"
-        base_scope = base_scope.order(created_at: :desc)
+        base = base.order(created_at: :desc)
       else
-        base_scope = base_scope.order(created_at: :desc)
+        base = base.order(created_at: :desc)
       end
 
-      base_scope
+      base
     rescue Date::Error
-      base_scope
+      base
     end
 
     def index
       @pagy, @shop_orders = pagy(filtered_scope)
-      calculate_processing_stats
+      get_stats
     end
 
     def pending
       @pagy, @shop_orders = pagy(filtered_scope.pending)
-      calculate_processing_stats
+      get_stats
       render :index, locals: { title: "pending " }
     end
 
     def awaiting_fulfillment
       @pagy, @shop_orders = pagy(filtered_scope.manually_fulfilled.awaiting_periodical_fulfillment)
-      calculate_processing_stats
+      get_stats
       render :index, locals: { title: "fulfillment queue – " }
     end
 
@@ -139,36 +138,76 @@ module Admin
       @shop_order = scope.find(params[:id])
     end
 
-    def calculate_processing_stats
-      # Calculate average time from pending to approved using activities
-      pending_to_approved = scope.joins("LEFT JOIN activities ON activities.trackable_id = shop_orders.id AND activities.trackable_type = 'ShopOrder' AND activities.key = 'approve'")
-                                 .where.not(aasm_state: "pending")
-                                 .where.not("activities.created_at IS NULL")
-                                 .average("EXTRACT(EPOCH FROM activities.created_at - shop_orders.created_at)")
+    def get_stats
+      pending_avg = scope.where.not(awaiting_periodical_fulfillment_at: nil)
+                         .average("EXTRACT(EPOCH FROM awaiting_periodical_fulfillment_at - shop_orders.created_at)")
 
-      # Calculate average time from awaiting fulfillment to fulfilled
-      awaiting_to_fulfilled = scope.where(aasm_state: "fulfilled")
-                                   .where.not(awaiting_periodical_fulfillment_at: nil)
-                                   .where.not(fulfilled_at: nil)
-                                   .average("EXTRACT(EPOCH FROM fulfilled_at - awaiting_periodical_fulfillment_at)")
+      fulfill_avg = scope.where(aasm_state: "fulfilled")
+                         .where.not(awaiting_periodical_fulfillment_at: nil)
+                         .where.not(fulfilled_at: nil)
+                         .average("EXTRACT(EPOCH FROM fulfilled_at - awaiting_periodical_fulfillment_at)")
 
-      @pending_to_approved_seconds = pending_to_approved&.to_i
-      @awaiting_to_fulfilled_seconds = awaiting_to_fulfilled&.to_i
+      @pending_secs = pending_avg&.to_i
+      @fulfill_secs = fulfill_avg&.to_i
 
-      base_scope_count = scope
+      week = scope.where("shop_orders.created_at >= ?", 1.week.ago)
+      
+      pending_week = week.where.not(awaiting_periodical_fulfillment_at: nil)
+                         .average("EXTRACT(EPOCH FROM awaiting_periodical_fulfillment_at - shop_orders.created_at)")
+      
+      fulfill_week = week.where(aasm_state: "fulfilled")
+                         .where.not(awaiting_periodical_fulfillment_at: nil)
+                         .where.not(fulfilled_at: nil)
+                         .average("EXTRACT(EPOCH FROM fulfilled_at - awaiting_periodical_fulfillment_at)")
+
+      @pending_secs_week = pending_week&.to_i
+      @fulfill_secs_week = fulfill_week&.to_i
+
+      last100 = scope.order("shop_orders.created_at DESC").limit(100)
+      
+      pending_100 = last100.where.not(awaiting_periodical_fulfillment_at: nil)
+                           .average("EXTRACT(EPOCH FROM awaiting_periodical_fulfillment_at - shop_orders.created_at)")
+      
+      fulfill_100 = last100.where(aasm_state: "fulfilled")
+                           .where.not(awaiting_periodical_fulfillment_at: nil)
+                           .where.not(fulfilled_at: nil)
+                           .average("EXTRACT(EPOCH FROM fulfilled_at - awaiting_periodical_fulfillment_at)")
+
+      @pending_secs_100 = pending_100&.to_i
+      @fulfill_secs_100 = fulfill_100&.to_i
+
+      base = scope
       unless params[:show_free_stickers] == "true"
-        base_scope_count = base_scope_count.joins(:shop_item).where.not(shop_items: { type: "ShopItem::FreeStickers" })
+        base = base.joins(:shop_item).where.not(shop_items: { type: "ShopItem::FreeStickers" })
       end
 
       @counts = {
-        pending: base_scope_count.where(aasm_state: "pending").count,
-        awaiting_fulfillment: base_scope_count.where(aasm_state: "awaiting_periodical_fulfillment").count,
-        fulfilled: base_scope_count.where(aasm_state: "fulfilled").count,
-        rejected: base_scope_count.where(aasm_state: "rejected").count
+        pending: base.where(aasm_state: "pending").count,
+        awaiting_fulfillment: base.where(aasm_state: "awaiting_periodical_fulfillment").count,
+        fulfilled: base.where(aasm_state: "fulfilled").count,
+        rejected: base.where(aasm_state: "rejected").count
+      }
+
+      week_base = base.where("shop_orders.created_at >= ?", 1.week.ago)
+      @counts_week = {
+        pending: week_base.where(aasm_state: "pending").count,
+        awaiting_fulfillment: week_base.where(aasm_state: "awaiting_periodical_fulfillment").count,
+        fulfilled: week_base.where(aasm_state: "fulfilled").count,
+        rejected: week_base.where(aasm_state: "rejected").count
+      }
+
+      last100_base = base.order("shop_orders.created_at DESC").limit(100)
+      @counts_100 = {
+        pending: last100_base.where(aasm_state: "pending").count,
+        awaiting_fulfillment: last100_base.where(aasm_state: "awaiting_periodical_fulfillment").count,
+        fulfilled: last100_base.where(aasm_state: "fulfilled").count,
+        rejected: last100_base.where(aasm_state: "rejected").count
       }
 
       if params[:show_free_stickers] == "true"
-        @counts[:in_verification_limbo] = base_scope_count.where(aasm_state: "in_verification_limbo").count
+        @counts[:in_verification_limbo] = base.where(aasm_state: "in_verification_limbo").count
+        @counts_week[:in_verification_limbo] = week_base.where(aasm_state: "in_verification_limbo").count
+        @counts_100[:in_verification_limbo] = last100_base.where(aasm_state: "in_verification_limbo").count
       end
     end
 
