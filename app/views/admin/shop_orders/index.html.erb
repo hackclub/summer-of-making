@@ -3,12 +3,12 @@
 
 <div style="margin-bottom: 2em; padding: 1em; background: var(--color-darker); border-radius: 8px;">
   <div style="margin-bottom: 1.5em;">
-    <strong style="color: var(--color-text); display: block; margin-bottom: 0.5em;">by the numbers: <% if params[:show_free_stickers] == "true" %><span>with free stickers</span><% end %></strong>
+    <strong style="color: var(--color-text); display: block; margin-bottom: 0.5em;font-size: 1.2em;">by the numbers: <% if params[:show_free_stickers] == "true" %><span>with free stickers</span><% end %></strong>
 
     <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.5em;">
       <div>
         <h4 style="color: var(--color-text); margin: 0 0 0.5em 0; font-size: 0.9em;">all time:</h4>
-        <div style="display: flex; flex-wrap: wrap; gap: 0.5em; align-items: center;">
+        <div style="display: flex; flex-wrap: wrap; gap: 0.5em; align-items: center; margin-bottom: 1em;">
           <span class="pill pill-yellow">pending: <%= @counts[:pending] %></span>
           <span class="pill pill-blue">awaiting fulfillment: <%= @counts[:awaiting_fulfillment] %></span>
           <span class="pill pill-green">fulfilled: <%= @counts[:fulfilled] %></span>
@@ -17,11 +17,25 @@
             <span class="pill pill-gray">idv limbo: <%= @counts[:in_verification_limbo] %></span>
           <% end %>
         </div>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1em;">
+          <div>
+            <strong style="color: var(--color-text); font-size: 0.8em;">avg time until approved:</strong><br>
+            <span style="font-family: monospace; font-weight: bold; font-size: 1.7em; color: <%= @pending_secs && @pending_secs > 172800 ? '#ff6b6b' : 'white' %>;">
+              <%= format_duration(@pending_secs) %>
+            </span>
+          </div>
+          <div>
+            <strong style="color: var(--color-text); font-size: 0.8em;">avg time until fulfilled:</strong><br>
+            <span style="font-family: monospace; font-weight: bold; font-size: 1.7em; color: <%= @fulfill_secs && @fulfill_secs > 172800 ? '#ff6b6b' : 'white' %>;">
+              <%= format_duration(@fulfill_secs) %>
+            </span>
+          </div>
+        </div>
       </div>
 
       <div>
         <h4 style="color: var(--color-text); margin: 0 0 0.5em 0; font-size: 0.9em;">past week:</h4>
-        <div style="display: flex; flex-wrap: wrap; gap: 0.5em; align-items: center;">
+        <div style="display: flex; flex-wrap: wrap; gap: 0.5em; align-items: center; margin-bottom: 1em;">
           <span class="pill pill-yellow">pending: <%= @counts_week[:pending] %></span>
           <span class="pill pill-blue">awaiting fulfillment: <%= @counts_week[:awaiting_fulfillment] %></span>
           <span class="pill pill-green">fulfilled: <%= @counts_week[:fulfilled] %></span>
@@ -30,11 +44,25 @@
             <span class="pill pill-gray">idv limbo: <%= @counts_week[:in_verification_limbo] %></span>
           <% end %>
         </div>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1em;">
+          <div>
+            <strong style="color: var(--color-text); font-size: 0.8em;">avg time until approved:</strong><br>
+            <span style="font-family: monospace; font-weight: bold; font-size: 1.7em; color: <%= @pending_secs_week && @pending_secs_week > 172800 ? '#ff6b6b' : 'white' %>;">
+              <%= format_duration(@pending_secs_week) %>
+            </span>
+          </div>
+          <div>
+            <strong style="color: var(--color-text); font-size: 0.8em;">avg time until fulfilled:</strong><br>
+            <span style="font-family: monospace; font-weight: bold; font-size: 1.7em; color: <%= @fulfill_secs_week && @fulfill_secs_week > 172800 ? '#ff6b6b' : 'white' %>;">
+              <%= format_duration(@fulfill_secs_week) %>
+            </span>
+          </div>
+        </div>
       </div>
 
       <div>
         <h4 style="color: var(--color-text); margin: 0 0 0.5em 0; font-size: 0.9em;">last 100 orders:</h4>
-        <div style="display: flex; flex-wrap: wrap; gap: 0.5em; align-items: center;">
+        <div style="display: flex; flex-wrap: wrap; gap: 0.5em; align-items: center; margin-bottom: 1em;">
           <span class="pill pill-yellow">pending: <%= @counts_100[:pending] %></span>
           <span class="pill pill-blue">awaiting fulfillment: <%= @counts_100[:awaiting_fulfillment] %></span>
           <span class="pill pill-green">fulfilled: <%= @counts_100[:fulfilled] %></span>
@@ -43,56 +71,20 @@
             <span class="pill pill-gray">idv limbo: <%= @counts_100[:in_verification_limbo] %></span>
           <% end %>
         </div>
-      </div>
-    </div>
-  </div>
-
-  <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.5em;">
-    <div>
-      <h4 style="color: var(--color-text); margin: 0 0 0.5em 0; font-size: 0.9em;">all time:</h4>
-      <div style="margin-bottom: 1em;">
-        <strong style="color: var(--color-text); font-size: 0.85em;">time until approved:</strong><br>
-        <span style="font-family: monospace; font-weight: bold; font-size: 1.3em;">
-          <%= format_duration(@pending_secs) %>
-        </span>
-      </div>
-      <div>
-        <strong style="color: var(--color-text); font-size: 0.85em;">time until fulfilled:</strong><br>
-        <span style="font-family: monospace; font-weight: bold; font-size: 1.3em;">
-          <%= format_duration(@fulfill_secs) %>
-        </span>
-      </div>
-    </div>
-    
-    <div>
-      <h4 style="color: var(--color-text); margin: 0 0 0.5em 0; font-size: 0.9em;">past week:</h4>
-      <div style="margin-bottom: 1em;">
-        <strong style="color: var(--color-text); font-size: 0.85em;">time until approved:</strong><br>
-        <span style="font-family: monospace; font-weight: bold; font-size: 1.3em;">
-          <%= format_duration(@pending_secs_week) %>
-        </span>
-      </div>
-      <div>
-        <strong style="color: var(--color-text); font-size: 0.85em;">time until fulfilled:</strong><br>
-        <span style="font-family: monospace; font-weight: bold; font-size: 1.3em;">
-          <%= format_duration(@fulfill_secs_week) %>
-        </span>
-      </div>
-    </div>
-
-    <div>
-      <h4 style="color: var(--color-text); margin: 0 0 0.5em 0; font-size: 0.9em;">last 100 orders:</h4>
-      <div style="margin-bottom: 1em;">
-        <strong style="color: var(--color-text); font-size: 0.85em;">time until approved:</strong><br>
-        <span style="font-family: monospace; font-weight: bold; font-size: 1.3em;">
-          <%= format_duration(@pending_secs_100) %>
-        </span>
-      </div>
-      <div>
-        <strong style="color: var(--color-text); font-size: 0.85em;">time until fulfilled:</strong><br>
-        <span style="font-family: monospace; font-weight: bold; font-size: 1.3em;">
-          <%= format_duration(@fulfill_secs_100) %>
-        </span>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1em;">
+          <div>
+            <strong style="color: var(--color-text); font-size: 0.8em;">avg time until approved:</strong><br>
+            <span style="font-family: monospace; font-weight: bold; font-size: 1.7em; color: <%= @pending_secs_100 && @pending_secs_100 > 172800 ? '#ff6b6b' : 'white' %>;">
+              <%= format_duration(@pending_secs_100) %>
+            </span>
+          </div>
+          <div>
+            <strong style="color: var(--color-text); font-size: 0.8em;">avg time until fulfilled:</strong><br>
+            <span style="font-family: monospace; font-weight: bold; font-size: 1.7em; color: <%= @fulfill_secs_100 && @fulfill_secs_100 > 172800 ? '#ff6b6b' : 'white' %>;">
+              <%= format_duration(@fulfill_secs_100) %>
+            </span>
+          </div>
+        </div>
       </div>
     </div>
   </div>
