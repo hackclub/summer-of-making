@@ -197,17 +197,20 @@ module Admin
       }
 
       last100_base = base.order("shop_orders.created_at DESC").limit(100)
+      last100_ids = last100_base.pluck(:id)
+      last100_subset = base.where(id: last100_ids)
+      
       @counts_100 = {
-        pending: last100_base.where(aasm_state: "pending").count,
-        awaiting_fulfillment: last100_base.where(aasm_state: "awaiting_periodical_fulfillment").count,
-        fulfilled: last100_base.where(aasm_state: "fulfilled").count,
-        rejected: last100_base.where(aasm_state: "rejected").count
+        pending: last100_subset.where(aasm_state: "pending").count,
+        awaiting_fulfillment: last100_subset.where(aasm_state: "awaiting_periodical_fulfillment").count,
+        fulfilled: last100_subset.where(aasm_state: "fulfilled").count,
+        rejected: last100_subset.where(aasm_state: "rejected").count
       }
 
       if params[:show_free_stickers] == "true"
         @counts[:in_verification_limbo] = base.where(aasm_state: "in_verification_limbo").count
         @counts_week[:in_verification_limbo] = week_base.where(aasm_state: "in_verification_limbo").count
-        @counts_100[:in_verification_limbo] = last100_base.where(aasm_state: "in_verification_limbo").count
+        @counts_100[:in_verification_limbo] = last100_subset.where(aasm_state: "in_verification_limbo").count
       end
     end
 
