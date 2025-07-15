@@ -110,8 +110,8 @@
 
       <div>
         <%= f.label :shop_item_id, "item:", style: "display: block; margin-bottom: 0.25em; color: var(--color-text);" %>
-        <%= f.select :shop_item_id, options_from_collection_for_select(ShopItem.order(:name), :id, :name, params[:shop_item_id]), 
-            { prompt: "all" }, 
+        <%= f.select :shop_item_id, options_from_collection_for_select(ShopItem.order(:name), :id, :name, params[:shop_item_id]),
+            { prompt: "all" },
             { style: "width: 100%; padding: 0.5em; border-radius: 6px; border: 1px solid var(--color-border); background: var(--color-darker); color: var(--color-text);" } %>
       </div>
 
@@ -125,8 +125,8 @@
             'rejected',
             'on_hold',
             'in_verification_limbo'
-          ], params[:status]), 
-          {}, 
+          ], params[:status]),
+          {},
           { style: "width: 100%; padding: 0.5em; border-radius: 6px; border: 1px solid var(--color-border); background: var(--color-darker); color: var(--color-text);" } %>
       </div>
 
@@ -149,8 +149,8 @@
             'id_asc',
             'shells_desc',
             'shells_asc'
-          ], params[:sort] || 'created_at_desc'), 
-          {}, 
+          ], params[:sort] || 'created_at_desc'),
+          {},
           { style: "width: 100%; padding: 0.5em; border-radius: 6px; border: 1px solid var(--color-border); background: var(--color-darker); color: var(--color-text);" } %>
       </div>
     </div>
@@ -160,12 +160,12 @@
       <%= link_to "clear all", admin_shop_orders_path, class: 'abtn secondary small' %>
       <% unless params.slice(:user_search, :shop_item_id, :status, :date_from, :date_to, :sort).values.all?(&:blank?) %>
         <span style="color: var(--color-muted); font-size: 0.9em;">
-          active: 
+          active:
           <% if params[:user_search].present? %>user: "<%= params[:user_search] %>" | <% end %>
           <% if params[:shop_item_id].present? %>item: "<%= ShopItem.find(params[:shop_item_id]).name rescue 'Unknown' %>" | <% end %>
           <% if params[:status].present? %>status: "<%= params[:status] %>" | <% end %>
           <% if params[:date_from].present? || params[:date_to].present? %>
-            dates: <%= params[:date_from] || '∞' %> to <%= params[:date_to] || '∞' %> | 
+            dates: <%= params[:date_from] || '∞' %> to <%= params[:date_to] || '∞' %> |
           <% end %>
           <% if params[:sort].present? %>sort: "<%= params[:sort] %>"<% end %>
         </span>
@@ -180,7 +180,7 @@
   <thead>
     <tr>
       <th>
-        <%= link_to "order id", admin_shop_orders_path(params.permit!.merge(sort: params[:sort] == 'id_asc' ? 'id_desc' : 'id_asc')), 
+        <%= link_to "order id", admin_shop_orders_path(params.permit!.merge(sort: params[:sort] == 'id_asc' ? 'id_desc' : 'id_asc')),
             style: "color: var(--color-text); text-decoration: none;" %>
         <% if params[:sort]&.start_with?('id_') %>
           <%= params[:sort] == 'id_asc' ? '↑' : '↓' %>
@@ -189,7 +189,7 @@
       <th>user</th>
       <th>item</th>
       <th>
-        <%= link_to "shells", admin_shop_orders_path(params.permit!.merge(sort: params[:sort] == 'shells_asc' ? 'shells_desc' : 'shells_asc')), 
+        <%= link_to "shells", admin_shop_orders_path(params.permit!.merge(sort: params[:sort] == 'shells_asc' ? 'shells_desc' : 'shells_asc')),
             style: "color: var(--color-text); text-decoration: none;" %>
         <% if params[:sort]&.start_with?('shells_') %>
           <%= params[:sort] == 'shells_asc' ? '↑' : '↓' %>
@@ -200,7 +200,7 @@
       <th>details</th>
       <th>address</th>
       <th>
-        <%= link_to "created", admin_shop_orders_path(params.permit!.merge(sort: params[:sort] == 'created_at_asc' ? 'created_at_desc' : 'created_at_asc')), 
+        <%= link_to "created", admin_shop_orders_path(params.permit!.merge(sort: params[:sort] == 'created_at_asc' ? 'created_at_desc' : 'created_at_asc')),
             style: "color: var(--color-text); text-decoration: none;" %>
         <% if params[:sort]&.start_with?('created_at_') %>
           <%= params[:sort] == 'created_at_asc' ? '↑' : '↓' %>

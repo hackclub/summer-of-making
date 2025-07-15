@@ -151,10 +151,10 @@ module Admin
       @fulfill_secs = fulfill_avg&.to_i
 
       week = scope.where("shop_orders.created_at >= ?", 1.week.ago)
-      
+
       pending_week = week.where.not(awaiting_periodical_fulfillment_at: nil)
                          .average("EXTRACT(EPOCH FROM awaiting_periodical_fulfillment_at - shop_orders.created_at)")
-      
+
       fulfill_week = week.where(aasm_state: "fulfilled")
                          .where.not(awaiting_periodical_fulfillment_at: nil)
                          .where.not(fulfilled_at: nil)
@@ -164,10 +164,10 @@ module Admin
       @fulfill_secs_week = fulfill_week&.to_i
 
       last100 = scope.order("shop_orders.created_at DESC").limit(100)
-      
+
       pending_100 = last100.where.not(awaiting_periodical_fulfillment_at: nil)
                            .average("EXTRACT(EPOCH FROM awaiting_periodical_fulfillment_at - shop_orders.created_at)")
-      
+
       fulfill_100 = last100.where(aasm_state: "fulfilled")
                            .where.not(awaiting_periodical_fulfillment_at: nil)
                            .where.not(fulfilled_at: nil)
@@ -199,7 +199,7 @@ module Admin
       last100_base = base.order("shop_orders.created_at DESC").limit(100)
       last100_ids = last100_base.pluck(:id)
       last100_subset = base.where(id: last100_ids)
-      
+
       @counts_100 = {
         pending: last100_subset.where(aasm_state: "pending").count,
         awaiting_fulfillment: last100_subset.where(aasm_state: "awaiting_periodical_fulfillment").count,
