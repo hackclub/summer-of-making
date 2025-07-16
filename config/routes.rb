@@ -345,6 +345,7 @@ Rails.application.routes.draw do
         post :ban_user
         post :unban_user
         post :impersonate
+        post :set_hackatime_trust_factor
       end
     end
     resources :shop_items

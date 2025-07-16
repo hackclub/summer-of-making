@@ -152,6 +152,69 @@ module Admin
       redirect_to root_path
     end
 
+    def set_hackatime_trust_factor
+      trust_params = trust_factor_params
+      trust_level = trust_params[:trust_level]
+      reason = trust_params[:reason]
+      api_key = trust_params[:api_key]
+
+      unless trust_level.present? && reason.present? && api_key.present?
+        flash[:error] = "you gotta fill everything out silly head"
+        return redirect_to admin_user_path(@user)
+      end
+
+      hackatime_id = fetch_hackatime(@user.email)
+      unless hackatime_id
+        flash[:error] = "could not find that person!"
+        return redirect_to admin_user_path(@user)
+      end
+
+      begin
+        headers = {
+          "Authorization" => "Bearer #{api_key}",
+          "Content-Type" => "application/json"
+        }
+
+        payload = {
+          id: hackatime_id.to_s,
+          trust_level: trust_level,
+          reason: reason
+        }
+
+        response = Faraday.post(
+          "https://hackatime.hackclub.com/api/admin/v1/user/convict",
+          payload.to_json,
+          headers
+        )
+
+        if response.success?
+          trust_level_name = case trust_level.to_i
+          when 0 then "blue (unscored)"
+          when 1 then "red (convicted)"
+          when 2 then "green (trusted)"
+          when 3 then "yellow (suspected)"
+          else "unknown"
+          end
+
+          flash[:success] = "Successfully set trust level to #{trust_level_name}"
+        else
+          error_message = begin
+            error_body = JSON.parse(response.body)
+            error_body["error"] || error_body["message"] || response.body
+          rescue JSON::ParserError
+            response.body
+          end
+
+          flash[:error] = "#{error_message}"
+        end
+      rescue => e
+        Rails.logger.error("ruh ro, failed to do that #{e.message}")
+        Honeybadger.notify(e, context: { user_id: @user.id, trust_level: trust_level, reason: reason })
+        flash[:error] = "error! #{e.message}"
+      end
+      redirect_to admin_user_path(@user)
+    end
+
     private
 
     def fetch_hackatime(email)
@@ -193,6 +256,10 @@ module Admin
 
     def payout_params
       params.require(:payout).permit(:amount, :reason)
+    end
+
+    def trust_factor_params
+      params.permit(:trust_level, :reason, :api_key)
     end
   end
 end
