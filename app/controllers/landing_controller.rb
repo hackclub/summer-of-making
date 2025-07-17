@@ -27,7 +27,7 @@ class LandingController < ApplicationController
           {
             name: item.name,
             time: "~#{hours} #{"hour".pluralize(hours)}",
-            image: item.image.present? ? url_for(item.image) : "https://crouton.net/crouton.png",
+            image: item.image.attached? ? url_for(item.image.variant(:thumb)) : nil,
             ticket_cost: item.ticket_cost
           }
         end

@@ -186,7 +186,7 @@
                 <div class="parchment-prize-card p-3 md:p-3 sm:p-2 text-center transition-all duration-300 hover:shadow-xl hover:-translate-y-2 hover:scale-105" style="animation-delay: <%= (index * 0.3) %>s;">
                   <div class="parchment-texture"></div>
                   <div class="parchment-prize-image w-full h-full flex items-center justify-center mb-2 rounded-xl">
-                    <% if prize[:image] && prize[:image] != "" %>
+                    <% if prize[:image].present? %>
                       <img src="<%= prize[:image] %>" alt="<%= prize[:name] %>" class="w-full h-full object-cover rounded-xl" loading="lazy">
                     <% else %>
                       <%= image_tag "clubhuman.png", alt: "Prize", class: "w-full h-full object-cover rounded-xl" %>
@@ -206,7 +206,7 @@
               <div class="carousel-slide flex-none w-40 md:w-44 sm:w-36" style="transform: <%= prize[:random_transform] %>; animation-delay: <%= (index * 0.4) %>s;">
                 <div class="parchment-prize-card p-3 md:p-3 sm:p-2 text-center transition-all duration-300 hover:shadow-xl hover:-translate-y-2 hover:scale-105" style="animation-delay: <%= (index * 0.4) %>s;">
                   <div class="parchment-prize-image w-full h-full flex items-center justify-center mb-2 rounded-xl">
-                    <% if prize[:image] && prize[:image] != "" %>
+                    <% if prize[:image].present? %>
                       <img src="<%= prize[:image] %>" alt="<%= prize[:name] %>" class="w-full h-full object-cover rounded-xl" loading="lazy">
                     <% else %>
                       <%= image_tag "clubhuman.png", alt: "Prize", class: "w-full h-full object-cover rounded-xl" %>
