@@ -85,15 +85,13 @@
   <div class="p-4 md:p-6">
     <div class="flex flex-col md:flex-row md:items-center mb-4 space-y-3 md:space-y-0">
       <h1 class="text-2xl md:text-3xl 2xl:text-4xl md:flex-grow"><%= @project.title %></h1>
-      <div class="flex items-center space-x-3 md:space-x-4">
+      <div class="flex items-center space-x-3 md:space-x-4 md:ml-4">
         <% if user_signed_in? %>
-          <div class="ml-4 flex flex-wrap items-center gap-6">
-
+          <div class="flex flex-row items-center gap-3 md:gap-4">
             <% if policy(@project).can_follow_or_report? %>
               <%= render "projects/follow_button", project: @project %>
               <%= render "projects/report_button", project: @project %>
             <% end %>
-
             <% if policy(@project).can_see_actions? %>
               <%= render "projects/ship_button", project: @project %>
               <%= render "projects/edit_button", project: @project %>
@@ -162,7 +160,7 @@
     <div class="flex items-center gap-2 space-x-2 mb-3 ml-2 md:mb-4 text-sm md:text-base 2xl:text-lg text-som-dark">
       <%= inline_svg("icons/user.svg", class: "w-4 h-4 m-0") %>
       <span>
-        created by&nbsp;<span class="font-extrabold"><%= render "shared/user_display_name", user: @project.user %><% admin_user_visit(@project.user) %></span>
+        Created by<span class="font-extrabold"><%= render "shared/user_display_name", user: @project.user %><% admin_user_visit(@project.user) %></span>
       </span>
     </div>
 

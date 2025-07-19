@@ -1,6 +1,12 @@
-<button data-controller="modal" data-action="click->modal#open" data-modal-id="<%= project.id %>" data-modal-type="report" class="bg-vintage-red hover:bg-vintage-red/80 text-white btn-pixel px-3 py-2 flex items-center hover:scale-[1.05] transition-transform">
-  <span class="text-white text-sm md:text-base 2xl:text-xl">Report</span>
-</button>
+<%= render "shared/button",
+    text: "Report",
+    icon: "flag.svg",
+    data: {
+      controller: "modal",
+      action: "click->modal#open",
+      modal_id: project.id,
+      modal_type: "report"
+    } %>
 
 <!-- Report Modal -->
 <div id="report-modal-<%= project.id %>" data-controller="modal" class="hidden fixed inset-0 z-50 overflow-auto bg-black/30 flex items-center justify-center p-2 md:p-4">

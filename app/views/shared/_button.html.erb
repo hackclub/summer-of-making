@@ -33,11 +33,12 @@
 %>
 
 <% button_content = capture do %>
-    <% if local_assigns[:icon] %>
-        <%= inline_svg("icons/#{local_assigns[:icon]}", class: "w-4 h-4") %>
-    <% end %>
-
-    <span><%= local_assigns[:text] %></span>
+    <div class="flex items-center gap-2">
+        <% if local_assigns[:icon] %>
+            <%= inline_svg("icons/#{local_assigns[:icon]}", class: "w-4 h-4") %>
+        <% end %>
+        <span><%= local_assigns[:text] %></span>
+    </div>
 <% end %>
 
 <% if local_assigns[:link] %>

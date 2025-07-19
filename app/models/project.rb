@@ -332,11 +332,11 @@ class Project < ApplicationRecord
   def certification_status_text
     case certification_status
     when "pending"
-      "awaiting ship certification"
+      "Awaiting ship certification..."
     when "approved"
-      "ship certified"
+      "Ship certified"
     when "rejected"
-      "no ship certification"
+      "No ship certification"
     else
       nil
     end

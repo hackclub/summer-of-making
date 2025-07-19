@@ -1,13 +1,17 @@
 <%= turbo_frame_tag dom_id(project, :follow_button) do %>
   <% if defined?(following) ? following : current_user.project_follows.exists?(project_id: project.id) %>
-    <%= button_to unfollow_project_path(project), method: :delete, class: "group bg-nice-blue hover:bg-vintage-red text-white btn-pixel px-3 py-2 flex items-center hover:scale-[1.05] transition-transform" do %>
-      <span class="group-hover:hidden text-white text-sm md:text-base 2xl:text-xl">Following</span>
-      <span class="hidden group-hover:block text-white text-sm md:text-base 2xl:text-xl">Unfollow</span>
+    <%= button_to unfollow_project_path(project), method: :delete, class: "group" do %>
+      <div class="som-button-secondary transition-colors">
+        <span class="group-hover:hidden">Following</span>
+        <span class="hidden group-hover:block">Unfollow?</span>
+      </div>
     <% end %>
   <% else %>
-    <%= button_to follow_project_path(project), class: "bg-forest text-white btn-pixel px-3 py-2 flex items-center hover:scale-[1.05] transition-transform" do %>
-      <%= inline_svg "plus.svg", class: "w-6 h-6" %>
-      <span class="ml-1 text-white text-sm md:text-base 2xl:text-xl">Follow</span>
+    <%= button_to follow_project_path(project), class: "group" do %>
+      <div class="som-button-primary transition-colors">
+        <span class="group-hover:hidden">Follow</span>
+        <span class="hidden group-hover:block">Follow?</span>
+      </div>
     <% end %>
   <% end %>
 <% end %>
