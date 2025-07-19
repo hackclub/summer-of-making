@@ -1,21 +1,9 @@
 @import "tailwindcss";
 
 @font-face {
-  font-family: "Steven";
-  font-weight: bold;
-  src: url("Steven.ttf") format(truetype);
-}
-
-@font-face {
   font-family: "DynaPuff";
   font-weight: 100 900;
   src: url("DynaPuff.ttf") format(truetype);
-}
-
-@font-face {
-  font-family: "Pagaki";
-  font-weight: 400;
-  src: url("Pagaki.ttf") format(truetype);
 }
 
 @font-face {
@@ -25,9 +13,7 @@
 }
 
 @theme {
-  --font-steven: "Steven", "sans-serif";
   --font-dynapuff: "DynaPuff", "sans-serif";
-  --font-pagaki: "Pagaki", "sans-serif";
   --font-national-park: "National Park", "sans-serif";
 
   --color-som-dark: #4a2d24;
