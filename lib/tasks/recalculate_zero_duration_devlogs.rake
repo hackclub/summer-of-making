@@ -16,22 +16,45 @@ namespace :devlogs do
     end
 
     puts "Starting recalculation process..."
+    require "thread"
+    threads = 8
+    queue = Queue.new
+    devlogs_to_update.includes(:project, :user).find_each.with_index do |devlog, index|
+      queue << [ devlog, index ]
+    end
+
     updated_count = 0
     failed_count = 0
+    processed_count = 0
+    mutex = Mutex.new
 
-    devlogs_to_update.includes(:project, :user).find_each.with_index do |devlog, index|
-      begin
-        devlog.recalculate_seconds_coded
-        updated_count += 1
-
-        if (index + 1) % 50 == 0
-          puts "Progress: #{index + 1}/#{total_count} processed, #{updated_count} updated, #{failed_count} failed"
+    puts "Using #{threads} threads"
+    threads = Array.new(threads) do
+      Thread.new do
+        while true
+          begin
+            devlog, index = queue.pop(true)
+          rescue ThreadError
+            break
+          end
+          begin
+            devlog.recalculate_seconds_coded
+            mutex.synchronize do
+              updated_count += 1
+              processed_count += 1
+              puts "Updated devlog #{devlog.id}, #{processed_count}/#{total_count} processed, #{updated_count} updated, #{failed_count} failed"
+            end
+          rescue => e
+            mutex.synchronize do
+              failed_count += 1
+              processed_count += 1
+              puts "Failed to update devlog #{devlog.id}: #{e.message}"
+            end
+          end
         end
-      rescue => e
-        failed_count += 1
-        puts "Failed to update devlog #{devlog.id}: #{e.message}"
       end
     end
+    threads.each(&:join)
 
     puts "Recalculation complete!"
     puts "Total devlogs processed: #{total_count}"
