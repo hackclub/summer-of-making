@@ -14,8 +14,8 @@ module HCBService
       @hcb_base_url ||= ENV["HCB_BASE_URL"]
     end
 
-    def create_card_grant(email:, amount_cents:, merchant_lock: nil, category_lock: nil, keyword_lock: nil, purpose: nil)
-      conn.post("organizations/#{@hcb_org_slug}/card_grants", email:, amount_cents:, category_lock:, merchant_lock:, keyword_lock:, purpose:).body
+    def create_card_grant(email:, amount_cents:, merchant_lock: nil, category_lock: nil, keyword_lock: nil, purpose: nil, pre_authorization_required: false, one_time_use: false, instructions: nil)
+      conn.post("organizations/#{@hcb_org_slug}/card_grants", email:, amount_cents:, category_lock:, merchant_lock:, keyword_lock:, purpose:, pre_authorization_required:, one_time_use:, instructions:).body
     end
 
     def topup_card_grant(hashid:, amount_cents:)
@@ -30,8 +30,8 @@ module HCBService
       conn.get("card_grants/#{hashid}?expand=balance_cents,disbursements").body
     end
 
-    def update_card_grant(hashid:, merchant_lock: nil, category_lock: nil, keyword_lock: nil, purpose: nil)
-      conn.patch("card_grants/#{hashid}", { merchant_lock:, category_lock:, keyword_lock:, purpose: }.compact).body
+    def update_card_grant(hashid:, merchant_lock: nil, category_lock: nil, keyword_lock: nil, purpose: nil, instructions: nil)
+      conn.patch("card_grants/#{hashid}", { merchant_lock:, category_lock:, keyword_lock:, purpose:, instructions: }.compact).body
     end
 
     def show_stripe_card(hashid:)
