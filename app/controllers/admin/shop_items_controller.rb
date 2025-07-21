@@ -104,9 +104,10 @@ module Admin
       end
 
       # Filter by enabled regions
-      if params[:enabled_region].present? && params[:enabled_region] != "all"
+      allowed_regions = Shop::Regionalizable::REGION_CODES.map(&:downcase)
+      if params[:enabled_region].present? && params[:enabled_region] != "all" && allowed_regions.include?(params[:enabled_region])
         column = "enabled_#{params[:enabled_region]}"
-        items = items.where(column => true) if ShopItem.column_names.include?(column)
+        items = items.where(column => true)
       end
 
       # Sorting
