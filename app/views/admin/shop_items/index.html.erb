@@ -5,7 +5,7 @@
     <i class="bi bi-plus-circle me-2"></i>
     New Shop Item
   <% end %>
-  
+
   <div class="d-flex gap-2">
     <%= link_to admin_shop_items_path, class: "btn btn-outline-danger btn-sm" do %>
       <i class="bi bi-x-circle me-1"></i>
@@ -32,7 +32,7 @@
     </div>
     <div class="card-body p-4">
       <%= form_with url: admin_shop_items_path, method: :get, local: true, class: "needs-validation", novalidate: true do |f| %>
-        
+
         <!-- Primary Search Row -->
         <div class="row mb-4">
           <div class="col-lg-8">
@@ -40,9 +40,9 @@
               <span class="input-group-text bg-white border-end-0">
                 <i class="bi bi-search text-muted"></i>
               </span>
-              <%= f.text_field :search, 
-                  value: params[:search], 
-                  placeholder: "Search shop items by name, description, or internal notes...", 
+              <%= f.text_field :search,
+                  value: params[:search],
+                  placeholder: "Search shop items by name, description, or internal notes...",
                   class: "form-control border-start-0 ps-0",
                   style: "box-shadow: none;" %>
             </div>
@@ -84,11 +84,11 @@
             </label>
             <%= f.select :type, options_for_select([
               ["🌟 All Types", "all"]
-            ] + @available_types.map { |name, type| ["#{name}", type] }, params[:type]), 
-            { include_blank: false }, 
+            ] + @available_types.map { |name, type| ["#{name}", type] }, params[:type]),
+            { include_blank: false },
             { class: "form-select form-select-sm" } %>
           </div>
-          
+
           <!-- Status Filter -->
           <div class="col-lg-2 col-md-4">
             <label class="form-label text-dark fw-medium">
@@ -101,7 +101,7 @@
               ["❌ Disabled", "disabled"]
             ], params[:enabled]), { include_blank: false }, { class: "form-select form-select-sm" } %>
           </div>
-          
+
           <!-- Region Filter -->
           <div class="col-lg-2 col-md-4">
             <label class="form-label text-dark fw-medium">
@@ -118,7 +118,7 @@
               ["🌐 Other", "xx"]
             ], params[:enabled_region]), { include_blank: false }, { class: "form-select form-select-sm" } %>
           </div>
-          
+
           <!-- Black Market -->
           <div class="col-lg-2 col-md-4">
             <label class="form-label text-dark fw-medium">
@@ -131,7 +131,7 @@
               ["☀️ Regular", "no"]
             ], params[:black_market]), { include_blank: false }, { class: "form-select form-select-sm" } %>
           </div>
-          
+
           <!-- Carousel -->
           <div class="col-lg-2 col-md-4">
             <label class="form-label text-dark fw-medium">
@@ -144,7 +144,7 @@
               ["📋 No", "no"]
             ], params[:carousel]), { include_blank: false }, { class: "form-select form-select-sm" } %>
           </div>
-          
+
           <!-- Stock Type -->
           <div class="col-lg-1 col-md-4">
             <label class="form-label text-dark fw-medium">
@@ -158,7 +158,7 @@
             ], params[:limited]), { include_blank: false }, { class: "form-select form-select-sm" } %>
           </div>
         </div>
-        
+
         <!-- Action Buttons -->
         <div class="d-flex gap-2 pt-3 border-top">
           <%= f.submit "Apply Filters", class: "btn btn-primary px-4" %>
@@ -185,7 +185,7 @@
         <span class="text-muted ms-1">(of <%= ShopItem.count %> total)</span>
       <% end %>
     </div>
-    
+
     <% if params[:search].present? || params[:type].present? || params[:enabled].present? || params[:black_market].present? || params[:carousel].present? || params[:limited].present? || params[:enabled_region].present? %>
       <div class="d-flex gap-1">
         <% if params[:search].present? %>

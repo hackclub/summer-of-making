@@ -56,7 +56,7 @@ module Admin
 
     def filter_and_search_shop_items
       items = ShopItem.all.with_attached_image
-      
+
       # Text search across name, description, and internal_description
       if params[:search].present?
         search_term = "%#{params[:search]}%"
@@ -65,12 +65,12 @@ module Admin
           search_term, search_term, search_term
         )
       end
-      
+
       # Filter by type
       if params[:type].present? && params[:type] != "all"
         items = items.where(type: params[:type])
       end
-      
+
       # Filter by enabled status
       case params[:enabled]
       when "enabled"
@@ -78,7 +78,7 @@ module Admin
       when "disabled"
         items = items.where(enabled: false)
       end
-      
+
       # Filter by black market
       case params[:black_market]
       when "yes"
@@ -86,29 +86,29 @@ module Admin
       when "no"
         items = items.not_black_market
       end
-      
+
       # Filter by carousel
       case params[:carousel]
       when "yes"
         items = items.shown_in_carousel
       when "no"
-        items = items.where(show_in_carousel: [false, nil])
+        items = items.where(show_in_carousel: [ false, nil ])
       end
-      
+
       # Filter by limited stock
       case params[:limited]
       when "limited"
         items = items.where(limited: true)
       when "unlimited"
-        items = items.where(limited: [false, nil])
+        items = items.where(limited: [ false, nil ])
       end
-      
+
       # Filter by enabled regions
       if params[:enabled_region].present? && params[:enabled_region] != "all"
         column = "enabled_#{params[:enabled_region]}"
         items = items.where(column => true) if ShopItem.column_names.include?(column)
       end
-      
+
       # Sorting
       case params[:sort]
       when "name_asc"
@@ -128,7 +128,7 @@ module Admin
       else
         items = items.order(created_at: :desc)
       end
-      
+
       items
     end
 
