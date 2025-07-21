@@ -467,6 +467,7 @@ ActiveRecord::Schema[8.0].define(version: 2025_07_21_143917) do
     t.decimal "price_offset_xx", precision: 6, scale: 2, default: "0.0"
     t.boolean "enabled"
     t.integer "site_action"
+    t.text "hcb_preauthorization_instructions"
     t.check_constraint "hacker_score >= 0 AND hacker_score <= 100", name: "hacker_score_percentage_check"
   end
 
