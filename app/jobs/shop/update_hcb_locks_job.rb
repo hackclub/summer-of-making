@@ -21,7 +21,7 @@ class Shop::UpdateHCBLocksJob < ApplicationJob
           category_lock: shop_item.hcb_category_lock,
           purpose: "SOM: #{shop_item.name}"
         }
-        
+
         # Add instructions for preauth grants
         if shop_item.is_a?(ShopItem::HCBPreauthGrant)
           update_params[:instructions] = shop_item.hcb_preauthorization_instructions
