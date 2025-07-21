@@ -272,10 +272,12 @@ class User < ApplicationRecord
     today_start = Time.use_zone(user_timezone) { Time.current.beginning_of_day }
 
     response = fetch_raw_hackatime_stats(from: today_start)
-    result = JSON.parse(response.body)
+    return 0 unless response&.success?
 
+    result = JSON.parse(response.body)
     return 0 unless result&.dig("data", "status") == "ok"
-    result.dig("data", "total_seconds") || 0
+
+    result.dig("data", "unique_total_seconds") || result.dig("data", "total_seconds") || 0
   rescue => e
     Rails.logger.error("Failed to fetch today's hackatime data: #{e.message}")
     0

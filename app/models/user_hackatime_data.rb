@@ -59,6 +59,7 @@ class UserHackatimeData < ApplicationRecord
   private
 
   def fetch_combined_project_time(project_keys)
+    return 0 unless user.slack_id.present?
     project_keys_string = project_keys.join(",")
     encoded_project_keys = URI.encode_www_form_component(project_keys_string)
 
@@ -76,14 +77,17 @@ class UserHackatimeData < ApplicationRecord
 
       if direct_res.success?
         direct_data = JSON.parse(direct_res.body)
-        direct_data.dig("data", "total_seconds") || 0
+        direct_data.dig("data", "unique_total_seconds") || direct_data.dig("data", "total_seconds") || 0
       else
         Rails.logger.warn "Failed to fetch combined Hackatime data for user #{user.slack_id}: HTTP #{direct_res.status}"
+        0
       end
     rescue JSON::ParserError => e
       Rails.logger.error "JSON parse error fetching combined Hackatime data for user #{user.slack_id}: #{e.message}"
+      0
     rescue => e
       Rails.logger.error "Error fetching combined Hackatime data for user #{user.slack_id}: #{e.message}"
+      0
     end
   end
 end

@@ -90,7 +90,7 @@ class Devlog < ApplicationRecord
 
         if direct_res.success?
           direct_data = JSON.parse(direct_res.body)
-          duration_seconds = direct_data.dig("data", "total_seconds") || 0
+          duration_seconds = direct_data.dig("data", "unique_total_seconds") || direct_data.dig("data", "total_seconds") || 0
         else
           Rails.logger.error "Hackatime API failed for devlog #{id}: HTTP #{direct_res.status} - #{direct_res.body}"
           duration_seconds = 0
