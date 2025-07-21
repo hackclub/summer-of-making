@@ -104,10 +104,19 @@ module Admin
       end
 
       # Filter by enabled regions
-      allowed_regions = Shop::Regionalizable::REGION_CODES.map(&:downcase)
-      if params[:enabled_region].present? && params[:enabled_region] != "all" && allowed_regions.include?(params[:enabled_region])
-        column = "enabled_#{params[:enabled_region]}"
-        items = items.where(column => true)
+      column_map = {
+        'us' => :enabled_us,
+        'eu' => :enabled_eu,
+        'in' => :enabled_in,
+        'ca' => :enabled_ca,
+        'au' => :enabled_au,
+        'xx' => :enabled_xx
+      }
+      if params[:enabled_region].present? && params[:enabled_region] != "all"
+        region = params[:enabled_region]
+        if column_map.key?(region)
+          items = items.where(column_map[region] => true)
+        end
       end
 
       # Sorting
