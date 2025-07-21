@@ -149,6 +149,12 @@
           <td><%= @shop_item.hcb_keyword_lock %></td>
         </tr>
       <% end %>
+      <% if @shop_item.hcb_preauthorization_instructions.present? %>
+        <tr>
+          <th>HCB Preauth Instructions</th>
+          <td><pre class="small"><%= @shop_item.hcb_preauthorization_instructions %></pre></td>
+        </tr>
+      <% end %>
       <% if @shop_item.agh_contents.present? %>
         <tr>
           <th>AGH Contents</th>

@@ -56,3 +56,4 @@ pin "@tiptap/extension-typography", to: "@tiptap--extension-typography.js" # @2.
 pin "@rails/actioncable", to: "actioncable.esm.js"
 pin_all_from "app/javascript/channels", under: "channels"
 pin "howler" # @2.2.4
+pin "alpinejs" # @3.14.9

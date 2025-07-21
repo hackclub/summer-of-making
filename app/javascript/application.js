@@ -5,3 +5,7 @@ import "controllers";
 import "chartkick";
 import "Chart.bundle";
 import "channels"
+
+import Alpine from 'alpinejs'
+window.Alpine = Alpine
+Alpine.start()

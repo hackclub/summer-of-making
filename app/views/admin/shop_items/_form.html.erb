@@ -1,3 +1,4 @@
+<div x-data="{ selectedType: '<%= @shop_item.type %>' }">
 <%= form_with(model: @shop_item.becomes(ShopItem), url: (@shop_item.persisted? ? admin_shop_item_path(@shop_item) : admin_shop_items_path), method: (@shop_item.persisted? ? :patch : :post), local: true) do |form| %>
   <% if @shop_item.errors.any? %>
     <div class="alert alert-danger">
@@ -14,7 +15,7 @@
     <div class="col-md-6">
       <div class="mb-3">
         <%= form.label :type, class: "form-label" %>
-        <%= form.select :type, @shop_item_types, { include_blank: "Select a type" }, { class: "form-select" } %>
+        <%= form.select :type, @shop_item_types, { include_blank: "Select a type" }, { class: "form-select", "x-model": "selectedType" } %>
       </div>
 
       <div class="mb-3">
@@ -138,23 +139,31 @@
         <small class="form-text text-muted">Number of items available for purchase</small>
       </div>
 
-      <h5>HCB Locks</h5>
-      <div class="mb-3">
-        <%= form.label :hcb_merchant_lock, "HCB Merchant Lock", class: "form-label" %>
-        <%= form.text_field :hcb_merchant_lock, class: "form-control" %>
+      <div x-show="selectedType === 'ShopItem::HCBGrant' || selectedType === 'ShopItem::HCBPreauthGrant'">
+        <h5>HCB Locks</h5>
+        <div class="mb-3">
+          <%= form.label :hcb_merchant_lock, "HCB Merchant Lock", class: "form-label" %>
+          <%= form.text_field :hcb_merchant_lock, class: "form-control" %>
+        </div>
+
+        <div class="mb-3">
+          <%= form.label :hcb_category_lock, "HCB Category Lock", class: "form-label" %>
+          <%= form.text_field :hcb_category_lock, class: "form-control" %>
+        </div>
+
+        <div class="mb-3">
+          <%= form.label :hcb_keyword_lock, "HCB Keyword Lock", class: "form-label" %>
+          <%= form.text_field :hcb_keyword_lock, class: "form-control" %>
+        </div>
       </div>
 
-      <div class="mb-3">
-        <%= form.label :hcb_category_lock, "HCB Category Lock", class: "form-label" %>
-        <%= form.text_field :hcb_category_lock, class: "form-control" %>
+      <div x-show="selectedType === 'ShopItem::HCBPreauthGrant'" class="mb-3">
+        <%= form.label :hcb_preauthorization_instructions, "HCB Preauthorization Instructions", class: "form-label" %>
+        <%= form.text_area :hcb_preauthorization_instructions, rows: 3, class: "form-control", placeholder: "Instructions for preauthorized HCB grants" %>
+        <small class="form-text text-muted">Used by HCB Preauth Grant items to provide spending instructions</small>
       </div>
 
-      <div class="mb-3">
-        <%= form.label :hcb_keyword_lock, "HCB Keyword Lock", class: "form-label" %>
-        <%= form.text_field :hcb_keyword_lock, class: "form-control" %>
-      </div>
-
-      <div class="mb-3">
+      <div x-show="selectedType === 'ShopItem::WarehouseItem'" class="mb-3">
         <%= form.label :agh_contents, "AGH Contents (JSON)", class: "form-label" %>
         <%= form.text_area :agh_contents, rows: 4, class: "form-control", placeholder: "Enter valid JSON" %>
       </div>
@@ -243,6 +252,7 @@
     <%= link_to 'Cancel', admin_shop_items_path, class: "btn btn-secondary" %>
   </div>
 <% end %>
+</div>
 
 <script>
     document.addEventListener('DOMContentLoaded', function () {
