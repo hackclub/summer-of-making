@@ -1,0 +1,13 @@
+<% content_for :head do %>
+  <% stylesheet_link_tag "admin_dashboard" %>
+<% end %>
+
+<h1>cache cache money money</h1>
+
+<% @caches.each do |key, name| %>
+  <div style="font-family: 'Comic Sans MS'; font-size: 24px; margin-bottom: 8px;">
+    <abbr title="<%= key %>"><%= name %></abbr>: <%= button_to ["zap that shit!", "blow it away...", "terminate with extreme prejudice.", "BURNINATE", "asplode", "leave no survivors"].sample, zap_admin_cach_path(key), method: :delete, class: "abtn small", form: {style: "display: inline;"} %>
+  </div>
+<% end %>
+
+<%= link_to "← lol nvm", admin_root_path %>

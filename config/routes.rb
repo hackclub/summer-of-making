@@ -380,5 +380,10 @@ Rails.application.routes.draw do
       end
     end
     resources :shop_card_grants, only: [ :index, :show ]
+    resources :caches, path: "cache", only: [ :index ] do
+      member do
+        delete :zap
+      end
+    end
   end
 end
