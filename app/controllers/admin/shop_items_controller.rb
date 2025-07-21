@@ -105,12 +105,12 @@ module Admin
 
       # Filter by enabled regions
       column_map = {
-        'us' => :enabled_us,
-        'eu' => :enabled_eu,
-        'in' => :enabled_in,
-        'ca' => :enabled_ca,
-        'au' => :enabled_au,
-        'xx' => :enabled_xx
+        "us" => :enabled_us,
+        "eu" => :enabled_eu,
+        "in" => :enabled_in,
+        "ca" => :enabled_ca,
+        "au" => :enabled_au,
+        "xx" => :enabled_xx
       }
       if params[:enabled_region].present? && params[:enabled_region] != "all"
         region = params[:enabled_region]
