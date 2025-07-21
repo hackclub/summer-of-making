@@ -1,17 +1,243 @@
 <h1>Shop Items</h1>
 
-<%= link_to "New Shop Item", new_admin_shop_item_path, class: "btn btn-primary" %>
+<div class="d-flex justify-content-between align-items-center mb-4">
+  <%= link_to new_admin_shop_item_path, class: "btn btn-primary btn-lg shadow-sm" do %>
+    <i class="bi bi-plus-circle me-2"></i>
+    New Shop Item
+  <% end %>
+  
+  <div class="d-flex gap-2">
+    <%= link_to admin_shop_items_path, class: "btn btn-outline-danger btn-sm" do %>
+      <i class="bi bi-x-circle me-1"></i>
+      Clear All Filters
+    <% end %>
+    <button class="btn btn-outline-primary btn-sm" type="button" data-bs-toggle="collapse" data-bs-target="#filtersCollapse" aria-expanded="<%= params[:search].present? || params[:type].present? || params[:enabled].present? || params[:black_market].present? %>">
+      <i class="bi bi-funnel me-1"></i>
+      <span class="d-none d-sm-inline">Toggle </span>Filters
+      <% if params[:search].present? || params[:type].present? || params[:enabled].present? || params[:black_market].present? || params[:carousel].present? || params[:limited].present? || params[:enabled_region].present? %>
+        <span class="badge bg-primary ms-2">Active</span>
+      <% end %>
+    </button>
+  </div>
+</div>
 
-<table class="table">
-  <thead>
+<!-- Search and Filter Form -->
+<div class="collapse <%= 'show' if params[:search].present? || params[:type].present? || params[:enabled].present? || params[:black_market].present? %>" id="filtersCollapse">
+  <div class="card border-0 shadow-sm mb-4">
+    <div class="card-header bg-light border-0 py-3">
+      <h6 class="mb-0 text-primary">
+        <i class="bi bi-funnel me-2"></i>
+        Search & Filter Options
+      </h6>
+    </div>
+    <div class="card-body p-4">
+      <%= form_with url: admin_shop_items_path, method: :get, local: true, class: "needs-validation", novalidate: true do |f| %>
+        
+        <!-- Primary Search Row -->
+        <div class="row mb-4">
+          <div class="col-lg-8">
+            <div class="input-group input-group-lg">
+              <span class="input-group-text bg-white border-end-0">
+                <i class="bi bi-search text-muted"></i>
+              </span>
+              <%= f.text_field :search, 
+                  value: params[:search], 
+                  placeholder: "Search shop items by name, description, or internal notes...", 
+                  class: "form-control border-start-0 ps-0",
+                  style: "box-shadow: none;" %>
+            </div>
+          </div>
+          <div class="col-lg-4">
+            <div class="input-group input-group-lg">
+              <span class="input-group-text bg-white">
+                <i class="bi bi-sort-down text-muted"></i>
+              </span>
+              <%= f.select :sort, options_for_select([
+                ["🕒 Newest First", "created_desc"],
+                ["🕐 Oldest First", "created_asc"],
+                ["🔤 Name A-Z", "name_asc"],
+                ["🔤 Name Z-A", "name_desc"],
+                ["💰 Cost Low-High", "cost_asc"],
+                ["💰 Cost High-Low", "cost_desc"],
+                ["📋 Type A-Z", "type_asc"],
+                ["📋 Type Z-A", "type_desc"]
+              ], params[:sort]), { include_blank: false }, { class: "form-select" } %>
+            </div>
+          </div>
+        </div>
+
+        <!-- Filter Pills Section -->
+        <div class="mb-3">
+          <h6 class="text-muted mb-2 fw-normal">
+            <i class="bi bi-sliders me-1"></i>
+            Quick Filters
+          </h6>
+        </div>
+
+        <!-- Filter Controls Grid -->
+        <div class="row g-3 mb-4">
+          <!-- Type Filter -->
+          <div class="col-lg-3 col-md-4">
+            <label class="form-label text-dark fw-medium">
+              <i class="bi bi-tag-fill me-1 text-primary"></i>
+              Item Type
+            </label>
+            <%= f.select :type, options_for_select([
+              ["🌟 All Types", "all"]
+            ] + @available_types.map { |name, type| ["#{name}", type] }, params[:type]), 
+            { include_blank: false }, 
+            { class: "form-select form-select-sm" } %>
+          </div>
+          
+          <!-- Status Filter -->
+          <div class="col-lg-2 col-md-4">
+            <label class="form-label text-dark fw-medium">
+              <i class="bi bi-toggle-on me-1 text-success"></i>
+              Status
+            </label>
+            <%= f.select :enabled, options_for_select([
+              ["All", ""],
+              ["✅ Enabled", "enabled"],
+              ["❌ Disabled", "disabled"]
+            ], params[:enabled]), { include_blank: false }, { class: "form-select form-select-sm" } %>
+          </div>
+          
+          <!-- Region Filter -->
+          <div class="col-lg-2 col-md-4">
+            <label class="form-label text-dark fw-medium">
+              <i class="bi bi-globe me-1 text-info"></i>
+              Region
+            </label>
+            <%= f.select :enabled_region, options_for_select([
+              ["🌍 All", "all"],
+              ["🇺🇸 US", "us"],
+              ["🇨🇦 CA", "ca"],
+              ["🇪🇺 EU", "eu"],
+              ["🇦🇺 AU", "au"],
+              ["🇮🇳 IN", "in"],
+              ["🌐 Other", "xx"]
+            ], params[:enabled_region]), { include_blank: false }, { class: "form-select form-select-sm" } %>
+          </div>
+          
+          <!-- Black Market -->
+          <div class="col-lg-2 col-md-4">
+            <label class="form-label text-dark fw-medium">
+              <i class="bi bi-moon-stars-fill me-1 text-dark"></i>
+              Market
+            </label>
+            <%= f.select :black_market, options_for_select([
+              ["All", ""],
+              ["🌑 Black", "yes"],
+              ["☀️ Regular", "no"]
+            ], params[:black_market]), { include_blank: false }, { class: "form-select form-select-sm" } %>
+          </div>
+          
+          <!-- Carousel -->
+          <div class="col-lg-2 col-md-4">
+            <label class="form-label text-dark fw-medium">
+              <i class="bi bi-images me-1 text-warning"></i>
+              Carousel
+            </label>
+            <%= f.select :carousel, options_for_select([
+              ["All", ""],
+              ["🎠 Yes", "yes"],
+              ["📋 No", "no"]
+            ], params[:carousel]), { include_blank: false }, { class: "form-select form-select-sm" } %>
+          </div>
+          
+          <!-- Stock Type -->
+          <div class="col-lg-1 col-md-4">
+            <label class="form-label text-dark fw-medium">
+              <i class="bi bi-box-seam me-1 text-secondary"></i>
+              Stock
+            </label>
+            <%= f.select :limited, options_for_select([
+              ["All", ""],
+              ["📦 Limited", "limited"],
+              ["♾️ Unlimited", "unlimited"]
+            ], params[:limited]), { include_blank: false }, { class: "form-select form-select-sm" } %>
+          </div>
+        </div>
+        
+        <!-- Action Buttons -->
+        <div class="d-flex gap-2 pt-3 border-top">
+          <%= f.submit "Apply Filters", class: "btn btn-primary px-4" %>
+          <%= link_to "Clear All", admin_shop_items_path, class: "btn btn-outline-secondary" %>
+          <div class="ms-auto">
+            <small class="text-muted">
+              <i class="bi bi-info-circle me-1"></i>
+              Press Enter in search box to filter instantly
+            </small>
+          </div>
+        </div>
+      <% end %>
+    </div>
+  </div>
+</div>
+
+<!-- Results count -->
+<div class="d-flex justify-content-between align-items-center mb-3">
+  <div class="d-flex align-items-center gap-3">
+    <div class="badge bg-light text-dark fs-6 px-3 py-2">
+      <i class="bi bi-list-ul me-2"></i>
+      <strong><%= @shop_items.count %></strong> items
+      <% if params[:search].present? || params[:type].present? || params[:enabled].present? || params[:black_market].present? || params[:carousel].present? || params[:limited].present? || params[:enabled_region].present? %>
+        <span class="text-muted ms-1">(of <%= ShopItem.count %> total)</span>
+      <% end %>
+    </div>
+    
+    <% if params[:search].present? || params[:type].present? || params[:enabled].present? || params[:black_market].present? || params[:carousel].present? || params[:limited].present? || params[:enabled_region].present? %>
+      <div class="d-flex gap-1">
+        <% if params[:search].present? %>
+          <span class="badge bg-primary">
+            <i class="bi bi-search me-1"></i>
+            "<%= params[:search] %>"
+          </span>
+        <% end %>
+        <% if params[:type].present? && params[:type] != "all" %>
+          <span class="badge bg-secondary">Type: <%= params[:type].split("::").last %></span>
+        <% end %>
+        <% if params[:enabled].present? %>
+          <span class="badge bg-<%= params[:enabled] == 'enabled' ? 'success' : 'danger' %>">
+            <%= params[:enabled].capitalize %>
+          </span>
+        <% end %>
+      </div>
+    <% end %>
+  </div>
+</div>
+
+<table class="table table-striped">
+  <thead class="table-light">
     <tr>
       <th>ID</th>
       <th>Image</th>
-      <th>Name</th>
-      <th>Type</th>
+      <th>
+        <%= link_to admin_shop_items_path(params.permit!.merge(sort: params[:sort] == "name_asc" ? "name_desc" : "name_asc")), class: "text-decoration-none" do %>
+          Name
+          <% if params[:sort]&.starts_with?("name") %>
+            <i class="bi bi-arrow-<%= params[:sort] == "name_asc" ? "up" : "down" %>"></i>
+          <% end %>
+        <% end %>
+      </th>
+      <th>
+        <%= link_to admin_shop_items_path(params.permit!.merge(sort: params[:sort] == "type_asc" ? "type_desc" : "type_asc")), class: "text-decoration-none" do %>
+          Type
+          <% if params[:sort]&.starts_with?("type") %>
+            <i class="bi bi-arrow-<%= params[:sort] == "type_asc" ? "up" : "down" %>"></i>
+          <% end %>
+        <% end %>
+      </th>
       <th>Enabled</th>
       <th>Regions</th>
-      <th>Ticket Cost</th>
+      <th>
+        <%= link_to admin_shop_items_path(params.permit!.merge(sort: params[:sort] == "cost_asc" ? "cost_desc" : "cost_asc")), class: "text-decoration-none" do %>
+          Ticket Cost
+          <% if params[:sort]&.starts_with?("cost") %>
+            <i class="bi bi-arrow-<%= params[:sort] == "cost_asc" ? "up" : "down" %>"></i>
+          <% end %>
+        <% end %>
+      </th>
       <th>USD Cost</th>
       <th>Hacker Score</th>
       <th>Price Offsets</th>
