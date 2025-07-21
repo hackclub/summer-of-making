@@ -5,7 +5,7 @@ class Shop::UpdateHCBLocksJob < ApplicationJob
 
   def perform(shop_item_id)
     shop_item = ShopItem.find(shop_item_id)
-    return unless shop_item.is_a?(ShopItem::HCBGrant)
+    return unless shop_item.is_a?(ShopItem::HCBGrant) || shop_item.is_a?(ShopItem::HCBPreauthGrant)
 
     # Find all active card grants for this shop item
     shop_item.shop_card_grants.each do |grant|
@@ -14,13 +14,20 @@ class Shop::UpdateHCBLocksJob < ApplicationJob
       begin
         Rails.logger.info "Updating HCB locks for grant #{grant.hcb_grant_hashid}"
 
-        HCBService.update_card_grant(
+        update_params = {
           hashid: grant.hcb_grant_hashid,
           merchant_lock: shop_item.hcb_merchant_lock,
           keyword_lock: shop_item.hcb_keyword_lock,
           category_lock: shop_item.hcb_category_lock,
           purpose: "SOM: #{shop_item.name}"
-        )
+        }
+        
+        # Add instructions for preauth grants
+        if shop_item.is_a?(ShopItem::HCBPreauthGrant)
+          update_params[:instructions] = shop_item.hcb_preauthorization_instructions
+        end
+
+        HCBService.update_card_grant(**update_params)
 
         Rails.logger.info "Successfully updated locks for grant #{grant.hcb_grant_hashid}"
       rescue => e
