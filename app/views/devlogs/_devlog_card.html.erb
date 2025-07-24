@@ -60,10 +60,14 @@
 
               <!-- Time ago -->
               <span>
-              <%= link_to "#{time_ago_in_words(devlog.created_at)} ago",
-                  project_path(devlog.project, anchor: dom_id(devlog)),
-              target: "_blank",
-              class: "hover:underline hover:text-nice-blue transition-colors duration-200" %>
+                <% unless devlog.project && devlog.project.is_deleted %>
+                  <%= link_to "#{time_ago_in_words(devlog.created_at)} ago",
+                      project_path(devlog.project, anchor: dom_id(devlog)),
+                  target: "_blank",
+                  class: "hover:underline hover:text-nice-blue transition-colors duration-200" %>
+                <% else %>
+                  <%= time_ago_in_words(devlog.created_at) %> ago
+                <% end %>
               </span>
 
               <% if show_stonks && devlog.project&.stonks&.count %>
