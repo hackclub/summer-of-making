@@ -26,73 +26,14 @@
         <div class="<%= 'hidden' unless current_user.has_commented %>" data-comment-modal-target="commentForm">
           <%= form_with model: [devlog, Comment.new],
               id: "comment-form-#{devlog.id}",
-              class: "space-y-3",
-              data: {
-                action: "submit->comment-modal#validateForm",
-                controller: "tiptap-comment",
-                comment_modal_target: "editor"
-              } do |f| %>
+              class: "space-y-3" do |f| %>
             <div class="space-y-2">
-              <div class="w-full border-2 border-saddle-taupe/50 bg-bread rounded-lg overflow-hidden shadow-sm focus-within:outline focus-within:outline-2 focus-within:outline-forest focus-within:-outline-offset-2">
-                <div data-tiptap-comment-target="toolbar" class="flex items-center flex-wrap gap-1 p-3 border-b-2 border-saddle-taupe/30 bg-gradient-to-r from-saddle-taupe/20 to-saddle-taupe/10 backdrop-blur-sm">
-                  <!-- Undo/Redo Group -->
-                  <div class="flex items-center gap-1 mr-2">
-                    <button type="button" data-action="undo" class="flex items-center justify-center w-9 h-9 bg-transparent hover:bg-saddle-taupe/20 border-0 rounded-md cursor-pointer text-saddle-taupe hover:text-forest disabled:opacity-40 disabled:cursor-not-allowed transition-all duration-200 ease-in-out transform hover:scale-110" title="Undo">
-                      <%= inline_svg_tag "undo.svg", class: "h-5 w-5" %>
-                    </button>
-                    <button type="button" data-action="redo" class="flex items-center justify-center w-9 h-9 bg-transparent hover:bg-saddle-taupe/20 border-0 rounded-md cursor-pointer text-saddle-taupe hover:text-forest disabled:opacity-40 disabled:cursor-not-allowed transition-all duration-200 ease-in-out transform hover:scale-110 " title="Redo">
-                      <%= inline_svg_tag "redo.svg", class: "h-5 w-5" %>
-                    </button>
-                  </div>
-
-                  <div class="w-px h-8 bg-saddle-taupe/40 mx-2"></div>
-
-                  <!-- Text Formatting Group -->
-                  <div class="flex items-center gap-1 mr-2">
-                    <button type="button" data-action="bold" class="toolbar-btn flex items-center justify-center w-9 h-9 bg-transparent hover:bg-saddle-taupe/20 border-0 rounded-md cursor-pointer text-saddle-taupe hover:text-forest disabled:opacity-40 disabled:cursor-not-allowed transition-all duration-200 ease-in-out transform hover:scale-110 focus:text-forest" title="Bold">
-                      <%= inline_svg_tag "bold.svg", class: "h-5 w-5" %>
-                    </button>
-                    <button type="button" data-action="italic" class="toolbar-btn flex items-center justify-center w-9 h-9 bg-transparent hover:bg-saddle-taupe/20 border-0 rounded-md cursor-pointer text-saddle-taupe hover:text-forest disabled:opacity-40 disabled:cursor-not-allowed transition-all duration-200 ease-in-out transform hover:scale-110 " title="Italic">
-                      <%= inline_svg_tag "italic.svg", class: "h-5 w-5" %>
-                    </button>
-                    <button type="button" data-action="strike" class="toolbar-btn flex items-center justify-center w-9 h-9 bg-transparent hover:bg-saddle-taupe/20 border-0 rounded-md cursor-pointer text-saddle-taupe hover:text-forest disabled:opacity-40 disabled:cursor-not-allowed transition-all duration-200 ease-in-out transform hover:scale-110 " title="Strikethrough">
-                      <%= inline_svg_tag "strikethrough.svg", class: "h-5 w-5" %>
-                    </button>
-                    <button type="button" data-action="code" class="toolbar-btn flex items-center justify-center w-9 h-9 bg-transparent hover:bg-saddle-taupe/20 border-0 rounded-md cursor-pointer text-saddle-taupe hover:text-forest disabled:opacity-40 disabled:cursor-not-allowed transition-all duration-200 ease-in-out transform hover:scale-110 " title="Code">
-                      <%= inline_svg_tag "code.svg", class: "h-5 w-5" %>
-                    </button>
-                  </div>
-
-                  <div class="w-px h-8 bg-saddle-taupe/40 mx-2"></div>
-
-                  <!-- Lists Group -->
-                  <div class="flex items-center gap-1 mr-2">
-                    <button type="button" data-action="bulletList" class="toolbar-btn flex items-center justify-center w-9 h-9 bg-transparent hover:bg-saddle-taupe/20 border-0 rounded-md cursor-pointer text-saddle-taupe hover:text-forest disabled:opacity-40 disabled:cursor-not-allowed transition-all duration-200 ease-in-out transform hover:scale-110 " title="Bullet List">
-                      <%= inline_svg_tag "bulletlist.svg", class: "h-5 w-5" %>
-                    </button>
-                    <button type="button" data-action="orderedList" class="toolbar-btn flex items-center justify-center w-9 h-9 bg-transparent hover:bg-saddle-taupe/20 border-0 rounded-md cursor-pointer text-saddle-taupe hover:text-forest disabled:opacity-40 disabled:cursor-not-allowed transition-all duration-200 ease-in-out transform hover:scale-110 " title="Numbered List">
-                      <%= inline_svg_tag "numbered-list.svg", class: "h-5 w-5" %>
-                    </button>
-                  </div>
-
-                  <div class="w-px h-8 bg-saddle-taupe/40 mx-2"></div>
-
-                  <!-- Special Formatting Group -->
-                  <div class="flex items-center gap-1">
-                    <button type="button" data-action="blockquote" class="toolbar-btn flex items-center justify-center w-9 h-9 bg-transparent hover:bg-saddle-taupe/20 border-0 rounded-md cursor-pointer text-saddle-taupe hover:text-forest disabled:opacity-40 disabled:cursor-not-allowed transition-all duration-200 ease-in-out transform hover:scale-110 " title="Quote">
-                      <%= inline_svg_tag "quote.svg", class: "h-5 w-5" %>
-                    </button>
-                    <button type="button" data-action="codeBlock" class="toolbar-btn flex items-center justify-center w-9 h-9 bg-transparent hover:bg-saddle-taupe/20 border-0 rounded-md cursor-pointer text-saddle-taupe hover:text-forest disabled:opacity-40 disabled:cursor-not-allowed transition-all duration-200 ease-in-out transform hover:scale-110 " title="Code Block">
-                      <%= inline_svg_tag "code-block.svg", class: "h-5 w-5" %>
-                    </button>
-                  </div>
-                </div>
-                <div id="tiptap-editor-#{devlog.id}"
-                     data-tiptap-comment-target="editor"
-                     class="min-h-[120px] p-4 text-base focus:outline-none">
-                </div>
-              </div>
-              <%= f.hidden_field :rich_content, data: { tiptap_comment_target: "input" } %>
+              <%= f.text_area :content,
+                class: %{
+                  w-full p-2 border-2 border-som-bright focus:outline-none focus:border-som-dark text-base
+                  md:text-lg 2xl:text-xl rounded-md transition-colors
+                }.squish,
+                rows: 4, required: true %>
               <p class="text-xs md:text-sm text-vintage-red hidden" id="textError-#{devlog.id}" data-comment-modal-target="textError"></p>
             </div>
 
