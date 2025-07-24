@@ -146,8 +146,8 @@ class UsersController < ApplicationController
 
     Rails.cache.fetch(cache_key, expires_in: 1.hour) do
       # Get user's devlogs and projects with includes
+      # Include devlogs even if project is nil to allow proper handling in view
       devlogs = @user.devlogs.includes(:project, :user, :comments, :likes, :file_attachment)
-                            .where.not(project: nil)
                             .order(created_at: :desc)
 
       projects = @user.projects.includes(:user, :banner_attachment)

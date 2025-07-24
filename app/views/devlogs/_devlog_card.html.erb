@@ -60,7 +60,7 @@
 
               <!-- Time ago -->
               <span>
-                <% unless devlog.project && devlog.project.is_deleted %>
+                <% unless !devlog.project %>
                   <%= link_to "#{time_ago_in_words(devlog.created_at)} ago",
                       project_path(devlog.project, anchor: dom_id(devlog)),
                   target: "_blank",
