@@ -20,6 +20,9 @@
     <div class="justify-center flex">
       <%= render "verification_callout" unless current_verification_status == :verified %>
     </div>
+    <div class="justify-center flex mt-4">
+      <%= link_to "View My Orders", "/shop/orders", class: "bg-black text-white px-6 py-3 rounded-lg font-semibold text-lg hover:bg-gray-800 transition-all duration-200" %>
+    </div>
   <% end %>
 
   <% if @regionalization_enabled %>
