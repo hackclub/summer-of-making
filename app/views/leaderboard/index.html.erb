@@ -27,11 +27,23 @@
                 <%= link_to user.display_name, user_path(user), class: "font-semibold text-lg hover:underline" %>
               </div>
             </div>
-            <div class="flex-shrink-0 flex items-center gap-2">
+            <div class="flex-shrink-0 flex items-center gap-2 text-xl">
               <%= render_shells user.balance.round %>
             </div>
           </div>
         <% end %>
+        <div class="mt-8 text-center space-y-2">
+            <div class="text-lg font-semibold">Total users: <span class="font-bold text-blue-700"><%= number_with_delimiter(@total_users) %></span></div>
+          <div class="text-lg font-semibold flex items-center gap-2 justify-center">
+            <span>Out of those,</span>
+            <span class="font-bold text-red-700"><%= @banned_users %></span>
+            <span>have been banned for fraud, burning a total of</span>
+            <span class="flex items-center gap-1 font-bold text-orange-700">
+              <%= render_shells(@burned_amount.round(2)) %>
+            </span>
+            <span>shells.</span>
+          </div>
+        </div>
       </div>
     </div>
   <% end %>
