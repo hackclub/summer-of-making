@@ -8,6 +8,9 @@ class UsersController < ApplicationController
 
   def show
     authorize @user
+    if @user.is_banned?
+      redirect_to root_path, alert: "This user has been banned." and return
+    end
     @user.user_profile ||= @user.build_user_profile
 
     # All projects for the sidebar
