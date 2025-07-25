@@ -388,4 +388,6 @@ Rails.application.routes.draw do
       end
     end
   end
+
+  get "leaderboard", to: "leaderboard#index"
 end

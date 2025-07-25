@@ -1,0 +1,76 @@
+<div class="container mx-auto px-4 py-8 max-w-4xl">
+  <%= render "shared/card" do %>
+    <div class="space-y-6">
+      <h1 class="text-3xl font-bold text-center mb-4">Top 50 Users</h1>
+      <% if current_user %>
+        <p class="text-center text-gray-600">Your current position: <strong><%= @current_pos %></strong></p>
+      <% else %>
+        <p class="text-center text-gray-600">Log in to see your position on the leaderboard!</p>
+      <% end %>
+      <div class="divide-y divide-[#b39078]">
+        <% @users.each_with_index do |user, i| %>
+          <% row_bg = case i
+            when 0 then 'bg-gradient-to-r from-yellow-300 via-yellow-200 to-yellow-200'
+            when 1 then 'bg-gradient-to-r from-gray-300 via-gray-200 to-gray-200'
+            when 2 then 'bg-gradient-to-r from-orange-300 via-orange-200 to-orange-200'
+            else ''
+          end %>
+          <div class="flex items-center p-4 rounded-lg gap-4 <%= row_bg %>">
+            <div class="flex-shrink-0">
+              <%= link_to user_path(user) do %>
+                <img src="<%= user.avatar %>" alt="<%= user.display_name %>" class="w-12 h-12 rounded-lg shadow cursor-pointer hover:scale-105 transition-transform" loading="lazy">
+              <% end %>
+            </div>
+            <div class="flex-1 min-w-0">
+              <div class="flex items-center gap-2">
+                <span class="text-lg font-bold">#<%= i + 1 %></span>
+                <%= link_to user.display_name, user_path(user), class: "font-semibold text-lg hover:underline" %>
+              </div>
+            </div>
+            <div class="flex-shrink-0 flex items-center gap-2">
+              <%= render_shells user.balance.round %>
+            </div>
+          </div>
+        <% end %>
+      </div>
+    </div>
+  <% end %>
+
+  <hr class="my-8">
+  <%= render "shared/card" do %>
+    <div class="space-y-6">
+      <h1 class="text-3xl font-bold text-center mb-4">Top 25 Projects</h1>
+      <div class="divide-y divide-[#b39078]">
+        <% @projects.each_with_index do |project, i| %>
+          <% row_bg = case i
+            when 0 then 'bg-gradient-to-r from-yellow-300 via-yellow-200 to-yellow-200'
+            when 1 then 'bg-gradient-to-r from-gray-300 via-gray-200 to-gray-200'
+            when 2 then 'bg-gradient-to-r from-orange-300 via-orange-200 to-orange-200'
+            else ''
+          end %>
+          <div class="flex items-center p-4 rounded-lg gap-4 <%= row_bg %>">
+            <div class="flex-shrink-0">
+              <% if project.banner.attached? %>
+                <%= link_to project_path(project) do %>
+                  <%= image_tag project.banner, alt: project.title, class: "w-12 h-12 rounded-lg shadow cursor-pointer hover:scale-105 transition-transform object-cover", loading: "lazy" %>
+                <% end %>
+              <% else %>
+                <%= link_to project_path(project) do %>
+                  <div class="w-12 h-12 bg-gray-200 rounded-lg flex items-center justify-center">
+                    <span class="text-gray-400 text-xl">🚀</span>
+                  </div>
+                <% end %>
+              <% end %>
+            </div>
+            <div class="flex-1 min-w-0">
+              <div class="flex items-center gap-2">
+                <span class="text-lg font-bold">#<%= i + 1 %></span>
+                <%= link_to project.title, project_path(project), class: "font-semibold text-lg hover:underline" %>
+              </div>
+            </div>
+          </div>
+        <% end %>
+      </div>
+    </div>
+  <% end %>
+</div>
