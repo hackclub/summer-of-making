@@ -7,7 +7,7 @@
     <% if @projects.any? %>
       <% @projects.each do |project| %>
         <%= link_to project_path(project) do %>
-          <div class="bg-[#F3ECD8] rounded-2xl border-4 border-[#E4DCC6] transform hover:scale-[1.02] transition-transform duration-300 flex flex-col h-full">
+          <div class="bg-[#F3ECD8] rounded-2xl border-4 border-[#E4DCC6] transform hover:scale-[1.02] transition-transform duration-300 flex flex-col h-full <%= 'animate-bounce' if current_user.devlogs.empty? && current_user.projects.count == 1 %>">
             <% project_image = project.banner.attached? ? url_for(project.banner) : (project.devlogs.find { |u| u.file.attached? && u.file.image? }&.file&.then { |f| url_for(f) } || "https://hc-cdn.hel1.your-objectstorage.com/s/v3/42eb885e3ebc20bd5e94782b7b4bcb31bcc956d3_i.png") %>
             <div class="h-36 md:h-48 overflow-hidden relative">
               <img src="<%= project_image %>" alt="<%= project.title %>" class="w-full h-full object-cover rounded-xl" loading="lazy">
@@ -105,7 +105,7 @@
                 action: "click->modal#open",
                 modal_type: "create-project"
               },
-              classes: "mx-auto" %>
+              classes: "mx-auto animate-bounce #{'animate-bounce' if current_user.projects.empty?}" %>
         </div>
       <% end %>
     <% end %>

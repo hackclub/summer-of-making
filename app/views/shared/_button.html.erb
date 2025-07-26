@@ -11,6 +11,7 @@
 #    - type: A button type to pass into 'button_tag'. Defaults to ':button'.
 #    - fill_width: If 'true', the button will fill the entire width of its container.
 #    - disabled: If 'true', the button will be disabled.
+#    - class: Additional classes to apply to the button or link.
 %>
 
 <% raise "shared/button requires 'text' as a local" unless local_assigns[:text] %>
@@ -31,7 +32,7 @@
         else "som-button-primary"
     end
 
-    button_class = "#{button_base_class} #{'w-full' if fill_width} #{'disabled' if disabled}"
+    button_class = "#{button_base_class} #{'w-full' if fill_width} #{'disabled' if disabled} #{local_assigns[:classes]}".strip
 %>
 
 <% button_content = capture do %>

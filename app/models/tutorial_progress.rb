@@ -24,7 +24,7 @@ class TutorialProgress < ApplicationRecord
   belongs_to :user
 
   TUTORIAL_STEPS = %w[hackatime_connected identity_verified free_stickers_ordered].freeze
-  SOFT_TUTORIAL_STEPS = %w[campfire explore my_projects vote shop].freeze
+  SOFT_TUTORIAL_STEPS = %w[campfire explore my_projects vote shop todo].freeze
 
   after_initialize :setup_default_progress, if: :new_record?
 
