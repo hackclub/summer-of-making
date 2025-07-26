@@ -22,6 +22,8 @@
 #  fk_rails_...  (reviewer_id => users.id)
 #
 class ShipCertification < ApplicationRecord
+  has_paper_trail
+
   belongs_to :reviewer, class_name: "User", optional: true
   validates :reviewer, presence: true, unless: -> { pending? }
   belongs_to :project
