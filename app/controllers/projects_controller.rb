@@ -377,7 +377,7 @@ class ProjectsController < ApplicationController
       end
 
       case response.code.to_i
-      when 200..299
+      when 200..399
         render json: { valid: true }
       when 401, 403
         domain = uri.host
