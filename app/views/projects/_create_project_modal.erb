@@ -10,9 +10,10 @@
     </div>
 
     <div class="max-h-[calc(90vh-100px)] overflow-y-auto overflow-x-hidden">
-      <%= form_with model: Project.new, class: "p-3 md:p-6 mx-auto w-[calc(100%-2px)]", data: { controller: "project-form repo-autofill", action: "submit->project-form#validateForm" } do |f| %>
+      <%= form_with model: Project.new, class: "p-3 md:p-6 mx-auto w-[calc(100%-2px)]", data: { controller: "project-form repo-autofill" } do |f| %>
 
-        <div class="space-y-2 md:space-y-4">
+        <!-- Project Form Step -->
+        <div data-project-form-target="projectFormStep" class="space-y-2 md:space-y-4">
           <div class="mb-2 md:mb-4">
             <div class="tooltip-label-container">
               <%= f.label :title, class: "block text-sm" %>
@@ -241,11 +242,61 @@
           </p>
         </div>
 
+        <!-- Rules Step -->
+        <div data-project-form-target="rulesStep" class="hidden">
+          <div class="space-y-4 md:space-y-6">
+              <div class="text-center mb-6">
+                <h4 class="text-xl md:text-2xl font-bold mb-2">Final thing before creating your project!</h4>
+                <p class="text-gray-700">Please read through these rules and guidelines.</p>
+            </div>
+
+            <div class="space-y-4">
+              <div>
+                <h5 class="text-sm text-gray-700 mb-3">Here are some basic rules you must adhere to if you don't want to be caught by our fraud department:</h5>
+                <ul class="list-disc list-inside space-y-2 text-sm text-gray-700">
+                  <li>Don't copy or plagerise other projects</li>
+                  <li>Don't copy tutorials exactly, add some new features of your own</li>
+                  <li>Don't code more than 70% of your project using AI (ChatGPT, Copilot, etc)</li>
+                  <li>Don't abuse or automate Hackatime time tracking, manually or automatically</li>
+                  <li>Don't purposefully inflate time spent coding</li>
+                  <li>Don't vote randomly without reading the projects</li>
+                </ul>
+              </div>
+            </div>
+
+            <div class="border-t border-saddle-taupe border-opacity-30 pt-4">
+              <div class="flex items-start space-x-3">
+                <div class="flex-shrink-0 mt-1">
+                  <label class="flex items-start space-x-2 text-sm cursor-pointer">
+                    <div class="som-checkbox flex-shrink-0 mt-1">
+                      <%= f.checkbox :rules_confirmed, id: "rules_confirmation", class: "sr-only", data: { project_form_target: "rulesConfirmationCheckbox", action: "change->project-form#toggleRulesConfirmation" } %>
+                      <div data-project-form-target="rulesConfirmationCheckboxFake" class="hidden">
+                      </div>
+                    </div>
+                    <div class="flex-1 min-w-0">
+                      <span class="font-bold">I understand and agree to these rules and guidelines</span>
+                      <span class="text-vintage-red">*</span>
+                      <p class="text-xs text-gray-700 mt-1">Violation of these rules can lead to loss of shells or a ban from this program or sometimes from Hack Club.</p>
+                    </div>
+                  </label>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
         <div class="flex flex-row justify-end space-x-2 md:space-x-3 mt-3 md:mt-4">
-          <%= render "shared/button", text: "Cancel", data: { action: "modal#close" }, kind: :secondary %>
-          <%= render "shared/button", text: "Create Project", type: :submit %>
+          <%= render "shared/button", text: "Cancel", type: :button, data: { action: "click->modal#close click->project-form#resetForm" }, kind: :secondary %>
+          <div data-project-form-target="nextButton">
+            <%= render "shared/button", text: "Next", type: :button, data: { action: "click->project-form#showRules" }, kind: :primary %>
+          </div>
+          <div data-project-form-target="submitButton" class="hidden">
+            <%= render "shared/button", text: "Create Project", type: :button, data: { action: "click->project-form#submitProject" }, kind: :primary %>
+          </div>
         </div>
       <% end %>
     </div>
   <% end %>
 </div>
+
+

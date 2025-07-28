@@ -28,6 +28,12 @@ export default class extends Controller {
     "bannerDropText",
     "bannerTextContainer",
     "bannerOverlay",
+    "projectFormStep",
+    "rulesStep",
+    "rulesConfirmationCheckbox",
+    "rulesConfirmationCheckboxFake",
+    "nextButton",
+    "submitButton",
   ];
 
   connect() {
@@ -42,9 +48,10 @@ export default class extends Controller {
     }
   }
 
-  validateForm(event) {
-    this.clearErrors();
 
+
+  validateFormFields() {
+    this.clearErrors();
     let isValid = true;
 
     if (!this.titleTarget.value.trim()) {
@@ -56,8 +63,6 @@ export default class extends Controller {
       this.showError(this.descriptionErrorTarget, "Description is required");
       isValid = false;
     }
-
-
 
     if (this.hasYswsSubmissionCheckboxRealTarget && this.yswsSubmissionCheckboxRealTarget.checked) {
       if (this.hasYswsTypeTarget && !this.yswsTypeTarget.value) {
@@ -93,12 +98,89 @@ export default class extends Controller {
     });
 
     if (!isValid) {
-      event.preventDefault();
       const firstError = this.element.querySelector(".text-vintage-red");
       if (firstError) {
         firstError.scrollIntoView({ behavior: "smooth", block: "center" });
       }
     }
+
+    return isValid;
+  }
+
+  showRules(event) {
+    if (event) {
+      event.preventDefault();
+    }
+    
+    if (!this.validateFormFields()) {
+      return;
+    }
+
+    this.projectFormStepTarget.classList.add("hidden");
+    this.rulesStepTarget.classList.remove("hidden");
+    
+    this.nextButtonTarget.classList.add("hidden");
+    this.submitButtonTarget.classList.remove("hidden");
+  }
+
+  toggleRulesConfirmation() {
+    const checked = this.rulesConfirmationCheckboxTarget.checked;
+    const checkboxContainer = this.rulesConfirmationCheckboxFakeTarget.parentElement;
+
+    if (checked) {
+      this.rulesConfirmationCheckboxFakeTarget.classList.remove("hidden");
+      checkboxContainer.classList.add("checked");
+    } else {
+      this.rulesConfirmationCheckboxFakeTarget.classList.add("hidden");
+      checkboxContainer.classList.remove("checked");
+    }
+  }
+
+  validateForm(event) {
+    if (!this.validateFormFields()) {
+      event.preventDefault();
+      return;
+    }
+
+    if (this.hasProjectFormStepTarget && !this.projectFormStepTarget.classList.contains("hidden")) {
+      event.preventDefault();
+      this.showRules();
+      return;
+    }
+  }
+
+  resetForm(event) {
+    if (event) {
+      event.preventDefault();
+    }
+    
+    if (this.hasRulesConfirmationCheckboxTarget) {
+      this.rulesConfirmationCheckboxTarget.checked = false;
+      if (this.hasRulesConfirmationCheckboxFakeTarget) {
+        this.rulesConfirmationCheckboxFakeTarget.classList.add("hidden");
+        const checkboxContainer = this.rulesConfirmationCheckboxFakeTarget.parentElement;
+        checkboxContainer.classList.remove("checked");
+      }
+    }
+
+    if (this.hasProjectFormStepTarget && this.hasRulesStepTarget) {
+      this.projectFormStepTarget.classList.remove("hidden");
+      this.rulesStepTarget.classList.add("hidden");
+    }
+
+    if (this.hasNextButtonTarget && this.hasSubmitButtonTarget) {
+      this.nextButtonTarget.classList.remove("hidden");
+      this.submitButtonTarget.classList.add("hidden");
+    }
+  }
+
+  submitProject() {
+    if (!this.rulesConfirmationCheckboxTarget.checked) {
+      alert("You must agree to the rules and guidelines before proceeding.");
+      return;
+    }
+
+    this.element.submit();
   }
 
   isValidUrl(string) {
@@ -196,9 +278,6 @@ export default class extends Controller {
   toggleUsedAiCheck() {
     const checked = this.usedAiCheckboxRealTarget.checked;
     const checkboxContainer = this.usedAiCheckboxFakeTarget.parentElement;
-
-    console.log("Checkbox checked:", checked);
-    console.log("Checkbox value:", this.usedAiCheckboxRealTarget.value);
 
     if (checked) {
       this.usedAiCheckboxFakeTarget.classList.remove("hidden");
