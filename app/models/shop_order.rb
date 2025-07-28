@@ -47,12 +47,12 @@ class ShopOrder < ApplicationRecord
   has_many :payouts, as: :payable, dependent: :destroy
   belongs_to :shop_card_grant, optional: true
 
-  validates :quantity, presence: true, numericality: { greater_than: 0 }
-  validate :check_one_per_person_ever_limit
-  validate :check_max_quantity_limit
-  validate :check_black_market_access
+  validates :quantity, presence: true, numericality: { greater_than: 0 }, on: :create
+  validate :check_one_per_person_ever_limit, on: :create
+  validate :check_max_quantity_limit, on: :create
+  validate :check_black_market_access, on: :create
   validate :check_user_balance, on: :create
-  validate :check_regional_availability
+  validate :check_regional_availability, on: :create
   validate :check_badge, on: :create
   after_create :create_negative_payout
   before_create :set_initial_state_for_free_stickers
