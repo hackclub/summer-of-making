@@ -169,6 +169,7 @@ class Project < ApplicationRecord
     fixit: "FIX IT!",
     twist: "Twist",
     reality: "Reality",
+    endpointer: "Endpointer",
     other: "Other"
   }
 
