@@ -22,7 +22,7 @@ class OneTime::BackfillShopOrderPhoneNumbersJob < ApplicationJob
           # Update the frozen_address to include the phone number
           updated_address = order.frozen_address.merge("phone_number" => phone_number)
           order.update_column(:frozen_address, updated_address)
-          
+
           Rails.logger.info "Updated order #{order.id} with phone number"
         else
           Rails.logger.info "No phone number found for user #{order.user.id} (order #{order.id})"
