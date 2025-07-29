@@ -10,6 +10,7 @@
 #  user_agent :string
 #  created_at :datetime         not null
 #  updated_at :datetime         not null
+#  slack_id   :string
 #
 # Indexes
 #
