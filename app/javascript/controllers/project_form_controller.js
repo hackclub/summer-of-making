@@ -34,6 +34,7 @@ export default class extends Controller {
     "rulesConfirmationCheckboxFake",
     "nextButton",
     "submitButton",
+    "createButton",
   ];
 
   connect() {
@@ -123,16 +124,22 @@ export default class extends Controller {
     this.submitButtonTarget.classList.remove("hidden");
   }
 
-  toggleRulesConfirmation() {
-    const checked = this.rulesConfirmationCheckboxTarget.checked;
+  toggleRulesConfirmation(event) {
+    const isChecked = event.target.checked;
     const checkboxContainer = this.rulesConfirmationCheckboxFakeTarget.parentElement;
 
-    if (checked) {
+    if (isChecked) {
       this.rulesConfirmationCheckboxFakeTarget.classList.remove("hidden");
       checkboxContainer.classList.add("checked");
+      if (this.hasCreateButtonTarget) {
+        this.createButtonTarget.disabled = false;
+      }
     } else {
       this.rulesConfirmationCheckboxFakeTarget.classList.add("hidden");
       checkboxContainer.classList.remove("checked");
+      if (this.hasCreateButtonTarget) {
+        this.createButtonTarget.disabled = true;
+      }
     }
   }
 
@@ -174,8 +181,9 @@ export default class extends Controller {
     }
   }
 
-  submitProject() {
+  submitProject(event) {
     if (!this.rulesConfirmationCheckboxTarget.checked) {
+      event.preventDefault();
       alert("You must agree to the rules and guidelines before proceeding.");
       return;
     }

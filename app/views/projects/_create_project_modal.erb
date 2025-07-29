@@ -3,7 +3,7 @@
     <div class="p-3 md:p-6 border-b border-saddle-taupe border-opacity-30">
       <div class="flex justify-between items-center">
         <h3 class="text-lg md:text-2xl">Create New Project</h3>
-        <button type="button" class="text-gray-600 hover:text-vintage-red cursor-pointer" data-action="click->modal#close">
+        <button type="button" class="hover:text-vintage-red cursor-pointer" data-action="click->modal#close">
           <%= inline_svg "icons/close.svg", class: "h-6 w-6 2xl:h-8 2xl:w-8" %>
         </button>
       </div>
@@ -56,28 +56,28 @@
           </style> -->
 
           <div class="mb-6 md:mb-12">
-            <div class="tooltip-label-container">
-              <%= f.label :banner, class: "block text-sm" %>
-                <div class="tooltip">
-                  <span class="question-mark">?</span>
-                  <span class="tooltiptext">An image showing your project (not your code).</span>
-                </div>
-            </div>
-            <div class="relative">
-                <div class="h-32 sm:h-40 w-full rounded-lg border-2 border-dashed border-saddle-taupe hover:border-forest transition-colors cursor-pointer relative overflow-hidden group bg-[#FFEAD0]"
-                    onclick="document.getElementById('banner').click()"
-                    data-project-form-target="bannerDropZone"
-                    data-action="dragover->project-form#handleDragOver dragleave->project-form#handleDragLeave drop->project-form#handleDrop">
-                    <img id="banner-preview" class="absolute inset-0 w-full h-full object-cover hidden" alt="Banner preview" data-project-form-target="bannerPreview">
-                  <div class="absolute inset-0 group-hover:bg-[#F3ECD8]/75 transition-all duration-200 flex items-center justify-center" data-project-form-target="bannerOverlay">
-                    <div class="som-button-primary bg-opacity-90 opacity-0 group-hover:opacity-100 transition-opacity duration-200" data-project-form-target="bannerTextContainer">
-                      <p class="" data-project-form-target="bannerDropText">Upload a banner</p>
-                    </div>
-                  </div>
-                </div>
-              <%= f.file_field :banner, id: "banner", class: "hidden", accept: "image/*", data: { project_form_target: "bannerInput", action: "change->project-form#updateBannerPreview" } %>
+          <div class="tooltip-label-container">
+            <%= f.label :banner, class: "block text-sm" %>
+            <div class="tooltip">
+              <span class="question-mark">?</span>
+              <span class="tooltiptext">An image showing your project (not your code).</span>
             </div>
           </div>
+          <div class="relative">
+            <div class="h-32 sm:h-40 w-full rounded-lg border-2 border-dashed border-saddle-taupe hover:border-forest transition-colors cursor-pointer relative overflow-hidden group bg-[#FFEAD0]"
+              onclick="document.getElementById('banner').click()"
+              data-project-form-target="bannerDropZone"
+              data-action="dragover->project-form#handleDragOver dragleave->project-form#handleDragLeave drop->project-form#handleDrop">
+              <img id="banner-preview" class="absolute inset-0 w-full h-full object-cover hidden" alt="Banner preview" data-project-form-target="bannerPreview">
+              <div class="absolute inset-0 group-hover:bg-[#F3ECD8]/75 transition-all duration-200 flex items-center justify-center" data-project-form-target="bannerOverlay">
+                <div class="som-button-primary bg-opacity-90 opacity-0 group-hover:opacity-100 transition-opacity duration-200" data-project-form-target="bannerTextContainer">
+                  <p class="" data-project-form-target="bannerDropText">Upload a banner</p>
+                </div>
+              </div>
+            </div>
+            <%= f.file_field :banner, id: "banner", class: "hidden", accept: "image/*", data: { project_form_target: "bannerInput", action: "change->project-form#updateBannerPreview" } %>
+          </div>
+        </div>
 
           <!-- YSWS Submission Section -->
           <div class="mb-3 md:mb-6">
@@ -85,9 +85,7 @@
               <label class="flex items-center space-x-2 text-sm cursor-pointer">
                 <div class="som-checkbox">
                   <%= f.checkbox :ysws_submission, id: "ysws_submission", class: "sr-only", data: { project_form_target: "yswsSubmissionCheckboxReal", action: "change->project-form#toggleYswsSubmission" } %>
-                  <div data-project-form-target="yswsSubmissionCheckboxFake" class="hidden">
-                    <%= inline_svg_tag "check.svg", class: "h-3 w-3 text-white" %>
-                  </div>
+                  <div data-project-form-target="yswsSubmissionCheckboxFake" class="hidden"></div>
                 </div>
                 <span>Are you submitting this to a YSWS program?</span>
               </label>
@@ -123,9 +121,7 @@
               <label class="flex items-center space-x-2 text-sm cursor-pointer">
                 <div class="som-checkbox">
                   <%= f.checkbox :used_ai, id: "used_ai", class: "sr-only", data: { project_form_target: "usedAiCheckboxReal", action: "change->project-form#toggleUsedAiCheck" } %>
-                  <div data-project-form-target="usedAiCheckboxFake" class="hidden">
-                    <%= inline_svg_tag "check.svg", class: "h-3 w-3 text-white" %>
-                  </div>
+                  <div data-project-form-target="usedAiCheckboxFake" class="hidden"></div>
                 </div>
                 <span>AI helped me build this (AI is allowed if you're transparent about it!)</span>
               </label>
@@ -134,7 +130,6 @@
                 <span class="tooltiptext">You need to check this if more than 30% of you code, READMEs, art, or any other part of your project was made with the help of Copilot, ChatGPT, Claude, Gemini, or any other kind of AI</span>
               </div>
             </div>
-
             <p class="mt-1 text-xs md:text-sm text-vintage-red hidden" id="repoError" data-project-form-target="repoError"></p>
           </div>
 
@@ -245,23 +240,20 @@
         <!-- Rules Step -->
         <div data-project-form-target="rulesStep" class="hidden">
           <div class="space-y-4 md:space-y-6">
-              <div class="text-center mb-6">
-                <h4 class="text-xl md:text-2xl font-bold mb-2">Final thing before creating your project!</h4>
-                <p class="text-gray-700">Please read through these rules and guidelines.</p>
+            <div class="text-center mb-6">
+              <h4 class="text-xl md:text-2xl font-bold mb-2">Final thing before creating your project!</h4>
+              <p>Please read through these rules and guidelines.</p>
             </div>
 
             <div class="space-y-4">
-              <div>
-                <h5 class="text-sm text-gray-700 mb-3">Here are some basic rules you must adhere to if you don't want to be caught by our fraud department:</h5>
-                <ul class="list-disc list-inside space-y-2 text-sm text-gray-700">
-                  <li>Don't copy or plagerise other projects</li>
-                  <li>Don't copy tutorials exactly, add some new features of your own</li>
-                  <li>Don't code more than 70% of your project using AI (ChatGPT, Copilot, etc)</li>
-                  <li>Don't abuse or automate Hackatime time tracking, manually or automatically</li>
-                  <li>Don't purposefully inflate time spent coding</li>
-                  <li>Don't vote randomly without reading the projects</li>
-                </ul>
-              </div>
+              <h5 class="text-sm mb-3">Here are some basic rules you must adhere to if you don't want to be caught by our fraud department:</h5>
+              <ul class="list-disc list-inside space-y-2 text-sm">
+                <li>Don't copy or plagerise other projects</li>
+                <li>Don't copy tutorials exactly, add some new features of your own</li>
+                <li>Don't abuse or automate Hackatime time tracking, manually or automatically</li>
+                <li>Don't purposefully inflate time spent coding</li>
+                <li>Don't vote randomly without reading the projects</li>
+              </ul>
             </div>
 
             <div class="border-t border-saddle-taupe border-opacity-30 pt-4">
@@ -269,14 +261,13 @@
                 <div class="flex-shrink-0 mt-1">
                   <label class="flex items-start space-x-2 text-sm cursor-pointer">
                     <div class="som-checkbox flex-shrink-0 mt-1">
-                      <%= f.checkbox :rules_confirmed, id: "rules_confirmation", class: "sr-only", data: { project_form_target: "rulesConfirmationCheckbox", action: "change->project-form#toggleRulesConfirmation" } %>
-                      <div data-project-form-target="rulesConfirmationCheckboxFake" class="hidden">
-                      </div>
+                      <%= f.checkbox :rules_confirmed, id: "rules_confirmation", required: true, class: "sr-only", data: { project_form_target: "rulesConfirmationCheckbox", action: "change->project-form#toggleRulesConfirmation" } %>
+                      <div data-project-form-target="rulesConfirmationCheckboxFake" class="hidden"></div>
                     </div>
                     <div class="flex-1 min-w-0">
                       <span class="font-bold">I understand and agree to these rules and guidelines</span>
                       <span class="text-vintage-red">*</span>
-                      <p class="text-xs text-gray-700 mt-1">Violation of these rules can lead to loss of shells or a ban from this program or sometimes from Hack Club.</p>
+                      <p class="text-xs mt-1">Violation of these rules can lead to loss of shells or a ban from this program or sometimes from Hack Club.</p>
                     </div>
                   </label>
                 </div>
@@ -291,7 +282,7 @@
             <%= render "shared/button", text: "Next", type: :button, data: { action: "click->project-form#showRules" }, kind: :primary %>
           </div>
           <div data-project-form-target="submitButton" class="hidden">
-            <%= render "shared/button", text: "Create Project", type: :button, data: { action: "click->project-form#submitProject" }, kind: :primary %>
+            <%= render "shared/button", text: "Create Project", type: :button, data: { project_form_target: "createButton", action: "click->project-form#submitProject" }, kind: :primary %>
           </div>
         </div>
       <% end %>
