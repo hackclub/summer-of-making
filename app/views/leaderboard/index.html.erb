@@ -33,7 +33,15 @@
           </div>
         <% end %>
         <div class="mt-8 text-center space-y-2">
-            <div class="text-lg font-semibold">Total users: <span class="font-bold text-blue-700"><%= number_with_delimiter(@total_users) %></span></div>
+          <div class="text-lg font-semibold flex items-center gap-2 justify-center">
+            <span>There are a total of</span>
+            <span class="font-bold text-blue-700"><%= number_with_delimiter(@total_users) %></span>
+            <span>users holding</span>
+            <span class="flex items-center gap-1 font-bold text-blue-700">
+              <%= render_shells(@marketcap.round(2)) %>
+            </span>
+            <span>shells.</span>
+          </div>
           <div class="text-lg font-semibold flex items-center gap-2 justify-center">
             <span>Out of those,</span>
             <span class="font-bold text-red-700"><%= @banned_users %></span>

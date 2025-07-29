@@ -17,5 +17,6 @@ class LeaderboardController < ApplicationController
     @total_users = User.count
     @banned_users = User.where(is_banned: true).count
     @burned_amount = Payout.where(user_id: User.where(is_banned: true).select(:id)).where("amount > 0").sum(:amount)
+    @marketcap = User.where(is_banned: false).joins(:payouts).group(:id).sum("payouts.amount").values.sum
   end
 end
