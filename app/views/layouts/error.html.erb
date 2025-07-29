@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html class="min-h-screen">
+<html class="min-h-[100dvh]">
   <head>
     <title><%= content_for(:title) || "Journey" %></title>
     <meta name="viewport" content="width=device-width,initial-scale=1">
@@ -16,7 +16,7 @@
     <%= javascript_importmap_tags %>
   </head>
 
-  <body class="min-h-screen bg-warm tracking-wider flex flex-col items-center justify-center">
+  <body class="min-h-[100dvh] bg-warm tracking-wider flex flex-col items-center justify-center">
     <div class="w-full max-w-2xl">
       <%= yield %>
     </div>

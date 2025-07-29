@@ -59,7 +59,7 @@
     <% end %>
   </head>
 
-  <body class="min-h-screen font-national-park font-bold text-som-dark">
+  <body class="min-h-[100dvh] font-national-park font-bold text-som-dark">
     <%# admin_tool do %>
       <%# render "shared/stonk_tickler_marquee" %>
     <%# end %>
@@ -76,7 +76,7 @@
         <% else %>
           <div data-controller="sidebar" data-sidebar-collapsed-value="false">
             <% if mobile_device? %>
-              <div class="flex flex-col h-screen box-border p-0">
+              <div class="flex flex-col h-[100dvh] box-border p-0">
                 <main class="py-4 px-0 sm:px-4 overflow-y-scroll flex-grow flex-shrink">
                   <div id="flash-container">
                     <%= render "shared/flash" %>
@@ -86,7 +86,7 @@
                 <%= render "shared/mobile_nav" %>
               </div>
             <% else %>
-              <div class="flex flex-col h-screen box-border p-0">
+              <div class="flex flex-col h-[100dvh] box-border p-0">
                 <% if !current_user.has_hackatime? && !current_user.tutorial_progress.completed_at.nil? %>
                   <div class="w-full bg-vintage-red text-white flex flex-col justify-center py-2">
                     <p class="text-center">
