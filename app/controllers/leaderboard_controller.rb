@@ -1,14 +1,15 @@
 class LeaderboardController < ApplicationController
   before_action :authenticate_user!, except: [ :index ]
   def index
-    @users = User.order(Arel.sql("COALESCE((SELECT SUM(amount) FROM payouts WHERE payouts.user_id = users.id), 0) DESC")).limit(50)
+    @users = User.where(is_banned: false)
+                 .order(Arel.sql("COALESCE((SELECT SUM(amount) FROM payouts WHERE payouts.user_id = users.id), 0) DESC"))
+                 .limit(50)
 
     if current_user
       current_shells = current_user.balance
-      @current_pos = User.where(
-        Arel.sql("COALESCE((SELECT SUM(amount) FROM payouts WHERE payouts.user_id = users.id), 0) > ?"),
-        current_shells
-      ).count + 1
+      @current_pos = User.where(is_banned: false)
+        .where(Arel.sql("COALESCE((SELECT SUM(amount) FROM payouts WHERE payouts.user_id = users.id), 0) > ?"), current_shells)
+        .count + 1
     end
 
     @projects = Project.order(rating: :desc).limit(25)
