@@ -54,6 +54,13 @@ class CampfireController < ApplicationController
   end
 
   def hackatime_status
+    unless current_user
+      render json: {
+        error: true,
+        error_message: "not logged in"
+      }, status: :unauthorized and return
+    end
+
     # Build dashboard data if hackatime is set up
     dashboard_data = nil
     if current_user.has_hackatime? && current_user.user_hackatime_data.present?
