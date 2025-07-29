@@ -145,89 +145,41 @@ module Admin
     end
 
     def get_stats
-      pending_avg = scope.where.not(awaiting_periodical_fulfillment_at: nil)
-                         .average("EXTRACT(EPOCH FROM awaiting_periodical_fulfillment_at - shop_orders.created_at)")
+      r = params[:stats_range] == "all" ? nil : 1.week.ago
+      b = scope
+      b = b.joins(:shop_item).where.not(shop_items: { type: "ShopItem::FreeStickers" }) unless params[:show_free_stickers] == "true"
+      b = r ? b.where("shop_orders.created_at >= ?", r) : b
 
-      fulfill_avg = scope.where(aasm_state: "fulfilled")
-                         .where.not(awaiting_periodical_fulfillment_at: nil)
-                         .where.not(fulfilled_at: nil)
-                         .average("EXTRACT(EPOCH FROM fulfilled_at - awaiting_periodical_fulfillment_at)")
-
-      @pending_secs = pending_avg&.to_i
-      @fulfill_secs = fulfill_avg&.to_i
-
-      week = scope.where("shop_orders.created_at >= ?", 1.week.ago)
-
-      pending_week = week.where.not(awaiting_periodical_fulfillment_at: nil)
-                         .average("EXTRACT(EPOCH FROM awaiting_periodical_fulfillment_at - shop_orders.created_at)")
-
-      fulfill_week = week.where(aasm_state: "fulfilled")
-                         .where.not(awaiting_periodical_fulfillment_at: nil)
-                         .where.not(fulfilled_at: nil)
-                         .average("EXTRACT(EPOCH FROM fulfilled_at - awaiting_periodical_fulfillment_at)")
-
-      @pending_secs_week = pending_week&.to_i
-      @fulfill_secs_week = fulfill_week&.to_i
-
-      last100 = scope.order("shop_orders.created_at DESC").limit(100)
-
-      pending_100 = last100.where.not(awaiting_periodical_fulfillment_at: nil)
-                           .average("EXTRACT(EPOCH FROM awaiting_periodical_fulfillment_at - shop_orders.created_at)")
-
-      fulfill_100 = last100.where(aasm_state: "fulfilled")
-                           .where.not(awaiting_periodical_fulfillment_at: nil)
-                           .where.not(fulfilled_at: nil)
-                           .average("EXTRACT(EPOCH FROM fulfilled_at - awaiting_periodical_fulfillment_at)")
-
-      @pending_secs_100 = pending_100&.to_i
-      @fulfill_secs_100 = fulfill_100&.to_i
-
-      base = scope
-      unless params[:show_free_stickers] == "true"
-        base = base.joins(:shop_item).where.not(shop_items: { type: "ShopItem::FreeStickers" })
-      end
-
-      @counts = {
-        pending: base.where(aasm_state: "pending").count,
-        awaiting_fulfillment: base.where(aasm_state: "awaiting_periodical_fulfillment").count,
-        fulfilled: base.where(aasm_state: "fulfilled").count,
-        rejected: base.where(aasm_state: "rejected").count
+      @c = {
+        pending: b.where(aasm_state: "pending").count,
+        awaiting_fulfillment: b.where(aasm_state: "awaiting_periodical_fulfillment").count,
+        fulfilled: b.where(aasm_state: "fulfilled").count,
+        rejected: b.where(aasm_state: "rejected").count
       }
+      @c[:in_verification_limbo] = b.where(aasm_state: "in_verification_limbo").count if params[:show_free_stickers] == "true"
 
-      week_base = base.where("shop_orders.created_at >= ?", 1.week.ago)
-      @counts_week = {
-        pending: week_base.where(aasm_state: "pending").count,
-        awaiting_fulfillment: week_base.where(aasm_state: "awaiting_periodical_fulfillment").count,
-        fulfilled: week_base.where(aasm_state: "fulfilled").count,
-        rejected: week_base.where(aasm_state: "rejected").count
-      }
+      mf = b.joins(:shop_item)
+            .where(shop_items: { type: ShopItem::MANUAL_FULFILLMENT_TYPES.map(&:name) })
+            .where(aasm_state: "fulfilled")
+            .where.not(fulfilled_at: nil)
+            .where.not(awaiting_periodical_fulfillment_at: nil)
 
-      last100_base = base.order("shop_orders.created_at DESC").limit(100)
-      last100_ids = last100_base.pluck(:id)
-      last100_subset = base.where(id: last100_ids)
-
-      @counts_100 = {
-        pending: last100_subset.where(aasm_state: "pending").count,
-        awaiting_fulfillment: last100_subset.where(aasm_state: "awaiting_periodical_fulfillment").count,
-        fulfilled: last100_subset.where(aasm_state: "fulfilled").count,
-        rejected: last100_subset.where(aasm_state: "rejected").count
-      }
-
-      if params[:show_free_stickers] == "true"
-        @counts[:in_verification_limbo] = base.where(aasm_state: "in_verification_limbo").count
-        @counts_week[:in_verification_limbo] = week_base.where(aasm_state: "in_verification_limbo").count
-        @counts_100[:in_verification_limbo] = last100_subset.where(aasm_state: "in_verification_limbo").count
-      end
+      @f = mf.average("EXTRACT(EPOCH FROM fulfilled_at - shop_orders.created_at)")&.to_i
+      @a = b.where.not(awaiting_periodical_fulfillment_at: nil)
+            .average("EXTRACT(EPOCH FROM awaiting_periodical_fulfillment_at - shop_orders.created_at)")&.to_i
+      @d = b.where(aasm_state: "fulfilled")
+            .where.not(awaiting_periodical_fulfillment_at: nil)
+            .where.not(fulfilled_at: nil)
+            .average("EXTRACT(EPOCH FROM fulfilled_at - awaiting_periodical_fulfillment_at)")&.to_i
     end
 
-    def format_duration(seconds)
-      return "--:--:--" unless seconds
-
-      hours = seconds / 3600
-      minutes = (seconds % 3600) / 60
-      secs = seconds % 60
+    def dur(sec)
+      return "--:--:--" unless sec
+      hours = sec / 3600
+      minutes = (sec % 3600) / 60
+      secs = sec % 60
       sprintf("%02d:%02d:%02d", hours, minutes, secs)
     end
-    helper_method :format_duration
+    helper_method :dur
   end
 end

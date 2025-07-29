@@ -3,86 +3,40 @@
 
 <div style="margin-bottom: 2em; padding: 1em; background: var(--color-darker); border-radius: 8px;">
   <div style="margin-bottom: 1.5em;">
-    <strong style="color: var(--color-text); display: block; margin-bottom: 0.5em;font-size: 1.2em;">by the numbers: <% if params[:show_free_stickers] == "true" %><span>with free stickers</span><% end %></strong>
-
-    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.5em;">
+    <strong style="color: var(--color-text); display: block; margin-bottom: 0.5em;font-size: 1.2em;">
+      are ya winning son?
+      <% if params[:show_free_stickers] == "true" %><span>+stickers</span><% end %>
+      <span style="margin-left: 1em;">
+        <%= link_to((params[:stats_range] == 'all' ? 'how about the past week?' : 'how about all time?'), params.permit!.merge(stats_range: (params[:stats_range] == 'all' ? nil : 'all')), class: 'abtn secondary small', style: 'margin-left: 1em;') %>
+      </span>
+    </strong>
+    <div style="display: flex; flex-wrap: wrap; gap: 0.5em; align-items: center; margin-bottom: 1.5em;">
+      <span class="pill pill-yellow">pending: <%= @c[:pending] %></span>
+      <span class="pill pill-blue">awaiting fulfillment: <%= @c[:awaiting_fulfillment] %></span>
+      <span class="pill pill-green">fulfilled: <%= @c[:fulfilled] %></span>
+      <span class="pill pill-red">rejected: <%= @c[:rejected] %></span>
+      <% if params[:show_free_stickers] == "true" && @c[:in_verification_limbo] %>
+        <span class="pill pill-gray">idv limbo: <%= @c[:in_verification_limbo] %></span>
+      <% end %>
+    </div>
+    <div style="display: flex; align-items: flex-end; gap: 2em;">
       <div>
-        <h4 style="color: var(--color-text); margin: 0 0 0.5em 0; font-size: 0.9em;">all time:</h4>
-        <div style="display: flex; flex-wrap: wrap; gap: 0.5em; align-items: center; margin-bottom: 1em;">
-          <span class="pill pill-yellow">pending: <%= @counts[:pending] %></span>
-          <span class="pill pill-blue">awaiting fulfillment: <%= @counts[:awaiting_fulfillment] %></span>
-          <span class="pill pill-green">fulfilled: <%= @counts[:fulfilled] %></span>
-          <span class="pill pill-red">rejected: <%= @counts[:rejected] %></span>
-          <% if params[:show_free_stickers] == "true" %>
-            <span class="pill pill-gray">idv limbo: <%= @counts[:in_verification_limbo] %></span>
-          <% end %>
-        </div>
-        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1em;">
-          <div>
-            <strong style="color: var(--color-text); font-size: 0.8em;">avg time until approved:</strong><br>
-            <span style="font-family: monospace; font-weight: bold; font-size: 1.7em; color: <%= @pending_secs && @pending_secs > 172800 ? '#ff6b6b' : 'white' %>;">
-              <%= format_duration(@pending_secs) %>
-            </span>
-          </div>
-          <div>
-            <strong style="color: var(--color-text); font-size: 0.8em;">avg time until fulfilled:</strong><br>
-            <span style="font-family: monospace; font-weight: bold; font-size: 1.7em; color: <%= @fulfill_secs && @fulfill_secs > 172800 ? '#ff6b6b' : 'white' %>;">
-              <%= format_duration(@fulfill_secs) %>
-            </span>
-          </div>
+        <div style="font-size: 0.9em; color: var(--color-text); margin-bottom: 0.2em;">avg time from order to fulfilled</div>
+        <div style="font-family: monospace; font-weight: bold; font-size: 2.5em; color: <%= @f && @f > 172800 ? '#ff6b6b' : 'white' %>;">
+          <%= dur(@f) %>
         </div>
       </div>
-
-      <div>
-        <h4 style="color: var(--color-text); margin: 0 0 0.5em 0; font-size: 0.9em;">past week:</h4>
-        <div style="display: flex; flex-wrap: wrap; gap: 0.5em; align-items: center; margin-bottom: 1em;">
-          <span class="pill pill-yellow">pending: <%= @counts_week[:pending] %></span>
-          <span class="pill pill-blue">awaiting fulfillment: <%= @counts_week[:awaiting_fulfillment] %></span>
-          <span class="pill pill-green">fulfilled: <%= @counts_week[:fulfilled] %></span>
-          <span class="pill pill-red">rejected: <%= @counts_week[:rejected] %></span>
-          <% if params[:show_free_stickers] == "true" %>
-            <span class="pill pill-gray">idv limbo: <%= @counts_week[:in_verification_limbo] %></span>
-          <% end %>
-        </div>
-        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1em;">
-          <div>
-            <strong style="color: var(--color-text); font-size: 0.8em;">avg time until approved:</strong><br>
-            <span style="font-family: monospace; font-weight: bold; font-size: 1.7em; color: <%= @pending_secs_week && @pending_secs_week > 172800 ? '#ff6b6b' : 'white' %>;">
-              <%= format_duration(@pending_secs_week) %>
-            </span>
-          </div>
-          <div>
-            <strong style="color: var(--color-text); font-size: 0.8em;">avg time until fulfilled:</strong><br>
-            <span style="font-family: monospace; font-weight: bold; font-size: 1.7em; color: <%= @fulfill_secs_week && @fulfill_secs_week > 172800 ? '#ff6b6b' : 'white' %>;">
-              <%= format_duration(@fulfill_secs_week) %>
-            </span>
+      <div style="display: flex; flex-direction: column; gap: 1em;">
+        <div>
+          <div style="font-size: 0.8em; color: var(--color-text);">avg time to approval (aka fraud check)</div>
+          <div style="font-family: monospace; font-weight: bold; font-size: 1.3em; color: <%= @a && @a > 172800 ? '#ff6b6b' : 'white' %>;">
+            <%= dur(@a) %>
           </div>
         </div>
-      </div>
-
-      <div>
-        <h4 style="color: var(--color-text); margin: 0 0 0.5em 0; font-size: 0.9em;">last 100 orders:</h4>
-        <div style="display: flex; flex-wrap: wrap; gap: 0.5em; align-items: center; margin-bottom: 1em;">
-          <span class="pill pill-yellow">pending: <%= @counts_100[:pending] %></span>
-          <span class="pill pill-blue">awaiting fulfillment: <%= @counts_100[:awaiting_fulfillment] %></span>
-          <span class="pill pill-green">fulfilled: <%= @counts_100[:fulfilled] %></span>
-          <span class="pill pill-red">rejected: <%= @counts_100[:rejected] %></span>
-          <% if params[:show_free_stickers] == "true" %>
-            <span class="pill pill-gray">idv limbo: <%= @counts_100[:in_verification_limbo] %></span>
-          <% end %>
-        </div>
-        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1em;">
-          <div>
-            <strong style="color: var(--color-text); font-size: 0.8em;">avg time until approved:</strong><br>
-            <span style="font-family: monospace; font-weight: bold; font-size: 1.7em; color: <%= @pending_secs_100 && @pending_secs_100 > 172800 ? '#ff6b6b' : 'white' %>;">
-              <%= format_duration(@pending_secs_100) %>
-            </span>
-          </div>
-          <div>
-            <strong style="color: var(--color-text); font-size: 0.8em;">avg time until fulfilled:</strong><br>
-            <span style="font-family: monospace; font-weight: bold; font-size: 1.7em; color: <%= @fulfill_secs_100 && @fulfill_secs_100 > 172800 ? '#ff6b6b' : 'white' %>;">
-              <%= format_duration(@fulfill_secs_100) %>
-            </span>
+        <div>
+          <div style="font-size: 0.8em; color: var(--color-text);">avg time from approval to fulfilled (aka rowan's job)</div>
+          <div style="font-family: monospace; font-weight: bold; font-size: 1.3em; color: <%= @d && @d > 172800 ? '#ff6b6b' : 'white' %>;">
+            <%= dur(@d) %>
           </div>
         </div>
       </div>
