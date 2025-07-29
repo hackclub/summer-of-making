@@ -7,7 +7,8 @@
       are ya winning son?
       <% if params[:show_free_stickers] == "true" %><span>+stickers</span><% end %>
       <span style="margin-left: 1em;">
-        <%= link_to((params[:stats_range] == 'all' ? 'how about the past week?' : 'how about all time?'), params.permit!.merge(stats_range: (params[:stats_range] == 'all' ? nil : 'all')), class: 'abtn secondary small', style: 'margin-left: 1em;') %>
+        <% p = params.permit(:show_free_stickers, :user_search, :shop_item_id, :status, :date_from, :date_to, :sort).to_h.symbolize_keys %>
+        <%= link_to((params[:stats_range] == 'all' ? 'how about the past week?' : 'how about all time?'), p.merge(stats_range: (params[:stats_range] == 'all' ? nil : 'all')), class: 'abtn secondary small', style: 'margin-left: 1em;') %>
       </span>
     </strong>
     <div style="display: flex; flex-wrap: wrap; gap: 0.5em; align-items: center; margin-bottom: 1.5em;">
