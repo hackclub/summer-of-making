@@ -180,6 +180,7 @@ class Project < ApplicationRecord
     twist: "Twist",
     reality: "Reality",
     endpointer: "Endpointer",
+    hackcraft: "Hackcraft",
     other: "Other"
   }
 
