@@ -1,49 +1,45 @@
-<%= stylesheet_link_tag 'admin_dashboard' %>
-
-<body class="adash" style="background: var(--color-background); color: var(--color-text); min-height: 100vh;">
-  <h1 style="margin: 2em 0 0.5em 1em; color: var(--color-primary); font-size: 2rem;">admin dashboard!</h1>
-  <p style="margin: 0 0 2em 2em; color: var(--color-muted);">you look great today :-)</p>
-  <div class="agrid" style="max-width: 700px; margin: 0 2em 2em 2em; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1.2em;">
-    <%= link_to "All Orders", admin_shop_orders_path, class: 'abtn secondary' %>
-    <%= link_to pending_admin_shop_orders_path, class: 'abtn secondary' do %>
-      Pending Acceptance <span class="pill"><%= ShopOrder.without_item_type("ShopItem::FreeStickers").where(aasm_state: :pending).count %></span>
-    <% end %>
-    <%= link_to awaiting_fulfillment_admin_shop_orders_path, class: 'abtn secondary' do %>
-      Manual Fulfillment <span class="pill"><%= ShopOrder.manually_fulfilled.without_item_type("ShopItem::FreeStickers").where(aasm_state: :awaiting_periodical_fulfillment).count %></span>
-    <% end %>
-    <%= link_to "Shop Items", admin_shop_items_path, class: 'abtn secondary' %>
-    <%= link_to admin_users_path, class: 'abtn secondary' do %>
-      Users <span class="pill"><%= User.count %></span>
-    <% end %>
-    <%= link_to "view counters", "/admin/view_analytics", class: 'abtn secondary' %>
-    <%= link_to "Blazer", admin_blazer_path, class: 'abtn secondary' %>
-    <%= link_to "Flipper", "/admin/flipper", class: 'abtn secondary' %>
-    <%= link_to "Job Queue", admin_mission_control_jobs_path, class: 'abtn secondary' %>
-    <%= link_to "Ahoy Captain Analytics", admin_ahoy_captain_path, class: 'abtn secondary' %>
-    <%= link_to admin_ship_certifications_path, class: 'abtn secondary' do %>
-      Ship certs <span class="pill"><%= ShipCertification.pending.size %></span>
-    <% end %>
-    <%= link_to admin_readme_certifications_path, class: 'abtn secondary' do %>
-      README certs <span class="pill"><%= ReadmeCertification.pending.size %></span>
-    <% end %>
-    <%= link_to "voting dashboard", "/admin/voting_dashboard", class: 'abtn secondary' %>
-    <%= link_to "payouts dashboard", "/admin/payouts_dashboard", class: 'abtn secondary' %>
-    <%= link_to "reports dashboard", "/admin/fraud_reports", class: 'abtn secondary' %>
-    <%= link_to "global caches", admin_caches_path, class: 'abtn secondary' %>
-    <%= link_to admin_ysws_reviews_path, class: 'abtn secondary' do %>
+<h1 style="font-size: 2rem;">admin dashboard!</h1>
+<p style="color: var(--color-muted);">you look great today :-)</p>
+<div class="agrid" style="max-width: 700px; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1.2em;">
+  <%= link_to "All Orders", admin_shop_orders_path, class: 'abtn secondary' %>
+  <%= link_to pending_admin_shop_orders_path, class: 'abtn secondary' do %>
+    Pending Acceptance <span class="pill"><%= ShopOrder.without_item_type("ShopItem::FreeStickers").where(aasm_state: :pending).count %></span>
+  <% end %>
+  <%= link_to awaiting_fulfillment_admin_shop_orders_path, class: 'abtn secondary' do %>
+    Manual Fulfillment <span class="pill"><%= ShopOrder.manually_fulfilled.without_item_type("ShopItem::FreeStickers").where(aasm_state: :awaiting_periodical_fulfillment).count %></span>
+  <% end %>
+  <%= link_to "Shop Items", admin_shop_items_path, class: 'abtn secondary' %>
+  <%= link_to admin_users_path, class: 'abtn secondary' do %>
+    Users <span class="pill"><%= User.count %></span>
+  <% end %>
+  <%= link_to "view counters", "/admin/view_analytics", class: 'abtn secondary' %>
+  <%= link_to "Blazer", admin_blazer_path, class: 'abtn secondary' %>
+  <%= link_to "Flipper", "/admin/flipper", class: 'abtn secondary' %>
+  <%= link_to "Job Queue", admin_mission_control_jobs_path, class: 'abtn secondary' %>
+  <%= link_to "Ahoy Captain Analytics", admin_ahoy_captain_path, class: 'abtn secondary' %>
+  <%= link_to admin_ship_certifications_path, class: 'abtn secondary' do %>
+    Ship certs <span class="pill"><%= ShipCertification.pending.size %></span>
+  <% end %>
+  <%= link_to admin_readme_certifications_path, class: 'abtn secondary' do %>
+    README certs <span class="pill"><%= ReadmeCertification.pending.size %></span>
+  <% end %>
+  <%= link_to "voting dashboard", "/admin/voting_dashboard", class: 'abtn secondary' %>
+  <%= link_to "payouts dashboard", "/admin/payouts_dashboard", class: 'abtn secondary' %>
+  <%= link_to "reports dashboard", "/admin/fraud_reports", class: 'abtn secondary' %>
+  <%= link_to "global caches", admin_caches_path, class: 'abtn secondary' %>
+  <%= link_to admin_ysws_reviews_path, class: 'abtn secondary' do %>
       YSWS reviews <span class="pill"><%= Project.ysws_review_eligible.count %></span>
     <% end %>
-  </div>
-  <div style="margin: 2em; max-width: 800px;">
-    <h2 style="color: var(--color-primary); margin-bottom: 1em;">Payout multiplier</h2>
-    <%= line_chart @multiplier_data,
-        title: "Payout.calculate_multiplier(x) where x = ELO percentile (0-1)",
-        xtitle: "ELO Percentile",
-        ytitle: "Multiplier",
-        width: "100%",
-        height: "400px" %>
-  </div>
-  <div style="margin: 2em 2em 0 2em;">
-    <%= link_to "← escape hatch", root_path, class: 'aout' %>
-  </div>
-</body>
+</div>
+<div style="margin-top: 0.5em;">
+  <%= link_to "← escape hatch", root_path, class: 'aout' %>
+</div>
+<div style="max-width: 800px;">
+  <h2 style="color: var(--color-primary); margin-bottom: 1em;">Payout multiplier</h2>
+  <%= line_chart @multiplier_data,
+      title: "Payout.calculate_multiplier(x) where x = ELO percentile (0-1)",
+      xtitle: "ELO Percentile",
+      ytitle: "Multiplier",
+      width: "100%",
+      height: "400px" %>
+</div>
