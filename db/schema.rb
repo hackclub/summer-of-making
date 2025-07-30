@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_07_29_113611) do
+ActiveRecord::Schema[8.0].define(version: 2025_07_30_113611) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -815,6 +815,8 @@ ActiveRecord::Schema[8.0].define(version: 2025_07_29_113611) do
     t.bigint "project_2_id"
     t.bigint "ship_event_1_id", null: false
     t.bigint "ship_event_2_id", null: false
+    t.datetime "processed_at"
+    t.text "ai_feedback"
     t.index ["marked_invalid_at"], name: "index_votes_on_marked_invalid_at"
     t.index ["marked_invalid_by_id"], name: "index_votes_on_marked_invalid_by_id"
     t.index ["project_1_id"], name: "index_votes_on_project_1_id"

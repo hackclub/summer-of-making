@@ -5,10 +5,12 @@
 # Table name: votes
 #
 #  id                    :bigint           not null, primary key
+#  ai_feedback           :text
 #  explanation           :text             not null
 #  invalid_reason        :text
 #  marked_invalid_at     :datetime
 #  music_played          :boolean
+#  processed_at          :datetime
 #  project_1_demo_opened :boolean          default(FALSE)
 #  project_1_repo_opened :boolean          default(FALSE)
 #  project_2_demo_opened :boolean          default(FALSE)
