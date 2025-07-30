@@ -130,10 +130,6 @@
             </small>
             <br>
             <small style="color: var(--color-text-muted);">
-              By: <%= ship_certification.project.user.display_name || ship_certification.project.user.email %>
-            </small>
-            <br>
-            <small style="color: var(--color-text-muted);">
               Type: <%= ship_certification.project.certification_type&.humanize %>
             </small>
           </div>
@@ -152,7 +148,7 @@
           <% if ship_certification.reviewer %>
             <%= ship_certification.reviewer.display_name || ship_certification.reviewer.email %>
           <% else %>
-            <span style="color: var(--color-text-muted);">System</span>
+            <span style="color: var(--color-text-muted);">-</span>
           <% end %>
         </td>
         <td>

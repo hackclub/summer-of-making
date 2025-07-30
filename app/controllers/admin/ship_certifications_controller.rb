@@ -68,7 +68,7 @@ module Admin
     end
 
     def edit
-      @ship_certification = ShipCertification.find(params[:id])
+      @ship_certification = ShipCertification.includes(project: [ :user, :ship_events ]).find(params[:id])
       @ship_certification.reviewer = current_user if @ship_certification.reviewer.nil?
     end
 
