@@ -1,12 +1,45 @@
 <h1>Edit Ship Certification</h1>
 
-<div class="project-links">
-  <b>Project Links:</b>
-  <%= link_to "Play", @ship_certification.project.demo_link, target: "_blank" if @ship_certification.project.demo_link.present? %>
-  <%= link_to "Repo", @ship_certification.project.repo_link, target: "_blank" if @ship_certification.project.repo_link.present? %>
-  <%= link_to "Readme", @ship_certification.project.readme_link, target: "_blank" if @ship_certification.project.readme_link.present? %>
+<div class="project-links" style="margin-bottom: 2em;">
+  <b style="color: var(--color-muted);">Project Links:</b>
+  <% if @ship_certification.project.demo_link.present? %>
+    <%= link_to "Play", @ship_certification.project.demo_link, target: "_blank", style: 'margin-left: 1em; color: var(--color-primary); font-weight: 600; text-decoration: underline;' %>
+  <% end %>
+  <% if @ship_certification.project.repo_link.present? %>
+    <%= link_to "Repo", @ship_certification.project.repo_link, target: "_blank", style: 'margin-left: 1em; color: var(--color-primary); font-weight: 600; text-decoration: underline;' %>
+  <% end %>
+  <% if @ship_certification.project.readme_link.present? %>
+    <%= link_to "Readme", @ship_certification.project.readme_link, target: "_blank", style: 'margin-left: 1em; color: var(--color-primary); font-weight: 600; text-decoration: underline;' %>
+  <% end %>
 </div>
 
-<%= render 'form', ship_certification: @ship_certification %>
+<div class="edit-ship-cert-form">
+  <%= render 'form', ship_certification: @ship_certification, current_user: current_user %>
+</div>
 
-<%= link_to "Back", admin_ship_certifications_path %>
+<div style="margin-top: 2em;">
+  <%= link_to "← Back", admin_ship_certifications_path, class: 'abtn small' %>
+</div>
+
+<style>
+.edit-ship-cert-form textarea {
+  padding: 0.7em 1em;
+  border-radius: 7px;
+  border: 1px solid var(--color-border);
+  background: var(--color-snow);
+  color: var(--color-text);
+  font-size: 1em;
+  margin-bottom: 0.2em;
+  min-height: 100px;
+  resize: vertical;
+}
+.edit-ship-cert-form input[type="file"] {
+  padding: 0.5em 0.2em;
+  background: var(--color-sheet);
+  border-radius: 7px;
+  border: 1px solid var(--color-border);
+  color: var(--color-text);
+  font-size: 1em;
+  margin-bottom: 0.2em;
+}
+</style>
