@@ -20,7 +20,7 @@
     <div class="justify-center flex">
       <%= render "verification_callout" unless current_verification_status == :verified %>
     </div>
-    <div class="mt-1 inline-block w-auto">
+    <div class="justify-center flex py-2">
       <%= render "shared/button",
         text: "View My Orders",
         link: shop_orders_path,
