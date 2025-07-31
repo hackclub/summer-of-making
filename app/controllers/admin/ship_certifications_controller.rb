@@ -18,8 +18,12 @@ module Admin
 
       @vote_counts = User.joins(:votes).where(votes: { status: "active" }).group(:id).count
 
-      if @category_filter.present?
-        base = base.where(projects: { certification_type: @category_filter })
+      if params.key?(:category_filter)
+        if @category_filter.present?
+          base = base.where(projects: { certification_type: @category_filter })
+        else
+          base = base.where(projects: { certification_type: [ nil, "" ] })
+        end
       end
 
       case @filter
@@ -51,20 +55,56 @@ module Admin
       @total_pending = base.pending.count
       @avg_turnaround = calc_avg_turnaround
 
-      @category_counts = ShipCertification
-        .joins(:project)
-        .where(projects: { is_deleted: false })
+      category_base = ShipCertification.joins(:project).where(projects: { is_deleted: false })
+      case @filter
+      when "approved"
+        category_base = category_base.approved
+      when "rejected"
+        category_base = category_base.rejected
+      when "pending"
+        category_base = category_base.pending
+      end
+      @category_counts = category_base
         .where.not(projects: { certification_type: [ nil, "" ] })
         .group("projects.certification_type")
         .count
 
-      # Leaderboard - reviewers by number of certifications reviewed
-      @leaderboard = User.joins("INNER JOIN ship_certifications ON users.id = ship_certifications.reviewer_id")
-                         .where.not(ship_certifications: { reviewer_id: nil })
-                         .group("users.id", "users.display_name", "users.email")
-                         .order("COUNT(ship_certifications.id) DESC")
-                         .limit(10)
-                         .pluck("users.display_name", "users.email", "COUNT(ship_certifications.id)")
+      no_type_base = ShipCertification.joins(:project).where(projects: { is_deleted: false })
+      case @filter
+      when "approved"
+        no_type_base = no_type_base.approved
+      when "rejected"
+        no_type_base = no_type_base.rejected
+      when "pending"
+        no_type_base = no_type_base.pending
+      end
+      @no_type_count = no_type_base.where(projects: { certification_type: [ nil ] }).count
+
+      @leaderboard_week = User.joins("INNER JOIN ship_certifications ON users.id = ship_certifications.reviewer_id")
+        .where.not(ship_certifications: { reviewer_id: nil })
+        .where("ship_certifications.updated_at >= ?", 7.days.ago)
+        .group("users.id", "users.display_name", "users.email")
+        .order("COUNT(ship_certifications.id) DESC")
+        .limit(20)
+        .pluck("users.display_name", "users.email", "COUNT(ship_certifications.id)")
+
+      @leaderboard_all = User.joins("INNER JOIN ship_certifications ON users.id = ship_certifications.reviewer_id")
+        .where.not(ship_certifications: { reviewer_id: nil })
+        .group("users.id", "users.display_name", "users.email")
+        .order("COUNT(ship_certifications.id) DESC")
+        .limit(20)
+        .pluck("users.display_name", "users.email", "COUNT(ship_certifications.id)")
+
+      @decided_last_24h = ShipCertification.where.not(judgement: :pending)
+        .where("ship_certifications.updated_at >= ?", 24.hours.ago)
+        .where("ship_certifications.updated_at > ship_certifications.created_at")
+        .joins(:project).where(projects: { is_deleted: false })
+        .count
+
+      @submitted_last_24h = ShipCertification
+        .where("ship_certifications.created_at >= ?", 24.hours.ago)
+        .joins(:project).where(projects: { is_deleted: false })
+        .count
     end
 
     def edit
