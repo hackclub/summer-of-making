@@ -56,7 +56,7 @@
     </div>
   <% end %>
 
-  <hr class="my-8">
+  <div class="my-8" />
   <%= render "shared/card" do %>
     <div class="space-y-6">
       <h1 class="text-3xl font-bold text-center mb-4">Top 25 Projects</h1>
@@ -87,6 +87,37 @@
                 <span class="text-lg font-bold">#<%= i + 1 %></span>
                 <%= link_to project.title, project_path(project), class: "font-semibold text-lg hover:underline" %>
               </div>
+            </div>
+          </div>
+        <% end %>
+      </div>
+    </div>
+  <% end %>
+  <div class="my-8" />
+  <%= render "shared/card" do %>
+    <div class="space-y-6">
+      <h1 class="text-3xl font-bold text-center mb-4">Popular Shop Items</h1>
+      <div class="divide-y divide-[#b39078]">
+        <% @shoplb.each_with_index do |item, i| %>
+          <% row_bg = case i
+            when 0 then 'bg-gradient-to-r from-yellow-300 via-yellow-200 to-yellow-200'
+            when 1 then 'bg-gradient-to-r from-gray-300 via-gray-200 to-gray-200'
+            when 2 then 'bg-gradient-to-r from-orange-300 via-orange-200 to-orange-200'
+            else ''
+          end %>
+          <div class="flex items-center p-4 rounded-lg gap-4 <%= row_bg %>">
+            <div class="flex-shrink-0">
+              <%= image_tag item.image, alt: item.name, class: "w-12 h-12 cursor-pointer hover:scale-105 transition-transform", loading: "lazy" %>
+            </div>
+            <div class="flex-1 min-w-0">
+              <div class="flex items-center gap-2">
+                <span class="text-lg font-bold">#<%= i + 1 %></span>
+                <%= item.name %>
+              </div>
+            </div>
+            <div class="flex-shrink-0 flex items-center gap-2 text-xl">
+              <span class="text-gray-600">Bought:</span>
+              <span class="font-bold text-blue-700"><%= item.total_purchased %></span>
             </div>
           </div>
         <% end %>

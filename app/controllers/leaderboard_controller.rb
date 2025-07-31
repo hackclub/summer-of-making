@@ -18,5 +18,13 @@ class LeaderboardController < ApplicationController
     @banned_users = User.where(is_banned: true).count
     @burned_amount = Payout.where(user_id: User.where(is_banned: true).select(:id)).where("amount > 0").sum(:amount)
     @marketcap = User.where(is_banned: false).joins(:payouts).group(:id).sum("payouts.amount").values.sum
+
+    @shoplb = ShopItem
+      .not_black_market
+      .joins(:shop_orders)
+      .select("shop_items.*, SUM(shop_orders.quantity) AS total_purchased")
+      .group("shop_items.id")
+      .order("total_purchased DESC")
+      .limit(25)
   end
 end
