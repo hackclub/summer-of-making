@@ -104,9 +104,7 @@ class ProjectsController < ApplicationController
     return unless current_user
 
     if current_user == @project.user && current_user.has_hackatime?
-      Rails.cache.fetch("hackatime_fetch_#{current_user.id}", expires_in: 30.seconds) do
-        current_user.refresh_hackatime_data_now
-      end
+      current_user.refresh_hackatime_data_now
     end
 
     @user_stonk = @project.stonks.find { |stonk| stonk.user_id == current_user.id }

@@ -307,7 +307,13 @@ class User < ApplicationRecord
     end
   end
 
-  def refresh_hackatime_data_now
+  def refresh_hackatime_data_now(cache_duration: 1.minute)
+    Rails.cache.fetch("hackatime_refresh_#{id}", expires_in: cache_duration) do
+      refresh_hackatime_data_now!
+    end
+  end
+
+  def refresh_hackatime_data_now!
     response = fetch_raw_hackatime_stats
     return unless response.success?
 
@@ -331,7 +337,7 @@ class User < ApplicationRecord
 
     update!(has_hackatime_account:, has_hackatime: true)
 
-    Rails.logger.tagged("User.refresh_hackatime_data_now") do
+    Rails.logger.tagged("User.refresh_hackatime_data_now!") do
       Rails.logger.debug("User #{id} (#{slack_id}) total seconds: #{result.dig("data", "total_seconds")}")
     end
 
@@ -350,7 +356,100 @@ class User < ApplicationRecord
 
     stats = user_hackatime_data || build_user_hackatime_data
     stats.update(data: result, last_updated_at: Time.current)
+
+    # Check for unlogged time warnings after data refresh (WARNING_COOLDOWN prevents duplicates)
+    check_and_send_unlogged_warnings
   end
+
+  def check_projects_needing_unlogged_warnings
+    return [] unless has_hackatime? && user_hackatime_data.present?
+
+    warning_threshold = 9.hours.to_i
+    maximum_threshold = 10.hours.to_i
+
+    eligible_projects = projects.includes(:devlogs)
+                                .where(is_deleted: false)
+                                .where.not(hackatime_project_keys: [ nil, [] ])
+
+    eligible_projects.filter do |project|
+      next false unless project.hackatime_keys.all?(&:present?)
+
+      unlogged_seconds = project.unlogged_time
+      next false unless unlogged_seconds >= warning_threshold && unlogged_seconds < maximum_threshold
+
+      cache_key = "unlogged_time_warning:#{id}:#{project.id}"
+      !Rails.cache.exist?(cache_key)
+    end
+  end
+
+  def check_and_send_unlogged_warnings
+    return unless has_hackatime? && user_hackatime_data.present?
+
+    warning_threshold = 9.hours.to_i
+    maximum_threshold = 10.hours.to_i
+    warning_cooldown = 2.hours.to_i
+
+    # Get projects that might need warnings
+    eligible_projects = projects.includes(:devlogs)
+                               .where(is_deleted: false)
+                               .where.not(hackatime_project_keys: [nil, []])
+
+    eligible_projects.each do |project|
+      next unless project.hackatime_keys.all?(&:present?)
+      
+      unlogged_seconds = project.unlogged_time
+      next unless unlogged_seconds >= warning_threshold && unlogged_seconds < maximum_threshold
+      
+      # Check if we haven't sent a warning recently (WARNING_COOLDOWN)
+      cache_key = "unlogged_time_warning:#{id}:#{project.id}"
+      next if Rails.cache.exist?(cache_key)
+
+      # Send warning asynchronously
+      send_unlogged_warning_async(project, unlogged_seconds, warning_cooldown)
+    rescue => e
+      Rails.logger.error "Failed to send unlogged time warning for project #{project.id}: #{e.message}"
+      Honeybadger.notify(e, context: {
+        user_id: id,
+        project_id: project.id,
+        slack_id: slack_id
+      })
+    end
+  end
+
+  private
+
+  def send_unlogged_warning_async(project, unlogged_seconds, warning_cooldown)
+    cache_key = "unlogged_time_warning:#{id}:#{project.id}"
+    
+    unlogged_hours = (unlogged_seconds / 3600.0).round(1)
+    remaining_hours = ((10.hours.to_i - unlogged_seconds) / 3600.0).round(1)
+
+    message = build_unlogged_warning_message(project, unlogged_hours, remaining_hours)
+
+    # Send Slack DM asynchronously (non-blocking)
+    SendSlackDmJob.perform_later(slack_id, message)
+    
+    # Set cache to prevent duplicate warnings
+    Rails.cache.write(cache_key, Time.current.to_i, expires_in: warning_cooldown)
+
+    Rails.logger.info "Sent unlogged time warning to #{display_name} for project '#{project.title}' - #{unlogged_hours}h unlogged"
+  end
+
+  def build_unlogged_warning_message(project, unlogged_hours, remaining_hours)
+    <<~MESSAGE.strip
+      :siren-real: *Time to post a devlog!* :siren-real:#{' '}
+
+      Your project *#{project.title}* has #{unlogged_hours} hours of unlogged coding time!
+
+      You need to post a devlog before you reach 10 hours of unlogged time. If you exceed 10 hours of unlogged time, your overflowed time won't count towards your payout!
+
+      📝 *#{remaining_hours} hours remaining* before you hit the limit.
+
+      Head over to your project and create a devlog: #{Rails.application.routes.url_helpers.project_url(project, host: "summer.hackclub.com")}
+    MESSAGE
+  end
+
+  public
 
   def has_hackatime?
     has_hackatime
