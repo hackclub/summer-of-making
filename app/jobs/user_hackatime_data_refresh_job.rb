@@ -2,6 +2,8 @@
 
 # This refreshes every user's Hackatime Project data.
 class UserHackatimeDataRefreshJob < ApplicationJob
+  include UniqueJob
+
   queue_as :literally_whenever
 
   WARNING_THRESHOLD = 9.hours.to_i
@@ -46,8 +48,6 @@ class UserHackatimeDataRefreshJob < ApplicationJob
     Rails.logger.tagged("UserHackatimeDataRefreshJob") do
       Rails.logger.info("Ended - sent #{warning_count} unlogged time warnings")
     end
-
-    UserHackatimeDataRefreshJob.perform_later
   end
 
   private

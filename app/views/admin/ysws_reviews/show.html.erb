@@ -1,0 +1,252 @@
+<body class="adash" style="background: var(--color-background); color: var(--color-text); min-height: 100vh; padding: 2rem;">
+
+<div style="margin-bottom: 2rem;">
+  <%= link_to "← Back to YSWS Reviews", admin_ysws_reviews_path,
+      class: "pill pill-gray", style: "text-decoration: none; padding: 0.5rem 1rem; margin-bottom: 1rem;" %>
+</div>
+
+<div style="margin-bottom: 2rem;">
+  <h1>
+    <%= link_to @project.title, project_path(@project),
+        style: "color: var(--color-primary); text-decoration: none;",
+        target: "_blank" %>
+    <span style="font-size: 0.5em; margin-left: 0.5rem;">
+      <%= link_to "View Project →", project_path(@project),
+          class: "pill pill-blue",
+          style: "text-decoration: none; padding: 0.3rem 0.8rem;",
+          target: "_blank" %>
+    </span>
+  </h1>
+  <p style="color: var(--color-text-muted); margin: 0.5rem 0;">
+    by <%= @project.user.display_name %> • Created <%= @project.created_at.strftime("%B %d, %Y") %>
+  </p>
+  <p style="margin: 1rem 0;"><%= @project.description %></p>
+
+  <!-- Project Links -->
+  <div style="display: flex; gap: 1rem; margin: 1rem 0; flex-wrap: wrap;">
+    <% if @project.repo_link.present? %>
+      <%= link_to "📁 Repository", @project.repo_link,
+          class: "pill pill-gray",
+          style: "text-decoration: none; padding: 0.5rem 1rem;",
+          target: "_blank", rel: "noopener" %>
+    <% end %>
+    <% if @project.demo_link.present? %>
+      <%= link_to "🚀 Demo", @project.demo_link,
+          class: "pill pill-blue",
+          style: "text-decoration: none; padding: 0.5rem 1rem;",
+          target: "_blank", rel: "noopener" %>
+    <% end %>
+    <% if @project.latest_ship_certification&.proof_video&.attached? %>
+      <span class="pill pill-green" style="padding: 0.5rem 1rem;">🎥 Ship Cert Video</span>
+    <% end %>
+  </div>
+
+  <!-- Ship Certification Video -->
+  <% if @project.latest_ship_certification&.proof_video&.attached? %>
+    <div style="margin: 1rem 0;">
+      <h4 style="margin: 0 0 0.5rem 0;">Ship Certification Video</h4>
+      <video controls style="width: 100%; max-width: 600px; border-radius: 8px;">
+        <source src="<%= rails_blob_path(@project.latest_ship_certification.proof_video) %>" type="video/mp4">
+        Your browser does not support the video tag.
+      </video>
+    </div>
+  <% end %>
+</div>
+
+<!-- Devlog Time Analysis -->
+<div style="background: var(--color-card); border-radius: 8px; margin-bottom: 2rem; padding: 1.5rem;">
+  <h3 style="margin: 0 0 1rem 0;">Devlog Time Analysis</h3>
+  <div style="height: 300px;">
+    <% devlog_data = @grouped_devlogs.values.flatten.map.with_index do |devlog, i|
+         ["Devlog ##{devlog.id}", (devlog.duration_seconds || 0) / 3600.0]
+       end %>
+    <%= bar_chart devlog_data,
+        suffix: " hrs",
+        height: "300px",
+        colors: ["#ec3750"],
+        library: {
+          plugins: {
+            legend: { display: false },
+            title: {
+              display: true,
+              text: "Time spent per devlog (hours)"
+            }
+          },
+          scales: {
+            y: {
+              beginAtZero: true,
+              title: {
+                display: true,
+                text: "Hours"
+              }
+            },
+            x: {
+              title: {
+                display: true,
+                text: "Devlogs"
+              }
+            }
+          }
+        } %>
+  </div>
+  <% all_devlogs = @grouped_devlogs.values.flatten %>
+  <% total_hours = all_devlogs.sum(&:duration_seconds) / 3600.0 %>
+  <% avg_hours = all_devlogs.any? ? total_hours / all_devlogs.count : 0 %>
+  <% max_hours = all_devlogs.any? ? all_devlogs.map(&:duration_seconds).max / 3600.0 : 0 %>
+  <% over_1hr_count = all_devlogs.count { |d| (d.duration_seconds || 0) >= 3600 } %>
+
+  <div style="display: flex; gap: 2rem; margin-top: 1rem; flex-wrap: wrap;">
+    <div style="background: var(--color-background-subtle); padding: 1rem; border-radius: 4px; flex: 1; min-width: 150px;">
+      <strong>Total Time:</strong><br>
+      <%= sprintf("%.1f", total_hours) %> hours
+    </div>
+    <div style="background: var(--color-background-subtle); padding: 1rem; border-radius: 4px; flex: 1; min-width: 150px;">
+      <strong>Average per Devlog:</strong><br>
+      <%= sprintf("%.1f", avg_hours) %> hours
+    </div>
+    <div style="background: var(--color-background-subtle); padding: 1rem; border-radius: 4px; flex: 1; min-width: 150px;">
+      <strong>Longest Devlog:</strong><br>
+      <%= sprintf("%.1f", max_hours) %> hours
+    </div>
+    <div style="background: var(--color-background-subtle); padding: 1rem; border-radius: 4px; flex: 1; min-width: 150px;">
+      <strong>Devlogs ≥ 1 hour:</strong><br>
+      <%= over_1hr_count %> / <%= all_devlogs.count %>
+    </div>
+  </div>
+</div>
+
+<%= form_with url: admin_ysws_review_path(@project), method: :patch, local: true do |form| %>
+  <% @grouped_devlogs.each do |ship_event, devlogs| %>
+    <div style="background: var(--color-card); border-radius: 8px; margin-bottom: 2rem; overflow: hidden;">
+      <div style="background: var(--color-background-subtle); padding: 1rem; border-bottom: 1px solid var(--color-border);">
+        <h3 style="margin: 0;">
+          <% if ship_event %>
+            Ship Event: <%= ship_event.created_at.strftime("%B %d, %Y") %>
+          <% else %>
+            Unshipped devlogs
+          <% end %>
+        </h3>
+      </div>
+
+      <% devlogs.each_with_index do |devlog, index| %>
+        <div style="padding: 1rem; border-bottom: 1px solid var(--color-border); <%= 'background-color: var(--color-background);' if index.even? %>">
+          <div style="display: flex; gap: 2rem;">
+            <div style="flex: 2;">
+              <h4 style="margin: 0 0 0.5rem 0;">
+                <%= link_to "Devlog ##{devlog.id}", devlog_project_path(@project, devlog_id: devlog.id),
+                    style: "color: var(--color-primary); text-decoration: none;",
+                    target: "_blank" %>
+                <span style="font-size: 0.8em; color: var(--color-text-muted);">
+                  <%= devlog.created_at.strftime("%b %d, %Y at %l:%M %p") %>
+                </span>
+                <span style="font-size: 0.7em; margin-left: 0.5rem;">
+                  <%= link_to "View →", devlog_project_path(@project, devlog_id: devlog.id),
+                      class: "pill pill-gray",
+                      style: "text-decoration: none; padding: 0.2rem 0.5rem;",
+                      target: "_blank" %>
+                </span>
+              </h4>
+              <div style="max-height: 200px; overflow-y: auto; background: var(--color-background-subtle); padding: 1rem; border-radius: 4px; margin: 0.5rem 0;">
+                <%= simple_format(truncate(devlog.text, length: 500)) %>
+              </div>
+              <p style="font-size: 0.9em; color: var(--color-text-muted);">
+                <strong>Original Time:</strong> <%= formal_seconds devlog.duration_seconds %>
+                <% if devlog.ysws_review_approval&.seconds_changed? %>
+                  <span class="pill pill-yellow" style="margin-left: 0.5rem;">Time Changed</span>
+                <% end %>
+              </p>
+            </div>
+
+            <div style="flex: 1; background: var(--color-background-subtle); padding: 1rem; border-radius: 4px;">
+              <h5 style="margin: 0 0 1rem 0;">Review Decision</h5>
+
+              <div style="margin-bottom: 1rem;">
+                <label style="display: block; margin-bottom: 0.5rem; font-weight: bold;">Status:</label>
+                <%= form.radio_button "devlog_approvals[#{devlog.id}][approved]", "1",
+                    checked: devlog.ysws_review_approval&.approved? %>
+                <%= form.label "devlog_approvals_#{devlog.id}_approved_1", "Approve",
+                    style: "margin-right: 1rem;" %>
+                <%= form.radio_button "devlog_approvals[#{devlog.id}][approved]", "0",
+                    checked: devlog.ysws_review_approval&.approved? == false %>
+                <%= form.label "devlog_approvals_#{devlog.id}_approved_0", "Reject" %>
+              </div>
+
+              <div style="margin-bottom: 1rem;">
+                <%= form.label "devlog_approvals_#{devlog.id}_approved_seconds", "Approved Seconds:",
+                    style: "display: block; margin-bottom: 0.5rem; font-weight: bold;" %>
+                <%= form.number_field "devlog_approvals[#{devlog.id}][approved_seconds]",
+                    value: devlog.ysws_review_approval&.approved_seconds || devlog.duration_seconds || 0,
+                    style: "width: 100%; padding: 0.5rem; border: 1px solid var(--color-border); border-radius: 4px;" %>
+              </div>
+
+              <div style="margin-bottom: 1rem;">
+                <%= form.label "devlog_approvals_#{devlog.id}_notes", "Internal Notes:",
+                    style: "display: block; margin-bottom: 0.5rem; font-weight: bold;" %>
+                <%= form.text_area "devlog_approvals[#{devlog.id}][notes]",
+                    value: devlog.ysws_review_approval&.notes,
+                    rows: 3,
+                    style: "width: 100%; padding: 0.5rem; border: 1px solid var(--color-border); border-radius: 4px; resize: vertical;" %>
+              </div>
+
+              <% if devlog.ysws_review_approval %>
+                <p style="font-size: 0.8em; color: var(--color-text-muted);">
+                  Last reviewed: <%= devlog.ysws_review_approval.reviewed_at.strftime("%b %d, %Y at %l:%M %p") %>
+                  <br>by <%= devlog.ysws_review_approval.user.display_name %>
+                </p>
+              <% end %>
+            </div>
+          </div>
+        </div>
+      <% end %>
+    </div>
+  <% end %>
+
+  <div style="margin-top: 2rem; text-align: center; display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap;">
+    <button type="button" id="approve-all-btn"
+        class="pill pill-blue"
+        style="padding: 1rem 2rem; font-size: 1.1em; cursor: pointer; border: none; text-decoration: none;">
+      Approve All Devlogs
+    </button>
+    <%= form.submit "Complete Review",
+        class: "pill pill-green",
+        style: "padding: 1rem 2rem; font-size: 1.1em; cursor: pointer; border: none; text-decoration: none;" %>
+  </div>
+<% end %>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  const approveAllBtn = document.getElementById('approve-all-btn');
+
+  approveAllBtn.addEventListener('click', function() {
+    // Find all approve radio buttons and check them
+    const approveRadios = document.querySelectorAll('input[type="radio"][value="1"]');
+
+    approveRadios.forEach(function(radio) {
+      if (radio.name.includes('[approved]')) {
+        radio.checked = true;
+
+        // For each approved devlog, set the approved_seconds to the original duration
+        const devlogId = radio.name.match(/devlog_approvals\[(\d+)\]/)[1];
+        const secondsField = document.querySelector(`input[name="devlog_approvals[${devlogId}][approved_seconds]"]`);
+
+        if (secondsField && !secondsField.value) {
+          // Keep the current value or use the default that's already there
+          // The field should already have the original duration as the default
+        }
+      }
+    });
+
+    // Update button text to indicate action was performed
+    approveAllBtn.textContent = 'All Devlogs Approved ✓';
+    approveAllBtn.style.backgroundColor = 'var(--color-success)';
+
+    // Reset button after 2 seconds
+    setTimeout(function() {
+      approveAllBtn.textContent = 'Approve All Devlogs';
+      approveAllBtn.style.backgroundColor = '';
+    }, 2000);
+  });
+});
+</script>
+
+</body>

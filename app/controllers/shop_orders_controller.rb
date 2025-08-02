@@ -62,9 +62,25 @@ class ShopOrdersController < ApplicationController
       # Find the selected address from IDV data
       idv_data = current_user.fetch_idv
       selected_address = idv_data.dig(:identity, :addresses)&.find { |addr| addr[:id].to_s == params[:shipping_address_id] }
-      @order.frozen_address = selected_address if selected_address
+      if selected_address
+        # Add phone number from IDV root identity object if available
+        phone_number = idv_data.dig(:identity, :phone_number)
+        selected_address = selected_address.merge("phone_number" => phone_number) if phone_number.present?
+        @order.frozen_address = selected_address
+      end
     elsif current_user.respond_to?(:address_hash)
-      @order.frozen_address = current_user.address_hash
+      # For fallback address, try to add phone number from IDV
+      address = current_user.address_hash
+      if address.present?
+        begin
+          idv_data = current_user.fetch_idv
+          phone_number = idv_data.dig(:identity, :phone_number)
+          address = address.merge("phone_number" => phone_number) if phone_number.present?
+        rescue => e
+          Rails.logger.error "Failed to fetch phone number for order creation: #{e.message}"
+        end
+      end
+      @order.frozen_address = address
     end
 
     if @order.save

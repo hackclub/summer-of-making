@@ -156,9 +156,8 @@ class ProjectsController < ApplicationController
   def my_projects
     @projects = current_user.projects.includes(
       :banner_attachment,
-      :ship_certifications,
-      ship_events: :payouts,
-      devlogs: [ :file_attachment ]
+      { ship_events: :payouts },
+      { devlogs: :file_attachment }
     ).order(created_at: :desc)
   end
 
@@ -597,11 +596,15 @@ class ProjectsController < ApplicationController
       payout_count = payouts.size
       payout_sum = payouts.sum(&:amount)
 
-      previous_ship = index > 0 ? ship_events_by_date[index - 1] : nil
-      start_time = previous_ship&.created_at || @project.created_at
-
-      devlogs_count = devlogs_by_date.count do |devlog|
-        devlog.created_at > start_time && devlog.created_at <= ship_event.created_at
+      if index == 0
+        devlogs_count = devlogs_by_date.count do |devlog|
+          devlog.created_at <= ship_event.created_at
+        end
+      else
+        previous_ship = ship_events_by_date[index - 1]
+        devlogs_count = devlogs_by_date.count do |devlog|
+          devlog.created_at > previous_ship.created_at && devlog.created_at <= ship_event.created_at
+        end
       end
 
       ship_event_data[ship_event.id] = {
@@ -650,8 +653,7 @@ class ProjectsController < ApplicationController
   def set_project
     @project = Project.includes(
       {
-        user: [ :user_hackatime_data, :projects ],
-        followers: :projects,
+        user: [ :user_hackatime_data ],
         devlogs: [
           :user,
           { comments: :user },

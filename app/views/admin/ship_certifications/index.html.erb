@@ -1,4 +1,3 @@
-<%= stylesheet_link_tag 'admin_dashboard' %>
 <body class="adash" style="background: var(--color-background); color: var(--color-text); min-height: 100vh; padding: 2rem;">
 
 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
@@ -46,30 +45,71 @@
         </span>
       </p>
     <% end %>
+    <p><strong>decisions in the past day:</strong> <span class="pill pill-dark"><%= @decided_last_24h %></span></p>
+    <p><strong>new ships in the past day:</strong> <span class="pill pill-dark"><%= @submitted_last_24h %></span></p>
   </div>
 
   <div style="background: var(--color-card); padding: 1rem; border-radius: 8px; flex: 2;">
     <h3>Reviewer Leaderboard</h3>
-    <% if @leaderboard.any? %>
-      <table style="width: 100%; font-size: 0.9rem;">
-        <thead>
-          <tr>
-            <th style="text-align: left;">Reviewer</th>
-            <th style="text-align: right;">Reviews</th>
-          </tr>
-        </thead>
-        <tbody>
-          <% @leaderboard.each do |name, email, count| %>
+    <div id="b">
+      <p style="margin-bottom: 0.5rem; font-size: 0.95em; color: var(--color-primary);">Past 7 days</p>
+      <% if @leaderboard_week.any? %>
+        <table style="width: 100%; font-size: 0.9rem;">
+          <thead>
             <tr>
-              <td><%= name || email %></td>
-              <td style="text-align: right;"><%= count %></td>
+              <th style="text-align: left;">Reviewer</th>
+              <th style="text-align: right;">Reviews</th>
             </tr>
-          <% end %>
-        </tbody>
-      </table>
-    <% else %>
-      <p>No reviews yet</p>
-    <% end %>
+          </thead>
+          <tbody>
+            <% @leaderboard_week.each do |name, email, count| %>
+              <tr>
+                <td><%= name || email %></td>
+                <td style="text-align: right;"><%= count %></td>
+              </tr>
+            <% end %>
+          </tbody>
+        </table>
+      <% else %>
+        <p>nuthing here!</p>
+      <% end %>
+    </div>
+    <button id="a" class="abtn small">how about all time?</button>
+    <div id="c" style="display: none; margin-top: 1rem;">
+      <p style="margin-bottom: 0.5rem; font-size: 0.95em; color: var(--color-primary);">All time</p>
+      <% if @leaderboard_all.any? %>
+        <table style="width: 100%; font-size: 0.9rem;">
+          <thead>
+            <tr>
+              <th style="text-align: left;">Reviewer</th>
+              <th style="text-align: right;">Reviews</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% @leaderboard_all.each do |name, email, count| %>
+              <tr>
+                <td><%= name || email %></td>
+                <td style="text-align: right;"><%= count %></td>
+              </tr>
+            <% end %>
+          </tbody>
+        </table>
+      <% else %>
+        <p>nuthing here!</p>
+      <% end %>
+    </div>
+    <script>
+      document.addEventListener('DOMContentLoaded', function() {
+        var a = document.getElementById('a');
+        var b = document.getElementById('b');
+        var c = document.getElementById('c');
+        a.addEventListener('click', function() {
+          b.style.display = 'none';
+          a.style.display = 'none';
+          c.style.display = 'block';
+        });
+      });
+    </script>
   </div>
 </div>
 
@@ -84,6 +124,9 @@
       <%= link_to admin_ship_certifications_path(filter: @filter, category_filter: cert_type), class: "pill #{@category_filter == cert_type ? 'pill-green' : 'pill-gray'}", style: "text-decoration: none; padding: 0.5rem 1rem;" do %>
         <%= cert_type.humanize %> (<%= count %>)
       <% end %>
+    <% end %>
+    <%= link_to admin_ship_certifications_path(filter: @filter, category_filter: nil), class: "pill #{@category_filter.nil? ? 'pill-green' : 'pill-gray'}", style: "text-decoration: none; padding: 0.5rem 1rem;" do %>
+      No type (<%= @no_type_count %>)
     <% end %>
   </div>
 </div>
@@ -131,10 +174,6 @@
             </small>
             <br>
             <small style="color: var(--color-text-muted);">
-              By: <%= ship_certification.project.user.display_name || ship_certification.project.user.email %>
-            </small>
-            <br>
-            <small style="color: var(--color-text-muted);">
               Type: <%= ship_certification.project.certification_type&.humanize %>
             </small>
           </div>
@@ -153,7 +192,7 @@
           <% if ship_certification.reviewer %>
             <%= ship_certification.reviewer.display_name || ship_certification.reviewer.email %>
           <% else %>
-            <span style="color: var(--color-text-muted);">System</span>
+            <span style="color: var(--color-text-muted);">-</span>
           <% end %>
         </td>
         <td>

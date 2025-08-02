@@ -38,6 +38,7 @@ class Comment < ApplicationRecord
 
   def notify_devlog_author
     return if devlog.user.slack_id.blank?
+    return if Rails.env.development?
     return unless devlog.project # Skip if project is nil
 
     message = "New comment on your project!:dino-bbq:\n\nCheck it out here: #{Rails.application.routes.url_helpers.project_url(

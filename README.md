@@ -38,5 +38,6 @@ This repository hosts the Ruby on Rails app for Hack Club's Summer of Making, a 
 5. Run `bundle install`. This might take a while - feel free to make yourself a cup of coffee and relax... ☕
 6. Run `bin/rails db:prepare` to prepare/seed the database.
 7. If you *do* have access to Identity Vault (IDV), set `BYPASS_IDV` and `MOCK_VERIFIED_USER` to `false` or remove them altogether in your `.env` file. They are set to `true` by default in `.env.example`.
-8. Run `bin/dev` to start the development server on port 3000, then visit `http://localhost:3000` in your browser.
-9. Profit?
+8. Make sure you have VIPS (`libvips`) installed. For example, if you're running Ubuntu, do `sudo apt install libvips`.
+9. Run `bin/dev` to start the development server on port 3000, then visit `http://localhost:3000` in your browser.
+10. Profit?

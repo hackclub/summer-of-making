@@ -346,6 +346,7 @@ Rails.application.routes.draw do
       end
     end
     resources :readme_certifications, only: [ :index, :edit, :update ]
+    resources :ysws_reviews, only: [ :index, :show, :update ]
     resources :users, only: [ :index, :show ] do
       member do
         post :internal_notes

@@ -89,11 +89,14 @@ group :development do
   # Use console on exceptions pages [https://github.com/rails/web-console]
   gem "web-console"
 
-  # Auto-reload pages after a code change
+  # Live reload for development [https://github.com/rails/rails_live_reload]
   gem "rails_live_reload"
 
   # For catching N+1 queries and unused eager loading [https://github.com/flyerhzm/bullet]
   gem "bullet"
+
+  # To generate mock data with db/seeds/development.rb
+  gem "faker"
 end
 
 group :test do

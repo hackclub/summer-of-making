@@ -19,7 +19,7 @@
 class AirtableSync < ApplicationRecord
   belongs_to :syncable, polymorphic: true
 
-  %w[Project User ShipEvent].each do |syncable_type|
+  %w[Project ShipEvent YswsReview::Submission].each do |syncable_type|
     scope :"for_#{syncable_type.underscore}", -> { where(syncable_type: syncable_type) }
   end
   scope :oldest_synced, -> { order("last_synced_at ASC NULLS FIRST") }

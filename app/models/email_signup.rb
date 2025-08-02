@@ -6,6 +6,7 @@
 #  email      :text             not null
 #  ip         :inet
 #  ref        :string
+#  slack_id   :string
 #  synced_at  :datetime
 #  user_agent :string
 #  created_at :datetime         not null

@@ -1,4 +1,3 @@
-<%= stylesheet_link_tag 'admin_dashboard' %>
 <h1 style="color: var(--color-primary);margin-top: 0;"><%= local_assigns[:title] %>shopped orders:</h1>
 
 <div style="margin-bottom: 2em; padding: 1em; background: var(--color-darker); border-radius: 8px;">
@@ -234,7 +233,10 @@
             <%= addy["first_name"] %> <%= addy["last_name"] %><br>
             <small style="color: var(--color-muted);">
               <%= addy["city"] %>, <%= addy["state"] %><br>
-              <%= addy["country"] %>
+              <%= addy["country"] %><br>
+              <% if addy["phone_number"].present? %>
+                <%= addy["phone_number"] %>
+              <% end %>
             </small>
           <% else %>
             <em style="color: var(--color-muted);">nuthing...</em>

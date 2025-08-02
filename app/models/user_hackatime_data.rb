@@ -37,7 +37,7 @@ class UserHackatimeData < ApplicationRecord
       end
     else
       Rails.cache.fetch("project_coding_time_#{project.id}_#{project_keys.sort.join(',')}", expires_in: 30.seconds) do
-        result = fetch_combined_project_time(project_keys)
+        result = fetch_combined_project_time_with_date(project_keys, "2025-06-16")
         if result.nil?
           Rails.logger.warn "Failed to fetch Hackatime data for project #{project.id} with keys #{project_keys} - using 0"
           Honeybadger.notify("UserHackatimeData API failure", context: {
@@ -68,9 +68,22 @@ class UserHackatimeData < ApplicationRecord
       .sort_by { |p| p[:name] }
   end
 
+  def fetch_neighborhood_total_time(project_keys)
+    # for neighbourhood projects we do may 1 thingie
+    Rails.cache.fetch("neighborhood_total_time_#{user.id}_#{project_keys.sort.join(',')}", expires_in: 10.seconds) do
+      result = fetch_combined_project_time_with_date(project_keys, "2025-05-01")
+      if result.nil?
+        Rails.logger.warn "Failed to fetch neighborhood total Hackatime data for user #{user.slack_id} with keys #{project_keys} - using 0"
+        0
+      else
+        result
+      end
+    end
+  end
+
   private
 
-  def fetch_combined_project_time(project_keys)
+  def fetch_combined_project_time_with_date(project_keys, start_date_string)
     return 0 unless user.slack_id.present?
     project_keys_string = project_keys.join(",")
     encoded_project_keys = URI.encode_www_form_component(project_keys_string)
@@ -78,7 +91,7 @@ class UserHackatimeData < ApplicationRecord
     # use utc
     start_time = begin
       Time.use_zone("America/New_York") do
-        Time.parse("2025-06-16").beginning_of_day
+        Time.parse(start_date_string).beginning_of_day
       end
     end.utc
 

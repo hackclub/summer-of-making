@@ -39,9 +39,7 @@ class DevlogsController < ApplicationController
 
     # check time reqs
     unless @project.can_post_devlog?
-      seconds_needed = @project.time_needed
-      redirect_to project_path(@project),
-                  alert: "You need to spend more time on this project before posting a devlog. #{helpers.format_seconds(seconds_needed)} more needed."
+      redirect_to project_path(@project), alert: "You can't post a devlog right now."
       return
     end
 

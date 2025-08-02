@@ -10,6 +10,7 @@
 #  duration_seconds                :integer          default(0), not null
 #  hackatime_projects_key_snapshot :jsonb            not null
 #  hackatime_pulled_at             :datetime
+#  is_neighborhood_migrated        :boolean          default(FALSE), not null
 #  last_hackatime_time             :integer
 #  likes_count                     :integer          default(0), not null
 #  seconds_coded                   :integer

@@ -40,7 +40,7 @@
                 <% if latest_ship_has_payouts %>
                   <% latest_shells = latest_ship_event.payouts.sum(:amount) %>
                   <% total_shells = project.ship_events.sum { |se| se.payouts.sum(:amount) } %>
-                  <p class="text-gray-400">You earned <%= pluralize(latest_shells, "shells") %> on the latest ship and <%= pluralize(total_shells, "shells") %> total!</p>
+                  <p class="text-gray-400">You earned <%= pluralize(latest_shells.to_i, "shells") %> on the latest ship and <%= pluralize(total_shells.to_i, "shells") %> total!</p>
                 <% elsif ship_certified && !latest_ship_has_payouts %>
                   <% if current_user.votes.size < (20 * current_user.unpaid_ship_events_count) %>
                     <p class="text-red-400">Your latest ship is being voted on. You should go vote - hang tight for your payout!</p>

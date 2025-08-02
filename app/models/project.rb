@@ -110,6 +110,16 @@ class Project < ApplicationRecord
     joins(:ship_certifications).where(ship_certifications: { judgement: "pending" })
   }
 
+  # Projects eligible for YSWS review
+  scope :ysws_review_eligible, -> {
+    joins(:ship_certifications)
+      .where(ship_certifications: { judgement: "approved" })
+      .where(ysws_type: nil)
+      .where(is_deleted: false)
+  }
+
+  has_one :ysws_review_submission, class_name: "YswsReview::Submission", dependent: :destroy
+
   validates :title, presence: true, length: { maximum: 200 }
   validates :description, presence: true, length: { maximum: 2500 }
 
@@ -152,6 +162,7 @@ class Project < ApplicationRecord
     converge: "Converge",
     grub: "Grub",
     hackaccino: "Hackaccino",
+    hackcraft: "Hackcraft",
     highway: "Highway",
     jumpstart: "Jumpstart",
     neighborhood: "Neighborhood",
@@ -169,6 +180,7 @@ class Project < ApplicationRecord
     fixit: "FIX IT!",
     twist: "Twist",
     reality: "Reality",
+    endpointer: "Endpointer",
     other: "Other"
   }
 
@@ -183,7 +195,6 @@ class Project < ApplicationRecord
   before_save :filter_hackatime_keys
 
   before_save :remove_duplicate_hackatime_keys
-  before_save :set_default_certification_type
 
   def total_votes
     vote_changes.count
@@ -240,17 +251,22 @@ class Project < ApplicationRecord
   def can_post_devlog?(required_seconds = 300)
     return false unless user.has_hackatime? && hackatime_keys.present?
 
-    unlogged_time >= required_seconds
-  end
+    if has_neighborhood_migrated_devlogs?
+      total_hackatime = user.user_hackatime_data&.fetch_neighborhood_total_time(hackatime_keys) || 0
+      unlogged = [ total_hackatime - total_seconds_coded, 0 ].max
+    else
+      unlogged = unlogged_time
+    end
 
-  def time_needed(required_seconds = 300)
-    return required_seconds unless user.has_hackatime?
-
-    [ required_seconds - unlogged_time, 0 ].max
+    unlogged >= required_seconds
   end
 
   def unlogged_time
     [ coding_time - total_seconds_coded, 0 ].max
+  end
+
+  def has_neighborhood_migrated_devlogs?
+    devlogs.where(is_neighborhood_migrated: true).exists?
   end
 
   def locked_hackatime_keys
@@ -606,10 +622,6 @@ class Project < ApplicationRecord
   def unlerp(start, stop, value)
     return 0.0 if start == stop
     (value - start) / (stop - start).to_f
-  end
-
-  def set_default_certification_type
-    self.certification_type = :cert_other if certification_type.blank?
   end
 
   private

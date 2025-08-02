@@ -55,3 +55,67 @@
     <% end %>
   </tbody>
 </table>
+
+<h1 style="font-size: 2rem;">Voting Quality Dashboard</h1>
+<p style="color: var(--color-muted);">Recent votes flagged for review by AI</p>
+<div style="margin-bottom: 2em;">
+  <%= link_to "← admin dashboard", admin_root_path, class: 'aout' %>
+</div>
+<table class="atable" style="width: 100%; max-width: 900px;">
+  <thead>
+    <tr>
+      <th>Vote ID</th>
+      <th>Voter</th>
+      <th>Project 1</th>
+      <th>Project 2</th>
+      <th>Vote Text</th>
+      <th>AI Feedback</th>
+      <th>Created</th>
+    </tr>
+  </thead>
+  <tbody>
+    <% @flagged_votes.each do |vote, ai_feedback| %>
+      <tr>
+        <td><%= vote.id %></td>
+        <td><%= vote.user&.name || vote.user_id %></td>
+        <td><%= vote.project_1&.name || vote.project_1_id %></td>
+        <td><%= vote.project_2&.name || vote.project_2_id %></td>
+        <td style="max-width: 300px; word-break: break-word;"><%= vote.text %></td>
+        <td style="max-width: 300px; word-break: break-word;"><%= ai_feedback %></td>
+        <td><%= vote.created_at.strftime('%Y-%m-%d %H:%M') %></td>
+      </tr>
+    <% end %>
+  </tbody>
+</table>
+
+<div style="margin: 2em 0;">
+  <%= button_to 'Show Last 15 Votes', admin_voting_dashboard_index_path(show_last_15: true), method: :get, class: 'aout' %>
+</div>
+
+<% if @last_15_votes.present? %>
+  <h2>Last 15 Votes</h2>
+  <table class="atable" style="width: 100%; max-width: 900px;">
+    <thead>
+      <tr>
+        <th>Vote ID</th>
+        <th>Voter</th>
+        <th>Project 1</th>
+        <th>Project 2</th>
+        <th>Vote Text</th>
+        <th>Created</th>
+      </tr>
+    </thead>
+    <tbody>
+      <% @last_15_votes.each do |vote| %>
+        <tr>
+          <td><%= vote.id %></td>
+          <td><%= vote.user&.name || vote.user_id %></td>
+          <td><%= vote.project_1&.name || vote.project_1_id %></td>
+          <td><%= vote.project_2&.name || vote.project_2_id %></td>
+          <td style="max-width: 300px; word-break: break-word;"><%= vote.text %></td>
+          <td><%= vote.created_at.strftime('%Y-%m-%d %H:%M') %></td>
+        </tr>
+      <% end %>
+    </tbody>
+  </table>
+<% end %>

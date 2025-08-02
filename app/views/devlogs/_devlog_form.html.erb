@@ -13,8 +13,14 @@
     </h3>
 
     <%
-      has_hackatime_time = @project.can_post_devlog?
-      time_since_last = [@project.coding_time - @project.total_seconds_coded, 0].max
+      # Calculate time consistently for both display and validation
+      if @project.has_neighborhood_migrated_devlogs?
+        total_hackatime = @project.user.user_hackatime_data&.fetch_neighborhood_total_time(@project.hackatime_keys) || 0
+      else
+        total_hackatime = @project.coding_time
+      end
+      time_since_last = [total_hackatime - @project.total_seconds_coded, 0].max
+      has_hackatime_time = time_since_last >= 300  # 5 minutes
     %>
 
     <%= form_with(model: [@project, @project.devlogs.build], class: "space-y-3 md:space-y-4", data: { controller: "form", action: "submit->form#validateAndPreventDoubleSubmission" }) do |f| %>
@@ -26,7 +32,7 @@
             To post a devlog, you need at least 5 minutes of Hackatime time.
             <% if @project.hackatime_project_keys.present? %>
               <br><br>Your Hackatime time since last devlog is
-              <% time_since_last = [@project.coding_time - @project.total_seconds_coded, 0].max %>
+              <% time_since_last = @project.unlogged_time %>
               <% since_last_hours = time_since_last / 3600 %>
               <% since_last_minutes = (time_since_last % 3600) / 60 %>
               <% since_last_seconds = time_since_last % 60 %>
@@ -42,23 +48,33 @@
             <label class="block text-base md:text-lg 2xl:text-xl mb-2">Time tracked with Hackatime</label>
             <div class="p-3 border-2 border-som-bright rounded-md">
               <div class="text-base md:text-lg">
-                <% total_hackatime_seconds = @project.coding_time %>
+                <% if @project.has_neighborhood_migrated_devlogs? %>
+                  <% total_hackatime_seconds = @project.user.user_hackatime_data&.fetch_neighborhood_total_time(@project.hackatime_keys) || 0 %>
+                <% else %>
+                  <% total_hackatime_seconds = @project.coding_time %>
+                <% end %>
                 <% total_hackatime_hours = total_hackatime_seconds / 3600 %>
                 <% total_hackatime_minutes = (total_hackatime_seconds % 3600) / 60 %>
                 <% total_hackatime_secs = total_hackatime_seconds % 60 %>
-                <div><span class="font-extrabold">Total Hackatime Duration:</span> <%= "#{total_hackatime_hours}h #{total_hackatime_minutes}m #{total_hackatime_secs}s" %></div>
+                <div><span class="font-extrabold">Total Time:</span> <%= "#{total_hackatime_hours}h #{total_hackatime_minutes}m #{total_hackatime_secs}s" %></div>
 
                 <% total_time = @project.total_seconds_coded %>
                 <% total_hours = total_time / 3600 %>
                 <% total_minutes = (total_time % 3600) / 60 %>
                 <% total_seconds = total_time % 60 %>
-                <div><span class="font-extrabold">Tracked in Devlogs:</span> <%= "#{total_hours}h #{total_minutes}m #{total_seconds}s" %></div>
+                <div><span class="font-extrabold">Logged Time:</span> <%= "#{total_hours}h #{total_minutes}m #{total_seconds}s" %></div>
 
-                <% time_since_last = total_hackatime_seconds - total_time %>
+                <% if total_time > total_hackatime_seconds %>
+                  <div class="text-som-dark text-sm mt-1 p-2 rounded">
+                    <span class="font-semibold">Neighborhood Migration:</span> Your devlog hours include time from before Summer of Making. Don't worry your payouts and time are secure!
+                  </div>
+                <% end %>
+                <%# pls do not use @project.unlogged time here! %>
+                <% time_since_last = [total_hackatime_seconds - total_time, 0].max %>
                 <% since_last_hours = time_since_last / 3600 %>
                 <% since_last_minutes = (time_since_last % 3600) / 60 %>
                 <% since_last_seconds = time_since_last % 60 %>
-                <div><span class="font-extrabold">Since Last Devlog:</span> <%= "#{since_last_hours}h #{since_last_minutes}m #{since_last_seconds}s" %></div>
+                <div><span class="font-extrabold">Unlogged Time:</span> <%= "#{since_last_hours}h #{since_last_minutes}m #{since_last_seconds}s" %></div>
                 <%= f.hidden_field :use_hackatime, value: "true" %>
               </div>
             </div>

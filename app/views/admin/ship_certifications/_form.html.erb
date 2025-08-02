@@ -2,56 +2,55 @@
   <% project = ship_certification.project %>
   <% if ship_certification.errors.any? %>
     <div id="error_explanation">
-      <h2><%= pluralize(ship_certification.errors.count, "error") %> prohibited this ship certification from being saved:</h2>
+      <h2 style="color: var(--color-red);"><%= pluralize(ship_certification.errors.count, "error") %> prohibited this ship certification from being saved:</h2>
       <ul>
         <% ship_certification.errors.full_messages.each do |message| %>
-          <li><%= message %></li>
+          <li style="color: var(--color-red);"><%= message %></li>
         <% end %>
       </ul>
     </div>
   <% end %>
 
-  <div class="field">
-    <b>Project ID:</b> <%= project.id %><br>
-    <b>Project:</b> <%= link_to project.title, project %> | <%= link_to "View on Platform", project_path(project), target: "_blank" %><br>
-    <b>User:</b> <%= project.user.display_name %> | <%= link_to "Admin Profile", admin_user_path(project.user), target: "_blank" %><br>
-    <b>Ship Events:</b> <%= project.ship_events.size %><br>
-    <b>Category:</b> <%= project.category&.humanize %><br>
-    <b>Certification Type:</b> <%= project.certification_type&.humanize %><br>
-    <b>Created:</b> <%= project.created_at.strftime("%m/%d/%Y at %I:%M %p") %><br>
-    <b>Last Updated:</b> <%= project.updated_at.strftime("%m/%d/%Y at %I:%M %p") %><br>
+  <div class="field" style="margin-bottom: 1.2em;">
+    <b style="color: var(--color-muted);">Project:</b> <%= link_to project.title, project, style: 'color: var(--color-primary); font-weight: 600; text-decoration: underline;' %> |
+    <%= link_to "View on Platform", project_path(project), target: "_blank", style: 'color: var(--color-primary); font-weight: 600; text-decoration: underline;' %><br>
+    <b style="color: var(--color-muted);">User:</b> <%= project.user.display_name %> |
+    <%= link_to "Admin Profile", admin_user_path(project.user), target: "_blank", style: 'color: var(--color-primary); font-weight: 600; text-decoration: underline;' %><br>
+    <b style="color: var(--color-muted);">Ship Events:</b> <span style="color: var(--color-primary); font-weight: 600;"> <%= project.ship_events.size %></span><br>
+    <b style="color: var(--color-muted);">Certification Type:</b> <span style="color: var(--color-primary); font-weight: 600;"> <%= project.certification_type&.humanize %></span><br>
+    <b style="color: var(--color-muted);">Created:</b> <span style="color: var(--color-primary); font-weight: 600;"> <%= project.created_at.strftime("%m/%d/%Y at %I:%M %p") %></span><br>
+    <b style="color: var(--color-muted);">Last Updated:</b> <span style="color: var(--color-primary); font-weight: 600;"> <%= project.updated_at.strftime("%m/%d/%Y at %I:%M %p") %></span><br>
   </div>
 
   <div class="field">
-    <%= f.label :judgement %>
+    <%= f.label :judgement, nil, style: 'color: var(--color-muted); font-weight: 600;' %>
     <%= f.select :judgement, options_for_select([
       ['Pending', 'pending'],
       ['Approved', 'approved'],
       ['Rejected', 'rejected']
-    ], ship_certification.judgement), {}, { class: 'form-control' } %>
+    ], ship_certification.judgement), {}, { class: 'form-control', style: 'color: var(--color-primary); font-weight: 600; background: var(--color-darker); border-radius: 7px; border: 1px solid var(--color-border); padding: 0.7em 1em; margin-bottom: 0.2em;' } %>
   </div>
 
   <div class="field">
-    <%= f.label :notes %>
-    <%= f.text_area :notes, rows: 4, class: 'form-control' %>
+    <%= f.label :notes, nil, style: 'color: var(--color-muted); font-weight: 600;' %>
+    <%= f.text_area :notes, rows: 4, style: 'padding:0.7em 1em; border-radius:7px; border:1px solid var(--color-border); background:var(--color-darker); color:var(--color-text); font-size:1em; margin-bottom:0.2em; min-height:100px; resize:vertical;' %>
   </div>
 
   <div class="field">
-    <%= f.label :proof_video, "Proof Video" %>
-    <%= f.file_field :proof_video, class: 'form-control' %>
+    <%= f.label :proof_video, "Proof Video", style: 'color: var(--color-muted); font-weight: 600;' %>
+    <%= f.file_field :proof_video, style: 'padding:0.5em 0.2em; background:var(--color-sheet); border-radius:7px; border:1px solid var(--color-border); color:var(--color-text); font-size:1em; margin-bottom:0.2em;' %>
     <% if ship_certification.proof_video.attached? %>
-      <p>Current: <%= link_to ship_certification.proof_video.filename, ship_certification.proof_video, target: "_blank" %></p>
+      <p>Current: <%= link_to ship_certification.proof_video.filename, ship_certification.proof_video, target: "_blank", style: 'color: var(--color-primary); font-weight: 600; text-decoration: underline;' %></p>
     <% end %>
   </div>
 
   <div class="field">
-    <%= f.label :reviewer_id, "Reviewer" %>
-    <%= f.collection_select :reviewer_id, User.where("is_admin = ? OR permissions LIKE ?", true, '%shipcert%'), :id, :email,
-                           { prompt: 'Select reviewer', selected: ship_certification.reviewer_id || current_user.id },
-                           { class: 'form-control' } %>
+    <b style="color: var(--color-muted);">Reviewing as:</b> <span style="color: var(--color-primary); font-weight: 600;"><%= current_user.display_name %></span>
+    <%= f.hidden_field :reviewer_id, value: current_user.id %>
   </div>
 
   <div class="actions">
-    <%= f.submit "Update Ship Certification", class: 'btn btn-primary' %>
+    <%= f.submit "Update Ship Certification", class: 'abtn small' %>
   </div>
+  <i style="color: var(--color-muted); margin-top: 0.5em;">Remember, you are only testing to see "does this work?" You are not checking for hour inflation or other things.</i>
 <% end %>

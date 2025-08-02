@@ -12,6 +12,7 @@ require "cgi"
 #  duration_seconds                :integer          default(0), not null
 #  hackatime_projects_key_snapshot :jsonb            not null
 #  hackatime_pulled_at             :datetime
+#  is_neighborhood_migrated        :boolean          default(FALSE), not null
 #  last_hackatime_time             :integer
 #  likes_count                     :integer          default(0), not null
 #  seconds_coded                   :integer
@@ -40,6 +41,7 @@ class Devlog < ApplicationRecord
   has_many :timer_sessions, dependent: :nullify
   has_many :likes, as: :likeable, dependent: :destroy
   has_one_attached :file
+  has_one :ysws_review_approval, class_name: "YswsReview::DevlogApproval", dependent: :destroy
 
   validates :text, presence: true
   validate :file_must_be_attached, on: %i[ create ]
@@ -73,20 +75,27 @@ class Devlog < ApplicationRecord
 
     # alternatively, record from the beginning of the event
     prev_time ||= begin
-      som_start = Time.use_zone("America/New_York") do
-        Time.parse("2025-06-16").beginning_of_day
-      end.utc
+      # handle neighborhood migration
+      start_date = if is_neighborhood_migrated
+        Time.use_zone("America/New_York") do
+          Time.parse("2025-05-01").beginning_of_day
+        end.utc
+      else
+        Time.use_zone("America/New_York") do
+          Time.parse("2025-06-16").beginning_of_day
+        end.utc
+      end
 
       is_first_devlog = Devlog.where(project_id: project_id).where("created_at < ?", created_at).empty?
 
       if is_first_devlog
-        if created_at.utc < som_start
+        if created_at.utc < start_date
           created_at.utc - 24.hours
         else
-          som_start
+          start_date
         end
       else
-        [ som_start, created_at.utc - 24.hours ].max
+        [ start_date, created_at.utc - 24.hours ].max
       end
     end
 

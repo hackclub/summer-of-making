@@ -7,7 +7,7 @@
       "check_name": "SendFile",
       "message": "Parameter value used in file name",
       "file": "app/controllers/attachments_controller.rb",
-      "line": 55,
+      "line": 64,
       "link": "https://brakemanscanner.org/docs/warning_types/file_access/",
       "code": "send_file(Rails.root.join(\"tmp\", \"uploads\", sanitize(params[:filename])), :disposition => \"inline\")",
       "render_path": null,
@@ -24,13 +24,47 @@
       "note": ""
     },
     {
+      "warning_type": "Cross-Site Scripting",
+      "warning_code": 4,
+      "fingerprint": "4f26ede9019a2ac5d9083aeab1358be372aea7389cee93f3cd59786a13180082",
+      "check_name": "LinkToHref",
+      "message": "Potentially unsafe model attribute in `link_to` href",
+      "file": "app/views/admin/ysws_reviews/show.html.erb",
+      "line": 35,
+      "link": "https://brakemanscanner.org/docs/warning_types/link_to_href",
+      "code": "link_to(\"\\u{1F680} Demo\", Project.find(params[:id]).demo_link, :class => \"pill pill-blue\", :style => \"text-decoration: none; padding: 0.5rem 1rem;\", :target => \"_blank\", :rel => \"noopener\")",
+      "render_path": [
+        {
+          "type": "controller",
+          "class": "Admin::YswsReviewsController",
+          "method": "show",
+          "line": 62,
+          "file": "app/controllers/admin/ysws_reviews_controller.rb",
+          "rendered": {
+            "name": "admin/ysws_reviews/show",
+            "file": "app/views/admin/ysws_reviews/show.html.erb"
+          }
+        }
+      ],
+      "location": {
+        "type": "template",
+        "template": "admin/ysws_reviews/show"
+      },
+      "user_input": "Project.find(params[:id]).demo_link",
+      "confidence": "Weak",
+      "cwe_id": [
+        79
+      ],
+      "note": ""
+    },
+    {
       "warning_type": "File Access",
       "warning_code": 16,
       "fingerprint": "830b6acd278c8e9ed54b5b3ae19108c2241118128eb1467872af4c9ec7950d9b",
       "check_name": "FileAccess",
       "message": "Parameter value used in file name",
       "file": "app/controllers/attachments_controller.rb",
-      "line": 16,
+      "line": 21,
       "link": "https://brakemanscanner.org/docs/warning_types/file_access/",
       "code": "FileUtils.mkdir_p(File.dirname(Rails.root.join(\"tmp\", \"uploads\", \"#{SecureRandom.hex(32)}#{File.extname(params[:file].original_filename).downcase}\")))",
       "render_path": null,
@@ -48,43 +82,33 @@
     },
     {
       "warning_type": "Cross-Site Scripting",
-      "warning_code": 2,
-      "fingerprint": "bd29c55f22e0ba2d5149c71e0d42a9d6766929c5f038d029a45f944fbabd6221",
-      "check_name": "CrossSiteScripting",
-      "message": "Unescaped model attribute",
-      "file": "app/views/shop_items/_item.html.erb",
-      "line": 18,
-      "link": "https://brakemanscanner.org/docs/warning_types/cross_site_scripting",
-      "code": "ShopItem.new.description",
+      "warning_code": 4,
+      "fingerprint": "ba08bacdd570de4d943b278668276695f833a14a10de62323062068530cd9426",
+      "check_name": "LinkToHref",
+      "message": "Potentially unsafe model attribute in `link_to` href",
+      "file": "app/views/admin/ysws_reviews/show.html.erb",
+      "line": 29,
+      "link": "https://brakemanscanner.org/docs/warning_types/link_to_href",
+      "code": "link_to(\"\\u{1F4C1} Repository\", Project.find(params[:id]).repo_link, :class => \"pill pill-gray\", :style => \"text-decoration: none; padding: 0.5rem 1rem;\", :target => \"_blank\", :rel => \"noopener\")",
       "render_path": [
         {
           "type": "controller",
-          "class": "ShopItemsController",
-          "method": "index",
-          "line": 19,
-          "file": "app/controllers/shop_items_controller.rb",
+          "class": "Admin::YswsReviewsController",
+          "method": "show",
+          "line": 62,
+          "file": "app/controllers/admin/ysws_reviews_controller.rb",
           "rendered": {
-            "name": "shop_items/index",
-            "file": "app/views/shop_items/index.html.erb"
-          }
-        },
-        {
-          "type": "template",
-          "name": "shop_items/index",
-          "line": 79,
-          "file": "app/views/shop_items/index.html.erb",
-          "rendered": {
-            "name": "shop_items/_item",
-            "file": "app/views/shop_items/_item.html.erb"
+            "name": "admin/ysws_reviews/show",
+            "file": "app/views/admin/ysws_reviews/show.html.erb"
           }
         }
       ],
       "location": {
         "type": "template",
-        "template": "shop_items/_item"
+        "template": "admin/ysws_reviews/show"
       },
-      "user_input": null,
-      "confidence": "High",
+      "user_input": "Project.find(params[:id]).repo_link",
+      "confidence": "Weak",
       "cwe_id": [
         79
       ],
@@ -97,7 +121,7 @@
       "check_name": "FileAccess",
       "message": "Parameter value used in file name",
       "file": "app/controllers/attachments_controller.rb",
-      "line": 32,
+      "line": 41,
       "link": "https://brakemanscanner.org/docs/warning_types/file_access/",
       "code": "FileUtils.rm_f(Rails.root.join(\"tmp\", \"uploads\", \"#{SecureRandom.hex(32)}#{File.extname(params[:file].original_filename).downcase}\"))",
       "render_path": null,
@@ -114,5 +138,5 @@
       "note": ""
     }
   ],
-  "brakeman_version": "7.0.2"
+  "brakeman_version": "7.1.0"
 }

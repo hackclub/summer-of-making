@@ -25,6 +25,13 @@ module ApplicationHelper
     result.join(" ")
   end
 
+  def formal_seconds(seconds)
+    # Mostly used on admin/reivewer pages where the underlying second count is important
+    # 60 => "60 seconds (1 min)"
+
+    pluralize(seconds, "second") + content_tag("em", " (#{format_seconds(seconds)})")
+  end
+
   def admin_tool(class_name = "", element = "div", show_in_impersonate: false, **, &)
     return unless current_user&.is_admin? || (show_in_impersonate && current_impersonator&.is_admin?)
 

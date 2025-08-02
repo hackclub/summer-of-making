@@ -20,9 +20,8 @@ class AirtableSyncJob < ApplicationJob
 
     airtable_data = sync_records.map do |sync_record|
       record = sync_record.syncable
-      mapped_data = model_class.airtable_field_mappings.transform_values do |field|
-        field.to_s.split(".").reduce(record) { |obj, method| obj&.send(method) }
-      end
+      # Use the instance method airtable_mapped_data for dynamic field mappings
+      mapped_data = record.airtable_mapped_data
 
       {
         sync_record: sync_record,
@@ -40,9 +39,19 @@ class AirtableSyncJob < ApplicationJob
       table.new(data[:airtable_data].merge("som_id" => data[:sync_record].syncable.id.to_s))
     end
 
+    Rails.logger.info "About to batch_upsert #{records.count} records"
+    Rails.logger.info "Sample record data: #{records.first&.fields&.inspect}"
+
     upserted_records = table.batch_upsert(records, "som_id")
 
+    Rails.logger.info "Batch upsert response: #{upserted_records.inspect}"
+
     airtable_records = upserted_records[:records] || []
+
+    Rails.logger.info "Found #{airtable_records.count} records in response"
+    if upserted_records[:errors]&.any?
+      Rails.logger.error "Batch upsert errors: #{upserted_records[:errors].inspect}"
+    end
 
     sync_records.each do |sync_record|
       airtable_record = airtable_records.find do |record|

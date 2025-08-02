@@ -1,0 +1,69 @@
+<body class="adash" style="background: var(--color-background); color: var(--color-text); min-height: 100vh; padding: 2rem;">
+
+<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+  <h1>YSWS Reviews
+    <span class="pill pill-<%= case @filter
+      when 'pending' then 'yellow'
+      when 'reviewed' then 'green'
+      when 'all' then 'dark'
+      else 'gray'
+    end %>" style="font-size: 0.6em; margin-left: 0.5rem;">
+      <%= @filter.capitalize %>
+    </span>
+  </h1>
+</div>
+
+<div style="display: flex; gap: 2rem; margin-bottom: 2rem;">
+  <div style="background: var(--color-card); padding: 1rem; border-radius: 8px; flex: 1;">
+    <h3>Review Stats</h3>
+    <p><strong>Pending Review:</strong> <span class="pill pill-yellow"><%= @total_pending %></span></p>
+    <p><strong>Reviewed:</strong> <span class="pill pill-green"><%= @total_reviewed %></span></p>
+    <p><strong>Total Eligible:</strong> <span class="pill pill-dark"><%= @total_all %></span></p>
+  </div>
+</div>
+
+<div style="display: flex; gap: 1rem; margin-bottom: 2rem;">
+  <%= link_to "Pending", admin_ysws_reviews_path(filter: "pending"),
+      class: "pill #{'pill-yellow' if @filter == 'pending'} #{'pill-gray' unless @filter == 'pending'}",
+      style: "text-decoration: none; padding: 0.5rem 1rem;" %>
+  <%= link_to "Reviewed", admin_ysws_reviews_path(filter: "reviewed"),
+      class: "pill #{'pill-green' if @filter == 'reviewed'} #{'pill-gray' unless @filter == 'reviewed'}",
+      style: "text-decoration: none; padding: 0.5rem 1rem;" %>
+  <%= link_to "All", admin_ysws_reviews_path(filter: "all"),
+      class: "pill #{'pill-dark' if @filter == 'all'} #{'pill-gray' unless @filter == 'all'}",
+      style: "text-decoration: none; padding: 0.5rem 1rem;" %>
+</div>
+
+<div style="background: var(--color-card); border-radius: 8px; overflow: hidden;">
+  <% if @projects.any? %>
+    <% @projects.each_with_index do |project, index| %>
+      <div style="padding: 1rem; border-bottom: 1px solid var(--color-border); <%= 'background-color: var(--color-background-subtle);' if index.even? %>">
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+          <div style="flex: 1;">
+            <h3 style="margin: 0 0 0.5rem 0;">
+              <%= link_to project.title, admin_ysws_review_path(project),
+                  style: "color: var(--color-primary); text-decoration: none;" %>
+            </h3>
+            <p style="margin: 0 0 0.5rem 0; color: var(--color-text-muted);">
+              by <%= project.user.display_name %> • <%= project.devlogs_count %> devlogs
+            </p>
+            <div style="display: flex; gap: 1rem; font-size: 0.9em;">
+              <span><strong>ELO:</strong> <%= @latest_vote_changes[project.id]&.elo_after || "N/A" %></span>
+              <span><strong>Created:</strong> <%= project.created_at.strftime("%b %d, %Y") %></span>
+            </div>
+          </div>
+          <div>
+            <%= link_to "Review", admin_ysws_review_path(project),
+                class: "pill pill-blue", style: "text-decoration: none; padding: 0.5rem 1rem;" %>
+          </div>
+        </div>
+      </div>
+    <% end %>
+  <% else %>
+    <div style="padding: 2rem; text-align: center; color: var(--color-text-muted);">
+      <p>No projects found for the current filter.</p>
+    </div>
+  <% end %>
+</div>
+
+</body>
