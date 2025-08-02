@@ -578,6 +578,10 @@ class User < ApplicationRecord
     AwardBadgesJob.perform_later(id, trigger_event, backfill)
   end
 
+  def completed_todo?
+    devlogs.any? && projects.any? && votes.any? && shop_orders.joins(:shop_item).where.not(shop_items: { type: "ShopItem::FreeStickers" }).any?
+  end
+
   private
 
   def should_mock_verification

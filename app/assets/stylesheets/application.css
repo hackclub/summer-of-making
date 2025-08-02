@@ -101,6 +101,33 @@
   animation: bounce 1s ease-in-out infinite;
 }
 
+@keyframes get-my-attention {
+  0%,
+  100% {
+    transform: translateY(0) rotate(0deg) scale(1);
+  }
+  20%,
+  53%,
+  80% {
+    transform: translateY(0) rotate(-6deg) scale(1.05);
+  }
+  40%,
+  43% {
+    transform: translateY(-10px) rotate(6deg) scale(1.1);
+  }
+  70% {
+    transform: translateY(-6px) rotate(-6deg) scale(1.07);
+  }
+  90% {
+    transform: translateY(-2px) rotate(6deg) scale(1.03);
+  }
+}
+
+.animate-get-my-attention {
+  animation: get-my-attention 1s ease-in-out infinite;
+  will-change: transform;
+}
+
 .modal {
   position: fixed;
   top: 50%;
@@ -136,7 +163,7 @@ main {
 
 /* Angry question mark. Chris calls it angry.¯\_(ツ)_/¯ */
 .tutorial-help-btn {
-  background: #523A52;
+  background: #523a52;
 }
 
 .tutorial-help-btn:hover {

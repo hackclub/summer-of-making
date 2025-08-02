@@ -19,9 +19,16 @@ class TutorialProgressController < ApplicationController
 
     if step_name.present?
       current_user.tutorial_progress.complete_soft_step!(step_name)
-      redirect_back(fallback_location: root_path)
+
+      respond_to do |format|
+        format.html { redirect_back(fallback_location: root_path) }
+        format.json { render json: { success: true } }
+      end
     else
-      redirect_back(fallback_location: root_path, alert: "Invalid step")
+      respond_to do |format|
+        format.html { redirect_back(fallback_location: root_path, alert: "Invalid step") }
+        format.json { render json: { error: "Invalid step" }, status: :bad_request }
+      end
     end
   end
 end

@@ -65,7 +65,31 @@
     <%# end %>
 
     <% if user_signed_in? %>
-      <div data-controller="tutorial">
+      <% if current_user.tutorial_progress.completed? && !mobile_device? %>
+        <div data-controller="todo">
+          <button
+            data-todo-target="todoButton"
+            data-action="click->todo#toggleAndComplete"
+            class="bg-[#523A52] hover:bg-[#856185] fixed hidden top-auto bottom-8 right-6 z-50 w-16 h-16 rounded-full md:flex items-center justify-center transition-all duration-200 hover:scale-110 text-white cursor-pointer drop-shadow-md"
+            title="Show todo for this page">
+            <%= inline_svg "icons/clipboard.svg", class: "size-8" %>
+          </button>
+
+          <!-- Todo Modal -->
+          <%= render "tutorial/todo_modal" %>
+
+          <% if !current_page?(campfire_path) && !current_user.tutorial_progress.soft_step_completed?("todo") && current_user.tutorial_progress.completed? && current_user.projects.empty? %>
+            <div class="bg-black/75 absolute inset-0 z-40 text-white cursor-pointer" data-todo-target="overlay" data-action="click->todo#completeAndHideOverlay">
+              <div class="absolute bottom-24 right-24">
+                <p class="text-3xl pr-8 pb-4">Check your todo list here!</p>
+                <%= inline_svg "swirly-arrow.svg", class: "size-52 rotate-90 ml-auto" %>
+              </div>
+            </div>
+          <% end %>
+        </div>
+      <% end %>
+
+      <div>
         <%= render "tutorial/tutorial" %>
         <% if current_user.tutorial_progress.should_show_completion_modal? %>
           <%= render "tutorial/completion_modal" %>
@@ -107,43 +131,6 @@
                   </main>
                 </div>
               </div>
-            <% end %>
-
-            <!-- Tutorial angry button thingie-->
-            <% soft_step_paths = {
-              campfire: campfire_path,
-              explore: explore_path,
-              my_projects: my_projects_path,
-              vote: new_vote_path,
-              shop: shop_path
-            } %>
-            <% current_soft_step = soft_step_paths.find { |k, v|
-              if k == :explore
-                request.path == '/explore' || current_page?(v)
-              else
-                current_page?(v)
-              end
-            }&.first %>
-            <% should_shake = current_soft_step && !current_user.tutorial_progress.soft_step_completed?(current_soft_step) %>
-            <% if should_shake %>
-              <div class="fixed bottom-16 right-18 z-50" data-tutorial-target="helpButton" data-action="click->tutorial#toggle">
-                <div class="absolute -top-8 -left-24 p-3 bg-[#F3ECD8] rounded-2xl border-4 border-[#E4DCC6] max-w-[120px] animate-pulse -rotate-24">
-                  <div class="text-sm text-som-dark font-bold text-center lg:text-lg">Click me!</div>
-                  <div class="absolute top-full left-1/2 transform -translate-x-1/2 w-0 h-0 border-l-8 border-r-8 border-t-8 border-l-transparent border-r-transparent border-t-[#E4DCC6]"></div>
-                  <div class="absolute top-full left-1/2 transform -translate-x-1/2 translate-y-[-2px] w-0 h-0 border-l-6 border-r-6 border-t-6 border-l-transparent border-r-transparent border-t-[#F3ECD8]"></div>
-                </div>
-                <%= image_tag "tutorial-mascot.png",
-                  class: "w-32 h-32 2xl:w-40 2xl:h-40 cursor-pointer transition-all duration-200 hover:scale-110 animate-bounce -rotate-12",
-                  title: "Show tutorial for this page" %>
-              </div>
-            <% else %>
-              <button id="tutorial-help-btn"
-                data-tutorial-target="helpButton"
-                data-action="click->tutorial#toggle"
-                class="tutorial-help-btn fixed top-4 right-4 md:top-auto md:bottom-8 md:right-6 z-50 w-12 h-12 md:w-16 md:h-16 rounded-full flex items-center justify-center transition-all duration-200 hover:scale-110 bg-gray-600 text-white cursor-pointer drop-shadow-md"
-                title="Show tutorial for this page">
-                <span class="text-2xl font-bold">?</span>
-              </button>
             <% end %>
           </div>
         <% end %>
