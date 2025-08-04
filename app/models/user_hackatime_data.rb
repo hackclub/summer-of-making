@@ -68,6 +68,10 @@ class UserHackatimeData < ApplicationRecord
       .sort_by { |p| p[:name] }
   end
 
+  def languages
+    data&.dig("data", "languages") || []
+  end
+
   def fetch_neighborhood_total_time(project_keys)
     # for neighbourhood projects we do may 1 thingie
     Rails.cache.fetch("neighborhood_total_time_#{user.id}_#{project_keys.sort.join(',')}", expires_in: 10.seconds) do
@@ -95,7 +99,7 @@ class UserHackatimeData < ApplicationRecord
       end
     end.utc
 
-    direct_url = "https://hackatime.hackclub.com/api/v1/users/#{user.slack_id}/stats?filter_by_project=#{encoded_project_keys}&start_date=#{start_time.iso8601}&features=projects&total_seconds=true&test_param=true"
+    direct_url = "https://hackatime.hackclub.com/api/v1/users/#{user.slack_id}/stats?filter_by_project=#{encoded_project_keys}&start_date=#{start_time.iso8601}&features=projects,languages&total_seconds=true&test_param=true"
 
     begin
       headers = { "RACK_ATTACK_BYPASS" => ENV["HACKATIME_BYPASS_KEYS"] }.compact

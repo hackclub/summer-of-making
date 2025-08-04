@@ -250,6 +250,10 @@ class User < ApplicationRecord
     user_hackatime_data&.projects || []
   end
 
+  def hackatime_languages
+    user_hackatime_data&.languages || []
+  end
+
   def format_seconds(seconds)
     return "0h 0m" if seconds.nil? || seconds.zero?
 
@@ -300,7 +304,7 @@ class User < ApplicationRecord
         end_date = Time.parse(to.to_s).utc.freeze
       end
 
-      url = "https://hackatime.hackclub.com/api/v1/users/#{slack_id}/stats?features=projects&start_date=#{start_date}&test_param=true"
+      url = "https://hackatime.hackclub.com/api/v1/users/#{slack_id}/stats?features=projects,languages&start_date=#{start_date}&test_param=true"
       url += "&end_date=#{end_date}" if end_date.present?
 
       Faraday.get(url, nil, { "RACK_ATTACK_BYPASS" => ENV["HACKATIME_BYPASS_KEYS"] }.compact)
