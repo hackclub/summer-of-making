@@ -186,7 +186,7 @@ class UsersController < ApplicationController
     @user = if params[:id] == "me"
       current_user
     else
-      scope = User.includes(:user_profile)
+      scope = User.includes(:user_profile, :user_badges)
       scope = scope.left_joins(:user_profile).where(user_profiles: { hide_from_logged_out: [ false, nil ] }) unless user_signed_in?
       scope.find(params[:id])
     end

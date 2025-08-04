@@ -118,9 +118,11 @@ class VotesController < ApplicationController
                                                   .where.not(id: voted_ship_event_ids)
                                     }
                                   )
+                                  .group("projects.id")
+                                  .having("COUNT(devlogs.id) > 0")
                                   .distinct
 
-    if projects_with_latest_ship.count < 2
+    if projects_with_latest_ship.count.size < 2
       @projects = []
       return
     end
