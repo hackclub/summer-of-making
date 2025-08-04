@@ -429,9 +429,10 @@ class User < ApplicationRecord
     payouts.sum(&:amount)
   end
 
-  def ship_events_count
+  def unpaid_ship_events_count
     projects.joins(:ship_events)
             .left_joins(ship_events: :payouts)
+            .where(payouts: { id: nil })
             .distinct
             .size
   end
