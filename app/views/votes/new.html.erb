@@ -37,7 +37,7 @@
   <%= render "shared/page_title",
       title: "Vote",
       subtitle: "Vote on others' projects! #{Vote.count} votes have been submitted so far!" %>
-  <% more_votes_required = current_user.unpaid_ship_events_count * 20 - @user_vote_count %>
+  <% more_votes_required = current_user.ship_events_count * 20 - @user_vote_count %>
   <% if more_votes_required > 0 %>
     <p class="text-center text-nice-blue text-lg mb-6">You need to vote <%= pluralize(more_votes_required, "more time") %>!</p>
   <% end %>
