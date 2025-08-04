@@ -106,7 +106,6 @@ class VotesController < ApplicationController
     projects_with_latest_ship = Project
                                   .joins(:ship_events)
                                   .joins(:ship_certifications)
-                                  .joins(:devlogs)
                                   .includes(ship_events: :payouts)
                                   .where(ship_certifications: { judgement: :approved })
                                   .where.not(user_id: current_user.id)
@@ -118,11 +117,9 @@ class VotesController < ApplicationController
                                                   .where.not(id: voted_ship_event_ids)
                                     }
                                   )
-                                  .group("projects.id")
-                                  .having("COUNT(devlogs.id) > 0")
                                   .distinct
 
-    if projects_with_latest_ship.count.size < 2
+    if projects_with_latest_ship.count < 2
       @projects = []
       return
     end
@@ -153,6 +150,8 @@ class VotesController < ApplicationController
         ship_date: latest_ship_event.created_at
       }
     end
+
+    projects_with_time = projects_with_time.select { |p| p[:total_time] > 0 }
 
     # sort by ship date – disabled until genesis
     projects_with_time.sort_by! { |p| p[:ship_date] }
