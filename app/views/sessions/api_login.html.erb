@@ -1,0 +1,35 @@
+<%# <div class="px-4 md:px-8 max-w-2xl mx-auto mt-12">
+  <div class="bg-white rounded-xl shadow-lg p-8 border border-gray-200">
+    
+  </div>
+</div> %>
+
+<div class="w-full h-full grid place-items-center p-5 lg:m-0">
+  <%= render "shared/card", classes: "w-full lg:w-2/5 mx-auto" do %>
+    <div class="flex items-center gap-3 mb-4">
+      <div class="w-10 h-10 rounded-lg flex items-center justify-center">
+        <%= inline_svg "slack.svg", class: "w-10 h-10 text-white" %>
+      </div>
+      <h1 class="text-2xl font-bold text-gray-900">Third-party Application Login</h1>
+    </div>
+    <p class="mb-4 text-gray-700">
+      You are about to log into Summer of Making through a third-party client. This will allow
+      the client to access your Summer of Making data and perform actions on your behalf. Ensure the
+      application you are using is trustable and that you understand the permissions it is requesting.
+    </p>
+
+    <p class="mb-4 flex flex-col gap-2 text-gray-700">
+      <b class="text-black">URL: <%= @redirect_uri %></b> 
+      <span>Make sure the URL is correct and matches with the application you will be using.</span>
+    </p>
+
+    <div class="">
+      <div class="flex flex-row items-center gap-4">
+        <button onClick="window.open('/auth/apiredirect?redirect_uri=<%= @redirect_uri %>', '_self')" class="cursor-pointer inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+          Yes, continue to the application.
+        </button>
+        <a href="/" class="text-blue-600 hover:text-blue-700 underline">No, take me back</a>
+      </div>
+    </div>
+  <% end %>
+</div>

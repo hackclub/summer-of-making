@@ -136,4 +136,30 @@ class SessionsController < ApplicationController
     session[:impersonator_user_id] = nil
     redirect_to root_path, notice: "welcome back, 007!"
   end
+
+  # You need to be authenticated so it can just return the session state for the
+  # API to use.
+  def api_login
+    if params[:redirect_uri]
+      begin
+        @redirect_uri = URI.parse(params[:redirect_uri])
+      rescue URI::InvalidURIError
+        render :api_login_error
+      end
+    else
+      render :api_login_error
+    end
+  end
+
+  # This just sends the session cookie so it can be used for auth.
+  def api_redirect
+    if params[:redirect_uri]
+      uri = URI.parse(params[:redirect_uri])
+      existing_params = Rack::Utils.parse_nested_query(uri.query)
+      uri.query = existing_params.merge({ _journey_session: cookies["_journey_session"] }).to_query
+      redirect_to uri.to_s
+    else
+      render :api_login_error
+    end
+  end
 end

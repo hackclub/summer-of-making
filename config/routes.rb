@@ -9,6 +9,8 @@
 #                               auth_slack GET    /auth/slack(.:format)                                                                             sessions#new
 #                           slack_callback GET    /auth/slack/callback(.:format)                                                                    sessions#create
 #                             auth_failure GET    /auth/failure(.:format)                                                                           sessions#failure
+#                            auth_apilogin GET    /auth/apilogin(.:format)                                                                          sessions#api_login
+#                         auth_apiredirect GET    /auth/apiredirect(.:format)                                                                       sessions#api_redirect
 #                                   logout DELETE /logout(.:format)                                                                                 sessions#destroy
 #                               magic_link GET    /magic-link(.:format)                                                                             sessions#magic_link
 #                  identity_vault_callback GET    /users/identity_vault_callback(.:format)                                                          users#identity_vault_callback
@@ -204,6 +206,8 @@ Rails.application.routes.draw do
   get "/auth/slack", to: "sessions#new"
   get "/auth/slack/callback", to: "sessions#create", as: :slack_callback
   get "/auth/failure", to: "sessions#failure"
+  get "/auth/apilogin", to: "sessions#api_login"
+  get "/auth/apiredirect", to: "sessions#api_redirect"
   delete "/logout", to: "sessions#destroy", as: :logout
   delete "/stop_impersonating", to: "sessions#stop_impersonating", as: :stop_impersonating
 
