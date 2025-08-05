@@ -315,6 +315,7 @@ Rails.application.routes.draw do
       resources :devlogs, only: [ :index, :show ]
       resources :comments, only: [ :index, :show ]
       resources :emotes, only: [ :show ]
+      resources :votes, only: [ :new, :create ]
     end
   end
   get "api/check_user", to: "users#check_user"
