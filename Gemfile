@@ -165,3 +165,6 @@ gem "sanitize", "~> 7.0"
 gem "activeinsights"
 
 gem "paper_trail"
+
+# Use rack-cors to configure CORS to be inactive on API routes
+gem "rack-cors"
