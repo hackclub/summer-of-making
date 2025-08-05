@@ -46,7 +46,7 @@
 #                                  devlogs GET    /devlogs(.:format)                                                                                devlogs#index
 #                                    votes POST   /votes(.:format)                                                                                  votes#create
 #                                 new_vote GET    /votes/new(.:format)                                                                              votes#new
-#                               shop_item POST   /shop_item(.:format)                                                                             shop_item#create
+#                               shop_item POST    /shop_item(.:format)                                                                             shop_item#create
 #                            new_shop_item GET    /shop_item/new(.:format)                                                                         shop_item#new
 #                           edit_shop_item GET    /shop_item/:id/edit(.:format)                                                                    shop_item#edit
 #                                shop_item GET    /shop_item/:id(.:format)                                                                         shop_item#show
@@ -81,6 +81,8 @@
 #                          api_v1_comments GET    /api/v1/comments(.:format)                                                                        api/v1/comments#index
 #                           api_v1_comment GET    /api/v1/comments/:id(.:format)                                                                    api/v1/comments#show
 #                             api_v1_emote GET    /api/v1/emotes/:id(.:format)                                                                      api/v1/emotes#show
+#                         api_v1_votes_new GET    /api/v1/votes/new(.:format)                                                                       api/v1/votes#new
+#                      api_v1_votes_create POST   /api/v1/votes(.:format)                                                                           api/v1/votes#create
 #                           api_check_user GET    /api/check_user(.:format)                                                                         users#check_user
 #                              api_devlogs POST   /api/devlogs(.:format)                                                                            devlogs#api_create
 #      users_update_hackatime_confirmation POST   /users/update_hackatime_confirmation(.:format)                                                    users#update_hackatime_confirmation
