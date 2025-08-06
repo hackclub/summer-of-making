@@ -53,7 +53,7 @@ class Shop::WarehousePackage < ApplicationRecord
       contents: contents,
       tags: [ "summer-of-making", "som-warehouse-prize" ],
       recipient_email: user.email,
-      user_facing_title: "Summer of Making – #{headline.join ', '}",
+      user_facing_title: "Summer of Making – #{headline.join ', '}"
     })
     ap response
     update!(theseus_package_id: response.dig("warehouse_order", "id"))

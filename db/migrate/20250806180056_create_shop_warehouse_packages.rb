@@ -1,4 +1,4 @@
-!class CreateShopWarehousePackages < ActiveRecord::Migration[8.0]
+class CreateShopWarehousePackages < ActiveRecord::Migration[8.0]
   def change
     create_table :shop_warehouse_packages do |t|
       t.references :user, null: false, foreign_key: true

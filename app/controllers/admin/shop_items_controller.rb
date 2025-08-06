@@ -161,7 +161,7 @@ module Admin
                                                             :hcb_merchant_lock, :hcb_category_lock, :hcb_keyword_lock, :hcb_preauthorization_instructions,
                                                             :agh_contents, :image, :limited, :stock, :site_action,
                                                             *ShopItem.region_columns)
-      
+
       # Parse agh_contents JSON string if present
       if permitted_params[:agh_contents].present? && permitted_params[:agh_contents].is_a?(String)
         begin
@@ -170,7 +170,7 @@ module Admin
           # Leave as string if JSON is invalid - let model validation handle it
         end
       end
-      
+
       permitted_params
     end
   end
