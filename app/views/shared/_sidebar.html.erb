@@ -70,7 +70,10 @@
               class: "text-3xl"
             },
             underline_attr: { data: { sidebar_target: "underline" } },
-            class: (user_is_banned || !tab_unlocked) ? "opacity-50 cursor-not-allowed" : "cursor-pointer"
+            class: "#{(user_is_banned || !tab_unlocked) ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}
+              #{'animate-get-my-attention' if (current_user.tutorial_progress.completed? && !(current_page?(my_projects_path) ||
+              (controller_name == 'projects' && action_name == 'show')) &&
+              (current_user.projects.empty? || (current_user.devlogs.empty? && current_user.projects.count == 1)))}"
           } %>
         </li>
 

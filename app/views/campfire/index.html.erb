@@ -383,69 +383,63 @@
               <h2 class="text-xl">Todo list:</h2>
             </div>
 
-            <div class="space-y-4">
-              <div class="flex items-center gap-3">
-                <div class="flex-shrink-0">
-                  <input type="checkbox" class="w-5 h-5 text-som-dark border-som-dark rounded-md focus:ring-som-dark focus:ring-2" <%= current_user.projects.any? ? 'checked' : '' %> disabled>
+            <ul class="space-y-2 text-left">
+              <li class="flex items-start">
+                <div class="flex-shrink-0 h-6 w-6 mt-0.5">
+                  <div class="h-5 w-5 border-2 <%= current_user.projects.any? ? 'bg-forest border-forest' : 'border-som-dark' %> flex items-center justify-center">
+                  </div>
                 </div>
-                <div class="flex-1">
-                  <p>Create a project in the <a href="/my_projects" class="text-blue-500 hover:text-blue-700 underline">Projects</a> tab</p>
-                </div>
-              </div>
+                <span class="ml-2 <%= current_user.projects.any? ? 'text-forest' : 'text-som-dark' %>">
+                  Create a project in the <a href="/my_projects" class="text-blue-500 hover:text-blue-700 underline">Projects</a> tab
+                </span>
+              </li>
 
-              <div class="flex items-center gap-3">
-                <div class="flex-shrink-0">
-                  <input type="checkbox" class="w-5 h-5 text-som-dark border-som-dark rounded-md focus:ring-som-dark focus:ring-2" <%= current_user.devlogs.any? ? 'checked' : '' %> disabled>
+              <li class="flex items-start">
+                <div class="flex-shrink-0 h-6 w-6 mt-0.5">
+                  <div class="h-5 w-5 border-2 <%= current_user.devlogs.any? ? 'bg-forest border-forest' : 'border-som-dark' %> flex items-center justify-center">
+                  </div>
                 </div>
-                <div class="flex-1">
-                  <p>Post updates on your devlog as you work</p>
-                </div>
-              </div>
+                <span class="ml-2 <%= current_user.devlogs.any? ? 'text-forest' : 'text-som-dark' %>">
+                  Post updates on your devlog as you work
+                </span>
+              </li>
 
-              <div class="flex items-center gap-3">
-                <div class="flex-shrink-0">
-                  <input type="checkbox" class="w-5 h-5 text-som-dark border-som-dark rounded-md focus:ring-som-dark focus:ring-2" <%= current_user.ship_events.any? ? 'checked' : '' %> disabled>
+              <li class="flex items-start">
+                <div class="flex-shrink-0 h-6 w-6 mt-0.5">
+                  <div class="h-5 w-5 border-2 <%= current_user.ship_events.any? ? 'bg-forest border-forest' : 'border-som-dark' %> flex items-center justify-center">
+                  </div>
                 </div>
-                <div class="flex-1">
-                  <p>Ship your project when it is ready for others to experience</p>
-                </div>
-              </div>
+                <span class="ml-2 <%= current_user.ship_events.any? ? 'text-forest' : 'text-som-dark' %>">
+                  Ship your project when it is ready for others to experience
+                </span>
+              </li>
 
-              <div class="flex items-center gap-3">
-                <div class="flex-shrink-0">
-                  <input type="checkbox" class="w-5 h-5 text-som-dark border-som-dark rounded-md focus:ring-som-dark focus:ring-2" <%= current_user.votes.any? ? 'checked' : '' %> disabled>
+              <li class="flex items-start">
+                <div class="flex-shrink-0 h-6 w-6 mt-0.5">
+                  <div class="h-5 w-5 border-2 <%= current_user.votes.any? ? 'bg-forest border-forest' : 'border-som-dark' %> flex items-center justify-center">
+                  </div>
                 </div>
-                <div class="flex-1">
-                  <p>Vote on other people's projects to receive your shells</p>
-                </div>
-              </div>
+                <span class="ml-2 <%= current_user.votes.any? ? 'text-forest' : 'text-som-dark' %>">
+                  Vote on other people's projects to receive your shells
+                </span>
+              </li>
 
-              <div class="flex items-center gap-3">
-                <div class="flex-shrink-0">
-                  <input type="checkbox" class="w-5 h-5 text-som-dark border-som-dark rounded-md focus:ring-som-dark focus:ring-2" <%= current_user.shop_orders.joins(:shop_item).where.not(shop_items: { type: "ShopItem::FreeStickers" }).any? ? 'checked' : '' %> disabled>
+              <li class="flex items-start">
+                <div class="flex-shrink-0 h-6 w-6 mt-0.5">
+                  <div class="h-5 w-5 border-2 <%= current_user.shop_orders.joins(:shop_item).where.not(shop_items: { type: "ShopItem::FreeStickers" }).any? ? 'bg-forest border-forest' : 'border-som-dark' %> flex items-center justify-center">
+                  </div>
                 </div>
-                <div class="flex-1">
-                  <p>Spend your hard-earned shells in the shop</p>
-                </div>
-              </div>
-            </div>
+                <span class="ml-2 <%= current_user.shop_orders.joins(:shop_item).where.not(shop_items: { type: "ShopItem::FreeStickers" }).any? ? 'text-forest' : 'text-som-dark' %>">
+                  Spend your hard-earned shells in the shop
+                </span>
+              </li>
+            </ul>
           </div>
 
           <div class="grow flex relative">
             <div class="h-auto xl:h-full w-full max-w-lg xl:w-auto xl:ml-auto aspect-video relative">
-              <video id="onboarding" class="absolute inset-0 overflow-clip rounded-md" style="box-sizing: border-box;" src="/onboarding.mp4" poster="/onboarding_poster.png" controls title="Onboarding tutorial video for this page">
+              <video id="onboarding" class="absolute inset-0 overflow-clip rounded-md" style="box-sizing: border-box;" src="/onboarding.mp4" poster="/onboarding_poster.png" controls title="Onboarding tutorial video">
               </video>
-              <div class="absolute z-50 -right-36 xl:left-12 -top-5 xl:-top-3 w-24 hidden md:block">
-                <div class="absolute -top-8 -left-24 p-3 bg-[#F3ECD8] rounded-2xl border-4 border-[#E4DCC6] max-w-[120px] animate-pulse rotate-24 xl:-rotate-24 cursor-pointer" id="onboarding-callout">
-                  <div class="text-[#4A2D24] font-bold text-center text-lg">Click me!</div>
-                  <div class="absolute top-full left-1/2 transform -translate-x-1/2 w-0 h-0 border-l-8 border-r-8 border-t-8 border-l-transparent border-r-transparent border-t-[#E4DCC6]"></div>
-                  <div class="absolute top-full left-1/2 transform -translate-x-1/2 translate-y-[-2px] w-0 h-0 border-l-6 border-r-6 border-t-6 border-l-transparent border-r-transparent border-t-[#F3ECD8]"></div>
-                </div>
-              </div>
-              <%= image_tag "tutorial-mascot.png",
-                class: "absolute hidden md:block -right-24 xl:-left-32 bottom-0 w-32 h-32 xl:w-40 xl:h-40 cursor-pointer transition-all duration-200 hover:scale-110 animate-bounce -rotate-12 xl:rotate-12 xl:-scale-x-100",
-                title: "Show tutorial for this page",
-                id: "onboarding-mascot" %>
             </div>
           </div>
         </div>
@@ -476,6 +470,30 @@
           document.addEventListener("turbo:load", initializeOnboardingVideo);
         </script>
       <% end %>
+    </div>
+  <% end %>
+
+  <!-- Onboarding Video Modal -->
+  <% if current_user.tutorial_progress.completed? && !current_user.tutorial_video_seen? %>
+    <div data-controller="onboarding-video-modal"
+      data-onboarding-video-modal-target="modal"
+      data-action="click->onboarding-video-modal#closeOnBackgroundClick"
+      class="fixed inset-0 bg-black/75 flex items-center justify-center z-50">
+      <div class="relative max-w-4xl w-full mx-4">
+        <button data-onboarding-video-modal-target="closeButton"
+          data-action="click->onboarding-video-modal#close"
+          class="absolute top-4 right-4 text-white p-2 hover:scale-110 transition-transform z-10">
+          <%= inline_svg "icons/close.svg", class: "h-6 w-6 md:h-8 md:w-8" %>
+        </button>
+        <video data-onboarding-video-modal-target="video"
+          data-action="ended->onboarding-video-modal#closeOnVideoEnd"
+          class="w-full rounded-lg"
+          controls
+          poster="/onboarding_poster.png">
+          <source src="/onboarding.mp4" type="video/mp4">
+          Your browser does not support the video tag.
+        </video>
+      </div>
     </div>
   <% end %>
 </div>

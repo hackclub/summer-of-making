@@ -11,7 +11,20 @@
 # It's strongly recommended that you check this file into your version control system.
 
 ActiveRecord::Schema[8.0].define(version: 2025_08_06_180204) do
+  create_schema "auth"
+  create_schema "extensions"
+  create_schema "graphql"
+  create_schema "graphql_public"
+  create_schema "pgbouncer"
+  create_schema "pgsodium"
+  create_schema "realtime"
+  create_schema "storage"
+  create_schema "vault"
+
   # These are extensions that must be enabled in order to support this database
+  enable_extension "extensions.pg_stat_statements"
+  enable_extension "extensions.pgcrypto"
+  enable_extension "extensions.uuid-ossp"
   enable_extension "pg_catalog.plpgsql"
 
   create_table "active_insights_jobs", force: :cascade do |t|
@@ -248,9 +261,9 @@ ActiveRecord::Schema[8.0].define(version: 2025_08_06_180204) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.integer "last_hackatime_time"
-    t.integer "seconds_coded"
     t.integer "likes_count", default: 0, null: false
     t.integer "comments_count", default: 0, null: false
+    t.integer "seconds_coded"
     t.datetime "hackatime_pulled_at"
     t.integer "views_count", default: 0, null: false
     t.integer "duration_seconds", default: 0, null: false
@@ -741,6 +754,19 @@ ActiveRecord::Schema[8.0].define(version: 2025_08_06_180204) do
     t.index ["user_id"], name: "index_user_profiles_on_user_id"
   end
 
+  create_table "user_vote_queues", force: :cascade do |t|
+    t.bigint "user_id", null: false
+    t.jsonb "ship_event_pairs", default: [], null: false
+    t.integer "current_position", default: 0, null: false
+    t.datetime "last_generated_at"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["current_position"], name: "index_user_vote_queues_on_current_position"
+    t.index ["last_generated_at"], name: "index_user_vote_queues_on_last_generated_at"
+    t.index ["user_id"], name: "index_user_vote_queues_on_user_id"
+    t.index ["user_id"], name: "index_user_vote_queues_on_user_id_unique", unique: true
+  end
+
   create_table "users", force: :cascade do |t|
     t.string "slack_id"
     t.string "email"
@@ -843,10 +869,10 @@ ActiveRecord::Schema[8.0].define(version: 2025_08_06_180204) do
 
   create_table "ysws_review_devlog_approvals", force: :cascade do |t|
     t.bigint "devlog_id", null: false
-    t.bigint "user_id", null: false, comment: "The reviewer who made this approval"
+    t.bigint "user_id", null: false
     t.boolean "approved", null: false
-    t.integer "approved_seconds", comment: "Seconds approved by reviewer (may differ from devlog.duration_seconds)"
-    t.text "notes", comment: "Internal notes from the reviewer"
+    t.integer "approved_seconds"
+    t.text "notes"
     t.datetime "reviewed_at", null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
@@ -904,6 +930,7 @@ ActiveRecord::Schema[8.0].define(version: 2025_08_06_180204) do
   add_foreign_key "user_badges", "users"
   add_foreign_key "user_hackatime_data", "users"
   add_foreign_key "user_profiles", "users"
+  add_foreign_key "user_vote_queues", "users"
   add_foreign_key "view_events", "users"
   add_foreign_key "vote_changes", "projects"
   add_foreign_key "vote_changes", "votes"

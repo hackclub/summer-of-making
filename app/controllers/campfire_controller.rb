@@ -12,7 +12,12 @@ class CampfireController < ApplicationController
 
     if params[:mark_video_seen] == "true" && @user.tutorial_progress.completed?
       @user.update!(tutorial_video_seen: true)
-      redirect_to campfire_path and return
+      if request.xhr?
+        render json: { success: true }
+        return
+      else
+        redirect_to campfire_path and return
+      end
     end
 
     if params[:reset].present? && @user&.tutorial_progress

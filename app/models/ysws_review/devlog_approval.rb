@@ -4,15 +4,15 @@
 #
 # Table name: ysws_review_devlog_approvals
 #
-#  id                                                                                       :bigint           not null, primary key
-#  approved                                                                                 :boolean          not null
-#  approved_seconds(Seconds approved by reviewer (may differ from devlog.duration_seconds)) :integer
-#  notes(Internal notes from the reviewer)                                                  :text
-#  reviewed_at                                                                              :datetime         not null
-#  created_at                                                                               :datetime         not null
-#  updated_at                                                                               :datetime         not null
-#  devlog_id                                                                                :bigint           not null
-#  user_id(The reviewer who made this approval)                                             :bigint           not null
+#  id               :bigint           not null, primary key
+#  approved         :boolean          not null
+#  approved_seconds :integer
+#  notes            :text
+#  reviewed_at      :datetime         not null
+#  created_at       :datetime         not null
+#  updated_at       :datetime         not null
+#  devlog_id        :bigint           not null
+#  user_id          :bigint           not null
 #
 # Indexes
 #

@@ -35,6 +35,7 @@ class User < ApplicationRecord
   has_many :projects
   has_many :devlogs
   has_many :votes
+  has_one :user_vote_queue, dependent: :destroy
   has_many :project_follows
   has_many :followed_projects, through: :project_follows, source: :project
   has_many :timer_sessions
@@ -123,21 +124,52 @@ class User < ApplicationRecord
 
   def self.create_from_slack(slack_id)
     user_info = fetch_slack_user_info(slack_id)
+    if user_info.user.is_bot
+      Rails.logger.warn({
+        event: "slack_user_is_bot",
+        slack_id: slack_id,
+        user_info: user_info.to_h
+      }.to_json)
+      return nil
+    end
+
+    email = user_info.user.profile.email
+    display_name = user_info.user.profile.display_name.presence || user_info.user.profile.real_name
+    timezone = user_info.user.tz
+    avatar = user_info.user.profile.image_192 || user_info.user.profile.image_512
 
     Rails.logger.tagged("UserCreation") do
       Rails.logger.info({
         event: "slack_user_found",
         slack_id: slack_id,
-        email: user_info.user.profile.email
+        email: email,
+        display_name: display_name,
+        timezone: timezone,
+        avatar: avatar
       }.to_json)
+    end
+
+    if email.blank? || !(email =~ URI::MailTo::EMAIL_REGEXP)
+      Rails.logger.warn({
+        event: "slack_user_missing_or_invalid_email",
+        slack_id: slack_id,
+        email: email,
+        user_info: user_info.to_h
+      }.to_json)
+      Honeybadger.notify("slack email fuck up???", context: {
+        slack_id: slack_id,
+        email: email,
+        user_info: user_info.to_h
+      })
+      raise StandardError, "slack #{slack_id} has a fuck ass email? #{email.inspect}"
     end
 
     User.create!(
       slack_id: slack_id,
-      display_name: user_info.user.profile.display_name.presence || user_info.user.profile.real_name,
-      email: user_info.user.profile.email,
-      timezone: user_info.user.tz,
-      avatar: user_info.user.profile.image_192 || user_info.user.profile.image_512,
+      display_name: display_name,
+      email: email,
+      timezone: timezone,
+      avatar: avatar,
       permissions: [],
       is_banned: false
     )
@@ -575,6 +607,19 @@ class User < ApplicationRecord
 
   def award_badges_async!(trigger_event = nil, backfill: false)
     AwardBadgesJob.perform_later(id, trigger_event, backfill)
+  end
+
+  def advance_vote_queue!
+    if user_vote_queue
+      result = user_vote_queue.advance_position!
+      result
+    else
+      false
+    end
+  end
+
+  def completed_todo?
+    devlogs.any? && projects.any? && votes.any? && shop_orders.joins(:shop_item).where.not(shop_items: { type: "ShopItem::FreeStickers" }).any?
   end
 
   private
