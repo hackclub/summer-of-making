@@ -41,7 +41,7 @@ module Api
                   {
                     id: d.id,
                     text: d.text,
-                    attachment: url_for(d.file),
+                    attachment: d.file.present? ? url_for(d.file) : nil,
                     time_seconds: d.duration_seconds,
                     likes_count: d.likes_count,
                     comments_count: d.comments_count,
@@ -81,7 +81,12 @@ module Api
       end
 
       def show
-        @project = Project.includes(:user, :followers, devlogs: [ :comments, file_attachment: :blob ]).find(params[:id])
+        begin
+          @project = Project.includes(:user, :followers, devlogs: [ :comments, file_attachment: :blob ]).find(params[:id])
+        rescue ActiveRecord::RecordNotFound
+          render json: { error: "project does not exist" }, status: :not_found
+          return
+        end
         render json: {
           id: @project.id,
           title: @project.title,
@@ -93,7 +98,7 @@ module Api
                 {
                   id: d.id,
                   text: d.text,
-                  attachment: url_for(d.file),
+                  attachment: d.file.present? ? url_for(d.file) : nil,
                   time_seconds: d.duration_seconds,
                   likes_count: d.likes_count,
                   comments_count: d.comments_count,
