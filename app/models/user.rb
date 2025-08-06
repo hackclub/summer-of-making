@@ -123,6 +123,14 @@ class User < ApplicationRecord
 
   def self.create_from_slack(slack_id)
     user_info = fetch_slack_user_info(slack_id)
+    if user_info.user.is_bot
+      Rails.logger.warn({
+        event: "slack_user_is_bot",
+        slack_id: slack_id,
+        user_info: user_info.to_h
+      }.to_json)
+      return nil
+    end
 
     email = user_info.user.profile.email
     display_name = user_info.user.profile.display_name.presence || user_info.user.profile.real_name
