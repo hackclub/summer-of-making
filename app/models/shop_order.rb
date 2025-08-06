@@ -21,18 +21,21 @@
 #  shop_card_grant_id                 :bigint
 #  shop_item_id                       :bigint           not null
 #  user_id                            :bigint           not null
+#  warehouse_package_id               :bigint
 #
 # Indexes
 #
-#  index_shop_orders_on_shop_card_grant_id  (shop_card_grant_id)
-#  index_shop_orders_on_shop_item_id        (shop_item_id)
-#  index_shop_orders_on_user_id             (user_id)
+#  index_shop_orders_on_shop_card_grant_id    (shop_card_grant_id)
+#  index_shop_orders_on_shop_item_id          (shop_item_id)
+#  index_shop_orders_on_user_id               (user_id)
+#  index_shop_orders_on_warehouse_package_id  (warehouse_package_id)
 #
 # Foreign Keys
 #
 #  fk_rails_...  (shop_card_grant_id => shop_card_grants.id)
 #  fk_rails_...  (shop_item_id => shop_items.id)
 #  fk_rails_...  (user_id => users.id)
+#  fk_rails_...  (warehouse_package_id => shop_warehouse_packages.id)
 #
 class ShopOrder < ApplicationRecord
   include AASM
@@ -46,6 +49,7 @@ class ShopOrder < ApplicationRecord
 
   has_many :payouts, as: :payable, dependent: :destroy
   belongs_to :shop_card_grant, optional: true
+  belongs_to :warehouse_package, class_name: "Shop::WarehousePackage", optional: true
 
   validates :quantity, presence: true, numericality: { greater_than: 0 }, on: :create
   validate :check_one_per_person_ever_limit, on: :create
@@ -64,6 +68,8 @@ class ShopOrder < ApplicationRecord
 
   scope :standard_sync, -> { includes(:user).includes(:shop_item).without_item_type(ShopItem::FreeStickers) }
   scope :free_stickers_sync, -> { includes(:user).includes(:shop_item).with_item_type(ShopItem::FreeStickers) }
+
+  def get_agh_contents = shop_item.get_agh_contents(self)
 
   def full_name
     "#{user.display_name}'s order for #{quantity} #{shop_item.name.pluralize(quantity)}"

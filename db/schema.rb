@@ -10,8 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-
-ActiveRecord::Schema[8.0].define(version: 2025_07_30_182737) do
+ActiveRecord::Schema[8.0].define(version: 2025_08_06_180204) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -505,9 +504,21 @@ ActiveRecord::Schema[8.0].define(version: 2025_07_30_182737) do
     t.bigint "shop_card_grant_id"
     t.decimal "fulfillment_cost", precision: 6, scale: 2, default: "0.0"
     t.string "fulfilled_by"
+    t.bigint "warehouse_package_id"
     t.index ["shop_card_grant_id"], name: "index_shop_orders_on_shop_card_grant_id"
     t.index ["shop_item_id"], name: "index_shop_orders_on_shop_item_id"
     t.index ["user_id"], name: "index_shop_orders_on_user_id"
+    t.index ["warehouse_package_id"], name: "index_shop_orders_on_warehouse_package_id"
+  end
+
+  create_table "shop_warehouse_packages", force: :cascade do |t|
+    t.bigint "user_id", null: false
+    t.jsonb "frozen_address", null: false
+    t.string "theseus_package_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["theseus_package_id"], name: "index_shop_warehouse_packages_on_theseus_package_id", unique: true
+    t.index ["user_id"], name: "index_shop_warehouse_packages_on_user_id"
   end
 
   create_table "slack_emotes", force: :cascade do |t|
@@ -874,7 +885,9 @@ ActiveRecord::Schema[8.0].define(version: 2025_07_30_182737) do
   add_foreign_key "shop_card_grants", "users"
   add_foreign_key "shop_orders", "shop_card_grants"
   add_foreign_key "shop_orders", "shop_items"
+  add_foreign_key "shop_orders", "shop_warehouse_packages", column: "warehouse_package_id"
   add_foreign_key "shop_orders", "users"
+  add_foreign_key "shop_warehouse_packages", "users"
   add_foreign_key "solid_queue_blocked_executions", "solid_queue_jobs", column: "job_id", on_delete: :cascade
   add_foreign_key "solid_queue_claimed_executions", "solid_queue_jobs", column: "job_id", on_delete: :cascade
   add_foreign_key "solid_queue_failed_executions", "solid_queue_jobs", column: "job_id", on_delete: :cascade

@@ -137,6 +137,21 @@
   </div>
 </div>
 
+<!-- Warehouse Tracking -->
+<% if @shop_order.warehouse_package&.theseus_package_id.present? %>
+  <div class="asec" style="padding: 1.5em; margin-bottom: 2em;">
+    <h2>warehouse package tracking</h2>
+    <div style="border: 1px solid var(--color-border); border-radius: 6px; overflow: hidden; background: white;">
+      <iframe 
+        src="<%= TheseusService::BASE_URL %>/packages/<%= @shop_order.warehouse_package.theseus_package_id %>/embed"
+        width="100%" 
+        height="400"
+        frameborder="0">
+      </iframe>
+    </div>
+  </div>
+<% end %>
+
 <%= render "admin/shared/internal_notes", { record: @shop_order } %>
 
 <%= render "admin/shop_card_grants/shop_card_grant", shop_order: @shop_order %>

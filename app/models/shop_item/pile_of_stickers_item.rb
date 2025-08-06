@@ -1,5 +1,3 @@
-# frozen_string_literal: true
-
 # == Schema Information
 #
 # Table name: shop_items
@@ -41,14 +39,20 @@
 #  created_at                        :datetime         not null
 #  updated_at                        :datetime         not null
 #
-class ShopItem::WarehouseItem < ShopItem
+class ShopItem::PileOfStickersItem < ShopItem::WarehouseItem
   def get_agh_contents(order)
     return [] unless agh_contents.present?
 
-    agh_contents.map do |content_item|
+    base_qty = agh_contents["base_qty"]
+    possible_stickers = agh_contents["choices"]
+
+    desired_qty = base_qty * order.quantity
+
+    # not an efficient way to do it, but it reads like poetry
+    possible_stickers.shuffle.cycle.take(desired_qty).tally.map do |sku, quantity|
       {
-        sku: content_item["sku"],
-        quantity: content_item["quantity"] * order.quantity
+        sku:,
+        quantity:
       }
     end
   end

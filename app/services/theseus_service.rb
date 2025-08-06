@@ -15,6 +15,10 @@ module TheseusService
       _conn.post("/api/v1/letter_queues/#{queue}", data).body
     end
 
+    def create_warehouse_order(data)
+      _conn.post("/api/v1/warehouse_orders", data).body
+    end
+
     def get_letter(letter_id)
       _conn.get("/api/v1/letters/#{letter_id}").body
     end

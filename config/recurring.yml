@@ -81,6 +81,12 @@ production:
     concurrency: 1
     description: "Process pending letter mail orders and send to Theseus som-fulfillment queue"
 
+  shop_process_warehouse_orders:
+    class: Shop::ProcessWarehouseOrdersJob
+    schedule: every 2 days
+    concurrency: 1
+    description: "Process pending warehouse item orders and create packages for warehouse fulfillment"
+
   airtable_syncable_update:
     class: AirtableSyncableUpdateJob
     schedule: every 2 minutes
