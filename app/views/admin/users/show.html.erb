@@ -557,6 +557,8 @@
       <% else %>
         <%= button_to "grant ship certifier permissions", grant_ship_certifier_admin_user_path(@user), class: "abtn primary" %>
       <% end %>
+
+      <%= button_to "force refresh hackatime", refresh_hackatime_admin_user_path(@user), class: 'abtn secondary' %>
     </div>
   </div>
 </div>
