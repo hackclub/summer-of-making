@@ -6,7 +6,8 @@ module Api
       include Pagy::Backend
 
       def index
-        page = params[:page].to_i
+        page = Integer(params[:page], exception: false) || 1
+        page = 1 if page < 1
         if page < 1
           render json: {
             error: "Page out of bounds"
@@ -15,7 +16,11 @@ module Api
         end
 
         begin
-          pagy, devlogs = pagy(Devlog.all.order(:id), items: 20, page: page) # order by id
+          pagy, devlogs = pagy(
+            Devlog.order(:id).includes(:user, :project, file_attachment: :blob),
+            items: 20,
+            page: page
+          )
         rescue Pagy::OverflowError
           render json: {
             error: "Page out of bounds"
@@ -27,9 +32,9 @@ module Api
           {
             text: devlog.text,
             id: devlog.id,
-            attachment: devlog.attachment,
+            attachment: devlog.file.attached? ? url_for(devlog.file) : nil,
             project_id: devlog.project_id,
-            slack_id: devlog.user.slack_id,
+            slack_id: devlog.user&.slack_id,
             created_at: devlog.created_at,
             updated_at: devlog.updated_at
           }
@@ -47,13 +52,13 @@ module Api
       end
 
       def show
-        @devlog = Devlog.find(params[:id])
+        @devlog = Devlog.includes(:user, :project, file_attachment: :blob).find(params[:id])
         render json: {
           text: @devlog.text,
           id: @devlog.id,
-          attachment: @devlog.attachment,
+          attachment: @devlog.file.attached? ? url_for(@devlog.file) : nil,
           project_id: @devlog.project_id,
-          slack_id: @devlog.user.slack_id,
+          slack_id: @devlog.user&.slack_id,
           created_at: @devlog.created_at,
           updated_at: @devlog.updated_at
         }
