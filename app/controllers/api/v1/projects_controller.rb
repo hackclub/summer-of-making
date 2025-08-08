@@ -14,10 +14,17 @@ module Api
         page = Integer(params[:page], exception: false) || 1
         page = 1 if page < 1
         begin
+          # ?devlogs=true
+          include_devlogs = params[:devlogs] == "true"
+
+          base_scope = Project.where(is_deleted: false)
+                               .includes(:user, :followers, banner_attachment: :blob)
+                               .order(:id)
+
+          base_scope = base_scope.includes(devlogs: [ :comments, { file_attachment: :blob } ]) if include_devlogs
+
           pagy, projects = pagy(
-            Project.where(is_deleted: false)
-                  .includes(:user, :followers, devlogs: [ :comments, file_attachment: :blob ])
-                  .order(:id),
+            base_scope,
             items: 20,
             page: page
           )
@@ -28,6 +35,18 @@ module Api
           return
         end
 
+        devlog_ids_by_project = {}
+        total_seconds_by_project = {}
+        unless include_devlogs
+          project_ids = projects.map(&:id)
+          if project_ids.any?
+            Devlog.where(project_id: project_ids).pluck(:project_id, :id).each do |pid, did|
+              (devlog_ids_by_project[pid] ||= []) << did
+            end
+            total_seconds_by_project = Devlog.where(project_id: project_ids).group(:project_id).sum(:duration_seconds)
+          end
+        end
+
         @projects = projects.map do |project|
           {
             id: project.id,
@@ -36,7 +55,7 @@ module Api
             category: project.category,
             devlogs_count: project.devlogs_count,
             devlogs:
-              if params[:devlogs] == "true"
+              if include_devlogs
                 project.devlogs.map do |d|
                   {
                     id: d.id,
@@ -51,9 +70,9 @@ module Api
                   }
                 end
               else
-                project.devlogs.pluck(:id)
+                devlog_ids_by_project[project.id] || []
               end,
-            total_seconds_coded: project.total_seconds_coded,
+            total_seconds_coded: include_devlogs ? project.total_seconds_coded : (total_seconds_by_project[project.id] || 0),
             is_shipped: project.is_shipped,
             readme_link: project.readme_link,
             demo_link: project.demo_link,
@@ -82,7 +101,7 @@ module Api
 
       def show
         begin
-          @project = Project.includes(:user, :followers, devlogs: [ :comments, file_attachment: :blob ]).find(params[:id])
+          @project = Project.includes(:user, :followers, { banner_attachment: :blob }, devlogs: [ :comments, { file_attachment: :blob } ]).find(params[:id])
         rescue ActiveRecord::RecordNotFound
           render json: { error: "project does not exist" }, status: :not_found
           return
