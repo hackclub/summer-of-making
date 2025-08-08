@@ -88,6 +88,14 @@ module Admin
         .limit(20)
         .pluck("users.display_name", "users.email", "COUNT(ship_certifications.id)")
 
+      @leaderboard_day = User.joins("INNER JOIN ship_certifications ON users.id = ship_certifications.reviewer_id")
+        .where.not(ship_certifications: { reviewer_id: nil })
+        .where("ship_certifications.updated_at >= ?", 24.hours.ago)
+        .group("users.id", "users.display_name", "users.email")
+        .order("COUNT(ship_certifications.id) DESC")
+        .limit(20)
+        .pluck("users.display_name", "users.email", "COUNT(ship_certifications.id)")
+
       @leaderboard_all = User.joins("INNER JOIN ship_certifications ON users.id = ship_certifications.reviewer_id")
         .where.not(ship_certifications: { reviewer_id: nil })
         .group("users.id", "users.display_name", "users.email")
