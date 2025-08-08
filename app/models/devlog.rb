@@ -35,6 +35,7 @@ require "cgi"
 #  fk_rails_...  (user_id => users.id)
 #
 class Devlog < ApplicationRecord
+  include Balloonable
   belongs_to :user
   belongs_to :project, counter_cache: { active: false }
   has_many :comments, -> { order(created_at: :desc) }, dependent: :destroy

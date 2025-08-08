@@ -17,8 +17,10 @@
 #
 class ShipEvent < ApplicationRecord
   include AirtableSyncable
+  include Balloonable
 
   belongs_to :project
+  has_one :user, through: :project
   has_one :ship_event_feedback
   has_many :payouts, as: :payable
 
@@ -39,10 +41,6 @@ class ShipEvent < ApplicationRecord
   def airtable_project_record_ids
     return [] unless project.airtable_synced?
     [ project.airtable_record_id ]
-  end
-
-  def user
-    project.user
   end
 
   def devlogs_since_last

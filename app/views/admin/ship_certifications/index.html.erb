@@ -74,6 +74,30 @@
         <p>nuthing here!</p>
       <% end %>
     </div>
+    <button id="sd" class="abtn small">show daily leaderboard</button>
+    <div id="d" style="display: none; margin-top: 1rem;">
+      <p style="margin-bottom: 0.5rem; font-size: 0.95em; color: var(--color-primary);">Past 24 hours</p>
+      <% if @leaderboard_day && @leaderboard_day.any? %>
+        <table style="width: 100%; font-size: 0.9rem;">
+          <thead>
+            <tr>
+              <th style="text-align: left;">Reviewer</th>
+              <th style="text-align: right;">Reviews</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% @leaderboard_day.each do |name, email, count| %>
+              <tr>
+                <td><%= name || email %></td>
+                <td style="text-align: right;"><%= count %></td>
+              </tr>
+            <% end %>
+          </tbody>
+        </table>
+      <% else %>
+        <p>nuthing here!</p>
+      <% end %>
+    </div>
     <button id="a" class="abtn small">how about all time?</button>
     <div id="c" style="display: none; margin-top: 1rem;">
       <p style="margin-bottom: 0.5rem; font-size: 0.95em; color: var(--color-primary);">All time</p>
@@ -103,10 +127,19 @@
         var a = document.getElementById('a');
         var b = document.getElementById('b');
         var c = document.getElementById('c');
+        var sd = document.getElementById('sd');
+        var d = document.getElementById('d');
+        sd.addEventListener('click', function() {
+          b.style.display = 'none';
+          sd.style.display = 'none';
+          d.style.display = 'block';
+        });
         a.addEventListener('click', function() {
           b.style.display = 'none';
           a.style.display = 'none';
           c.style.display = 'block';
+          sd.style.display = 'none';
+          d.style.display = 'none';
         });
       });
     </script>

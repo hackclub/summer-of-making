@@ -116,8 +116,8 @@
               <% when ShopOrder %>
                 🛒 <%= link_to "ShopOrder ##{payout.payable.id}", admin_shop_order_path(payout.payable) %>
               <% when ShipEvent %>
-                🚢 <%= link_to "ShipEvent ##{payout.payable.id}", project_path(payout.payable.project) %>
-                (<%= payout.payable.project.title %>)
+                🚢 <%= link_to "ShipEvent ##{payout.payable.id}", project_path(payout.payable.project) if payout.payable&.project.present? %>
+                (<%= payout.payable.project&.title || "no project????" %>)
               <% else %>
                 <%= payout.payable.class.name %> #<%= payout.payable.id %>
               <% end %>

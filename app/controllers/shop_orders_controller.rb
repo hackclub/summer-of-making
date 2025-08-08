@@ -2,7 +2,7 @@ class ShopOrdersController < ApplicationController
   before_action :set_shop_order, only: [ :show ]
   before_action :set_shop_item, only: [ :new, :create ]
   before_action :check_freeze, except: [ :index, :show ]
-  # before_action :check_circuit_breaker, only: [ :new, :create ]
+  before_action :check_circuit_breaker, only: [ :new, :create ]
 
   def index
     @orders = current_user.shop_orders.includes(:shop_item).order(created_at: :desc)

@@ -33,6 +33,15 @@
                 placeholder: "Tell us about yourself...",
                 class: "w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-vertical" %>
           </div>
+          <div class="mb-3">
+            <%= form.label :balloon_color, "Favorite Color:", class: "block text-sm font-medium text-gray-700 mb-1" %>
+            <div class="flex items-center space-x-3">
+              <%= form.color_field :balloon_color,
+                  value: (@profile.balloon_color || "#ff6b6b"),
+                  class: "h-5 w-5 border border-gray-300 rounded-md cursor-pointer" %>
+              <span class="text-sm text-gray-600">what is it?</span>
+            </div>
+          </div>
 
           <% if @user.has_badge?(:graphic_design_is_my_passion) %>
             <div>

@@ -14,14 +14,15 @@ module MapHelper
         project_path: project_path(project),
         user: {
           display_name: project.user.display_name,
-          avatar: url_for(project.user.avatar)
+          avatar: url_for(project.user.avatar),
+          favorite_color: project.user.user_profile&.balloon_color
         }
-      }
+      }.compact
     end
   end
 
   def map_projects_query
-    Project.joins(:ship_events).on_map.includes(:user).distinct
+    Project.joins(:ship_events).on_map.includes(user: :user_profile).distinct
   end
 
   def placeable_projects_message(count)
