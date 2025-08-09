@@ -106,7 +106,6 @@ class VotesController < ApplicationController
           queue.refill_queue!(UserVoteQueue::REFILL_THRESHOLD)
         end
       end
-      RefillUserVoteQueueJob.perform_unique_with_args(current_user.id)
     end
 
     Rails.logger.info("bc js work #{@vote_queue.inspect}")
