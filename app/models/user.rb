@@ -19,6 +19,7 @@
 #  internal_notes                       :text
 #  is_admin                             :boolean          default(FALSE), not null
 #  is_banned                            :boolean          default(FALSE)
+#  fraud_team_member                    :boolean          default(FALSE), not null
 #  last_name                            :string
 #  permissions                          :text             default([])
 #  shenanigans_state                    :jsonb
@@ -475,6 +476,10 @@ class User < ApplicationRecord
   # Avo backtraces
   def is_developer?
     slack_id == "U03DFNYGPCN"
+  end
+
+  def fraud_team_member?
+    fraud_team_member
   end
 
   def identity_vault_oauth_link(callback_url)
