@@ -103,7 +103,7 @@ class VotesController < ApplicationController
       queue.save!
       queue.with_lock do
         if queue.queue_exhausted?
-          queue.refill_queue!(UserVoteQueue::REFILL_THRESHOLD)
+          queue.refill_queue!(UserVoteQueue::QUEUE_SIZE)
         end
       end
     end
