@@ -42,6 +42,8 @@
 #  updated_at                        :datetime         not null
 #
 class ShopItem < ApplicationRecord
+  has_paper_trail # this should NOT be necessary, but can't have shit in detroit
+
   include Shop::Regionalizable
 
   def self.fulfill_immediately?

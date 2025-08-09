@@ -33,6 +33,8 @@
 #  slack_id                             :string
 #
 class User < ApplicationRecord
+  has_paper_trail
+
   has_many :projects
   has_many :devlogs
   has_many :votes

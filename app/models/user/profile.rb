@@ -20,6 +20,8 @@
 #  fk_rails_...  (user_id => users.id)
 #
 class User::Profile < ApplicationRecord
+  has_paper_trail
+
   belongs_to :user
 
   validates :bio, length: { maximum: 1000 }, allow_blank: true

@@ -38,6 +38,8 @@
 #  fk_rails_...  (warehouse_package_id => shop_warehouse_packages.id)
 #
 class ShopOrder < ApplicationRecord
+  has_paper_trail
+
   include AASM
   include PublicActivity::Model
   include HasTableSync

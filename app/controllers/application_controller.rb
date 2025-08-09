@@ -5,6 +5,8 @@ class ApplicationController < ActionController::Base
   include PublicActivity::StoreController
   include Pundit::Authorization
 
+  before_action :set_paper_trail_whodunnit
+
   # before_action :try_rack_mini_profiler_enable
 
   # Only allow modern browsers supporting webp images, web push, badges, import maps, CSS nesting, and CSS :has.
@@ -60,6 +62,9 @@ class ApplicationController < ActionController::Base
   def require_admin!
     redirect_to "/" unless current_user && current_user.is_admin?
   end
+
+  def user_for_paper_trail = current_impersonator&.id || current_user&.id
+  def info_for_paper_trail = { extra_data: { impersonating: impersonating?, pretending_to_be: current_impersonator && current_user }.compact_blank }
 
   private
 

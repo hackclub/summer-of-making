@@ -25,6 +25,8 @@
 #  fk_rails_...  (user_id => users.id)
 #
 class YswsReview::DevlogApproval < ApplicationRecord
+  has_paper_trail
+
   self.table_name = "ysws_review_devlog_approvals"
 
   belongs_to :devlog
