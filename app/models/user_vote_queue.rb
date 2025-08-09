@@ -93,11 +93,7 @@ class UserVoteQueue < ApplicationRecord
     Rails.logger.info "After increment: current_position = #{current_position}, increment result = #{result}"
 
     if needs_refill?
-        if Rails.env.development?
-          RefillUserVoteQueueJob.perform_now(user_id)
-        else
-          RefillUserVoteQueueJob.perform_later(user_id)
-        end
+        RefillUserVoteQueueJob.perform_unique_with_args(user_id)
     end
 
     true

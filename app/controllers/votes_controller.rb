@@ -101,7 +101,12 @@ class VotesController < ApplicationController
   def set_projects
     @vote_queue = current_user.user_vote_queue || current_user.build_user_vote_queue.tap do |queue|
       queue.save!
-      RefillUserVoteQueueJob.perform_now(current_user.id)
+      queue.with_lock do
+        if queue.queue_exhausted?
+          queue.refill_queue!(UserVoteQueue::REFILL_THRESHOLD)
+        end
+      end
+      RefillUserVoteQueueJob.perform_unique_with_args(current_user.id)
     end
 
     Rails.logger.info("bc js work #{@vote_queue.inspect}")
