@@ -28,9 +28,9 @@ class UserVoteQueue < ApplicationRecord
 
   validates :current_position, presence: true, numericality: { greater_than_or_equal_to: 0 }
 
-  QUEUE_SIZE = 30
+  QUEUE_SIZE = 15
   # do note that we trigger a refill job if we hit the refill threshold not when we have depelted the queue
-  REFILL_THRESHOLD = 10
+  REFILL_THRESHOLD = 5
 
   scope :needs_refill, -> {
     where("jsonb_array_length(ship_event_pairs) - current_position <= ?", REFILL_THRESHOLD)
@@ -93,7 +93,7 @@ class UserVoteQueue < ApplicationRecord
     Rails.logger.info "After increment: current_position = #{current_position}, increment result = #{result}"
 
     if needs_refill?
-        RefillUserVoteQueueJob.perform_unique_with_args(user_id)
+        refill_queue!
     end
 
     true
