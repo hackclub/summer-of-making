@@ -10,14 +10,10 @@
       <%= f.check_box :fraud_team, { checked: params[:fraud_team] == 'true' }, 'true', '' %>
       Fraud Team
     </label>
-<!--    <label style="display: flex; align-items: center; gap: 0.5em;">-->
-      <%#= f.check_box :black_market, { checked: params[:black_market] == 'true' }, 'true', '' %>
-<!--      Black Market-->
-<!--    </label>-->
-<!--    <label style="display: flex; align-items: center; gap: 0.5em;">-->
-      <%#= f.check_box :ysws_verified, { checked: params[:ysws_verified] == 'true' }, 'true', '' %>
-<!--      YSWS Verified-->
-<!--    </label>-->
+    <label style="display: flex; align-items: center; gap: 0.5em;">
+      <%= f.check_box :black_market, { checked: params[:black_market] == 'true' }, 'true', '' %>
+      heidimart
+    </label>
     <label style="display: flex; align-items: center; gap: 0.5em;">
       <%= f.check_box :ship_certifier, { checked: params[:ship_certifier] == 'true' }, 'true', '' %>
       Ship Certifier
@@ -38,7 +34,7 @@
       <th>Admin</th>
       <th>Ship Certifier</th>
       <th>Fraud Team</th>
-<!--      <th>YSWS Verified</th>-->
+      <th>Black Market</th>
       <th>Actions</th>
     </tr>
   </thead>
@@ -51,7 +47,7 @@
         <td><%= user.is_admin? ? "✓" : "" %></td>
         <td><%= user.ship_certifier? ? "✓" : "" %></td>
         <td><%= user.fraud_team_member? ? "✓" : "" %></td>
-<!--        <td><%#= user.ysws_verified? ? "✓" : "" %></td>-->
+        <td><%= user.has_black_market? ? "✓" : "" %></td>
         <td><%= link_to "View", "/admin/users/#{user.id}", class: 'abtn secondary', style: 'padding: 0.3em 0.8em; font-size: 0.95em;' %></td>
       </tr>
     <% end %>

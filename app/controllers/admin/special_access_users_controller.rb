@@ -16,6 +16,10 @@ module Admin
         @users = @users.where("permissions::jsonb ? 'shipcert'")
       end
 
+      if params[:black_market] == "true"
+        @users = @users.where(has_black_market: true)
+      end
+
       # If no filters are applied, show only users with special access
       if params.slice(:admin, :fraud_team, :ship_certifier).values.none? { |v| v == "true" }
         @users = @users.where(
