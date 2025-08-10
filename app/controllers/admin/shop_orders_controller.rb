@@ -5,6 +5,7 @@ module Admin
     include Pagy::Backend
     before_action :ensure_authorized_user
     before_action :set_shop_order, except: [ :index, :pending, :awaiting_fulfillment ]
+    skip_before_action :authenticate_admin!
 
     def scope
       ShopOrder.all.includes(:user, :shop_item)
