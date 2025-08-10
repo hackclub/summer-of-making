@@ -4,8 +4,7 @@
   { label: "Manual Fulfillment", path: awaiting_fulfillment_admin_shop_orders_path, count: ShopOrder.manually_fulfilled.without_item_type("ShopItem::FreeStickers").where(aasm_state: :awaiting_periodical_fulfillment).count },
   { label: "Users", path: admin_users_path },
   { label: "Reports Dashboard", path: "/admin/fraud_reports" }
-]
-%>
+] %>
 <h1 style="font-size: 2rem;">admin dashboard!</h1>
 <p style="color: var(--color-muted);">you look great today :-)</p>
 <div class="agrid" style="max-width: 700px; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1.2em;">
