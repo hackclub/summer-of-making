@@ -155,13 +155,14 @@
               large: true,
               animate_push: true,
               text_attr: {
-                data: { sidebar_target: "collapseFade" },
-                class: "text-3xl"
+          data: { sidebar_target: "collapseFade" },
+          class: "text-3xl"
               },
               underline_attr: { data: { sidebar_target: "underline" } }
             } %>
           </li>
-        <% elsif current_user&.ship_certifier? %>
+        <% end %>
+        <% if current_user&.ship_certifier? %>
           <li class="flex justify-start border-2 border-dashed border-orange-500 bg-orange-500/10" style="margin-right: 10px; border-radius: 10px;">
             <%= render partial: "shared/link", locals: {
               target: admin_ship_certifications_path,
@@ -170,13 +171,14 @@
               large: true,
               animate_push: true,
               text_attr: {
-                data: { sidebar_target: "collapseFade" },
-                class: "text-3xl"
+          data: { sidebar_target: "collapseFade" },
+          class: "text-3xl"
               },
               underline_attr: { data: { sidebar_target: "underline" } }
             } %>
           </li>
-        <% elsif current_user&.fraud_team_member? %>
+        <% end %>
+        <% if current_user&.fraud_team_member? %>
           <li class="flex justify-start border-2 border-dashed border-red-500 bg-red-500/10" style="margin-right: 10px; border-radius: 10px;">
             <%= render partial: "shared/link", locals: {
               target: pending_admin_shop_orders_path,
