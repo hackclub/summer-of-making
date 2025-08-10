@@ -179,7 +179,7 @@
         <% elsif current_user&.fraud_team_member? %>
           <li class="flex justify-start border-2 border-dashed border-red-500 bg-red-500/10" style="margin-right: 10px; border-radius: 10px;">
             <%= render partial: "shared/link", locals: {
-              target: admin_shop_orders_path,
+              target: pending_admin_shop_orders_path,
               text: "Shop Orders",
               icon: "shop",
               large: true,

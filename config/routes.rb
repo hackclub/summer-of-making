@@ -177,14 +177,6 @@ class AdminConstraint
   end
 end
 
-class FraudTeamConstraint
-  def self.matches?(request)
-    return false unless request.session[:user_id]
-    user = User.find_by(id: request.session[:user_id])
-    user&.fraud_team_member?
-  end
-end
-
 Rails.application.routes.draw do
   # Temporary flash testing routes (remove after testing)
   if Rails.env.development?
@@ -330,41 +322,7 @@ Rails.application.routes.draw do
 
   get "/gork", to: "static_pages#gork"
 
-  namespace :admin, path: "admin/fraud", constraints: FraudTeamConstraint do
-    resources :shop_orders, only: [ :index, :show ] do
-      collection do
-        get :pending
-      end
-      member do
-        post :internal_notes
-        post :approve
-        post :reject
-        post :place_on_hold
-        post :take_off_hold
-      end
-    end
-    resources :users, only: [ :index, :show ] do
-      member do
-        post :internal_notes
-        post :create_payout
-        post :nuke_idv_data
-        post :cancel_card_grants
-        post :freeze
-        post :defrost
-        post :grant_ship_certifier
-        post :revoke_ship_certifier
-        post :give_black_market
-        post :take_away_black_market
-        post :ban_user
-        post :unban_user
-        post :impersonate
-        post :set_hackatime_trust_factor
-        post :refresh_hackatime
-      end
-    end
-  end
-
-  namespace :admin, constraints: AdminConstraint do
+  namespace :admin, constraint: AdminConstraint do
     mount MissionControl::Jobs::Engine, at: "jobs"
     mount AhoyCaptain::Engine, at: "ahoy_captain"
     mount Blazer::Engine, at: "blazer"
