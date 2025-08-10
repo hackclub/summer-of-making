@@ -136,6 +136,12 @@ class ProjectsController < ApplicationController
   def create
     @project = current_user.projects.build(project_params)
 
+    if not_img?(params[:project][:banner])
+      flash.now[:alert] = "That is not a image!"
+      render :index, status: :forbidden
+      return
+    end
+
     if @project.hackatime_project_keys.present?
       @project.hackatime_project_keys = @project.hackatime_project_keys.compact_blank.uniq
     end
@@ -153,6 +159,12 @@ class ProjectsController < ApplicationController
   def update
     if current_user == @project.user || current_user.is_admin?
       update_params = project_params
+
+      if not_img?(update_params[:banner])
+        flash.now[:alert] = "That is not a image!"
+        render :edit, status: :forbidden
+        return
+      end
 
       if update_params[:hackatime_project_keys].present?
         update_params[:hackatime_project_keys] = update_params[:hackatime_project_keys].compact_blank.uniq
@@ -713,5 +725,14 @@ class ProjectsController < ApplicationController
 
   def coordinates_params
     params.require(:project).permit(:x, :y)
+  end
+
+  def not_img?(banner)
+    return false if banner.blank?
+    if banner.respond_to?(:content_type)
+      !banner.content_type.start_with?("image/")
+    else
+      false
+    end
   end
 end
