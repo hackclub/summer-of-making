@@ -146,7 +146,7 @@
           } %>
         </li>
 
-        <% if current_user&.is_admin? %>
+        <% if current_user&.is_admin? || current_user&.fraud_team_member? %>
           <li class="flex justify-start border-2 border-dashed border-orange-500 bg-orange-500/10" style="margin-right: 10px; border-radius: 10px;">
             <%= render partial: "shared/link", locals: {
               target: admin_root_path,
@@ -173,22 +173,6 @@
               text_attr: {
           data: { sidebar_target: "collapseFade" },
           class: "text-3xl"
-              },
-              underline_attr: { data: { sidebar_target: "underline" } }
-            } %>
-          </li>
-        <% end %>
-        <% if current_user&.fraud_team_member? %>
-          <li class="flex justify-start border-2 border-dashed border-red-500 bg-red-500/10" style="margin-right: 10px; border-radius: 10px;">
-            <%= render partial: "shared/link", locals: {
-              target: pending_admin_shop_orders_path,
-              text: "Shop Orders",
-              icon: "shop",
-              large: true,
-              animate_push: true,
-              text_attr: {
-                data: { sidebar_target: "collapseFade" },
-                class: "text-3xl"
               },
               underline_attr: { data: { sidebar_target: "underline" } }
             } %>
