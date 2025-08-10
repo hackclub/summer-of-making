@@ -2,7 +2,8 @@
   { label: "All Orders", path: admin_shop_orders_path },
   { label: "Pending Acceptance", path: pending_admin_shop_orders_path, count: ShopOrder.without_item_type("ShopItem::FreeStickers").where(aasm_state: :pending).count },
   { label: "Manual Fulfillment", path: awaiting_fulfillment_admin_shop_orders_path, count: ShopOrder.manually_fulfilled.without_item_type("ShopItem::FreeStickers").where(aasm_state: :awaiting_periodical_fulfillment).count },
-  { label: "Users", path: admin_users_path }
+  { label: "Users", path: admin_users_path },
+  { label: "Reports Dashboard", path: "/admin/fraud_reports" }
 ]
 %>
 <h1 style="font-size: 2rem;">admin dashboard!</h1>

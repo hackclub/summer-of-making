@@ -1,7 +1,8 @@
 module Admin
   class FraudReportsController < ApplicationController
-    before_action :authenticate_fraud_team!
+    before_action :auth
     before_action :set_fraud_report, only: [ :show, :resolve, :unresolve ]
+    skip_before_action :authenticate_admin!
 
     def index
       @total_reports = FraudReport.count
@@ -28,8 +29,10 @@ module Admin
 
     private
 
-    def authenticate_fraud_team!
-      redirect_to root_path unless current_user&.admin_or_fraud_team_member?
+    def auth
+      unless current_user&.is_admin? || current_user&.fraud_team_member?
+        redirect_to root_path, alert: "whomp whomp"
+      end
     end
 
     def set_fraud_report
