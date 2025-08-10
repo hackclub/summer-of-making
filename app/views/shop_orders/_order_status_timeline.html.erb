@@ -84,13 +84,26 @@
                 <p class="text-lg font-mono text-forest"><%= link_to "click here!", order.shop_card_grant.hcb_url %></p>
               <% elsif (order.shop_item.is_a?(ShopItem::FreeStickers) || order.shop_item.is_a?(ShopItem::LetterMail)) && @letter_status.present? %>
                 <p class="text-sm font-semibold text-forest">Letter Status:</p>
-                <p class="text-lg font-mono text-forest"><%= order.external_ref %></p>
+                <p class="text-lg font-mono text-forest">
+                  <% m = order.external_ref&.start_with?("ltr!") ? "https://mail.hackclub.com/#{order.external_ref}" : nil %>
+                  <% if m %>
+                    <%= link_to order.external_ref, m, target: "_blank", class: "underline" %>
+                  <% else %>
+                    <%= order.external_ref %>
+                  <% end %>
+                </p>
                 <div class="mt-2 text-sm text-forest">
                   <p><strong>Status:</strong> <%= @letter_status.dig(:letter, :status)&.humanize || 'Unknown' %></p>
                 </div>
               <% else %>
                 <p class="text-sm font-semibold text-forest">Tracking:</p>
-                <p class="text-lg font-mono text-forest"><%= order.external_ref %></p>
+                <p class="text-lg font-mono text-forest">
+                  <% if m %>
+                    <%= link_to order.external_ref, m, target: "_blank", class: "underline" %>
+                  <% else %>
+                    <%= order.external_ref %>
+                  <% end %>
+                </p>
               <% end %>
             </div>
           <% end %>
@@ -132,23 +145,23 @@
           <% end %>
         <% else %>
           <% case order.shop_item.type %>
-        <% when /Grant/i %>
-            <li>• Grant requests are reviewed by our team</li>
-            <li>• Approved grants are automatically processed</li>
-          <% when /HQMail/i %>
-            <li>• Mail is sent directly from Hack Club HQ</li>
-            <li>• Typical processing time: 2-4 business days</li>
-            <li>• Personal touch from the Hack Club team</li>
-          <% when /LetterMail/i %>
-            <li>• Letters are batched and mailed every few days</li>
-          <% when /Special/i %>
-            <li>• This item requires special coordination by our team</li>
-            <li>• Processing time varies based on the specific request</li>
-            <li>• Someone from Hack Club will be in touch!</li>
-          <% else %>
-            <li>• Orders are processed during business hours</li>
-            <li>• Typical processing time: 3-5 business days</li>
-            <li>• You'll receive tracking info here once shipped</li>
+            <% when /Grant/i %>
+              <li>• Grant requests are reviewed by our team</li>
+              <li>• Approved grants are automatically processed</li>
+            <% when /HQMail/i %>
+              <li>• Mail is sent directly from Hack Club HQ</li>
+              <li>• Typical processing time: 2-4 business days</li>
+              <li>• Personal touch from the Hack Club team</li>
+            <% when /LetterMail/i %>
+              <li>• Letters are batched and mailed every few days</li>
+            <% when /Special/i %>
+              <li>• This item requires special coordination by our team</li>
+              <li>• Processing time varies based on the specific request</li>
+              <li>• Someone from Hack Club will be in touch!</li>
+            <% else %>
+              <li>• Orders are processed during business hours</li>
+              <li>• Typical processing time: 3-5 business days</li>
+              <li>• You'll receive tracking info here once shipped</li>
           <% end %>
         <% end %>
         <li>• Questions? Contact our support team</li>
