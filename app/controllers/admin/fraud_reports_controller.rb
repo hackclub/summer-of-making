@@ -1,5 +1,6 @@
 module Admin
   class FraudReportsController < ApplicationController
+    before_action :authenticate_fraud_team!
     before_action :set_fraud_report, only: [ :show, :resolve, :unresolve ]
 
     def index
@@ -26,6 +27,10 @@ module Admin
     end
 
     private
+
+    def authenticate_fraud_team!
+      redirect_to root_path unless current_user&.admin_or_fraud_team_member?
+    end
 
     def set_fraud_report
       @fraud_report = FraudReport.find(params[:id])

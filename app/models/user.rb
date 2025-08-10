@@ -434,6 +434,10 @@ class User < ApplicationRecord
     is_admin? || ship_certifier?
   end
 
+  def admin_or_fraud_team_member?
+    is_admin? || fraud_team_member?
+  end
+
   def blue_check?
     has_badge?(:verified)
   end
