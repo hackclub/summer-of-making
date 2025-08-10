@@ -231,6 +231,28 @@ module Admin
       redirect_to admin_user_path(@user)
     end
 
+    def grant_fraud_reviewer
+      if @user.fraud_team_member?
+        flash[:notice] = "#{@user.email} nothing changed, they already have fraud reviewer permissions"
+      else
+        @user.update!(fraud_team_member: true)
+        @user.create_activity("grant_fraud_reviewer")
+        flash[:success] = "gotcha, granted fraud reviewer rights to #{@user.email}"
+      end
+      redirect_to admin_user_path(@user)
+    end
+
+    def revoke_fraud_reviewer
+      unless @user.fraud_team_member?
+        flash[:notice] = "#{@user.email} nothing changed, they don't have fraud reviewer permissions"
+      else
+        @user.update!(fraud_team_member: false)
+        @user.create_activity("revoke_fraud_reviewer")
+        flash[:success] = "gotcha, revoked fraud reviewer rights from #{@user.email}"
+      end
+      redirect_to admin_user_path(@user)
+    end
+
     private
 
     def ensure_authorized_user
