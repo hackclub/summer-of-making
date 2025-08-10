@@ -408,6 +408,7 @@ Rails.application.routes.draw do
         post :refresh_hackatime
       end
     end
+    resources :special_access_users, only: [ :index ]
     resources :shop_items
     resources :projects, only: [] do
       member do
