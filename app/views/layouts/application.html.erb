@@ -27,15 +27,9 @@
     <script defer data-domain="summer.hackclub.com" src="https://plausible.io/js/script.file-downloads.hash.outbound-links.tagged-events.js"></script>
     <script>
       window.plausible = window.plausible || function() { (window.plausible.q = window.plausible.q || []).push(arguments) }
-      <% if user_signed_in? %>
-        window.flipperFlags = {
-          realTimeBalloons: <%= Flipper.enabled?(:real_time_balloons_2025_08_11, current_user) %>
-        }
-      <% else %>
-        window.flipperFlags = {
-          realTimeBalloons: false
-        }
-      <% end %>
+      window.flipperFlags = {
+          realTimeBalloons: <%= Flipper.enabled?(:real_time_balloons_2025_08_11, current_user).to_json %>
+      }
     </script>
 
     <script>
@@ -74,7 +68,7 @@
     <div id="balloon-template" style="display: none;">
       <%= inline_svg "balloon.svg", width: "60", height: "80" %>
     </div>
-    
+
     <%# admin_tool do %>
       <%# render "shared/stonk_tickler_marquee" %>
     <%# end %>
