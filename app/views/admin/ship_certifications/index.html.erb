@@ -63,7 +63,7 @@
           </thead>
           <tbody>
             <% @leaderboard_week.each do |name, email, count| %>
-              <tr>
+              <tr style="background: <%= cycle('#1c1b22', '#414142') %>;">
                 <td><%= name || email %></td>
                 <td style="text-align: right;"><%= count %></td>
               </tr>
