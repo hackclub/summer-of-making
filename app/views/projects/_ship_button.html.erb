@@ -1,14 +1,27 @@
 <% if !project.is_shipped %>
-  <%= render "shared/button",
-      text: "Ship It!",
-      kind: "primary",
-      icon: "ship.svg",
-      data: {
-        controller: "modal",
-        action: "modal#open",
-        modal_id: "#{project.id}",
-        modal_type: "is_shipped"
-      } %>
+  <% if policy(project).can_see_certification_details? && project.latest_ship_certification&.rejected? %>
+    <%= render "shared/button",
+        text: "Ship It!",
+        kind: "primary",
+        icon: "ship.svg",
+        data: {
+          controller: "modal",
+          action: "click->modal#open",
+          modal_id: "#{project.id}",
+          modal_type: "certification"
+        } %>
+  <% else %>
+    <%= render "shared/button",
+        text: "Ship It!",
+        kind: "primary",
+        icon: "ship.svg",
+        data: {
+          controller: "modal",
+          action: "modal#open",
+          modal_id: "#{project.id}",
+          modal_type: "is_shipped"
+        } %>
+  <% end %>
 <% else %>
   <%= render "shared/button",
       text: "Shipped!",

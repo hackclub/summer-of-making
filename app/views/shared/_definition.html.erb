@@ -1,0 +1,244 @@
+<%#
+  Precuror to hackclub/glossary... eventually
+
+  Locals:
+    - term: Optional heading word (e.g., "esoteric")
+    - subtitle: Optional secondary label (e.g., "adjective")
+    - pronunciation: Optional phonetic string (simple text)
+    - definition: Required primary definition text
+    - examples: Optional Array[String] of example usages
+    - compare_label: Optional label for compare row (default: "Compare")
+    - compare_to: Optional String to display as comparison target
+    - mysterious: Optional Boolean for a vignette + watermark variant (default: false)
+
+  Usage:
+    <%= render "shared/definition",
+          term: "Kartikey",
+          subtitle: "proper noun",
+          definition: "the best som developer named after the hindu god of war",
+          examples: ["Kartikey is the best som developer"],
+          compare_to: "Chris"
+%>
+
+<%
+  compare_label = local_assigns.fetch(:compare_label, "Compare")
+  examples = Array(local_assigns[:examples]).compact
+  mysterious = local_assigns.fetch(:mysterious, false)
+%>
+
+<section class="definition-paper <%= 'definition-mood-mysterious' if mysterious %> text-som-dark">
+  <% if local_assigns[:term].present? || local_assigns[:subtitle].present? || local_assigns[:pronunciation].present? %>
+    <header class="mb-2 md:mb-3">
+      <div class="flex items-baseline gap-3 flex-wrap">
+        <% if local_assigns[:term].present? %>
+          <h2 class="definition-term text-xl md:text-2xl tracking-tight"><%= term %></h2>
+        <% end %>
+        <% if local_assigns[:subtitle].present? %>
+          <span class="definition-pos uppercase text-[11px] md:text-xs tracking-[0.18em]"><%= subtitle %></span>
+        <% end %>
+        <% if local_assigns[:pronunciation].present? %>
+          <span class="definition-ipa text-xs md:text-sm">/<%= pronunciation %>/</span>
+        <% end %>
+      </div>
+    </header>
+  <% end %>
+
+  <div class="leading-snug md:leading-normal text-[15px] md:text-base">
+    <%# term line %>
+    <p class="definition-line"><%= definition.respond_to?(:html_safe) ? definition : h(definition) %></p>
+
+    <% if examples.any? %>
+      <ul class="mt-2 space-y-1">
+        <% examples.each do |ex| %>
+          <li class="definition-example">“<%= ex %>”</li>
+        <% end %>
+      </ul>
+    <% end %>
+
+    <%# extended body after examples %>
+    <% if local_assigns[:body_html].present? %>
+      <div class="mt-3">
+        <%= local_assigns[:body_html].respond_to?(:html_safe) ? local_assigns[:body_html] : h(local_assigns[:body_html]) %>
+      </div>
+    <% end %>
+
+    <% if local_assigns[:compare_to].present? %>
+      <div class="mt-3 pt-2 border-t border-black/10 text-xs md:text-sm">
+        <span class="opacity-60"><%= compare_label %></span>
+        <span class="underline decoration-black/20 underline-offset-2 ml-1"><%= compare_to %></span>
+      </div>
+    <% end %>
+  </div>
+</section>
+
+<%# thanks claude! - this is mostly AI generated with minimal human tweaks. If you'd like to change it go ahead. %>
+<% content_for :head do %>
+  <style>
+    .definition-paper {
+      --paper: #ffffff;
+      --ink: #4a2d24;
+      --deckle-shadow: rgba(0,0,0,0.08);
+      --deckle-shadow-strong: rgba(0,0,0,0.12);
+      --font-print-serif: ui-serif, Georgia, Cambria, "Times New Roman", Times, serif;
+
+      position: relative;
+      border: 0;
+      padding: 16px 18px;
+      color: var(--ink);
+      font-family: var(--font-print-serif);
+      background:
+        radial-gradient(120% 90% at 50% 0%, rgba(0,0,0,0.03), rgba(0,0,0,0) 40%),
+        linear-gradient(0deg, rgba(255,255,255,0.78), rgba(255,255,255,0.78)),
+        url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100' height='100' viewBox='0 0 100 100'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100' height='100' filter='url(%23noise)' opacity='0.05'/%3E%3C/svg%3E"),
+        url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='80' height='80' viewBox='0 0 80 80'%3E%3Cg fill='%23a8956b' fill-opacity='0.025'%3E%3Cpath d='M0 0h10v10H0zm10 10h10v10H10zm10 0h10v10H20zm10 10h10v10H30zm10 0h10v10H40zm10 10h10v10H50zm10 0h10v10H60zm10 10h10v10H70zm0-20h10v10H70zm-10 0h10v10H60zm-10-10h10v10H50zm-10 0h10v10H40zm-10-10h10v10H30zm-10 0h10v10H20zm-10 10h10v10H10zM0 20h10v10H0zm0 10h10v10H0zm0 10h10v10H0zm0 10h10v10H0zm10 0h10v10H10zm10 0h10v10H20zm10 0h10v10H30z'/%3E%3C/g%3E%3C/svg%3E"),
+        var(--paper);
+      background-blend-mode: normal, normal, multiply, multiply, normal;
+      filter:
+        drop-shadow(0 2px 0 var(--deckle-shadow))
+        drop-shadow(0 14px 22px var(--deckle-shadow-strong));
+      overflow: hidden;
+      /* Torn top+bottom via clip-path (fallback keeps rounded rect if unsupported) */
+      -webkit-clip-path: polygon(
+        0% 8px, 4% 0%, 8% 9px, 12% 2px, 16% 10px, 20% 3px, 24% 9px, 28% 1px, 32% 10px, 36% 2px,
+        40% 8px, 44% 0%, 48% 9px, 52% 2px, 56% 10px, 60% 3px, 64% 9px, 68% 1px, 72% 10px, 76% 2px,
+        80% 8px, 84% 0%, 88% 9px, 92% 2px, 96% 10px, 100% 6px,
+        100% calc(100% - 6px), 96% 100%, 92% calc(100% - 8px), 88% 100%, 84% calc(100% - 7px), 80% 100%,
+        76% calc(100% - 6px), 72% 100%, 68% calc(100% - 8px), 64% 100%, 60% calc(100% - 7px), 56% 100%,
+        52% calc(100% - 6px), 48% 100%, 44% calc(100% - 8px), 40% 100%, 36% calc(100% - 7px), 32% 100%,
+        28% calc(100% - 6px), 24% 100%, 20% calc(100% - 8px), 16% 100%, 12% calc(100% - 7px), 8% 100%,
+        4% calc(100% - 6px), 0% 100%
+      );
+      clip-path: polygon(
+        0% 8px, 4% 0%, 8% 9px, 12% 2px, 16% 10px, 20% 3px, 24% 9px, 28% 1px, 32% 10px, 36% 2px,
+        40% 8px, 44% 0%, 48% 9px, 52% 2px, 56% 10px, 60% 3px, 64% 9px, 68% 1px, 72% 10px, 76% 2px,
+        80% 8px, 84% 0%, 88% 9px, 92% 2px, 96% 10px, 100% 6px,
+        100% calc(100% - 6px), 96% 100%, 92% calc(100% - 8px), 88% 100%, 84% calc(100% - 7px), 80% 100%,
+        76% calc(100% - 6px), 72% 100%, 68% calc(100% - 8px), 64% 100%, 60% calc(100% - 7px), 56% 100%,
+        52% calc(100% - 6px), 48% 100%, 44% calc(100% - 8px), 40% 100%, 36% calc(100% - 7px), 32% 100%,
+        28% calc(100% - 6px), 24% 100%, 20% calc(100% - 8px), 16% 100%, 12% calc(100% - 7px), 8% 100%,
+        4% calc(100% - 6px), 0% 100%
+      );
+    }
+
+    /* Subtle paper grain */
+    .definition-paper::after {
+      content: "";
+      pointer-events: none;
+      position: absolute;
+      inset: 0;
+      background-image:
+        url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120' viewBox='0 0 120 120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0' /%3E%3CfeComponentTransfer%3E%3CfeFuncA type='table' tableValues='0 0.07'/%3E%3C/feComponentTransfer%3E%3C/filter%3E%3Crect width='120' height='120' filter='url(%23n)'/%3E%3C/svg%3E");
+      opacity: 0.12;
+      mix-blend-mode: multiply;
+    }
+
+    /* Mysterious variant: vignette + faint sigil watermark */
+    .definition-paper.definition-mood-mysterious {
+      background:
+        radial-gradient(120% 90% at 50% 0%, rgba(0,0,0,0.06), rgba(0,0,0,0) 36%),
+        linear-gradient(0deg, rgba(255,255,245,0.85), rgba(255,255,245,0.85)),
+        url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100' height='100' viewBox='0 0 100 100'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100' height='100' filter='url(%23noise)' opacity='0.06'/%3E%3C/svg%3E"),
+        url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='80' height='80' viewBox='0 0 80 80'%3E%3Cg fill='%234a2d24' fill-opacity='0.03'%3E%3Cpath d='M0 0h10v10H0zm10 10h10v10H10zm10 0h10v10H20zm10 10h10v10H30zm10 0h10v10H40zm10 10h10v10H50zm10 0h10v10H60zm10 10h10v10H70zm0-20h10v10H70zm-10 0h10v10H60zm-10-10h10v10H50zm-10 0h10v10H40zm-10-10h10v10H30zm-10 0h10v10H20zm-10 10h10v10H10zM0 20h10v10H0zm0 10h10v10H0zm0 10h10v10H0zm0 10h10v10H0zm10 0h10v10H10zm10 0h10v10H20zm10 0h10v10H30z'/%3E%3C/g%3E%3C/svg%3E"),
+        #fbf7ef;
+      background-blend-mode: normal, normal, multiply, multiply, normal;
+      filter:
+        drop-shadow(0 4px 0 var(--deckle-shadow))
+        drop-shadow(0 18px 28px var(--deckle-shadow-strong));
+    }
+
+    .definition-paper.definition-mood-mysterious::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      background:
+        radial-gradient(130% 110% at 50% 12%, rgba(0,0,0,0) 52%, rgba(0,0,0,0.18) 100%),
+        linear-gradient(180deg, rgba(60,40,20,0.06), rgba(0,0,0,0));
+      mix-blend-mode: multiply;
+      transition: opacity 220ms ease;
+      opacity: 0.75;
+    }
+
+    .definition-paper.definition-mood-mysterious:hover::before {
+      opacity: 0.8;
+    }
+
+    .definition-paper.definition-mood-mysterious::after {
+      background-image:
+        url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120' viewBox='0 0 120 120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0' /%3E%3CfeComponentTransfer%3E%3CfeFuncA type='table' tableValues='0 0.07'/%3E%3C/feComponentTransfer%3E%3C/filter%3E%3Crect width='120' height='120' filter='url(%23n)'/%3E%3C/svg%3E"),
+        url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 240 240'%3E%3Cg fill='none' stroke='%234a2d24' stroke-opacity='0.28' stroke-width='1.2'%3E%3Ccircle cx='120' cy='120' r='86'/%3E%3Ccircle cx='120' cy='120' r='62'/%3E%3Cpath d='M120 26 L144 120 L120 214 L96 120 Z'/%3E%3Cpath d='M26 120 L120 96 L214 120 L120 144 Z'/%3E%3C/g%3E%3C/svg%3E");
+      background-repeat: repeat, no-repeat;
+      background-position: 0 0, 85% 12%;
+      background-size: auto, 220px 220px;
+      opacity: 0.28;
+      transform-origin: 85% 12%;
+      /* animation: sigil-slow-spin 30s linear infinite; */
+    }
+
+    @keyframes sigil-slow-spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    .definition-line {
+      text-rendering: optimizeLegibility;
+      -webkit-font-smoothing: antialiased;
+      font-weight: 600;
+      font-family: var(--font-print-serif);
+    }
+
+    .definition-example {
+      list-style: none;
+      font-style: italic;
+      color: rgba(74, 45, 36, 0.85);
+      position: relative;
+      padding-left: 18px;
+      font-family: var(--font-print-serif);
+    }
+
+    .definition-example::before {
+      content: "•";
+      position: absolute;
+      left: 0;
+      top: 0;
+      color: rgba(74, 45, 36, 0.5);
+    }
+
+    /* Typography accents */
+    .definition-term {
+      font-family: var(--font-pagaki), var(--font-national-park), ui-serif, Georgia, serif;
+      font-weight: 800;
+      letter-spacing: 0.2px;
+      text-shadow: 0 1px 0 rgba(255, 255, 255, 0.55);
+    }
+
+    .definition-mood-mysterious .definition-term {
+      text-shadow:
+        0 1px 0 rgba(255,255,255,0.6),
+        0.6px 0.6px 0 rgba(0,0,0,0.18);
+    }
+
+    .definition-pos {
+      color: var(--color-som-detail);
+      font-family: var(--font-print-serif);
+      font-variant-caps: small-caps;
+      letter-spacing: 0.12em;
+      font-weight: 700;
+      opacity: 0.9;
+    }
+
+    .definition-ipa {
+      opacity: 0.7;
+      font-weight: 600;
+      font-family: var(--font-print-serif);
+    }
+
+    .definition-mood-mysterious .definition-line {
+      text-shadow: 0.45px 0.45px 0 rgba(0,0,0,0.12);
+    }
+
+    @media (min-width: 768px) {
+      .definition-paper { padding: 20px 22px; }
+    }
+  </style>
+<% end %>

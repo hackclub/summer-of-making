@@ -59,7 +59,7 @@
     <% end %>
   </head>
 
-  <body class="min-h-[100dvh] font-national-park font-bold text-som-dark">
+  <body class="min-h-[100dvh] font-national-park font-bold text-som-dark overflow-hidden">
     <%# admin_tool do %>
       <%# render "shared/stonk_tickler_marquee" %>
     <%# end %>
@@ -141,7 +141,7 @@
       <div id="modals"></div>
     </div>
 
-    <% if user_signed_in? && Flipper.enabled?(:sinkening, current_user) && SinkeningSetting.intensity > 0 && !current_page?(map_path) %>
+    <% if user_signed_in? && Flipper.enabled?(:sinkening, current_user) && SinkeningSetting.intensity > 0 && !current_page?(map_path) && !Flipper.enabled?(:disable_sinkening_visuals, current_user) %>
       <div class="w-full overflow-hidden">
         <div class="fixed bottom-0 left-0 right-0 sinkening-water z-[100] translate-y-8">
           <svg viewBox="0 0 1200 200" class="w-full h-full" preserveAspectRatio="none">

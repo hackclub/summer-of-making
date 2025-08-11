@@ -15,8 +15,18 @@
             style: "width: 200px; padding: 0.5em; border: 1px solid #ccc; border-radius: 4px; font-size: 1rem;" %>
     </div>
 
+    <div style="margin-bottom: 1.5em;">
+      <%= form.label :slack_story_url, "Slack story URL:", style: "display: block; margin-bottom: 0.5em; font-weight: 600;" %>
+      <%= form.url_field :slack_story_url,
+            value: @setting.slack_story_url,
+            placeholder: "https://hackclub.slack.com/archives/...",
+            style: "width: 100%; max-width: 540px; padding: 0.5em; border: 1px solid #ccc; border-radius: 4px; font-size: 1rem;" %>
+      <p style="margin-top: 0.5em; color: #666; font-size: 0.9rem;">If blank, we'll fall back to default.</p>
+    </div>
+
     <%= form.submit "Update Intensity", class: "abtn primary", style: "margin-top: 1em;" %>
-      <p><%= link_to "Manage Flipper Flag", "/admin/flipper/features/sinkening", class: "abtn secondary small" %></p>
+      <p><%= link_to "Manage Main Flipper Flag", "/admin/flipper/features/sinkening", class: "abtn secondary small" %></p>
+      <p><%= link_to "Manage Visuals Bypass Flipper Flag", "/admin/flipper/features/disable_sinkening_visuals", class: "abtn secondary small" %></p>
   <% end %>
 </div>
 

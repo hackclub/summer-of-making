@@ -49,7 +49,7 @@
                   <% end %>
                 <% elsif project.certification_status == "rejected" %>
                   <% if project.can_request_recertification? %>
-                    <p class="text-red-400">Ship certification was rejected. Fix issues and request re-certification!</p>
+                    <p class="text-red-400">Changes are needed. Fix issues and request re-certification!</p>
                   <% else %>
                     <p class="text-yellow-600">Re-certification requested - awaiting review!</p>
                   <% end %>

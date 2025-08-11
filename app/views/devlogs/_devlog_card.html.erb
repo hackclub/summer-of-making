@@ -11,7 +11,7 @@
   container_classes ||= ''                 # Additional container classes
   content_margin ||= ''                    # Content margin/padding classes
   no_parchment ||= false                   # Whether to disable parchment styling
-  show_animation = @new_devlog_id == devlog.id && devlog.for_sinkening
+  show_animation = @new_devlog_id == devlog.id && devlog.for_sinkening && !Flipper.enabled?(:disable_sinkening_visuals, current_user)
 %>
 
   <%= render layout: "shared/card", locals: { classes: devlog.for_sinkening ? "origin-top-right #{show_animation ? 'devlog-card-rotate' : '-rotate-1 '}" : '' } do %>
@@ -205,7 +205,7 @@
         <%
           intensity = SinkeningSetting.current.intensity
           adjusted_intensity = intensity * intensity
-          rotation_intensity = 1 + (Flipper.enabled?(:sinkening, current_user) ? 5 * adjusted_intensity + 1 : 0)
+          rotation_intensity = 1 + ((Flipper.enabled?(:sinkening, current_user) && !Flipper.enabled?(:disable_sinkening_visuals, current_user)) ? 5 * adjusted_intensity + 1 : 0)
           random_delay = -rand(0..6000) # Random delay between 0-6000ms (full animation cycle)
         %>
         <div class="absolute top-0 right-0 p-2 z-0 origin-bottom"

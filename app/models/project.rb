@@ -375,7 +375,7 @@ class Project < ApplicationRecord
     when "approved"
       "Ship certified"
     when "rejected"
-      "No ship certification"
+      "Changes needed"
     else
       nil
     end
