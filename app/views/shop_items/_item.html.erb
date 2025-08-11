@@ -101,11 +101,11 @@
       <% unless item.is_free? %>
         <% hours = item.fixed_estimate(regional_price).round %>
         <div class="text-xs text-gray-500 text-center">
-          ≈<%= hours %> <%= "hour".pluralize(hours) %> on an average project
+          ≈<%= hours %> <%= "hour".pluralize(hours) %> on an average project • <%= @ordered_quantity_by_item_id[item.id] || 0 %> sold
         </div>
       <% else %>
         <div class="text-xs text-gray-500 text-center">
-          This item is free! Go for it!
+          This item is free! Go for it! • <%= @ordered_quantity_by_item_id[item.id] || 0 %> sold
         </div>
       <% end %>
     </div>

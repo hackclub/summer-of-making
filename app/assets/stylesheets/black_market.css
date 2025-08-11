@@ -408,6 +408,12 @@ main {
   margin-left: 8px;
 }
 
+.shop-item-sold {
+  font-size: 0.95em;
+  font-weight: 600;
+  margin-left: 8px;
+}
+
 .shop-item-actions {
   margin-top: 10px;
   display: flex;

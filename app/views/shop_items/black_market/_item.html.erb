@@ -24,11 +24,21 @@
           <span class="shop-item-remaining">
             <%= remaining %> left
           </span>
+          <span class="shop-item-sold">
+            <%= @ordered_quantity_by_item_id[item.id] || 0 %> sold
+          </span>
         <% elsif remaining && remaining <= 0 %>
           <span class="shop-item-out">
             Out of Stock
           </span>
+          <span class="shop-item-sold">
+            <%= @ordered_quantity_by_item_id[item.id] || 0 %> sold
+          </span>
         <% end %>
+      <% else %>
+        <span class="shop-item-sold">
+          <%= @ordered_quantity_by_item_id[item.id] || 0 %> sold
+        </span>
       <% end %>
     </div>
     <div class="shop-item-actions">
