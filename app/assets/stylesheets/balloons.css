@@ -30,7 +30,6 @@ header,
 .sidebar,
 [data-sidebar-target="sidebar"] {
   position: relative;
-  z-index: 100;
 }
 
 /* Responsive adjustments */
