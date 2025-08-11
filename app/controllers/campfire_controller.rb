@@ -4,6 +4,7 @@ class CampfireController < ApplicationController
   before_action :check_and_mark_tutorial_completion, only: [ :index ]
 
   def index
+    console
     @user = current_user
 
     if params[:tutorial_completed] == "true" && @user.tutorial_progress.completed?

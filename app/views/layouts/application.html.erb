@@ -20,12 +20,22 @@
     <%= stylesheet_link_tag "pixelart" %>
     <%= stylesheet_link_tag "som" %>
     <%= stylesheet_link_tag "tooltips" %>
+    <%= stylesheet_link_tag "balloons", "data-turbo-track": "reload" %>
     <%= stylesheet_link_tag "tutorial", "data-turbo-track": "reload" %>
     <%= javascript_importmap_tags %>
 
     <script defer data-domain="summer.hackclub.com" src="https://plausible.io/js/script.file-downloads.hash.outbound-links.tagged-events.js"></script>
     <script>
       window.plausible = window.plausible || function() { (window.plausible.q = window.plausible.q || []).push(arguments) }
+      <% if user_signed_in? %>
+        window.flipperFlags = {
+          realTimeBalloons: <%= Flipper.enabled?(:real_time_balloons_2025_08_11, current_user) %>
+        }
+      <% else %>
+        window.flipperFlags = {
+          realTimeBalloons: false
+        }
+      <% end %>
     </script>
 
     <script>
@@ -60,6 +70,11 @@
   </head>
 
   <body class="min-h-[100dvh] font-national-park font-bold text-som-dark overflow-hidden">
+    <!-- Hidden balloon SVG template for JavaScript balloons -->
+    <div id="balloon-template" style="display: none;">
+      <%= inline_svg "balloon.svg", width: "60", height: "80" %>
+    </div>
+    
     <%# admin_tool do %>
       <%# render "shared/stonk_tickler_marquee" %>
     <%# end %>
