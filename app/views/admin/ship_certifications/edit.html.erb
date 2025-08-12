@@ -13,6 +13,11 @@
   <% end %>
 </div>
 
+<% if @ship_certification.recertification_instructions.present? %>
+  <div style="color: var(--color-muted); font-size: 1em; font-weight: 600;">Special instructions from the project author:</div>
+  <div class="special-instructions"><%= simple_format(@ship_certification.recertification_instructions) %></div>
+<% end %>
+
 <div class="edit-ship-cert-form">
   <%= render 'form', ship_certification: @ship_certification, current_user: current_user %>
 </div>
@@ -41,5 +46,14 @@
   color: var(--color-text);
   font-size: 1em;
   margin-bottom: 0.2em;
+}
+.special-instructions p {
+  padding: 0.7em 1em;
+  border-radius: 7px;
+  border: 1px solid var(--color-border);
+  background: var(--color-sheet);
+  color: var(--color-text);
+  font-size: 1em;
+  width: 400px;
 }
 </style>
