@@ -94,7 +94,10 @@
 
   <div class="p-4 md:p-6">
     <div class="flex flex-col md:flex-row md:items-center mb-4 space-y-3 md:space-y-0">
-      <h1 class="text-2xl md:text-3xl 2xl:text-4xl md:flex-grow"><%= @project.title %></h1>
+      <h1 class="text-2xl md:text-3xl 2xl:text-4xl md:flex-grow flex items-center gap-2">
+        <%= @project.title %>
+        <% if @project.used_ai %><span class="bg-amber-100 text-xs px-2 py-1 rounded-full border">Used AI</span><% end %>
+      </h1>
       <div class="flex items-center space-x-3 md:space-x-4 md:ml-4">
         <% if user_signed_in? %>
           <div class="flex flex-row items-center gap-3 md:gap-4">

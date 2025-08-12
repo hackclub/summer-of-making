@@ -1,8 +1,11 @@
 <div data-todo-target="modal" class="fixed bottom-4 right-4 w-96 rounded-lg shadow-2xl border border-[#7c4a331a] z-50 transform translate-x-full transition-transform duration-300 ease-in-out" style="display: none; background: radial-gradient(circle at 43.330392% 44.289383%, rgb(246, 219, 186), rgb(230, 212, 190));">
   <div class="p-6">
-    <div class="flex justify-between items-center mb-4">
-      <h2 class="text-xl font-bold text-som-dark">Todo list:</h2>
-      <button data-action="click->todo#close" class="text-som-dark hover:scale-110 transition-transform">
+    <div class="flex items-center justify-between mb-4">
+      <div class="flex flex-col">
+        <h2 class="text-xl font-bold text-som-dark">Todo list:</h2>
+        <p>May take up to a minute to update!</p>
+      </div>
+      <button data-action="click->todo#close" class="transition-transform text-som-dark hover:scale-110">
         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
         </svg>
@@ -16,7 +19,7 @@
           </div>
         </div>
         <span class="ml-2 <%= @todo_flags[:has_projects] ? 'text-forest' : 'text-som-dark' %>">
-          Create a project in the <a href="/my_projects" class="text-blue-500 hover:text-blue-700 underline">Projects</a> tab
+          Create a project in the <a href="/my_projects" class="text-blue-500 underline hover:text-blue-700">Projects</a> tab
         </span>
       </li>
 

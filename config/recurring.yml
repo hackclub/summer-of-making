@@ -57,6 +57,12 @@ production:
     concurrency: 1
     description: "Sync email signups to Airtable every minute with single execution limit"
 
+  shop_kick_verification_limbo_orders:
+    class: Shop::KickVerificationLimboOrdersJob
+    schedule: every 30 minutes
+    concurrency: 1
+    description: "recheck verf on free stickers orders"
+
   shop_reap_free_stickers_orders:
     class: Shop::ReapFreeStickersOrdersJob
     schedule: at 1am every day

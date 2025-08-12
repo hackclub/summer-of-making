@@ -10,6 +10,7 @@ require "cgi"
 #  attachment                      :string
 #  comments_count                  :integer          default(0), not null
 #  duration_seconds                :integer          default(0), not null
+#  for_sinkening                   :boolean          default(FALSE), not null
 #  hackatime_projects_key_snapshot :jsonb            not null
 #  hackatime_pulled_at             :datetime
 #  is_neighborhood_migrated        :boolean          default(FALSE), not null

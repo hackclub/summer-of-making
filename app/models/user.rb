@@ -19,6 +19,7 @@
 #  internal_notes                       :text
 #  is_admin                             :boolean          default(FALSE), not null
 #  is_banned                            :boolean          default(FALSE)
+#  fraud_team_member                    :boolean          default(FALSE), not null
 #  last_name                            :string
 #  permissions                          :text             default([])
 #  shenanigans_state                    :jsonb
@@ -32,6 +33,8 @@
 #  slack_id                             :string
 #
 class User < ApplicationRecord
+  has_paper_trail
+
   has_many :projects
   has_many :devlogs
   has_many :votes
@@ -50,6 +53,7 @@ class User < ApplicationRecord
   has_many :shop_orders
   has_many :shop_card_grants
   has_many :user_badges, dependent: :destroy
+  has_many :comments
 
   accepts_nested_attributes_for :user_profile
   has_many :hackatime_projects
@@ -431,6 +435,10 @@ class User < ApplicationRecord
     is_admin? || ship_certifier?
   end
 
+  def admin_or_fraud_team_member?
+    is_admin? || fraud_team_member?
+  end
+
   def blue_check?
     has_badge?(:verified)
   end
@@ -475,6 +483,10 @@ class User < ApplicationRecord
   # Avo backtraces
   def is_developer?
     slack_id == "U03DFNYGPCN"
+  end
+
+  def fraud_team_member?
+    fraud_team_member
   end
 
   def identity_vault_oauth_link(callback_url)

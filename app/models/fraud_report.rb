@@ -21,6 +21,8 @@
 #  fk_rails_...  (user_id => users.id)
 #
 class FraudReport < ApplicationRecord
+  has_paper_trail
+
   belongs_to :suspect, polymorphic: true
   belongs_to :reporter, class_name: "User", foreign_key: "user_id"
 

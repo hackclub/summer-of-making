@@ -1,7 +1,9 @@
 module Admin
   class UsersController < ApplicationController
     include Pagy::Backend
+    before_action :ensure_authorized_user
     before_action :set_user, except: [ :index ]
+    skip_before_action :authenticate_admin!
 
     def index
       @pagy, @users = pagy(
@@ -229,7 +231,35 @@ module Admin
       redirect_to admin_user_path(@user)
     end
 
+    def grant_fraud_reviewer
+      if @user.fraud_team_member?
+        flash[:notice] = "#{@user.email} nothing changed, they already have fraud reviewer permissions"
+      else
+        @user.update!(fraud_team_member: true)
+        @user.create_activity("grant_fraud_reviewer")
+        flash[:success] = "gotcha, granted fraud reviewer rights to #{@user.email}"
+      end
+      redirect_to admin_user_path(@user)
+    end
+
+    def revoke_fraud_reviewer
+      unless @user.fraud_team_member?
+        flash[:notice] = "#{@user.email} nothing changed, they don't have fraud reviewer permissions"
+      else
+        @user.update!(fraud_team_member: false)
+        @user.create_activity("revoke_fraud_reviewer")
+        flash[:success] = "gotcha, revoked fraud reviewer rights from #{@user.email}"
+      end
+      redirect_to admin_user_path(@user)
+    end
+
     private
+
+    def ensure_authorized_user
+      unless current_user&.is_admin? || current_user&.fraud_team_member?
+        redirect_to root_path, alert: "whomp whomp"
+      end
+    end
 
     def fetch_hackatime(email)
       return nil if email.blank?

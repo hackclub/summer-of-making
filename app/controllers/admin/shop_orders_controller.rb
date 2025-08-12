@@ -3,7 +3,9 @@
 module Admin
   class ShopOrdersController < ApplicationController
     include Pagy::Backend
+    before_action :ensure_authorized_user
     before_action :set_shop_order, except: [ :index, :pending, :awaiting_fulfillment ]
+    skip_before_action :authenticate_admin!
 
     def scope
       ShopOrder.all.includes(:user, :shop_item)
@@ -139,6 +141,12 @@ module Admin
     end
 
     private
+
+    def ensure_authorized_user
+      unless current_user&.is_admin? || current_user&.fraud_team_member?
+        redirect_to root_path, alert: "whomp whomp"
+      end
+    end
 
     def set_shop_order
       @shop_order = scope.find(params[:id])

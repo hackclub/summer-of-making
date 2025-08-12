@@ -13,6 +13,7 @@
 #  hackatime_project_keys :string           default([]), is an Array
 #  is_deleted             :boolean          default(FALSE)
 #  is_shipped             :boolean          default(FALSE)
+#  is_sinkening_ship      :boolean
 #  rating                 :integer
 #  readme_link            :string
 #  repo_link              :string
@@ -39,6 +40,8 @@
 #  fk_rails_...  (user_id => users.id)
 #
 class Project < ApplicationRecord
+  has_paper_trail
+
   include PublicActivity::Model
 
   belongs_to :user
@@ -369,7 +372,7 @@ class Project < ApplicationRecord
     when "approved"
       "Ship certified"
     when "rejected"
-      "No ship certification"
+      "Changes needed"
     else
       nil
     end

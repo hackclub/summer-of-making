@@ -559,6 +559,12 @@
       <% end %>
 
       <%= button_to "force refresh hackatime", refresh_hackatime_admin_user_path(@user), class: 'abtn secondary' %>
+
+      <% if @user.fraud_team_member? %>
+        <%= button_to "revoke fraud reviewer permissions", revoke_fraud_reviewer_admin_user_path(@user), confirm: "ya sure you wanna do that?", class: "abtn secondary" %>
+      <% else %>
+        <%= button_to "grant fraud reviewer permissions", grant_fraud_reviewer_admin_user_path(@user), class: "abtn primary" %>
+      <% end %>
     </div>
   </div>
 </div>

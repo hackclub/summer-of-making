@@ -52,14 +52,18 @@ class DevlogsController < ApplicationController
       @devlog.hackatime_pulled_at = Time.current
     end
 
+    @devlog.for_sinkening = true if Flipper.enabled?(:sinkening, current_user)
+
     if @devlog.save
       if @project.hackatime_keys.present?
         @devlog.recalculate_seconds_coded
       end
 
       if @devlog.project
+        flash[:new_devlog_id] = @devlog.id
         redirect_to @devlog.project, notice: "Devlog was successfully posted."
       else
+        flash[:new_devlog_id] = @devlog.id
         redirect_to campfire_path, notice: "Devlog was successfully posted."
       end
     else
@@ -135,6 +139,8 @@ class DevlogsController < ApplicationController
     devlog = project.devlogs.build(devlog_params)
     devlog.user = user
 
+    devlog.for_sinkening = true if Flipper.enabled?(:sinkening, user)
+
     if devlog.save
       render json: { message: "Devlog successfully created", devlog: devlog }, status: :created
     else
@@ -172,6 +178,6 @@ class DevlogsController < ApplicationController
   end
 
   def devlog_params
-    params.expect(devlog: %i[text file])
+    params.expect(devlog: %i[text file for_sinkening])
   end
 end

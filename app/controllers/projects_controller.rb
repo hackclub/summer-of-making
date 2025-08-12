@@ -106,6 +106,9 @@ class ProjectsController < ApplicationController
     # Handle devlog highlighting for direct devlog links
     @target_devlog_id = params[:devlog_id] if params[:devlog_id].present?
 
+    # ID of newly created devlog for balloon animation
+    @new_devlog_id = flash[:new_devlog_id] if flash[:new_devlog_id].present?
+
     return unless current_user
 
     if current_user == @project.user && current_user.has_hackatime?
@@ -136,6 +139,12 @@ class ProjectsController < ApplicationController
   def create
     @project = current_user.projects.build(project_params)
 
+    if not_img?(params[:project][:banner])
+      flash.now[:alert] = "That is not a image!"
+      render :index, status: :forbidden
+      return
+    end
+
     if @project.hackatime_project_keys.present?
       @project.hackatime_project_keys = @project.hackatime_project_keys.compact_blank.uniq
     end
@@ -153,6 +162,12 @@ class ProjectsController < ApplicationController
   def update
     if current_user == @project.user || current_user.is_admin?
       update_params = project_params
+
+      if not_img?(update_params[:banner])
+        flash.now[:alert] = "That is not a image!"
+        render :edit, status: :forbidden
+        return
+      end
 
       if update_params[:hackatime_project_keys].present?
         update_params[:hackatime_project_keys] = update_params[:hackatime_project_keys].compact_blank.uniq
@@ -280,7 +295,11 @@ class ProjectsController < ApplicationController
       return
     end
 
-    if ShipEvent.create(project: @project)
+    if ShipEvent.create(project: @project, for_sinkening: Flipper.enabled?(:sinkening, current_user))
+      if Flipper.enabled?(:sinkening, current_user)
+        @project.update!(is_sinkening_ship: true)
+      end
+
       is_first_ship = current_user.projects.joins(:ship_events).count == 1
       ahoy.track "tutorial_step_first_project_shipped", user_id: current_user.id, project_id: @project.id, is_first_ship: is_first_ship
       redirect_to project_path(@project), notice: "Your project has been shipped!"
@@ -626,7 +645,8 @@ class ProjectsController < ApplicationController
         position: position,
         payout_count: payout_count,
         payout_sum: payout_sum,
-        devlogs_since_last_count: devlogs_count
+        devlogs_since_last_count: devlogs_count,
+        hours_covered: helpers.format_seconds(ship_event.seconds_covered)
       }
     end
 
@@ -713,5 +733,14 @@ class ProjectsController < ApplicationController
 
   def coordinates_params
     params.require(:project).permit(:x, :y)
+  end
+
+  def not_img?(banner)
+    return false if banner.blank?
+    if banner.respond_to?(:content_type)
+      !banner.content_type.start_with?("image/")
+    else
+      false
+    end
   end
 end

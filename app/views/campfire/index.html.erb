@@ -7,6 +7,16 @@
     </div>
   </div>
 
+  <% if Flipper.enabled?(:sinkening, current_user) %>
+    <div class="mb-8">
+      <%= render "shared/definition",
+        term: "⚠️ THE SUMMER OF MAKING NEEDS YOU! 🫵",
+        mysterious: true,
+        definition: "The island is sinking from the weight of all the Hackers. Don’t worry, Euan and the Shipwrights have a plan: each time you devlog or ship, a balloon will inflate. With enough balloons, we can raise the island and stabilize it for a whole extra month. Ship during this period and join the hack-along sessions to earn a special sticker and a commemorative balloon for each one you contributed.",
+        body_html: render(partial: "campfire/balloon_brigade_cta") %>
+    </div>
+  <% end %>
+
   <% if current_user.is_banned? %>
     <%= render "shared/card", classes: "bg-red-50/80 border-red-400 mb-8" do %>
       <div class="flex items-start gap-3">

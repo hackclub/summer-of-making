@@ -1,0 +1,39 @@
+/* Floating balloon base styles */
+
+.floating-balloon-container {
+  will-change: transform, opacity;
+}
+
+.floating-balloon-container .string-sway-container {
+  transform-origin: 50% 0%;
+}
+
+/* Keep balloons between background and UI */
+.floating-balloon-container {
+  z-index: 10;
+}
+
+.floating-balloon-container .balloon-card {
+  pointer-events: auto;
+  z-index: 50;
+  position: relative;
+  transition: transform 0.1s ease-out;
+}
+
+/* Ensure specific UI elements appear above balloons */
+.card-with-gradient,
+nav,
+header,
+.modal,
+.sidebar,
+[data-sidebar-target="sidebar"] {
+  position: relative;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .floating-balloon-container .balloon-card {
+    max-width: 250px;
+    padding: 12px;
+  }
+}

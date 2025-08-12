@@ -109,6 +109,12 @@ class Badge
       color: "border-gray-500 bg-gray-500/10 text-gray-800",
       full_size_icon: true,
       criteria: ->(user) { false }
+    },
+    yapper_level_1: {
+      name: "Yapper I",
+      flavor_text: "Posted 10 comments on devlogs.",
+      icon: "💬",
+      criteria: ->(user) { user.comments.count >= 5 }
     }
   }.freeze
 
