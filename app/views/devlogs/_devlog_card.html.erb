@@ -102,9 +102,9 @@
         <!-- Attachments -->
         <% if devlog.file.attached? %>
           <div class="mt-2 sm:mt-3">
-            <% if devlog.file.image? %>
+            <% if devlog.file.try(:image?) %>
               <%= image_tag devlog.file, alt: "Update attachment", class: "w-full object-contain cursor-pointer hover:opacity-90 transition-opacity rounded-lg max-h-96", data: { action: "click->image-viewer#open" }, loading: "lazy" %>
-            <% elsif devlog.file.video? %>
+            <% elsif devlog.file.try(:video?) %>
               <%
                 video_autoplay = context == 'explore'
                 video_classes = "w-full object-contain rounded-lg cursor-pointer video-autoplay max-h-96"
@@ -139,7 +139,7 @@
                   </div>
                 <% end %>
               </div>
-            <% elsif devlog.file.audio? %>
+            <% elsif devlog.file.try(:audio?) %>
               <div class="w-full flex items-center justify-center py-4">
                 <%= audio_tag url_for(devlog.file), class: "w-full max-w-md", controls: true, controlslist: "nodownload" do %>
                   Your browser does not support the audio tag.

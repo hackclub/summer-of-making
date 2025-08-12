@@ -20,8 +20,6 @@
   transition: transform 0.1s ease-out;
 }
 
-
-
 /* Ensure specific UI elements appear above balloons */
 .card-with-gradient,
 nav,

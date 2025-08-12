@@ -29,6 +29,7 @@ class Comment < ApplicationRecord
   validates :content, presence: true, length: { maximum: 1000 }, format: { with: /\A[^<>]*\z/, message: "must not contain HTML tags" }
 
   after_create :notify_devlog_author
+  after_create :update_commenter_badges
 
   def display_content
     content.to_s
@@ -46,4 +47,6 @@ class Comment < ApplicationRecord
     )}"
     SendSlackDmJob.perform_later(devlog.user.slack_id, message)
   end
+
+  def update_commenter_badges = AwardBadgesJob.perform_later(user_id)
 end
