@@ -308,12 +308,33 @@
                 <p class="text-sm text-red-700 mb-3">
                   Your project didn't get certified. Check the feedback above.
                 </p>
+                <div>
+                  <label for="recertification-instructions-visible-<%= @project.id %>" class="block text-sm font-medium text-gray-700">
+                    Special instructions for the review team (optional):
+                  </label>
+                  <textarea 
+                    id="recertification-instructions-visible-<%= @project.id %>" 
+                    rows="5" 
+                    class="som-horizontal-input mt-1 block w-full text-sm"
+                  ></textarea>
+                </div>
                 <% if @project.can_request_recertification? %>
-                  <%= button_to request_recertification_project_path(@project),
-                      class: "som-button-primary px-4 py-2 text-sm",
-                      data: { confirm: "Request re-certification? Make sure you've fixed the issues mentioned in the feedback above." } do %>
-                    Request Re-certification
+                  <%= form_with url: request_recertification_project_path(@project), method: :post, local: true, id: "recertification-instructions-form-#{@project.id}" do |f| %>
+                    <%= f.text_area :recertification_instructions, id: "recertification-instructions-#{@project.id}", style: "display:none;" %>
                   <% end %>
+                  <button
+                      type="button"
+                      class="som-button-primary px-4 py-2 text-sm mt-4"
+                      data-confirm="Request re-certification? Make sure you've fixed the issues mentioned in the feedback above." 
+                      onclick="
+                        if(confirm(this.dataset.confirm)){
+                          document.getElementById('recertification-instructions-<%= @project.id %>').value =
+                            document.getElementById('recertification-instructions-visible-<%= @project.id %>').value;
+                          document.getElementById('recertification-instructions-form-<%= @project.id %>').submit();
+                        }
+                        return false;
+                      "
+                  >Request Re-certification</button>
                 <% end %>
               </div>
             <% end %>

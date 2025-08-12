@@ -402,11 +402,14 @@ class Project < ApplicationRecord
     !latest_ship_certification.pending?
   end
 
-  def request_recertification!
+  def request_recertification!(instructions=nil)
     return false unless can_request_recertification?
 
     # create a new pending ship certification
-    ship_certifications.create!(judgement: :pending)
+    ship_certifications.create!(
+      judgement: :pending,
+      recertification_instructions: instructions
+    )
   end
 
   def unpaid_ship_events_since_last_payout
