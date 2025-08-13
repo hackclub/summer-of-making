@@ -22,7 +22,7 @@ module Api
 
         begin
           pagy, users = pagy(
-            User.order(:id).includes(:user_profile, :user_hackatime_data, :user_badges), # order by id
+            User.order(:id).includes(:user_profile, :user_hackatime_data, :user_badges, :payouts), # order by id
             items: 20,
             page: page
           )
@@ -46,21 +46,8 @@ module Api
                                   .select(:id, :title, :devlogs_count, :created_at, :user_id)
                                   .group_by(&:user_id)
 
-        balances_by_user = {}
-        escrowed_balances_by_user = {}
-        if current_user&.has_badge?(:pocket_watcher)
-          balances_by_user = Payout.where(user_id: user_ids, escrowed: false).group(:user_id).sum(:amount)
-          escrowed_balances_by_user = Payout.where(user_id: user_ids, escrowed: true).group(:user_id).sum(:amount)
-          total_balances_by_user = balances_by_user.merge(escrowed_balances_by_user) { |key, v1, v2| v1 + v2 }
-        end
 
         @users = users.map do |user|
-          balance_value = if current_user&.has_badge?(:pocket_watcher)
-            user.has_badge?(:offshore_bank_account) ? "Nice try, but they've covered their tracks a little better than that." : (balances_by_user[user.id] || 0)
-          else
-            "You need to have a pocket watcher badge to view this."
-          end
-
           {
             id: user.id,
             slack_id: user.slack_id,
@@ -73,9 +60,9 @@ module Api
             projects: (projects_by_user[user.id] || []).map { |p| { id: p.id, title: p.title, devlogs_count: p.devlogs_count, created_at: p.created_at } },
             coding_time_seconds: user.has_hackatime? ? user.all_time_coding_seconds : 0,
             coding_time_seconds_today: user.has_hackatime? ? user.daily_coding_seconds : 0,
-            balance: current_user&.has_badge?(:pocket_watcher) ? (user.has_badge?(:offshore_bank_account) ? "Nice try, but they've covered their tracks a little better than that." : (total_balances_by_user[user.id] || 0)) : "You need to have a pocket watcher badge to view this.",
-            released_balance: current_user&.has_badge?(:pocket_watcher) ? (user.has_badge?(:offshore_bank_account) ? "Nice try, but they've covered their tracks a little better than that." : (balances_by_user[user.id] || 0)) : "You need to have a pocket watcher badge to view this.",
-            escrowed_balance: current_user&.has_badge?(:pocket_watcher) ? (user.has_badge?(:offshore_bank_account) ? "Nice try, but they've covered their tracks a little better than that." : (escrowed_balances_by_user[user.id] || 0)) : "You need to have a pocket watcher badge to view this.",
+            balance: current_user&.has_badge?(:pocket_watcher) ? (user.has_badge?(:offshore_bank_account) ? "Nice try, but they've covered their tracks a little better than that." : user.total_shells) : "You need to have a pocket watcher badge to view this.",
+            released_balance: current_user&.has_badge?(:pocket_watcher) ? (user.has_badge?(:offshore_bank_account) ? "Nice try, but they've covered their tracks a little better than that." : user.balance) : "You need to have a pocket watcher badge to view this.",
+            escrowed_balance: current_user&.has_badge?(:pocket_watcher) ? (user.has_badge?(:offshore_bank_account) ? "Nice try, but they've covered their tracks a little better than that." : user.escrowed_balance) : "You need to have a pocket watcher badge to view this.",
             badges: user.badges.map { |b|
               icon = b[:icon].include?(".") ? view_context.image_url(b[:icon]) : b[:icon]
               { name: b[:name], text: b[:flavor_text], icon: icon }
