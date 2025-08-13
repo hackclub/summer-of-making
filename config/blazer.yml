@@ -31,7 +31,7 @@ user_method: current_user
 user_name: first_name
 
 # custom before_action to use for auth
-before_action_method: require_admin!
+before_action_method: require_fraud_team!
 
 # email to send checks from
 # from_email: blazer@example.org
