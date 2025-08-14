@@ -13,6 +13,8 @@ module Admin
 
     def show
       @shop_orders = @shop_item.shop_orders.includes(:user).order(created_at: :desc).limit(20)
+      @total_orders = @shop_item.shop_orders.count
+      @total_spent = @shop_item.shop_orders.sum(:total_cost)
     end
 
     def new
