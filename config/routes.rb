@@ -306,7 +306,11 @@ Rails.application.routes.draw do
   namespace :api do
     namespace :v1 do
       get "users/me", to: "users#me"
-      resources :projects, only: [ :index, :show ]
+      resources :projects, only: [ :index, :show ] do
+        collection do
+          get :shipped
+        end
+      end
       resources :users, only: [ :index, :show ]
       resources :devlogs, only: [ :index, :show ]
       resources :comments, only: [ :index, :show ]

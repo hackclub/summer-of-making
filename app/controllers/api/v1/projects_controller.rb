@@ -141,6 +141,50 @@ module Api
           followers: @project.followers.map { |u| { id: u.id, name: u.display_name } }
         }
       end
+
+      def shipped
+        stuff = Project.joins(:ship_events)
+                        .where(is_deleted: false)
+                        .group("projects.id")
+                        .order("MAX(ship_events.created_at) DESC")
+                        .limit(25)
+                        .pluck("projects.id", "MAX(ship_events.created_at)")
+
+        project_ids = stuff.map(&:first)
+
+        shit = Project.includes(:user, :followers, :ship_events, banner_attachment: :blob)
+                      .where(id: project_ids)
+                      .index_by(&:id)
+
+        s = Devlog.where(project_id: project_ids)
+                  .group(:project_id)
+                  .sum(:duration_seconds)
+
+        @out = stuff.map do |project_id, latest_ship_date|
+          project = shit[project_id]
+          next unless project
+
+          {
+            id: project.id,
+            title: project.title,
+            description: project.description,
+            devlogs_count: project.devlogs_count,
+            total_seconds_coded: s[project.id] || 0,
+            is_shipped: project.is_shipped, # if its no, we fucked up
+            readme_link: project.readme_link,
+            demo_link: project.demo_link,
+            repo_link: project.repo_link,
+            user_id: project.user.id,
+            slack_id: project.user.slack_id,
+            created_at: project.created_at,
+            updated_at: project.updated_at,
+            latest_ship_date: latest_ship_date,
+            total_ships: project.ship_events.count
+          }
+        end.compact
+
+        render json: @out
+      end
     end
   end
 end
