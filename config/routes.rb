@@ -316,6 +316,22 @@ Rails.application.routes.draw do
       resources :comments, only: [ :index, :show ]
       resources :emotes, only: [ :show ]
     end
+
+    namespace :v2 do
+      resources :projects, only: [ :index, :show ] do
+        collection do
+          get :search
+        end
+      end
+      resources :users, only: [ :index, :show ] do
+        collection do
+          get :search
+        end
+      end
+      resources :devlogs, only: [ :index, :show ]
+      resources :payouts, only: [ :index, :show ]
+      get "/", to: "base#index"
+    end
   end
   get "api/check_user", to: "users#check_user"
   post "api/devlogs", to: "devlogs#api_create"
