@@ -11,20 +11,7 @@
 # It's strongly recommended that you check this file into your version control system.
 
 ActiveRecord::Schema[8.0].define(version: 2025_08_18_122349) do
-  create_schema "auth"
-  create_schema "extensions"
-  create_schema "graphql"
-  create_schema "graphql_public"
-  create_schema "pgbouncer"
-  create_schema "pgsodium"
-  create_schema "realtime"
-  create_schema "storage"
-  create_schema "vault"
-
   # These are extensions that must be enabled in order to support this database
-  enable_extension "extensions.pg_stat_statements"
-  enable_extension "extensions.pgcrypto"
-  enable_extension "extensions.uuid-ossp"
   enable_extension "pg_catalog.plpgsql"
 
   create_table "active_insights_jobs", force: :cascade do |t|
@@ -261,9 +248,9 @@ ActiveRecord::Schema[8.0].define(version: 2025_08_18_122349) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.integer "last_hackatime_time"
+    t.integer "seconds_coded"
     t.integer "likes_count", default: 0, null: false
     t.integer "comments_count", default: 0, null: false
-    t.integer "seconds_coded"
     t.datetime "hackatime_pulled_at"
     t.integer "views_count", default: 0, null: false
     t.integer "duration_seconds", default: 0, null: false
@@ -886,10 +873,10 @@ ActiveRecord::Schema[8.0].define(version: 2025_08_18_122349) do
 
   create_table "ysws_review_devlog_approvals", force: :cascade do |t|
     t.bigint "devlog_id", null: false
-    t.bigint "user_id", null: false
+    t.bigint "user_id", null: false, comment: "The reviewer who made this approval"
     t.boolean "approved", null: false
-    t.integer "approved_seconds"
-    t.text "notes"
+    t.integer "approved_seconds", comment: "Seconds approved by reviewer (may differ from devlog.duration_seconds)"
+    t.text "notes", comment: "Internal notes from the reviewer"
     t.datetime "reviewed_at", null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false

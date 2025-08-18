@@ -7,6 +7,7 @@ const doink = new Howl({
 
 consumer.subscriptions.create("BalloonsChannel", {
   connected() {
+	  window.balloons = this;
   },
 
   disconnected() {
