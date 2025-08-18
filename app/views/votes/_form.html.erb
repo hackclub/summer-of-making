@@ -58,6 +58,7 @@
       class: "som-horizontal-input w-full rounded-lg resize-none focus:ring-2 focus:ring-nice-blue focus:border-nice-blue transition-colors #{'border-vintage-red' if vote.errors[:explanation].any?}",
       rows: 4,
       required: true,
+      minlength: 20,
       placeholder: "Tell us why you made this choice..." %>
 
     <% if vote.errors[:explanation].any? %>

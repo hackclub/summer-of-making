@@ -71,6 +71,7 @@ class Vote < ApplicationRecord
   scope :invalid, -> { where(status: "invalid") }
   scope :recent, -> { order(created_at: :desc) }
 
+  before_validation :no_whitesp_my_friend
   before_save :normalize_ship_event_order
 
   after_create :process_vote_results
@@ -118,6 +119,10 @@ class Vote < ApplicationRecord
   end
 
   private
+
+  def no_whitesp_my_friend
+    self.explanation = explanation.to_s.strip
+  end
 
   def queue_badge_award
     AwardBadgesJob.perform_later(user_id, "vote_created")
