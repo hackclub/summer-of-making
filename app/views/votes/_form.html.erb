@@ -2,6 +2,7 @@
   url: votes_path,
   class: "space-y-6",
   data: {
+    turbo: false,
     controller: "form",
     action: "submit->form#preventDoubleSubmission"
   }) do |f| %>

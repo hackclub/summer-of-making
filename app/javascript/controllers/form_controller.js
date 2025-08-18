@@ -38,10 +38,14 @@ export default class extends Controller {
     this.submitting = true
     this.disableSubmitButton()
 
-    this.element.addEventListener("turbo:submit-end", () => {
-      this.resetButton()
-      this.element.reset() 
-    }, { once: true })
+    const turboDisabled = this.element.dataset.turbo === 'false'
+    
+    if (!turboDisabled) {
+      this.element.addEventListener("turbo:submit-end", () => {
+        this.resetButton()
+        this.element.reset() 
+      }, { once: true })
+    }
   }
 
   disableSubmitButton() {
