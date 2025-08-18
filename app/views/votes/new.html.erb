@@ -31,6 +31,9 @@
       <% end %>
     <% end %>
   <% end %>
+  <% if ENV['TURNSTILE_SITE_KEY'].present? %>
+    <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
+  <% end %>
 <% end %>
 
 <div class="container mx-auto px-0 sm:px-4 py-4 md:py-8">

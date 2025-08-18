@@ -11,6 +11,12 @@
   <%= f.hidden_field :ship_event_2_id, value: @ship_events&.last&.id %>
   <%= f.hidden_field :signature, value: @vote_signature %>
 
+  <% if ENV['TURNSTILE_SITE_KEY'].present? %>
+    <div class="flex justify-center mb-4">
+      <div class="cf-turnstile" data-sitekey="<%= ENV['TURNSTILE_SITE_KEY'] %>" data-theme="auto"></div>
+    </div>
+  <% end %>
+
   <div class="text-center">
     <h2 class="text-md sm:text-md md:text-lg lg:text-2xl mb-6 sm:mb-8 text-center">
       A good ship is technical, creative, and tells the story of how it was made.

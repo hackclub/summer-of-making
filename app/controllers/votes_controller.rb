@@ -12,6 +12,14 @@ class VotesController < ApplicationController
   end
 
   def create
+    if TurnstileService.enabled?
+      token = params[:"cf-turnstile-response"] || params[:cf_turnstile_response] || params.dig(:vote, :cf_turnstile_response)
+      verification = TurnstileService.verify(token, remote_ip: request.remote_ip)
+      unless verification[:success]
+        redirect_to new_vote_path, alert: "Turnstile verification failed. Please try again." and return
+      end
+    end
+
     ship_event_1_id = params[:vote][:ship_event_1_id]&.to_i
     ship_event_2_id = params[:vote][:ship_event_2_id]&.to_i
     signature = params[:vote][:signature]
@@ -234,6 +242,6 @@ class VotesController < ApplicationController
 
   def vote_params
     params.expect(vote: %i[winning_project_id explanation
-                           ship_event_1_id ship_event_2_id signature])
+                           ship_event_1_id ship_event_2_id signature cf_turnstile_response])
   end
 end
