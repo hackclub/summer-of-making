@@ -256,8 +256,8 @@ Rails.application.routes.draw do
   resources :votes, only: [ :new, :create ] do
     collection do
       get :locked
-      get "track_demo/:position", to: "votes#track_demo", as: :track_demo
-      get "track_repo/:position", to: "votes#track_repo", as: :track_repo
+      post "track_demo/:position", to: "votes#track_demo", as: :track_demo
+      post "track_repo/:position", to: "votes#track_repo", as: :track_repo
     end
   end
 

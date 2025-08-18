@@ -109,7 +109,7 @@
                         text: "Demo",
                         link: track_demo_votes_path(position: index + 1),
                         link_target: "_blank",
-                        type: "secondary",
+                        method: :post,
                         icon: "world.svg",
                         onclick: "event.stopPropagation()" %>
                   <% end %>
@@ -118,7 +118,7 @@
                         text: "Repository",
                         link: track_repo_votes_path(position: index + 1),
                         link_target: "_blank",
-                        type: "secondary",
+                        method: :post,
                         icon: "git.svg",
                         onclick: "event.stopPropagation()" %>
                   <% end %>

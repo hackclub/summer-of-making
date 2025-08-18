@@ -19,6 +19,8 @@
 <% link_target = local_assigns.fetch(:link_target, "") %>
 <% fill_width  = local_assigns.fetch(:fill_width, false) %>
 <% disabled    = local_assigns.fetch(:disabled, false) %>
+<% method      = local_assigns[:method] %>
+<% onclick     = local_assigns[:onclick] %>
 
 <%
     button_type = local_assigns.fetch(:type, :button)
@@ -45,11 +47,19 @@
 <% end %>
 
 <% if local_assigns[:link] %>
-    <%= link_to local_assigns[:link], class: button_class, data: local_assigns[:data], target: link_target do %>
-        <%= button_content %>
+    <% if method&.to_s&.downcase == 'post' %>
+        <%= form_with url: local_assigns[:link], method: :post, html: { target: link_target, class: "inline" } do %>
+            <%= button_tag :submit, class: button_class, data: local_assigns[:data], disabled: disabled, onclick: onclick do %>
+                <%= button_content %>
+            <% end %>
+        <% end %>
+    <% else %>
+        <%= link_to local_assigns[:link], class: button_class, data: local_assigns[:data], target: link_target, onclick: onclick do %>
+            <%= button_content %>
+        <% end %>
     <% end %>
 <% else %>
-    <%= button_tag button_type, class: button_class, data: local_assigns[:data], disabled: disabled do %>
+    <%= button_tag button_type, class: button_class, data: local_assigns[:data], disabled: disabled, onclick: onclick do %>
         <%= button_content %>
     <% end %>
 <% end %>
