@@ -31,6 +31,20 @@ class VotesController < ApplicationController
       return
     end
 
+    # we should have done this from the start but it's time when this is excuted - started_at
+    time_spt_ms = nil
+    if verification_result[:valid]
+      payload = verification_result[:payload]
+      if payload && payload["timestamp"].present?
+        begin
+          started_at = Time.at(payload["timestamp"].to_i)
+          time_spt_ms = ((Time.current - started_at) * 1000).to_i.clamp(0, 86_400_000)
+        rescue StandardError
+          time_spt_ms = nil
+        end
+      end
+    end
+
     ship_events = ShipEvent.where(id: [ ship_event_1_id, ship_event_2_id ]).includes(:project)
     if ship_events.size != 2
       redirect_to new_vote_path, alert: "Invalid ship events selected"
@@ -43,21 +57,8 @@ class VotesController < ApplicationController
     @vote = current_user.votes.build(vote_params.except(:ship_event_1_id, :ship_event_2_id, :signature))
     @vote.ship_event_1_id = ship_event_1_id
     @vote.ship_event_2_id = ship_event_2_id
+    @vote.time_spent_voting_ms = time_spt_ms
 
-    # we should have done this from the start but it's time when this is excuted - started_at
-    if verification_result[:valid]
-      payload = verification_result[:payload]
-      if payload && payload["timestamp"].present?
-        begin
-          started_at = Time.at(payload["timestamp"].to_i)
-          @vote.time_spent_voting_ms = ((Time.current - started_at) * 1000).to_i.clamp(0, 86_400_000)
-        rescue StandardError
-          @vote.time_spent_voting_ms = nil
-        end
-      end
-    end
-
-    # Backward compatibility
     @vote.project_1_id = @ship_events[0].project.id
     @vote.project_2_id = @ship_events[1].project.id
     # Handle tie case
