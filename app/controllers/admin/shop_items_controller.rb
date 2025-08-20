@@ -14,7 +14,7 @@ module Admin
     def show
       @shop_orders = @shop_item.shop_orders.includes(:user).order(created_at: :desc)
       @total_orders = @shop_item.shop_orders.count
-      @total_spent = @shop_item.shop_orders.sum(:frozen_item_price)
+      @total_spent = @shop_item.shop_orders.sum("frozen_item_price * quantity")
     end
 
     def new
