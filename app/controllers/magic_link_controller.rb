@@ -7,13 +7,21 @@ class MagicLinkController < ApplicationController
     slack_id = params.require(:slack_id)
     email = params.require(:email)
 
-    signup = EmailSignup.find_or_create_by(email: email) do |s|
-      s.slack_id = slack_id
-      s.ip = request.remote_ip
-      s.user_agent = request.user_agent
+    signup = EmailSignup.find_by(email: email)
+    if signup.nil?
+      error_info = {
+        error: "No EmailSignup found for email",
+        email: email,
+        slack_id: slack_id,
+        params: params.to_unsafe_h
+      }
+    #  Honeybadger.notify("No EmailSignup found for #{email}", context: error_info)
+      return render json: {
+        success: false,
+        error: "No email sign up found for #{email}. Give it another go?",
+        debug: error_info
+      }, status: 400
     end
-
-    Rails.logger.info({ event: "created_email_signup", email: email, slack_id: slack_id, ip: request.remote_ip, user_agent: request.user_agent }.to_json)
 
     begin
       user = User.create_from_slack slack_id
@@ -29,7 +37,7 @@ class MagicLinkController < ApplicationController
         }.to_json)
       end
     rescue StandardError => e
-      Honeybadger.notify(e)
+     # Honeybadger.notify(e)
       user = User.find_by(email: email)
     end
 
