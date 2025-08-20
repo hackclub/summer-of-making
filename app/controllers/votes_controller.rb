@@ -253,7 +253,13 @@ class VotesController < ApplicationController
   end
 
   def vote_params
-    params.expect(vote: %i[winning_project_id explanation
-                           ship_event_1_id ship_event_2_id signature cf_turnstile_response])
+    params.require(:vote).permit(
+      :winning_project_id,
+      :explanation,
+      :ship_event_1_id,
+      :ship_event_2_id,
+      :signature,
+      :cf_turnstile_response
+    )
   end
 end
