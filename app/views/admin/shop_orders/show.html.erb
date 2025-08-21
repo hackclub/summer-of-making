@@ -152,6 +152,8 @@
   </div>
 <% end %>
 
+<%= render "admin/inspector", record: @shop_order.warehouse_package if @shop_order.warehouse_package.present? %>
+
 <%= render "admin/shared/internal_notes", { record: @shop_order } %>
 
 <%= render "admin/shop_card_grants/shop_card_grant", shop_order: @shop_order %>
