@@ -322,6 +322,10 @@ class Project < ApplicationRecord
         met: devlogs_since_last_ship.count >= 1,
         message: "You must have at least one devlog #{ship_events.count > 0 ? "since the last ship" : ""}"
       },
+      voting_quota: {
+        met: user.has_met_voting_requirement?,
+        message: "You must vote #{[ user.votes_required_for_release - user.votes.active.count, 0 ].max} more times to ship."
+      },
       repo_link: {
         met: repo_link.present?,
         message: "Project must have a repository link."
