@@ -26,7 +26,7 @@ class OneTime::ReleaseEscrowedPayoutsJob < ApplicationJob
 
       next if approved_ships.empty? || ships_covered <= 0
 
-      ships_to_release = approved_ships.take(ships_covered)
+      ships_to_release = approved_ships
 
       release_candidates = ships_to_release.flat_map do |ship|
         ship.payouts

@@ -490,6 +490,7 @@ class User < ApplicationRecord
     approved_count = ship_events
       .joins(project: :ship_certifications)
       .where(ship_certifications: { judgement: ShipCertification.judgements[:approved] })
+      .where.not(id: Payout.released.where(payable_type: "ShipEvent").select(:payable_id))
       .count("ship_events.id")
     approved_count * 20
   end
