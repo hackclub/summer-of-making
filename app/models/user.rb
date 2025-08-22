@@ -166,7 +166,7 @@ class User < ApplicationRecord
         email: email,
         user_info: user_info.to_h
       })
-      raise StandardError, "slack #{slack_id} has a fuck ass email? #{email.inspect}"
+      raise StandardError, "Slack ID #{slack_id} has an invalid email: #{email.inspect}"
     end
 
     User.create!(
