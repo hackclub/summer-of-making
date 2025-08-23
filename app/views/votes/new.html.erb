@@ -171,6 +171,7 @@
                     <span>•</span>
                     <span class="text-gray-800"><%= format_seconds(ship_time_seconds) %></span>
                     <% admin_tool do %>
+                      <%= render "shared/project_twiddles", project: project %>
                       <span>•</span>
                       <span>Ship Date: <span class="text-black"><%= ship_event.created_at.strftime("%b %d") %></span></span>
                       <span>•</span>
