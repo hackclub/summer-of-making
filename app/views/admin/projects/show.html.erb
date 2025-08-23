@@ -11,7 +11,7 @@
     <b>Followers:</b> <%= @project.followers.count %> <br>
     <b>Creator:</b> <%= link_to @project.user.display_name, admin_user_path(@project.user) %> <br>
 
-    <b>Links:</b> 
+    <b>Links:</b>
     <% if @project.demo_link.present? %>
       <%= link_to "Demo", @project.demo_link, target: "_blank" %>
     <% end %>
@@ -72,7 +72,7 @@
 
           <% if vote.invalid_reason %>
             <br>
-            <b>Marked Invalid by <%= link_to vote.marked_invalid_by.display_name, admin_user_path(vote.marked_invalid_by) %>:</b> 
+            <b>Marked Invalid by <%= link_to vote.marked_invalid_by.display_name, admin_user_path(vote.marked_invalid_by) %>:</b>
             <%= vote.invalid_reason %>
           <% end %>
         </li>
