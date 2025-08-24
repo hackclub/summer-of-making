@@ -200,6 +200,10 @@ class Project < ApplicationRecord
 
   before_save :remove_duplicate_hackatime_keys
 
+  def title_with_id
+    "#{title} (\##{id})"
+  end
+
   def total_votes
     vote_changes.count
   end

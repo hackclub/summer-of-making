@@ -1,0 +1,82 @@
+<h1 style="color: var(--color-primary); margin-bottom: 1.5em;">
+  Project #<%= @project.id %>, <%= @project.title %>
+</h1>
+
+<div class="asecs">
+  <div class="asec" style="padding: 1.5em;">
+    <h2>basic info</h2>
+    <b>Title:</b> <%= link_to @project.title, project_path(@project) %> <br>
+    <b>Description:</b> <%= @project.description %> <br>
+    <b>Devlogs:</b> <%= @project.devlogs.count %> <br>
+    <b>Followers:</b> <%= @project.followers.count %> <br>
+    <b>Creator:</b> <%= link_to @project.user.display_name, admin_user_path(@project.user) %> <br>
+
+    <b>Links:</b>
+    <% if @project.demo_link.present? %>
+      <%= link_to "Demo", @project.demo_link, target: "_blank" %>
+    <% end %>
+
+    <% if @project.repo_link.present? %>
+      <%= link_to "Repo", @project.repo_link, target: "_blank" %>
+    <% end %>
+
+    <% if @project.readme_link.present? %>
+      <%= link_to "Readme", @project.readme_link, target: "_blank" %>
+    <% end %>
+    <br>
+
+  </div>
+</div>
+<div class="asecs">
+  <div class="asec" style="padding: 1.5em;">
+    <h2>votes</h2>
+    Summary:
+    <%= @project.total_votes %> votes (<%= @project.wins_count %> wins, <%= @project.losses_count %> losses, <%= @project.ties_count %> ties),
+    <%= @project.current_elo_rating %> ELO.
+    <ul style="color: var(--color-text);">
+      <% @project.vote_changes.each do |vote_change| %>
+        <% vote = vote_change.vote %>
+        <li>
+          <b>
+            Vote #<%= vote.id %>, made by <%= link_to vote.user.display_name, admin_user_path(vote.user) %>
+            <% unless vote.is_tie? %>
+              for <%= link_to vote.winner_project.title_with_id, admin_project_path(vote.winner_project) %>
+              over <%= link_to vote.loser_project.title_with_id, admin_project_path(vote.loser_project) %>:
+            <% else %>
+              to tie <%= link_to vote.project_1.title_with_id, admin_project_path(vote.project_1) %>
+              and <%= link_to vote.project_2.title_with_id, admin_project_path(vote.project_2) %>:
+            <% end %>
+          </b> <br>
+          <div style="color: var(--color-muted); margin: 0.5em 0;"><%= vote.explanation %></div>
+          Took <%= vote.time_spent_voting_ms / 1000 %>s.
+          Changed ELO of this project: <%= vote_change.elo_before %> -&gt; <%= vote_change.elo_after %> (delta <%= vote_change.elo_delta %>).
+
+          <% if vote.project_1_repo_opened && vote.project_1_demo_opened %>
+              They looked at <%= vote.project_1.title_with_id %>'s repo and demo.
+          <% elsif vote.project_1_repo_opened %>
+              They looked at <%= vote.project_1.title_with_id %>'s repo.
+          <% elsif vote.project_1_demo_opened %>
+              They looked at <%= vote.project_1.title_with_id %>'s demo.
+          <% else %>
+              They didn't look at <%= vote.project_1.title_with_id %>'s links.
+          <% end %>
+          <% if vote.project_2_repo_opened && vote.project_2_demo_opened %>
+              They looked at <%= vote.project_2.title_with_id %>'s repo and demo.
+          <% elsif vote.project_2_repo_opened %>
+              They looked at <%= vote.project_2.title_with_id %>'s repo.
+          <% elsif vote.project_2_demo_opened %>
+              They looked at <%= vote.project_2.title_with_id %>'s demo.
+          <% else %>
+              They didn't look at <%= vote.project_2.title_with_id %>'s links.
+          <% end %>
+
+          <% if vote.invalid_reason %>
+            <br>
+            <b>Marked Invalid by <%= link_to vote.marked_invalid_by.display_name, admin_user_path(vote.marked_invalid_by) %>:</b>
+            <%= vote.invalid_reason %>
+          <% end %>
+        </li>
+      <% end %>
+    </ul>
+  </div>
+</div>
