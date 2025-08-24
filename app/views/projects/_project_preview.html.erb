@@ -46,6 +46,13 @@
               <% end %>
             <% end %>
             <%= project.devlogs_count || project.devlogs.count %> devlogs  •  <%= format_seconds(project.total_seconds_coded) %>
+            <!-- Views -->
+            •
+            <svg xmlns="http://www.w3.org/2000/svg" class="inline w-4 h-4 align-middle" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8S1 12 1 12z" />
+              <circle cx="12" cy="12" r="3" />
+            </svg>
+            <span class="align-middle"><%= number_with_delimiter(project.views_count || 0) %></span>
           </p>
 
           <p class="line-clamp-3 text-sm md:text-base 2xl:text-lg overflow-hidden mb-4">
