@@ -60,6 +60,7 @@ class ShopOrder < ApplicationRecord
   validate :check_user_balance, on: :create
   validate :check_regional_availability, on: :create
   validate :check_badge, on: :create
+  validate :check_sinkening_participation, on: :create
   after_create :create_negative_payout
   before_create :set_initial_state_for_free_stickers
 
@@ -239,6 +240,14 @@ class ShopOrder < ApplicationRecord
     # Allow items enabled for the address region OR for XX (Rest of World)
     unless shop_item.enabled_in_region?(address_region) || shop_item.enabled_in_region?("XX")
       errors.add(:base, "This item is not available for shipping to #{address_country}.")
+    end
+  end
+
+  def check_sinkening_participation
+    return unless shop_item.is_a?(ShopItem::SinkeningBalloons)
+
+    unless Flipper.enabled?(:enable_shop_balloons, user) && user.sinkening_participation?
+      errors.add(:base, "You are not eligible to order Sinkening Balloons.")
     end
   end
 

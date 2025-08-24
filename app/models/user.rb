@@ -681,6 +681,10 @@ class User < ApplicationRecord
     devlogs.any? && projects.any? && votes.any? && shop_orders.joins(:shop_item).where.not(shop_items: { type: "ShopItem::FreeStickers" }).any?
   end
 
+  def sinkening_participation?
+    devlogs.exists?(for_sinkening: true) || ship_events.exists?(for_sinkening: true)
+  end
+
   private
 
   def should_mock_verification

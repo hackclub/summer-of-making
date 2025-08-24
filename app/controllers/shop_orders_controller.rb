@@ -46,6 +46,12 @@ class ShopOrdersController < ApplicationController
       return
     end
 
+    # Check to make sure sinkening balloons can only be ordered if user is participating
+    if !Flipper.enabled?(:enable_shop_balloons, current_user) || (@item.is_a?(ShopItem::SinkeningBalloons) && !current_user.sinkening_participation?)
+      redirect_to shop_path, alert: "Hey! You're not supposed to be here."
+      return
+    end
+
     render :new_black_market, layout: "black_market" if @item.requires_black_market?
   end
 

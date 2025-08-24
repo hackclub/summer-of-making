@@ -112,7 +112,7 @@
     </div>
   <% end %>
   <div class="my-6 text-center flex justify-center flex-col">
-    <% if @shop_items.empty? %>
+    <% if @shop_items.empty? || (Flipper.enabled?(:enable_shop_balloons, current_user) && @shop_items.count == 1 && @shop_items.first.is_a?(ShopItem::SinkeningBalloons) && !current_user.sinkening_participation?) %>
       <%= render "shared/card", classes: 'max-w-md mx-auto' do %>
         <div class="text-lg font-semibold text-[#3a2f25] font-['DynaPuff',sans-serif] mb-1">
           <% if @regionalization_enabled %>
@@ -150,7 +150,13 @@
               <%= render partial: "raffle_card" %>
             <% end %>
             <% sorted_items.each do |item| %>
-              <%= render partial: "item", locals: { item: } %>
+              <% if item.is_a?(ShopItem::SinkeningBalloons) %>
+                <% if Flipper.enabled?(:enable_shop_balloons, current_user) && current_user.sinkening_participation? %>
+                  <%= render partial: "item", locals: { item: } %>
+                <% end %>
+              <% else %>
+                <%= render partial: "item", locals: { item: } %>
+              <% end %>
             <% end %>
           </div>
         </div>
