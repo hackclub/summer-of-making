@@ -142,7 +142,7 @@
           <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8S1 12 1 12z" />
           <circle cx="12" cy="12" r="3" />
         </svg>
-        <span class="text-som-dark"><%= number_with_delimiter(@project.views_count || 0) %> views</span>
+        <span class="text-som-dark"><%= number_with_delimiter(@project.views_count || 0) %> <%= "view".pluralize(@project.views_count || 0) %></span>
       </div>
 
       <%
