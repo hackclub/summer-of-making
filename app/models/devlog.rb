@@ -68,7 +68,16 @@ class Devlog < ApplicationRecord
   end
 
   # ie. Project.first.devlogs.capped_duration_seconds
-  scope :capped_duration_seconds, -> { where.not(duration_seconds: nil).sum("LEAST(duration_seconds, #{10.hours.to_i})") }
+  scope :capped_duration_seconds, lambda {
+    cap_date = Time.new(2025, 7, 19).utc
+    cap_seconds = 10.hours.to_i
+    where.not(duration_seconds: nil)
+      .sum([
+        "CASE WHEN created_at >= ? THEN LEAST(duration_seconds, ?) ELSE duration_seconds END",
+        cap_date,
+        cap_seconds
+      ])
+  }
 
   def recalculate_seconds_coded
     # find the created_at of the devlog directly before this one

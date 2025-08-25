@@ -64,7 +64,12 @@ class ShipEvent < ApplicationRecord
   end
   # this is the hours covered by the ship event, not the total hours up to the ship event
   def hours_covered
-    seconds_covered.fdiv(3600)
+    hours = seconds_covered.fdiv(3600)
+    if created_at >= Time.new(2025, 7, 19)
+      [ hours, 10 ].min
+    else
+      hours
+    end
   end
 
   # this is the total hours up to the ship event
