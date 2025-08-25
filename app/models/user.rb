@@ -357,8 +357,6 @@ class User < ApplicationRecord
 
     if should_ban && !is_banned
       ban_user!("hackatime_ban")
-    elsif !should_ban && is_banned
-      unban_user!
     end
 
     if projects.empty?
