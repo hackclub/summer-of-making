@@ -52,7 +52,7 @@
               <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8S1 12 1 12z" />
               <circle cx="12" cy="12" r="3" />
             </svg>
-            <span class="align-middle"><%= number_with_delimiter(project.views_count || 0) %></span>
+            <%= pluralize(number_with_delimiter(project.views_count || 0), 'view') %>
           </p>
 
           <p class="line-clamp-3 text-sm md:text-base 2xl:text-lg overflow-hidden mb-4">
