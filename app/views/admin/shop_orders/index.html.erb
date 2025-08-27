@@ -6,7 +6,7 @@
       are ya winning son?
       <% if params[:show_free_stickers] == "true" %><span>+stickers</span><% end %>
       <span style="margin-left: 1em;">
-        <% p = params.permit(:show_free_stickers, :user_search, :shop_item_id, :status, :date_from, :date_to, :sort).to_h.symbolize_keys %>
+        <% p = params.permit(:show_free_stickers, :user_search, :shop_item_id, :status, :date_from, :date_to, :country, :sort).to_h.symbolize_keys %>
         <%= link_to((params[:stats_range] == 'all' ? 'how about the past week?' : 'how about all time?'), p.merge(stats_range: (params[:stats_range] == 'all' ? nil : 'all')), class: 'abtn secondary small', style: 'margin-left: 1em;') %>
       </span>
     </strong>
@@ -95,6 +95,11 @@
       </div>
 
       <div>
+        <%= f.label :country, "country:", style: "display: block; margin-bottom: 0.25em; color: var(--color-text);" %>
+        <%= f.text_field :country, value: params[:country], placeholder: "country", style: "width: 100%; padding: 0.5em; border-radius: 6px; border: 1px solid var(--color-border); background: var(--color-darker); color: var(--color-text);" %>
+      </div>
+
+      <div>
         <%= f.label :sort, "sort by:", style: "display: block; margin-bottom: 0.25em; color: var(--color-text);" %>
         <%= f.select :sort, options_for_select([
             'created_at_desc',
@@ -112,7 +117,7 @@
     <div style="display: flex; gap: 1em; align-items: center;">
       <%= f.submit "apply", class: 'abtn primary small' %>
       <%= link_to "clear all", admin_shop_orders_path, class: 'abtn secondary small' %>
-      <% unless params.slice(:user_search, :shop_item_id, :status, :date_from, :date_to, :sort).values.all?(&:blank?) %>
+      <% unless params.slice(:user_search, :shop_item_id, :status, :date_from, :date_to, :country, :sort).values.all?(&:blank?) %>
         <span style="color: var(--color-muted); font-size: 0.9em;">
           active:
           <% if params[:user_search].present? %>user: "<%= params[:user_search] %>" | <% end %>
@@ -121,6 +126,7 @@
           <% if params[:date_from].present? || params[:date_to].present? %>
             dates: <%= params[:date_from] || '∞' %> to <%= params[:date_to] || '∞' %> |
           <% end %>
+          <% if params[:country].present? %>country: "<%= params[:country] %>" | <% end %>
           <% if params[:sort].present? %>sort: "<%= params[:sort] %>"<% end %>
         </span>
       <% end %>

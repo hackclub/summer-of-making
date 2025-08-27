@@ -42,6 +42,10 @@ module Admin
         base = base.where("created_at <= ?", Date.parse(params[:date_to]).end_of_day)
       end
 
+      if params[:country].present?
+        base = base.where("frozen_address->>'country' ILIKE ?", "%#{params[:country]}%")
+      end
+
       case params[:sort]
       when "id_asc"
         base = base.order(id: :asc)
