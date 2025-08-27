@@ -358,7 +358,10 @@ class User < ApplicationRecord
     if should_ban && !is_banned
       ban_user!("hackatime_ban")
     elsif !should_ban && is_banned
-      unban_user!
+      r = activities.where(key: "ban_user").order(created_at: :desc).first
+      if r&.parameters&.dig("reason") == "hackatime_ban"
+        unban_user!
+      end
     end
 
     if projects.empty?
