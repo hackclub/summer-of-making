@@ -69,7 +69,12 @@ module Admin
     end
 
     def index
-      @pagy, @shop_orders = pagy(filtered_scope)
+      if params[:goob] == "true"
+        @grouped_orders = group_all(filtered_scope)
+        @pagy = nil
+      else
+        @pagy, @shop_orders = pagy(filtered_scope)
+      end
       get_stats
     end
 
@@ -80,7 +85,13 @@ module Admin
     end
 
     def awaiting_fulfillment
-      @pagy, @shop_orders = pagy(filtered_scope.manually_fulfilled.awaiting_periodical_fulfillment)
+      scope = filtered_scope.manually_fulfilled.awaiting_periodical_fulfillment
+      if params[:goob] == "true"
+        @grouped_orders = group_all(scope)
+        @pagy = nil
+      else
+        @pagy, @shop_orders = pagy(scope)
+      end
       get_stats
       render :index, locals: { title: "fulfillment queue – " }
     end
@@ -145,6 +156,24 @@ module Admin
     end
 
     private
+
+    def group_all(scope)
+      orders = scope.includes(:user, :shop_item).to_a
+      grouped = orders.group_by(&:user)
+
+      grouped.map do |user, user_orders|
+      total_shells = user_orders.sum { |o| o.frozen_item_price * o.quantity }
+      total_items = user_orders.sum(&:quantity)
+
+      {
+        user: user,
+        orders: user_orders.sort_by(&:created_at),
+        total_shells: total_shells,
+        total_items: total_items,
+        address: user_orders.first&.frozen_address || {}
+      }
+      end.sort_by { |group| -group[:orders].size }
+    end
 
     def ensure_authorized_user
       unless current_user&.is_admin? || current_user&.fraud_team_member?

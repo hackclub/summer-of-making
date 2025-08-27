@@ -44,11 +44,17 @@
   </div>
 </div>
 
-<div style="margin-bottom: 2em;">
+<div style="margin-bottom: 2em; display: flex; gap: 1em; align-items: center;">
   <% if params[:show_free_stickers] %>
     <%= link_to "oh god please make the free stickers stop", {show_free_stickers: nil}, class: 'abtn secondary small' %>
   <% else %>
     <%= link_to "show me the free stickers ones too", {show_free_stickers: true}, class: 'abtn primary small' %>
+  <% end %>
+
+  <% if params[:goob] == "true" %>
+    <%= link_to "segregation", params.permit!.except(:goob), class: 'abtn secondary small' %>
+  <% else %>
+    <%= link_to "group by goober", params.permit!.merge(goob: true), class: 'abtn primary small' %>
   <% end %>
 </div>
 
@@ -133,10 +139,113 @@
     </div>
 
     <%= f.hidden_field :show_free_stickers, value: params[:show_free_stickers] if params[:show_free_stickers] %>
+    <%= f.hidden_field :goob, value: params[:goob] if params[:goob] %>
   <% end %>
 </div>
 
-<table class="atable">
+<% if @grouped_orders %>
+  <% @grouped_orders.each do |group| %>
+    <div style="margin-bottom: 2em; border: 1px solid var(--color-border); border-radius: 8px; background: var(--color-darker);">
+      <div style="padding: 1em; border-bottom: 1px solid var(--color-border); background: var(--color-dark);">
+        <h3 style="margin: 0; color: var(--color-primary);">
+          <%= link_to group[:user].display_name || "Unknown", admin_user_path(group[:user]) %>
+            <small style="color: var(--color-muted); font-weight: normal;">
+            (<%= group[:user].email %>) slack: <%= link_to group[:user].slack_id, "https://hackclub.slack.com/team/#{group[:user].slack_id}", style: "color: var(--color-primary);" %></small>
+        </h3>
+        <div style="margin-top: 0.5em; display: flex; gap: 1em; align-items: center;">
+          <span class="pill pill-blue"><%= pluralize(group[:orders].count, 'order') %></span>
+          <span class="pill pill-green"><%= pluralize(group[:total_items], 'item') %></span>
+          <span class="pill pill-yellow"><%= number_with_precision(group[:total_shells], precision: 0) %> shells</span>
+        </div>
+        <% if group[:address].present? %>
+          <div style="margin-top: 0.5em; font-size: 0.9em; color: var(--color-text);">
+            <%= group[:address]["first_name"] %> <%= group[:address]["last_name"] %> @
+            <%= group[:address]["city"] %>, <%= group[:address]["state"] %>, <%= group[:address]["country"] %>
+          </div>
+        <% end %>
+      </div>
+      <table class="atable" style="margin: 0;">
+        <thead>
+          <tr>
+            <th>order id</th>
+            <th>item</th>
+            <th>shells</th>
+            <th>qty</th>
+            <th>status</th>
+            <th>details</th>
+            <th>created</th>
+            <th>actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% group[:orders].each do |order| %>
+            <tr>
+              <td><%= order.id %></td>
+              <td>
+                <%= order.shop_item.name %><br>
+                <small style="color: var(--color-muted);"><%= order.shop_item.type&.demodulize %></small>
+              </td>
+              <td><%= number_with_precision(order.frozen_item_price, precision: 0) %></td>
+              <td><%= order.quantity %></td>
+              <td>
+                <% case order.aasm_state %>
+                <% when 'pending' %>
+                  <span class="pill pill-yellow">pending</span>
+                <% when 'awaiting_periodical_fulfillment' %>
+                  <span class="pill pill-blue">awaiting fulfillment</span>
+                <% when 'fulfilled' %>
+                  <span class="pill pill-green">fulfilled</span>
+                <% when 'rejected' %>
+                  <span class="pill pill-red">rejected</span>
+                <% when 'on_hold' %>
+                  <span class="pill pill-gray">on hold</span>
+                <% when 'in_verification_limbo' %>
+                  <span class="pill pill-gray">verification limbo</span>
+                <% else %>
+                  <span class="pill"><%= order.aasm_state.humanize %></span>
+                <% end %>
+              </td>
+              <td>
+                <% if order.external_ref.present? %>
+                  <strong>ref:</strong> <%= order.external_ref %><br>
+                <% end %>
+                <% if order.fulfilled_by.present? %>
+                  <strong>by:</strong> <%= order.fulfilled_by %><br>
+                <% end %>
+                <% if order.fulfillment_cost.present? && order.fulfillment_cost > 0 %>
+                  <strong>cost:</strong> $<%= number_with_precision(order.fulfillment_cost, precision: 2) %><br>
+                <% end %>
+                <% if order.rejection_reason.present? %>
+                  <strong>rejection:</strong> <%= truncate(order.rejection_reason, length: 30) %><br>
+                <% end %>
+                <% if order.internal_notes.present? %>
+                  <strong>notes:</strong> <%= truncate(order.internal_notes, length: 30) %><br>
+                <% end %>
+                <% if order.fulfilled_at.present? %>
+                  <small style="color: var(--color-muted);">fulfilled: <%= time_ago_in_words(order.fulfilled_at) %> ago</small>
+                <% elsif order.rejected_at.present? %>
+                  <small style="color: var(--color-muted);">rejected: <%= time_ago_in_words(order.rejected_at) %> ago</small>
+                <% elsif order.awaiting_periodical_fulfillment_at.present? %>
+                  <small style="color: var(--color-muted);">queued: <%= time_ago_in_words(order.awaiting_periodical_fulfillment_at) %> ago</small>
+                <% elsif order.on_hold_at.present? %>
+                  <small style="color: var(--color-muted);">on hold: <%= time_ago_in_words(order.on_hold_at) %> ago</small>
+                <% end %>
+              </td>
+              <td>
+                <%= order.created_at.strftime("%m/%d/%y") %><br>
+                <small style="color: var(--color-muted);"><%= order.created_at.strftime("%l:%M %p") %></small>
+              </td>
+              <td>
+                <%= link_to "do shit", admin_shop_order_path(order), class: 'abtn secondary', style: 'padding: 0.3em 0.8em; font-size: 0.95em;' %>
+              </td>
+            </tr>
+          <% end %>
+        </tbody>
+      </table>
+    </div>
+  <% end %>
+<% else %>
+  <table class="atable">
   <thead>
     <tr>
       <th>
@@ -259,8 +368,11 @@
     <% end %>
   </tbody>
 </table>
+<% end %>
 
-<%== pagy_nav(@pagy) %> <br>
-<%== pagy_info(@pagy) %> <br>
+<% if @pagy %>
+  <%== pagy_nav(@pagy) %> <br>
+  <%== pagy_info(@pagy) %> <br>
+<% end %>
 
 <%= link_to "← back", admin_root_path %>
