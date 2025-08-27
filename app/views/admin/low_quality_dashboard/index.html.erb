@@ -1,0 +1,38 @@
+<div class="asec" style="padding: 1.5em;">
+  <h1>Low-quality review</h1>
+  <p>Projects with <strong><%= @threshold %>+</strong> unresolved reports.</p>
+
+  <% if @projects.empty? %>
+    <p>No projects need review.</p>
+  <% else %>
+    <div style="display: grid; gap: 12px; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));">
+      <% @projects.each do |project| %>
+        <div style="background: var(--color-darker); border: 1px solid var(--color-border); padding: 12px; border-radius: 6px;">
+          <div style="display:flex; align-items:center; gap:8px; margin-bottom:8px;">
+            <div style="width:40px; height:40px; overflow:hidden; border-radius: 6px;">
+              <%= image_tag project.banner, style: "width:100%; height:100%; object-fit:cover;" %>
+            </div>
+            <div>
+              <div style="font-weight:600;">
+                <%= link_to project.title, [:admin, project], style: "color: var(--color-primary)" %>
+              </div>
+              <small style="color: var(--color-muted);">by <%= project.user.display_name %></small>
+            </div>
+          </div>
+
+          <div style="display:flex; gap:8px; flex-wrap: wrap; color: var(--color-muted); margin-bottom:8px;">
+            <span>Reports: <strong><%= @reported[project.id] %></strong></span>
+            <% last_ship = project.ship_events.order(:created_at).last %>
+            <span>Latest ship: <%= last_ship&.created_at&.strftime('%b %d') || '—' %></span>
+            <span>Payouts: <%= last_ship&.payouts&.exists? ? 'yes' : 'no' %></span>
+          </div>
+
+          <div style="display:flex; gap:8px;">
+            <%= button_to "Mark low-quality", mark_low_quality_admin_low_quality_dashboard_index_path(project_id: project.id), method: :post, class: "marble-button btn-error" %>
+            <%= button_to "Mark OK", mark_ok_admin_low_quality_dashboard_index_path(project_id: project.id), method: :post, class: "marble-button" %>
+          </div>
+        </div>
+      <% end %>
+    </div>
+  <% end %>
+</div>

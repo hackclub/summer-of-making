@@ -3,6 +3,7 @@
   { label: "Pending Acceptance", path: pending_admin_shop_orders_path, count: ShopOrder.without_item_type("ShopItem::FreeStickers").where(aasm_state: :pending).count },
   { label: "Manual Fulfillment", path: awaiting_fulfillment_admin_shop_orders_path, count: ShopOrder.manually_fulfilled.without_item_type("ShopItem::FreeStickers").where(aasm_state: :awaiting_periodical_fulfillment).count },
   { label: "Users", path: admin_users_path },
+  { label: "Low-quality Dashboard", path: admin_low_quality_dashboard_index_path },
   { label: "Reports Dashboard", path: "/admin/fraud_reports" },
   { label: "Blazer", path: admin_blazer_path }
 ] %>
@@ -48,6 +49,7 @@
       <% end %>
       <%= link_to "voting dashboard", "/admin/voting_dashboard", class: 'abtn secondary' %>
       <%= link_to "payouts dashboard", "/admin/payouts_dashboard", class: 'abtn secondary' %>
+      <%= link_to "low-quality dashboard", admin_low_quality_dashboard_index_path, class: 'abtn secondary' %>
       <%= link_to "reports dashboard", "/admin/fraud_reports", class: 'abtn secondary' %>
       <%= link_to "global caches", admin_caches_path, class: 'abtn secondary' %>
       <%= link_to admin_ysws_reviews_path, class: 'abtn secondary' do %>

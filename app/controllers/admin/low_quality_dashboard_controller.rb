@@ -1,0 +1,58 @@
+module Admin
+  class LowQualityDashboardController < ApplicationController
+    before_action :authenticate_ship_certifier!
+    skip_before_action :authenticate_admin!
+
+    def index
+      # 1 for test, 3 for prod
+      @threshold = 3
+      proj_counts = FraudReport.unresolved.where(suspect_type: "Project").where("reason LIKE ?", "LOW_QUALITY:%").group(:suspect_id).count
+      se_counts = FraudReport.unresolved.where(suspect_type: "ShipEvent").where("reason LIKE ?", "LOW_QUALITY:%").group(:suspect_id).count
+      se_project_map = ShipEvent.where(id: se_counts.keys).pluck(:id, :project_id).to_h
+      rolled = se_counts.each_with_object(Hash.new(0)) { |(se_id, count), h| h[se_project_map[se_id]] += count }
+      merged = proj_counts.merge(rolled) { |_, a, b| a + b }
+      @reported = merged.select { |_, c| c >= @threshold }
+
+      project_ids = @reported.keys.compact
+      @projects = Project.where(id: project_ids).includes(:user, :ship_events)
+    end
+
+    def mark_low_quality
+      project = Project.find(params[:project_id])
+      # minimum payout only if no payout exists for latest ship
+      ship = project.ship_events.order(:created_at).last
+      if ship.present? && ship.payouts.none?
+        hours = ship.hours_covered
+        min_multiplier = 1.0
+        amount = (min_multiplier * hours).ceil
+        if amount > 0
+          Payout.create!(amount: amount, payable: ship, user: project.user, reason: "Minimum payout (low-quality)", escrowed: false)
+        end
+      end
+
+      FraudReport.where(suspect_type: "Project", suspect_id: project.id, resolved: false).update_all(resolved: true)
+
+      if project.user&.slack_id.present?
+        message = <<~EOT
+        Thanks for shipping! After review, this ship didn’t meet our voting quality bar.
+        We issued a minimum payout if there wasn’t already one. Keep building – you can ship again anytime.
+        EOT
+        SendSlackDmJob.perform_later(project.user.slack_id, message)
+      end
+
+      redirect_to admin_low_quality_dashboard_index_path, notice: "Marked as low-quality and handled payouts/DMs."
+    end
+
+    def mark_ok
+      project = Project.find(params[:project_id])
+      FraudReport.where(suspect_type: "Project", suspect_id: project.id, resolved: false).update_all(resolved: true)
+      redirect_to admin_low_quality_dashboard_index_path, notice: "Marked OK and cleared reports."
+    end
+
+    private
+
+    def authenticate_ship_certifier!
+      redirect_to root_path unless current_user&.admin_or_ship_certifier?
+    end
+  end
+end

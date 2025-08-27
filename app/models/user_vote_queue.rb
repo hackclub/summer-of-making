@@ -62,6 +62,14 @@ class UserVoteQueue < ApplicationRecord
 
     loop do
       ship_events = current_ship_events
+      # excluse low quality projects
+      if ship_events.any?
+        over_reported_ids = FraudReport.unresolved.where(suspect_type: "ShipEvent", suspect_id: ship_events.map(&:id)).where("reason LIKE ?", "LOW_QUALITY:%").group(:suspect_id).having("COUNT(*) >= 3").count.keys
+        if over_reported_ids.any? { |id| ship_events.map(&:id).include?(id) }
+          advance_position!
+          next
+        end
+      end
       projects = ship_events.map(&:project).compact
 
       # because of scope, this should filter for deleted projects
@@ -225,6 +233,10 @@ class UserVoteQueue < ApplicationRecord
     latest_ship_event_ids = eligible_projects.map { |project|
       project.ship_events.max_by(&:created_at).id
     }
+
+    # don't generate matchups for low quality projects
+    flagged = FraudReport.unresolved.where(suspect_type: "ShipEvent", suspect_id: latest_ship_event_ids).where("reason LIKE ?", "LOW_QUALITY:%").group(:suspect_id).having("COUNT(*) >= 3").count.keys
+    latest_ship_event_ids -= flagged
 
     total_times_by_ship_event = Devlog
       .joins("INNER JOIN ship_events ON devlogs.project_id = ship_events.project_id")

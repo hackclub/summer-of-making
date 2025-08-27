@@ -354,6 +354,12 @@ Rails.application.routes.draw do
     resources :view_analytics, only: [ :index ]
     resources :voting_dashboard, only: [ :index ]
     resources :payouts_dashboard, only: [ :index ]
+    resources :low_quality_dashboard, only: [ :index ] do
+      collection do
+        post :mark_low_quality
+        post :mark_ok
+      end
+    end
     resources :fraud_reports, only: [ :index, :show ] do
       member do
         get :resolve

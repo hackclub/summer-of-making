@@ -177,6 +177,20 @@
               underline_attr: { data: { sidebar_target: "underline" } }
             } %>
           </li>
+          <li class="flex justify-start border-2 border-dashed border-orange-500 bg-orange-500/10" style="margin-right: 10px; border-radius: 10px;">
+            <%= render partial: "shared/link", locals: {
+              target: admin_low_quality_dashboard_index_path,
+              text: "Low-quality",
+              icon: "edit",
+              large: true,
+              animate_push: true,
+              text_attr: {
+          data: { sidebar_target: "collapseFade" },
+          class: "text-3xl"
+              },
+              underline_attr: { data: { sidebar_target: "underline" } }
+            } %>
+          </li>
         <% end %>
       </ul>
     </nav>
