@@ -155,6 +155,54 @@ module Admin
       redirect_to [ :admin, @shop_order ]
     end
 
+    def convert_to_preauth
+      amount_dollars = params[:amount_dollars].presence&.to_f || @shop_order.shop_item.usd_cost * @shop_order.quantity
+      amount_cents = (amount_dollars * 100).to_i
+      email = @shop_order.user.email
+
+      begin
+        grant_rec = ShopCardGrant.new(
+          user: @shop_order.user,
+          shop_item: @shop_order.shop_item
+        )
+
+        grant_rec.transaction do
+          grant_response = HCBService.create_card_grant(
+            email: email,
+            amount_cents: amount_cents,
+            purpose: "SOM: #{@shop_order.shop_item.name}",
+            instructions: "Hello, Please use this grant to buy a #{@shop_order.shop_item.name}. Got any questions or something to say? Contact @3kh0 on Slack, and I can help you there! Make sure you upload receipts once you are done otherwise bad things will happen..."
+          )
+
+          grant_rec.hcb_grant_hashid = grant_response["id"]
+          grant_rec.expected_amount_cents = amount_cents
+          grant_rec.save!
+
+          latest_disbursement = grant_response.dig("disbursements", 0, "transaction_id")
+          memo = "[preauth grant] #{@shop_order.shop_item.name} for #{@shop_order.user.display_name}"
+
+          @shop_order.shop_card_grant = grant_rec
+          @shop_order.mark_fulfilled! "SCG #{grant_rec.id}", nil, "System"
+
+          if latest_disbursement
+            begin
+              HCBService.rename_transaction(hashid: latest_disbursement, new_memo: memo)
+            rescue => e
+              Honeybadger.notify(e)
+            end
+          end
+        end
+
+        @shop_order.create_activity("convert_to_preauth", parameters: { amount_dollars: amount_dollars, grant_id: grant_rec.id })
+        flash[:success] = "its done you lazy bum #{@shop_order.user.email}"
+      rescue => e
+        Honeybadger.notify(e)
+        flash[:error] = "dude stop being lazy: #{e.message}"
+      end
+
+      redirect_to [ :admin, @shop_order ]
+    end
+
     private
 
     def group_all(scope)

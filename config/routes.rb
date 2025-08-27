@@ -411,6 +411,7 @@ Rails.application.routes.draw do
         post :place_on_hold
         post :take_off_hold
         post :mark_fulfilled
+        post :convert_to_preauth
       end
     end
     resources :shop_card_grants, only: [ :index, :show ]

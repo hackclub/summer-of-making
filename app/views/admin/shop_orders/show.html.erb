@@ -204,6 +204,7 @@
       <%= f.submit "i fulfilled it!", class: 'abtn primary' %>
     <% end %>
   </div>
+  <button type="button" onclick="slazy()" class="abtn small" style="background: var(--color-orange);">im fucking lazy do it for me</button>
   <% end %>
 </div>
 
@@ -215,3 +216,43 @@
 </div>
 
 <%= render "admin/inspector", record: @shop_order %>
+
+<div id="lazyd" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000; justify-content: center; align-items: center;">
+  <div style="background: var(--color-darker); padding: 1rem; max-width: 800px; margin: 2em;">
+    <h3>okay you lazy bum</h3>
+    <p>okay just make sure everythings chill, we bouta send a preauth grant to <strong><%= @shop_order.user.email %></strong> for</p>
+    <p><strong><%= @shop_order.shop_item.name %></strong> (qty: <%= @shop_order.quantity %>)</p>
+
+    <%= form_with url: convert_to_preauth_admin_shop_order_path(@shop_order), method: :post, id: "preauthForm" do |f| %>
+      <div style="margin: 1em 0;">
+        <%= f.label :amount_dollars, "how many mc chickens?", style: "display: block; margin-bottom: 0.5em;" %>
+        <%= f.number_field :amount_dollars,
+            value: (@shop_order.shop_item.usd_cost * @shop_order.quantity).to_f,
+            step: 0.01,
+            style: "width: 100%; padding: 0.5em; border-radius: 6px; border: 1px solid var(--color-border); background: var(--color-darker); color: var(--color-text);" %>
+        <small style="color: var(--color-muted);">recommended: $<%= (@shop_order.shop_item.usd_cost * @shop_order.quantity).to_f %></small>
+      </div>
+
+      <div style="margin-top: 2em; display: flex; gap: 1em;">
+        <%= f.submit "seems legit lets do it", class: 'abtn primary' %>
+        <button type="button" onclick="hlazy()" class="abtn secondary">nvm this shit not it</button>
+      </div>
+    <% end %>
+  </div>
+</div>
+
+<script>
+function slazy() {
+  document.getElementById('lazyd').style.display = 'flex';
+}
+
+function hlazy() {
+  document.getElementById('lazyd').style.display = 'none';
+}
+
+document.getElementById('lazyd').addEventListener('click', function(e) {
+  if (e.target === this) {
+    hlazy();
+  }
+});
+</script>
