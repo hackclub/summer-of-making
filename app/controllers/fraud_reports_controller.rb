@@ -37,7 +37,7 @@ class FraudReportsController < ApplicationController
       else # other
         fraud_report.update_column(:reason, "OTHER: #{fraud_report.reason.to_s.strip}")
       end
-      
+
       # only dm the first time
       if fraud_report.reason.to_s.start_with?("LOW_QUALITY:")
         c = FraudReport.unresolved.where(suspect_type: fraud_report.suspect_type, suspect_id: fraud_report.suspect_id).count
@@ -57,7 +57,7 @@ class FraudReportsController < ApplicationController
           end
         end
       end
-      
+
       # advance the vote queue if this report was filed from the voting page
       if fraud_report.suspect_type == "ShipEvent"
         if current_user.user_vote_queue&.current_ship_events&.map(&:id)&.include?(fraud_report.suspect_id)
@@ -65,7 +65,7 @@ class FraudReportsController < ApplicationController
           advanced = true
         end
       end
-      
+
       base_msg = "Thank you – your report has been received and will be reviewed promptly."
       flash[:notice] = advanced ? "#{base_msg} We’ve moved you to the next matchup." : base_msg
       redirect_to request.referer || root_path
