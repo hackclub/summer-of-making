@@ -38,7 +38,7 @@ class FraudReportsController < ApplicationController
         fraud_report.update_column(:reason, "OTHER: #{fraud_report.reason.to_s.strip}")
       end
 
-      # only dm the first time
+      # only dm the first time and auto-exclude after 3 low-quality reports
       if fraud_report.reason.to_s.start_with?("LOW_QUALITY:")
         c = FraudReport.unresolved.where(suspect_type: fraud_report.suspect_type, suspect_id: fraud_report.suspect_id).count
         if c == 1
@@ -55,6 +55,14 @@ class FraudReportsController < ApplicationController
             EOT
             SendSlackDmJob.perform_later(owner.slack_id, msg)
           end
+        end
+        if c >= 3 && fraud_report.suspect_type == "ShipEvent"
+          ShipEvent.where(id: fraud_report.suspect_id).update_all(excluded_from_pool: true)
+          msg = <<~EOT
+          Heads up — your ship has been excluded from voting due to multiple low-quality reports.
+          Thanks for building! Our shipwrights will review and follow up if needed. No action is required right now.
+          EOT
+          SendSlackDmJob.perform_later(owner.slack_id, msg)
         end
       end
 

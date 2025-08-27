@@ -2,11 +2,12 @@
 #
 # Table name: ship_events
 #
-#  id            :bigint           not null, primary key
-#  for_sinkening :boolean          default(FALSE), not null
-#  created_at    :datetime         not null
-#  updated_at    :datetime         not null
-#  project_id    :bigint           not null
+#  id                 :bigint           not null, primary key
+#  excluded_from_pool :boolean          default(FALSE), not null
+#  for_sinkening      :boolean          default(FALSE), not null
+#  created_at         :datetime         not null
+#  updated_at         :datetime         not null
+#  project_id         :bigint           not null
 #
 # Indexes
 #
@@ -24,6 +25,7 @@ class ShipEvent < ApplicationRecord
   has_one :user, through: :project
   has_one :ship_event_feedback
   has_many :payouts, as: :payable
+  attribute :excluded_from_pool, :boolean, default: false
 
   after_create :maybe_create_ship_certification
   after_create :award_user_badges

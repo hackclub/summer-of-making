@@ -62,6 +62,10 @@ class UserVoteQueue < ApplicationRecord
 
     loop do
       ship_events = current_ship_events
+      if ship_events.any? && ShipEvent.where(id: ship_events.map(&:id), excluded_from_pool: true).exists?
+        advance_position!
+        next
+      end
       # excluse low quality projects
       if ship_events.any?
         over_reported_ids = FraudReport.unresolved.where(suspect_type: "ShipEvent", suspect_id: ship_events.map(&:id)).where("reason LIKE ?", "LOW_QUALITY:%").group(:suspect_id).having("COUNT(*) >= 3").count.keys
@@ -231,8 +235,8 @@ class UserVoteQueue < ApplicationRecord
     eligible_projects = projects_with_latest_ship.to_a
 
     latest_ship_event_ids = eligible_projects.map { |project|
-      project.ship_events.max_by(&:created_at).id
-    }
+      project.ship_events.where(excluded_from_pool: false).max_by(&:created_at)&.id
+    }.compact
 
     # don't generate matchups for low quality projects
     flagged = FraudReport.unresolved.where(suspect_type: "ShipEvent", suspect_id: latest_ship_event_ids).where("reason LIKE ?", "LOW_QUALITY:%").group(:suspect_id).having("COUNT(*) >= 3").count.keys
