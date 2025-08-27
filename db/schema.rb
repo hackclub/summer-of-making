@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_08_18_122349) do
+ActiveRecord::Schema[8.0].define(version: 2025_08_24_190238) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -381,7 +381,7 @@ ActiveRecord::Schema[8.0].define(version: 2025_08_18_122349) do
     t.integer "views_count", default: 0, null: false
     t.float "x"
     t.float "y"
-    t.boolean "is_sinkening_ship"
+    t.boolean "is_sinkening_ship", default: false
     t.index ["is_shipped"], name: "index_projects_on_is_shipped"
     t.index ["user_id"], name: "index_projects_on_user_id"
     t.index ["views_count"], name: "index_projects_on_views_count"
@@ -437,6 +437,7 @@ ActiveRecord::Schema[8.0].define(version: 2025_08_18_122349) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.boolean "for_sinkening", default: false, null: false
+    t.boolean "excluded_from_pool", default: false, null: false
     t.index ["project_id"], name: "index_ship_events_on_project_id"
   end
 
@@ -527,7 +528,7 @@ ActiveRecord::Schema[8.0].define(version: 2025_08_18_122349) do
   end
 
   create_table "sinkening_settings", force: :cascade do |t|
-    t.float "intensity"
+    t.float "intensity", default: 1.0
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.string "slack_story_url"
@@ -756,7 +757,7 @@ ActiveRecord::Schema[8.0].define(version: 2025_08_18_122349) do
 
   create_table "user_vote_queues", force: :cascade do |t|
     t.bigint "user_id", null: false
-    t.jsonb "ship_event_pairs", default: [], null: false
+    t.jsonb "ship_event_pairs", default: "[]", null: false
     t.integer "current_position", default: 0, null: false
     t.datetime "last_generated_at"
     t.datetime "created_at", null: false
