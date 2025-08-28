@@ -12,10 +12,10 @@ class ShipCertificationJudgmentNotificationJob < ApplicationJob
     return if ship_certification.judgement == old_judgment
 
     user = ship_certification.project.user
-    return unless user.slack_user_id
+    return unless user.slack_id
 
     message = build_notification_message(ship_certification, new_judgment)
-    SendSlackDmJob.perform_later(user.slack_user_id, message)
+    SendSlackDmJob.perform_later(user.slack_id, message)
   end
 
   private
