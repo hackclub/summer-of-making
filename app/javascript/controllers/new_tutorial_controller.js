@@ -115,10 +115,12 @@ export default class extends Controller {
     const attributes = this.stepAttributes[this.progress];
     const prevAttributes = this.stepAttributes[previous] || {};
 
-    this.focusedElement = attributes.focus ? document.getElementById(attributes.focus) : null;
     this.textTarget.innerHTML = this.dialogue[this.progress];
 
     console.log("Updating elements:", {was_advance, previous, focusedElement: this.focusedElement, attributes});
+
+    // focus box
+    this.focusedElement = attributes.focus ? document.getElementById(attributes.focus) : null;
     if (this.focusedElement) {
       const rect = this.focusedElement.getBoundingClientRect();
       this.dialogueFocus = {
@@ -135,6 +137,12 @@ export default class extends Controller {
       this.dialogueFocus.height += (attributes.height ?? 0);
       this.dialogueFocus.radius += (attributes.radius ?? 0);
       this.dialogueFocus.z = attributes.z ?? true;
+
+      if (this.dialogueFocus.z) {
+        this.focusedElement.style.zIndex = 100;
+      } else {
+        this.focusedElement.style.zIndex = "";
+      }
     } else {
       this.dialogueFocus = {
         x: 0,
@@ -144,6 +152,8 @@ export default class extends Controller {
         radius: 0,
         z: true
       };
+
+      // clear previous focus
       if (prevAttributes.focus) {
         const prevFocusElement = document.getElementById(prevAttributes.focus);
         if (prevFocusElement) {
@@ -151,7 +161,14 @@ export default class extends Controller {
         }
       }
     }
+    this.focusTarget.setAttribute("x", this.dialogueFocus.x);
+    this.focusTarget.setAttribute("y", this.dialogueFocus.y);
+    this.focusTarget.setAttribute("width", this.dialogueFocus.width);
+    this.focusTarget.setAttribute("height", this.dialogueFocus.height);
+    this.focusTarget.setAttribute("rx", this.dialogueFocus.radius);
+    this.focusTarget.setAttribute("ry", this.dialogueFocus.radius);
 
+    // video
     if (attributes.video) {
       this.videoTarget.style.display = "";
       this.videoContainerTarget.style.display = "";
@@ -176,7 +193,6 @@ export default class extends Controller {
         this.videoHintTarget.innerHTML = "Skip for now..."
         this.videoContainerTarget.style.pointerEvents = "";
       }
-
     } else {
       this.videoTarget.pause();
       this.videoTarget.currentTime = 0;
@@ -186,27 +202,13 @@ export default class extends Controller {
 
       this.avatarTarget.classList.remove("new-tutorial-avatar-slide-out");
 
+      // clear previous video
       if (prevAttributes.video) {
         this.avatarTarget.classList.add("new-tutorial-avatar-slide-in");
 
         setTimeout(() => {
           this.avatarTarget.classList.remove("new-tutorial-avatar-slide-in");
         }, 510);
-      }
-    }
-
-    this.focusTarget.setAttribute("x", this.dialogueFocus.x);
-    this.focusTarget.setAttribute("y", this.dialogueFocus.y);
-    this.focusTarget.setAttribute("width", this.dialogueFocus.width);
-    this.focusTarget.setAttribute("height", this.dialogueFocus.height);
-    this.focusTarget.setAttribute("rx", this.dialogueFocus.radius);
-    this.focusTarget.setAttribute("ry", this.dialogueFocus.radius);
-
-    if (this.focusedElement) {
-      if (this.dialogueFocus.z) {
-        this.focusedElement.style.zIndex = 100;
-      } else {
-        this.focusedElement.style.zIndex = "";
       }
     }
   }
@@ -239,7 +241,6 @@ export default class extends Controller {
         return;
       }
     }
-
 
     if (Date.now() - this.lastClickedNext < (this.progress == 0 ? this.initialDelay : this.nextDelay)) {
       console.log("Clicked too soon");
