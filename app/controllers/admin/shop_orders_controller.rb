@@ -46,6 +46,10 @@ module Admin
         base = base.where("frozen_address->>'country' ILIKE ?", "%#{params[:country]}%")
       end
 
+      if params[:item_type].present?
+        base = base.joins(:shop_item).where(shop_items: { type: params[:item_type] })
+      end
+
       case params[:sort]
       when "id_asc"
         base = base.order(id: :asc)

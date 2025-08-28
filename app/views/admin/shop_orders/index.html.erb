@@ -118,6 +118,13 @@
           {},
           { style: "width: 100%; padding: 0.5em; border-radius: 6px; border: 1px solid var(--color-border); background: var(--color-darker); color: var(--color-text);" } %>
       </div>
+
+      <div>
+        <%= f.label :item_type, "type:", style: "display: block; margin-bottom: 0.25em; color: var(--color-text);" %>
+        <%= f.select :item_type, options_for_select(ShopItem.distinct.pluck(:type).compact.sort, params[:item_type]),
+            { prompt: "all" },
+            { style: "width: 100%; padding: 0.5em; border-radius: 6px; border: 1px solid var(--color-border); background: var(--color-darker); color: var(--color-text);" } %>
+      </div>
     </div>
 
     <div style="display: flex; gap: 1em; align-items: center;">
