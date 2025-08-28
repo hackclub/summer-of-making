@@ -1,8 +1,6 @@
 <b><%= payout.created_at.in_time_zone("America/New_York") %>:</b>
 <%= render_shells(payout.amount) %> on
 <% case payout.payable %>
-<% when JourneyPayoutStonks %>
-  <%= link_to "📈 stonks " %>
 <% when User %>
   <%= link_to "👤 #{payout.payable.first_name} #{payout.payable.last_name}", admin_user_path(payout.payable) %>
 <% when ShopOrder %>
