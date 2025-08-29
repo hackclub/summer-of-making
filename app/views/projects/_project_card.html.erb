@@ -191,7 +191,7 @@
       <% end %>
 
       <% if @project.readme_link.present? %>
-        <%= render "shared/button", text: "Readme", link: @project.readme_link, link_target: "_blank", icon: "document.svg", fill_width: true %>
+        <%= render "shared/button", text: "Readme", data: { controller: "modal", action: "click->modal#open", modal_id: @project.id, modal_type: "readme"}, icon: "document.svg", fill_width: true %>
       <% end %>
     </div>
 

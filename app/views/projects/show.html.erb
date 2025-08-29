@@ -331,3 +331,5 @@
     <%= inline_svg "check.svg", class: "h-4 w-4 text-forest inline" %>
   </div>
 </div>
+
+<%= render "projects/readme_viewer_modal", project: @project, url: @project.readme_link %>
