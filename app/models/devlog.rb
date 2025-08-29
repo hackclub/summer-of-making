@@ -67,8 +67,13 @@ class Devlog < ApplicationRecord
     likes.exists?(user: user)
   end
 
-  # ie. Project.first.devlogs.capped_duration_seconds
-  scope :capped_duration_seconds, -> { where.not(duration_seconds: nil).sum("LEAST(duration_seconds, #{10.hours.to_i})") }
+    # ie. Project.first.devlogs.capped_duration_seconds
+    scope :capped_duration_seconds, -> {
+    where.not(duration_seconds: nil)
+      .sum(
+        "CASE WHEN created_at >= '2025-07-19 00:00:00' THEN LEAST(duration_seconds, 36000) ELSE duration_seconds END"
+      )
+    }
 
   def recalculate_seconds_coded
     # find the created_at of the devlog directly before this one
