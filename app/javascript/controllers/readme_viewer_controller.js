@@ -12,6 +12,11 @@ export default class extends Controller {
     loadReadme() {
         if (!this.urlValue) return;
 
+        marked.setOptions({
+            breaks: true,
+            gfm: true
+        });
+
         fetch(this.urlValue)
             .then(response => {
                 if (!response.ok) throw new Error('Failed to fetch README');
@@ -19,7 +24,7 @@ export default class extends Controller {
             })
             .then(text => {
                 const html = marked.parse(text);
-                this.contentTarget.innerHTML = `<div class="max-w-none">${html}</div>`;
+                this.contentTarget.innerHTML = `<div class="markdown-content max-w-none">${html}</div>`;
             })
             .catch(error => {
                 this.contentTarget.innerHTML = `<p class="text-vintage-red">Failed to load README: ${error.message}</p>`;
