@@ -146,7 +146,7 @@
           <% end %>
           <div class="flex flex-col sm:grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
             <% sorted_items = @regular_items.sort_by { |item| item.price_for_region(@selected_region) } %>
-            <% if cookies[:dismissed_raffle_v2] != 'true' && current_user&.tutorial_progress&.completed? %>
+            <% if cookies[:dismissed_raffle_v3] != 'true' && current_user&.tutorial_progress&.completed? %>
               <%= render partial: "raffle_card" %>
             <% end %>
             <% sorted_items.each do |item| %>
