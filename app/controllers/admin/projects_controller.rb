@@ -2,7 +2,10 @@
 
 module Admin
   class ProjectsController < ApplicationController
-    before_action :set_project, only: [ :destroy, :restore ]
+    before_action :set_project, only: [ :show, :destroy, :restore ]
+
+    def show
+    end
 
     def destroy
       @project.update!(is_deleted: true)
