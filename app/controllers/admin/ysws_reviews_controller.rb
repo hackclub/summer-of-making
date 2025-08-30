@@ -9,7 +9,7 @@ module Admin
       .select("projects.*,
                COUNT(DISTINCT devlogs.id) as devlogs_count,
                (SELECT elo_after FROM vote_changes WHERE project_id = projects.id ORDER BY created_at DESC LIMIT 1) as elo_score")
-      .includes(:user, :devlogs)
+      .includes(:user, :devlogs, ship_certifications: :reviewer)
 
     case @filter
     when "pending"

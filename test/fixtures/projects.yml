@@ -13,7 +13,7 @@
 #  hackatime_project_keys :string           default([]), is an Array
 #  is_deleted             :boolean          default(FALSE)
 #  is_shipped             :boolean          default(FALSE)
-#  is_sinkening_ship      :boolean
+#  is_sinkening_ship      :boolean          default(FALSE)
 #  rating                 :integer
 #  readme_link            :string
 #  repo_link              :string

@@ -224,7 +224,7 @@
                         <% if current_user && current_user == item.user && ship_data[:escrow_count].to_i.positive? %>
                           <% remaining = current_user.remaining_votes_to_ship %>
                           <% if remaining > 0 %>
-                            <p class="">You need <%= pluralize(remaining, 'more vote') %> since your last ship to release your shells. <a href="<%= new_vote_path %>" class="underline text-blue-700 hover:text-blue-800">Start voting</a>.</p>
+                            <p class="">You need <%= pluralize(remaining, 'more vote') %> since your last ship to release your shells. <span data-action="click->modal#startVoting" data-vote-path="<%= new_vote_path %>" class="underline text-blue-700 hover:text-blue-800 cursor-pointer">Start voting</span>.</p>
                           <% end %>
                         <% end %>
                       </div>

@@ -1,6 +1,15 @@
 <div class="asec" style="padding: 1.5em;">
   <h1>Low-quality review</h1>
-  <p>Projects with <strong><%= @threshold %>+</strong> unresolved reports.</p>
+  <p>Projects with <strong><%= @threshold %>+</strong> <%= @state %> reports.</p>
+
+  <div style="margin: 12px 0; display: flex; gap: 8px;">
+    <%= link_to admin_low_quality_dashboard_index_path(state: 'unresolved'), class: "pill #{ @state == 'unresolved' ? 'pill-yellow' : 'pill-gray' }", style: "text-decoration: none; padding: 0.5rem 1rem;" do %>
+      Unresolved
+    <% end %>
+    <%= link_to admin_low_quality_dashboard_index_path(state: 'resolved'), class: "pill #{ @state == 'resolved' ? 'pill-green' : 'pill-gray' }", style: "text-decoration: none; padding: 0.5rem 1rem;" do %>
+      Resolved
+    <% end %>
+  </div>
 
   <% if @projects.empty? %>
     <p>No projects need review.</p>

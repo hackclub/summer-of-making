@@ -44,7 +44,7 @@
                 <% elsif ship_certified && !latest_ship_has_payouts %>
                   <% remaining = current_user.remaining_votes_to_ship %>
                   <% if remaining > 0 %>
-                    <p class="text-red-400">Your latest payout is on hold — you need <%= pluralize(remaining, 'more vote') %> since your last ship to release your shells. <a href="<%= new_vote_path %>" class="underline text-blue-700 hover:text-blue-800">Start voting</a>.</p>
+                    <p class="text-red-400">Your latest payout is on hold — you need <%= pluralize(remaining, 'more vote') %> since your last ship to release your shells. <span data-action="click->modal#startVoting" data-vote-path="<%= new_vote_path %>" class="underline text-blue-700 hover:text-blue-800 cursor-pointer">Start voting</span>.</p>
                   <% else %>
                     <p class="text-red-400">Your latest ship is being voted on. Hang tight - you'll get your payout soon!</p>
                   <% end %>
