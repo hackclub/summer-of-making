@@ -6,6 +6,7 @@
       when 'pending' then 'yellow'
       when 'approved' then 'green'
       when 'rejected' then 'red'
+      when 'returned' then 'orange'
       when 'all' then 'dark'
       else 'gray'
     end %>" style="font-size: 0.6em; margin-left: 0.5rem;">
@@ -177,8 +178,11 @@
     <%= link_to admin_ship_certifications_path(filter: 'rejected', category_filter: @category_filter), class: "pill #{@filter == 'rejected' ? 'pill-red' : 'pill-gray'}", style: "text-decoration: none; padding: 0.5rem 1rem;" do %>
       Rejected (<%= @total_rejected %>)
     <% end %>
+    <%= link_to admin_ship_certifications_path(filter: 'returned', category_filter: @category_filter), class: "pill #{@filter == 'returned' ? 'pill-orange' : 'pill-gray'}", style: "text-decoration: none; padding: 0.5rem 1rem;" do %>
+      Returned (<%= @total_returned %>)
+    <% end %>
     <%= link_to admin_ship_certifications_path(filter: 'all', category_filter: @category_filter), class: "pill #{@filter == 'all' ? 'pill-dark' : 'pill-gray'}", style: "text-decoration: none; padding: 0.5rem 1rem;" do %>
-      All (<%= @total_approved + @total_rejected + @total_pending %>)
+      All (<%= @total_approved + @total_rejected + @total_pending + @total_returned %>)
     <% end %>
   </div>
 </div>
@@ -232,13 +236,29 @@
           </div>
         </td>
         <td>
-          <% case ship_certification.judgement %>
-          <% when 'approved' %>
-            <span class="pill pill-green">Approved</span>
-          <% when 'rejected' %>
-            <span class="pill pill-red">Rejected</span>
+          <% if ship_certification.ysws_returned? %>
+            <span class="pill pill-orange">RETURNED BY ADMIN</span>
+            <% if ship_certification.ysws_feedback_reason_labels.any? %>
+              <br>
+              <small style="color: var(--color-text-muted); font-size: 0.75em; margin-top: 0.3rem; display: block;">
+                <%= ship_certification.ysws_feedback_reason_labels.join(", ") %>
+              </small>
+            <% end %>
+            <% if ship_certification.ysws_returned_by_id && @returned_by_users&.dig(ship_certification.ysws_returned_by_id) %>
+              <br>
+              <small style="color: var(--color-text-muted); font-size: 0.75em;">
+                by <%= @returned_by_users[ship_certification.ysws_returned_by_id].display_name %> • <%= time_ago_in_words(ship_certification.ysws_returned_at) %> ago
+              </small>
+            <% end %>
           <% else %>
-            <span class="pill pill-yellow">Pending</span>
+            <% case ship_certification.judgement %>
+            <% when 'approved' %>
+              <span class="pill pill-green">Approved</span>
+            <% when 'rejected' %>
+              <span class="pill pill-red">Rejected</span>
+            <% else %>
+              <span class="pill pill-yellow">Pending</span>
+            <% end %>
           <% end %>
         </td>
         <td>

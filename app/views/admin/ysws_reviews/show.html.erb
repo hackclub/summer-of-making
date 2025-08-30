@@ -227,16 +227,55 @@
         style="padding: 1rem 2rem; font-size: 1.1em; cursor: pointer; border: none; text-decoration: none;">
       Approve All Devlogs
     </button>
+    <button type="button" id="return-to-certifier-btn"
+        class="pill pill-orange"
+        style="padding: 1rem 2rem; font-size: 1.1em; cursor: pointer; border: none; text-decoration: none; background-color: #ff8a00;">
+      Return to Ship Certifier
+    </button>
     <%= form.submit "Complete Review",
         class: "pill pill-green",
         style: "padding: 1rem 2rem; font-size: 1.1em; cursor: pointer; border: none; text-decoration: none;" %>
   </div>
 <% end %>
 
+<!-- Return to Certifier Modal -->
+<div id="return-modal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.5); z-index: 1000;">
+  <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); background: var(--color-background); padding: 2rem; border-radius: 8px; max-width: 500px; width: 90%;">
+    <h3 style="margin: 0 0 1rem 0;">Return Project to Ship Certifier</h3>
+    <p style="margin: 0 0 1.5rem 0; color: var(--color-text-muted);">
+      Select the reason(s) why this project needs to be returned to the ship certifier:
+    </p>
+
+    <%= form_with url: return_to_certifier_admin_ysws_review_path(@project), method: :patch, local: true, id: 'return-form' do |f| %>
+      <div style="margin-bottom: 1.5rem;">
+        <% ShipCertification::YSWS_FEEDBACK_REASONS.each do |reason| %>
+          <label style="display: block; margin: 0.5rem 0; cursor: pointer;">
+            <input type="checkbox" name="feedback_reasons[]" value="<%= reason %>" style="margin-right: 0.5rem;">
+            <%= ShipCertification::YSWS_FEEDBACK_REASON_LABELS[reason] %>
+          </label>
+        <% end %>
+      </div>
+      <div style="display: flex; gap: 1rem; justify-content: flex-end;">
+        <button type="button" id="cancel-return-btn" class="pill pill-gray" style="padding: 0.75rem 1.5rem; cursor: pointer; border: none; text-decoration: none;">
+          Cancel
+        </button>
+        <button type="submit" class="pill pill-orange" style="padding: 0.75rem 1.5rem; cursor: pointer; border: none; text-decoration: none; background-color: #ff8a00;">
+          Return Project
+        </button>
+      </div>
+    <% end %>
+  </div>
+</div>
+
 <script>
 document.addEventListener('DOMContentLoaded', function() {
   const approveAllBtn = document.getElementById('approve-all-btn');
+  const returnToCertifierBtn = document.getElementById('return-to-certifier-btn');
+  const returnModal = document.getElementById('return-modal');
+  const cancelReturnBtn = document.getElementById('cancel-return-btn');
+  const returnForm = document.getElementById('return-form');
 
+  // Approve all functionality
   approveAllBtn.addEventListener('click', function() {
     // Find all approve radio buttons and check them
     const approveRadios = document.querySelectorAll('input[type="radio"][value="1"]');
@@ -265,6 +304,31 @@ document.addEventListener('DOMContentLoaded', function() {
       approveAllBtn.textContent = 'Approve All Devlogs';
       approveAllBtn.style.backgroundColor = '';
     }, 2000);
+  });
+
+  // Return to certifier functionality
+  returnToCertifierBtn.addEventListener('click', function() {
+    returnModal.style.display = 'block';
+  });
+
+  cancelReturnBtn.addEventListener('click', function() {
+    returnModal.style.display = 'none';
+  });
+
+  // Close modal when clicking outside
+  returnModal.addEventListener('click', function(e) {
+    if (e.target === returnModal) {
+      returnModal.style.display = 'none';
+    }
+  });
+
+  // Validate form submission
+  returnForm.addEventListener('submit', function(e) {
+    const checkedBoxes = returnForm.querySelectorAll('input[name="feedback_reasons[]"]:checked');
+    if (checkedBoxes.length === 0) {
+      e.preventDefault();
+      alert('Please select at least one reason for returning the project.');
+    }
   });
 });
 </script>

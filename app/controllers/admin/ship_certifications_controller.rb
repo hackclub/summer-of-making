@@ -32,6 +32,8 @@ module Admin
         @ship_certifications = base.approved
       when "rejected"
         @ship_certifications = base.rejected
+      when "returned"
+        @ship_certifications = base.where.not(ysws_returned_at: nil)
       when "pending"
         @ship_certifications = base.pending
       when "all"
@@ -71,6 +73,7 @@ module Admin
       @total_approved = base.approved.count
       @total_rejected = base.rejected.count
       @total_pending = base.pending.count
+      @total_returned = base.where.not(ysws_returned_at: nil).count
       @avg_turnaround = calc_avg_turnaround
 
       category_base = ShipCertification.joins(:project).where(projects: { is_deleted: false })
@@ -131,6 +134,10 @@ module Admin
         .where("ship_certifications.created_at >= ?", 24.hours.ago)
         .joins(:project).where(projects: { is_deleted: false })
         .count
+
+      # Load ysws_returned_by users for the filtered certifications to avoid N+1 queries
+      returned_by_ids = @ship_certifications.map(&:ysws_returned_by_id).compact.uniq
+      @returned_by_users = User.where(id: returned_by_ids).index_by(&:id) if returned_by_ids.any?
     end
 
     def edit
