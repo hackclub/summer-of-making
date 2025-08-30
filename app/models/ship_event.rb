@@ -30,6 +30,28 @@ class ShipEvent < ApplicationRecord
   after_create :maybe_create_ship_certification
   after_create :award_user_badges
 
+  def has_feedback?
+    feedback.present?
+  end
+
+  def feedback_summary
+    return nil unless has_feedback?
+    
+    feedback.match(/\*\*Summary\*\*:\s*(.+?)(?=\n\*\*|\z)/m)&.[](1)&.strip
+  end
+
+  def vote_count
+    VoteChange.where(project: project).where("created_at > ?", created_at).count
+  end
+
+  def votes_needed_for_payout
+    [18 - vote_count, 0].max
+  end
+
+  def ready_for_payout?
+    vote_count >= 18
+  end
+
   def self.airtable_table_name
     "_ship_events"
   end
@@ -87,5 +109,32 @@ class ShipEvent < ApplicationRecord
 
   def award_user_badges
     user.award_badges_async!("ship_event_created")
+  end
+
+  def regenerate_feedback
+    begin
+      service = ShipFeedbackService.new(self)
+      feedback = service.generate_feedback
+      
+      if feedback
+        {
+          success: true,
+          message: "Feedback regenerated successfully",
+          feedback: feedback,
+          ship_event_id: id
+        }
+      else
+        {
+          success: false,
+          message: "Failed to generate feedback - check logs for details"
+        }
+      end
+    rescue => e
+      Rails.logger.error "Admin feedback regeneration failed for ship_event #{id}: #{e.message}"
+      {
+        success: false,
+        message: "An error occurred while regenerating feedback"
+      }
+    end
   end
 end

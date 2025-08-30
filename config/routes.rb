@@ -344,6 +344,11 @@ Rails.application.routes.draw do
   post "api/devlogs", to: "devlogs#api_create"
 
   resources :ship_event_feedbacks
+  resources :ship_events, only: [] do
+    member do
+      get :feedback
+    end
+  end
 
   post "track_view", to: "view_tracking#create"
 
@@ -432,6 +437,11 @@ Rails.application.routes.draw do
       end
     end
     resources :sinkenings, only: [ :show, :update ], path: "sinkening"
+    resources :ship_events, only: [] do
+      member do
+        post :regenerate_feedback
+      end
+    end
   end
 
   get "leaderboard", to: "leaderboard#index"
