@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_08_27_192404) do
+ActiveRecord::Schema[8.0].define(version: 2025_08_29_174519) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -298,6 +298,11 @@ ActiveRecord::Schema[8.0].define(version: 2025_08_27_192404) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.boolean "resolved", default: false, null: false
+    t.datetime "resolved_at"
+    t.bigint "resolved_by_id"
+    t.string "category"
+    t.index ["category"], name: "index_fraud_reports_on_category"
+    t.index ["resolved_by_id"], name: "index_fraud_reports_on_resolved_by_id"
     t.index ["user_id", "suspect_type", "suspect_id"], name: "index_fraud_reports_on_user_and_suspect", unique: true
     t.index ["user_id"], name: "index_fraud_reports_on_user_id"
   end
@@ -916,6 +921,7 @@ ActiveRecord::Schema[8.0].define(version: 2025_08_27_192404) do
   add_foreign_key "devlogs", "projects"
   add_foreign_key "devlogs", "users"
   add_foreign_key "fraud_reports", "users"
+  add_foreign_key "fraud_reports", "users", column: "resolved_by_id"
   add_foreign_key "hackatime_projects", "users"
   add_foreign_key "likes", "users"
   add_foreign_key "magic_links", "users"

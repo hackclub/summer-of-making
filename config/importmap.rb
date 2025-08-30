@@ -57,4 +57,3 @@ pin "@rails/actioncable", to: "actioncable.esm.js"
 pin_all_from "app/javascript/channels", under: "channels"
 pin "howler" # @2.2.4
 pin "alpinejs" # @3.14.9
-pin "marked" # @16.2.1

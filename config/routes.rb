@@ -252,6 +252,7 @@ Rails.application.routes.draw do
       delete :unstake_stonks
       patch :update_coordinates
       delete :unplace_coordinates
+      get :render_readme
       # patch :recover
       get "devlog/:devlog_id", action: :show, as: :devlog
     end
