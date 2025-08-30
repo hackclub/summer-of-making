@@ -5,6 +5,7 @@
 # Table name: projects
 #
 #  id                     :bigint           not null, primary key
+#  ai_explanation         :string
 #  category               :string
 #  certification_type     :integer
 #  demo_link              :string
@@ -324,7 +325,7 @@ class Project < ApplicationRecord
         message: "You must have at least one devlog #{ship_events.count > 0 ? "since the last ship" : ""}"
       },
       voting_quota: {
-        met: user.votes_since_last_ship_count >= 20,
+        met: user.remaining_votes_to_ship == 0,
         message: "You must vote #{user.remaining_votes_to_ship} more times to ship."
       },
       repo_link: {

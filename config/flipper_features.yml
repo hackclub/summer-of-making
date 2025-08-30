@@ -7,3 +7,4 @@ shared:
   disable_sinkening_visuals: when enabled for a User actor, no water (and no fun!)
   map_volcano: not yet....
   enable_shop_balloons: allows a user to order sinkening balloons, only if they're eligible
+  new_onboarding_2025_08_22: enables the new onboarding experience for users

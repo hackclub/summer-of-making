@@ -1,0 +1,264 @@
+<%= javascript_include_tag "new_tutorial_data" %>
+
+<div
+  data-new-tutorial-target="container"
+  style="display: none">
+  <div class="absolute inset-0 z-50 bg-fade-in" data-new-tutorial-target="background">
+    <svg width="100%" height="100%">
+      <defs>
+        <!-- The filter region is very large to ensure the blur is never clipped, regardless of rect size/position -->
+        <filter
+          id="soft-edge"
+          x="-10000"
+          y="-10000"
+          width="20000"
+          height="20000"
+          filterUnits="userSpaceOnUse">
+          <feGaussianBlur stdDeviation="10" result="blur" />
+        </filter>
+
+          <mask id="mask" x="0" y="0" width="100%" height="100%">
+            <rect x="0" y="0" width="100%" height="100%" fill="#fff"></rect>
+          <rect
+            x="0"
+            y="0"
+            rx="0"
+            ry="0"
+            width="0"
+            height="0"
+            data-new-tutorial-target="focus"
+            filter="url(#soft-edge)"></rect>
+        </mask>
+      </defs>
+
+      <rect
+        x="0"
+        y="0"
+        width="100%"
+        height="100%"
+        mask="url(#mask)"
+        fill-opacity="0.75"></rect>
+    </svg>
+  </div>
+
+  <div class="absolute left-5 right-5 bottom-16 z-50 select-none">
+    <div class="flex justify-center w-full">
+      <div class="flex flex-col max-w-2xl grow" data-new-tutorial-target="dialogue">
+        <picture class="ml-auto new-tutorial-avatar-slide-in-delay">
+          <img
+            src="<%= asset_path('orpheusyap1.png') %>"
+            alt="Explorpheus"
+            class="h-50 -mb-2"
+            data-new-tutorial-target="avatar">
+        </picture>
+
+        <div
+          class="relative rounded-lg shadow-2xl border border-[#7c4a331a] min-h-30 p-5 text-2xl new-tutorial-slide-fade-in"
+          style="background: radial-gradient(circle at 43.330392% 44.289383%, rgb(246, 219, 186), rgb(230, 212, 190));">
+          <p
+            class="absolute -top-5 right-8 px-2 py-1 bg-som-dark text-orange-100 rounded-lg text-base">
+            Explorpheus
+          </p>
+
+          <div class="flex justify-center items-center text-center h-full">
+            <p data-new-tutorial-target="text">
+              Loading... Hang tight!
+            </p>
+          </div>
+
+          <p
+            class="absolute text-sm -bottom-6 text-orange-100 left-3"
+            data-new-tutorial-target="hint">
+            Click anywhere to continue...
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div
+    class="absolute inset-0 bottom-[13rem] m-12 z-50 new-tutorial-video-slide"
+    style="display: none"
+    data-new-tutorial-target="videoContainer">
+    <div class="flex justify-center w-full h-full">
+      <div
+        class="flex flex-col max-w-4xl grow items-center justify-center space-y-4">
+        <video
+          data-new-tutorial-target="video"
+          class="aspect-video rounded-lg overflow-hidden"
+          controls
+          preload="auto"
+          controlsList="nofullscreen"
+          playsinline>
+          <source src="" type="video/mp4">
+          Uh oh! Your browser does not support the video tag.
+        </video>
+
+        <button
+          type="button"
+          data-new-tutorial-target="videoHint"
+          data-action="click->new-tutorial#skipVideo"
+          class="px-3 py-1 rounded mr-auto"
+          style="background: radial-gradient(circle at 43.330392% 44.289383%, rgb(246, 219, 186), rgb(230, 212, 190));">
+          Skip for now...
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<style>
+  @media (prefers-reduced-motion: no-preference) {
+    .bg-fade-in {
+      animation: bg-fade-in 0.25s ease-out forwards;
+    }
+
+    @keyframes bg-fade-in {
+      0% {
+        opacity: 0;
+      }
+      100% {
+        opacity: 1;
+      }
+    }
+
+    .bg-fade-out {
+      animation: bg-fade-out 0.25s ease-in forwards;
+    }
+
+    @keyframes bg-fade-out {
+      0% {
+        opacity: 1;
+      }
+      100% {
+        opacity: 0;
+      }
+    }
+
+    .new-tutorial-shake {
+      display: inline-block;
+      animation: new-tutorial-shake 0.25s ease-in-out infinite;
+    }
+
+    @keyframes new-tutorial-shake {
+      0% {
+        transform: translate(0) rotate(0deg);
+      }
+      25% {
+        transform: translate(-1px, 1px) rotate(1deg);
+      }
+      50% {
+        transform: translate(1px, -1px) rotate(-1deg);
+      }
+      75% {
+        transform: translate(-1px, -1px) rotate(1deg);
+      }
+      100% {
+        transform: translate(0) rotate(0deg);
+      }
+    }
+
+    .new-tutorial-slide-fade-in {
+      animation: new-tutorial-slide-fade-in 0.5s ease-out forwards;
+    }
+
+    @keyframes new-tutorial-slide-fade-in {
+      0% {
+        transform: translateY(100%);
+        opacity: 0;
+      }
+      100% {
+        transform: translateY(0);
+        opacity: 1;
+      }
+    }
+
+    .new-tutorial-avatar-slide-in-delay {
+      animation: new-tutorial-avatar-slide-in-delay 0.75s ease-out forwards;
+    }
+
+    @keyframes new-tutorial-avatar-slide-in-delay {
+      0%,
+      67% {
+        transform: translateY(100%);
+        opacity: 0;
+      }
+      100% {
+        transform: translateY(0);
+        opacity: 1;
+      }
+    }
+
+    .new-tutorial-avatar-slide-in {
+      animation: new-tutorial-avatar-slide-in 0.5s ease-in forwards;
+    }
+
+    @keyframes new-tutorial-avatar-slide-in {
+      0% {
+        transform: translateY(100%);
+        opacity: 0;
+      }
+      100% {
+        transform: translateY(0);
+        opacity: 1;
+      }
+    }
+
+    .new-tutorial-avatar-slide-out {
+      animation: new-tutorial-avatar-slide-out 0.5s ease-in forwards;
+    }
+
+    @keyframes new-tutorial-avatar-slide-out {
+      0% {
+        transform: translateY(0);
+        opacity: 1;
+      }
+      100% {
+        transform: translateY(100%);
+        opacity: 0;
+      }
+    }
+
+    .new-tutorial-bling {
+      position: relative;
+      background: linear-gradient(
+        120deg,
+        #4b2e19 20%,
+        #7c5a3a 45%,
+        #c8a97e 50%,
+        #7c5a3a 55%,
+        #4b2e19 80%
+      );
+      background-size: 200% 100%;
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      color: transparent;
+      animation: new-tutorial-shiny-effect 3s linear infinite;
+    }
+
+    @keyframes new-tutorial-shiny-effect {
+      0% {
+        background-position: 200% 0;
+      }
+      100% {
+        background-position: 0 0;
+      }
+    }
+
+    .new-tutorial-video-slide {
+      animation: new-tutorial-video-slide 0.75s ease-out forwards;
+    }
+
+    @keyframes new-tutorial-video-slide {
+      0% {
+        transform: translateY(-100%);
+        opacity: 0;
+      }
+      100% {
+        transform: translateY(0);
+        opacity: 1;
+      }
+    }
+  }
+</style>

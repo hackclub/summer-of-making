@@ -11,7 +11,7 @@
           modal_type: "certification"
         } %>
   <% else %>
-    <%= render "shared/button",
+    <% render "shared/button",
         text: "Ship It!",
         kind: "primary",
         icon: "ship.svg",
@@ -20,6 +20,13 @@
           action: "modal#open",
           modal_id: "#{project.id}",
           modal_type: "is_shipped"
+        } %>
+    <%= render "shared/button",
+        text: "Ship It!",
+        kind: "primary",
+        icon: "ship.svg",
+        data: {
+          action: "new-tutorial#startShipScene",
         } %>
   <% end %>
 <% else %>
