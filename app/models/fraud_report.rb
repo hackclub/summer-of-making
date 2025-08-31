@@ -2,17 +2,19 @@
 #
 # Table name: fraud_reports
 #
-#  id             :bigint           not null, primary key
-#  category       :string
-#  reason         :string
-#  resolved       :boolean          default(FALSE), not null
-#  resolved_at    :datetime
-#  suspect_type   :string
-#  created_at     :datetime         not null
-#  updated_at     :datetime         not null
-#  resolved_by_id :bigint
-#  suspect_id     :bigint
-#  user_id        :bigint           not null
+#  id               :bigint           not null, primary key
+#  category         :string
+#  reason           :string
+#  resolved         :boolean          default(FALSE), not null
+#  resolved_at      :datetime
+#  resolved_message :text
+#  resolved_outcome :string
+#  suspect_type     :string
+#  created_at       :datetime         not null
+#  updated_at       :datetime         not null
+#  resolved_by_id   :bigint
+#  suspect_id       :bigint
+#  user_id          :bigint           not null
 #
 # Indexes
 #
@@ -49,8 +51,8 @@ class FraudReport < ApplicationRecord
     )
   end
 
-  def resolve!(user: nil)
-    update!(resolved: true, resolved_at: Time.current, resolved_by_id: user&.id)
+  def resolve!(user: nil, outcome: nil, message: nil)
+    update!(resolved: true, resolved_at: Time.current, resolved_by_id: user&.id, resolved_outcome: outcome, resolved_message: message)
   end
 
   def unresolve!

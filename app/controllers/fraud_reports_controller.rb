@@ -51,7 +51,8 @@ class FraudReportsController < ApplicationController
           Heads up — your ship has been excluded from voting due to multiple low-quality reports.
           Thanks for building! Our shipwrights will review and follow up if needed. No action is required right now.
           EOT
-          SendSlackDmJob.perform_later(owner.slack_id, msg)
+          ship_event = ShipEvent.find_by(id: fraud_report.suspect_id)
+          SendSlackDmJob.perform_later(ship_event.user.slack_id, msg) if ship_event&.user&.slack_id.present?
         end
       end
 

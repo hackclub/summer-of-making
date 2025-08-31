@@ -51,8 +51,8 @@ module Admin
         end
       end
 
-      FraudReport.where(suspect_type: "Project", suspect_id: project.id, resolved: false).update_all(resolved: true, resolved_at: Time.current, resolved_by_id: current_user.id)
-      FraudReport.where(suspect_type: "ShipEvent").joins("JOIN ship_events ON ship_events.id = fraud_reports.suspect_id").where(ship_events: { project_id: project.id }, resolved: false).update_all(resolved: true, resolved_at: Time.current, resolved_by_id: current_user.id)
+      FraudReport.where(suspect_type: "Project", suspect_id: project.id, resolved: false).update_all(resolved: true, resolved_at: Time.current, resolved_by_id: current_user.id, resolved_outcome: "low_quality", resolved_message: reason)
+      FraudReport.where(suspect_type: "ShipEvent").joins("JOIN ship_events ON ship_events.id = fraud_reports.suspect_id").where(ship_events: { project_id: project.id }, resolved: false).update_all(resolved: true, resolved_at: Time.current, resolved_by_id: current_user.id, resolved_outcome: "low_quality", resolved_message: reason)
 
       if project.user&.slack_id.present?
         message = <<~EOT
@@ -70,8 +70,9 @@ module Admin
 
     def mark_ok
       project = Project.find(params[:project_id])
-      FraudReport.where(suspect_type: "Project", suspect_id: project.id, resolved: false).update_all(resolved: true, resolved_at: Time.current, resolved_by_id: current_user.id)
-      FraudReport.where(suspect_type: "ShipEvent").joins("JOIN ship_events ON ship_events.id = fraud_reports.suspect_id").where(ship_events: { project_id: project.id }, resolved: false).update_all(resolved: true, resolved_at: Time.current, resolved_by_id: current_user.id)
+      ok_reason = params[:ok_reason].to_s.presence
+      FraudReport.where(suspect_type: "Project", suspect_id: project.id, resolved: false).update_all(resolved: true, resolved_at: Time.current, resolved_by_id: current_user.id, resolved_outcome: "ok", resolved_message: ok_reason)
+      FraudReport.where(suspect_type: "ShipEvent").joins("JOIN ship_events ON ship_events.id = fraud_reports.suspect_id").where(ship_events: { project_id: project.id }, resolved: false).update_all(resolved: true, resolved_at: Time.current, resolved_by_id: current_user.id, resolved_outcome: "ok", resolved_message: ok_reason)
 
       redirect_to admin_low_quality_dashboard_index_path, notice: "Marked OK and cleared reports."
     end
