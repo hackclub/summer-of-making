@@ -81,6 +81,75 @@ module Admin
       @recent = Payout.includes(:user, :payable)
                              .order(created_at: :desc)
                              .limit(100)
+
+      escrow_scope = Payout.where(escrowed: true)
+      @escrow_count = escrow_scope.count
+      @escrow_amount = escrow_scope.sum(:amount)
+      @escrow_recent_amount = escrow_scope.where(created_at: yesterday..).sum(:amount)
+      @escrow_users = escrow_scope.distinct.count(:user_id)
+      @released_cap = Payout.where(escrowed: false).sum(:amount)
+
+      escrow_holder_balances = Payout.joins(:user)
+                                     .where(escrowed: true)
+                                     .group("users.id", "users.display_name", "users.avatar")
+                                     .sum(:amount)
+      @escrow_holders = escrow_holder_balances
+                          .sort_by { |_, amount| -amount }
+                          .first(10)
+
+      holder_user_ids = @escrow_holders.map { |(user_data, _)| user_data[0] }
+      users_for_holders = User.where(id: holder_user_ids).includes(:votes, projects: :ship_events)
+      @votes_needed_by_user_id = users_for_holders.to_h do |u|
+        remaining = [ u.votes_required_for_release - u.votes.active.count, 0 ].max
+        [ u.id, remaining ]
+      end
+
+      @escrow_release_ready = 0
+      escrow_user_ids = escrow_scope.select(:user_id).distinct.pluck(:user_id)
+      if escrow_user_ids.any?
+        User.where(id: escrow_user_ids).find_each do |u|
+          @escrow_release_ready += 1 if u.has_met_voting_requirement?
+        end
+      end
+      @total_votes_needed = 0
+      if escrow_user_ids.any?
+        User.where(id: escrow_user_ids).find_each do |u|
+          @total_votes_needed += [ u.votes_required_for_release - u.votes.active.count, 0 ].max
+        end
+      end
+
+      approved_project_ids = Project.joins(:ship_certifications)
+                                    .where(ship_certifications: { judgement: :approved })
+                                    .distinct
+                                    .pluck(:id)
+
+      @total_ship_events = ShipEvent.where(project_id: approved_project_ids).count
+      released_ship_event_ids = Payout.joins("JOIN ship_events ON payouts.payable_id = ship_events.id")
+                                      .where(payable_type: "ShipEvent", escrowed: false)
+                                      .where(ship_events: { project_id: approved_project_ids })
+                                      .distinct
+                                      .pluck(:payable_id)
+      any_payout_ship_event_ids = Payout.joins("JOIN ship_events ON payouts.payable_id = ship_events.id")
+                                        .where(payable_type: "ShipEvent")
+                                        .where(ship_events: { project_id: approved_project_ids })
+                                        .distinct
+                                        .pluck(:payable_id)
+
+      @total_unpaid_ship_events = ShipEvent.where(project_id: approved_project_ids)
+                                           .where.not(id: any_payout_ship_event_ids)
+                                           .count
+
+      escrowed_only_ship_event_ids = (Payout.joins("JOIN ship_events ON payouts.payable_id = ship_events.id")
+                                            .where(payable_type: "ShipEvent", escrowed: true)
+                                            .where(ship_events: { project_id: approved_project_ids })
+                                            .distinct.pluck(:payable_id) - released_ship_event_ids)
+      @escrow_pending_ship_events = ShipEvent.where(id: escrowed_only_ship_event_ids, project_id: approved_project_ids).count
+
+      last_paid_payout = Payout.where(payable_type: "ShipEvent", escrowed: false)
+                               .order(created_at: :desc)
+                               .includes(:payable)
+                               .first
+      @rough_next_ship_date = last_paid_payout&.payable&.created_at
     end
 
     private

@@ -87,9 +87,22 @@ class ProjectsController < ApplicationController
     authorize @project, :show?
     track_view(@project)
 
+    if current_user
+      current_user.user_badges.load
+      current_user.payouts.load
+    end
+
     @devlogs = @project.devlogs.sort_by(&:created_at).reverse
     @ship_events = @project.ship_events.sort_by(&:created_at).reverse
-    @timeline = (@devlogs + @ship_events).sort_by(&:created_at).reverse
+
+    # Include shipwright advice in timeline for project owner only
+    timeline_items = [ @devlogs, @ship_events ]
+    if current_user == @project.user
+      @shipwright_advices = @project.shipwright_advices.includes(:ship_certification).sort_by(&:created_at).reverse
+      timeline_items << @shipwright_advices
+    end
+
+    @timeline = timeline_items.flatten.sort_by(&:created_at).reverse
 
     @stonks = @project.stonks.sort_by(&:amount).reverse
     @latest_ship_certification = @project.ship_certifications.max_by(&:created_at)
@@ -101,6 +114,9 @@ class ProjectsController < ApplicationController
     # Handle devlog highlighting for direct devlog links
     @target_devlog_id = params[:devlog_id] if params[:devlog_id].present?
 
+    # ID of newly created devlog for balloon animation
+    @new_devlog_id = flash[:new_devlog_id] if flash[:new_devlog_id].present?
+
     return unless current_user
 
     if current_user == @project.user && current_user.has_hackatime?
@@ -110,6 +126,16 @@ class ProjectsController < ApplicationController
     end
 
     @user_stonk = @project.stonks.find { |stonk| stonk.user_id == current_user.id }
+
+    # precoomputed liked state for devlogs
+    if @devlogs.any?
+      devlog_ids = @devlogs.map(&:id)
+      @liked_devlog_ids = Like.where(user_id: current_user.id, likeable_type: "Devlog", likeable_id: devlog_ids)
+                               .pluck(:likeable_id)
+                               .to_set
+    else
+      @liked_devlog_ids = Set.new
+    end
   end
 
   def edit
@@ -120,6 +146,12 @@ class ProjectsController < ApplicationController
 
   def create
     @project = current_user.projects.build(project_params)
+
+    if not_img?(params[:project][:banner])
+      flash.now[:alert] = "That is not a image!"
+      render :index, status: :forbidden
+      return
+    end
 
     if @project.hackatime_project_keys.present?
       @project.hackatime_project_keys = @project.hackatime_project_keys.compact_blank.uniq
@@ -138,6 +170,12 @@ class ProjectsController < ApplicationController
   def update
     if current_user == @project.user || current_user.is_admin?
       update_params = project_params
+
+      if not_img?(update_params[:banner])
+        flash.now[:alert] = "That is not a image!"
+        render :edit, status: :forbidden
+        return
+      end
 
       if update_params[:hackatime_project_keys].present?
         update_params[:hackatime_project_keys] = update_params[:hackatime_project_keys].compact_blank.uniq
@@ -265,7 +303,11 @@ class ProjectsController < ApplicationController
       return
     end
 
-    if ShipEvent.create(project: @project)
+    if ShipEvent.create(project: @project, for_sinkening: Flipper.enabled?(:sinkening, current_user))
+      if Flipper.enabled?(:sinkening, current_user)
+        @project.update!(is_sinkening_ship: true)
+      end
+
       is_first_ship = current_user.projects.joins(:ship_events).count == 1
       ahoy.track "tutorial_step_first_project_shipped", user_id: current_user.id, project_id: @project.id, is_first_ship: is_first_ship
       redirect_to project_path(@project), notice: "Your project has been shipped!"
@@ -592,9 +634,13 @@ class ProjectsController < ApplicationController
 
     ship_events_by_date.each_with_index do |ship_event, index|
       position = index + 1
-      payouts = ship_event.payouts.to_a
+      payouts = ship_event.payouts.where(escrowed: false).to_a
       payout_count = payouts.size
       payout_sum = payouts.sum(&:amount)
+
+      escrowed_payouts = ship_event.payouts.where(escrowed: true).to_a
+      escrow_count = escrowed_payouts.size
+      escrow_sum = escrowed_payouts.sum(&:amount)
 
       if index == 0
         devlogs_count = devlogs_by_date.count do |devlog|
@@ -611,7 +657,10 @@ class ProjectsController < ApplicationController
         position: position,
         payout_count: payout_count,
         payout_sum: payout_sum,
-        devlogs_since_last_count: devlogs_count
+        escrow_count: escrow_count,
+        escrow_sum: escrow_sum,
+        devlogs_since_last_count: devlogs_count,
+        hours_covered: helpers.format_seconds(ship_event.seconds_covered)
       }
     end
 
@@ -653,21 +702,22 @@ class ProjectsController < ApplicationController
   def set_project
     @project = Project.includes(
       {
-        user: [ :user_hackatime_data ],
+        user: [ :user_hackatime_data, :user_badges ],
         devlogs: [
-          :user,
+          { user: :user_badges },
           { comments: :user },
-          :file_attachment
+          { file_attachment: :blob }
         ],
         ship_events: [
           :payouts
         ],
         stonks: [
           :user
-        ]
+        ],
+        followers: :projects
       },
-      :banner_attachment,
-      :ship_certifications
+      { banner_attachment: :blob },
+      ship_certifications: [ { proof_video_attachment: :blob } ]
     ).find(params[:id])
   rescue ActiveRecord::RecordNotFound
     deleted_project = Project.with_deleted.find_by(id: params[:id])
@@ -697,5 +747,14 @@ class ProjectsController < ApplicationController
 
   def coordinates_params
     params.require(:project).permit(:x, :y)
+  end
+
+  def not_img?(banner)
+    return false if banner.blank?
+    if banner.respond_to?(:content_type)
+      !banner.content_type.start_with?("image/")
+    else
+      false
+    end
   end
 end

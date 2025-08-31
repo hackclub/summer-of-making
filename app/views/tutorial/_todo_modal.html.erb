@@ -1,0 +1,77 @@
+<div data-todo-target="modal" class="fixed bottom-4 right-4 w-96 rounded-lg shadow-2xl border border-[#7c4a331a] z-50 transform translate-x-full transition-transform duration-300 ease-in-out" style="display: none; background: radial-gradient(circle at 43.330392% 44.289383%, rgb(246, 219, 186), rgb(230, 212, 190));">
+  <div class="p-6">
+    <div class="flex items-center justify-between mb-4">
+      <div class="flex flex-col">
+        <h2 class="text-xl font-bold text-som-dark">Todo list:</h2>
+        <p>Follow me to get started!</p>
+      </div>
+      <button data-action="click->todo#close" class="transition-transform text-som-dark hover:scale-110">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+        </svg>
+      </button>
+    </div>
+
+    <ul class="space-y-2 text-left">
+      <li class="flex items-start">
+        <div class="flex-shrink-0 h-6 w-6 mt-0.5">
+          <div class="h-5 w-5 border-2 <%= current_user.tutorial_video_seen? ? 'bg-forest border-forest' : 'border-som-dark' %> flex items-center justify-center">
+          </div>
+        </div>
+        <span class="ml-2 <%= current_user.tutorial_video_seen? ? 'text-forest' : 'text-som-dark' %>">
+          Watch the <a href="/onboarding.mp4" class="text-blue-500 hover:text-blue-700 underline">Introduction Video</a>
+        </span>
+      </li>
+
+      <li class="flex items-start">
+        <div class="flex-shrink-0 h-6 w-6 mt-0.5">
+          <div class="h-5 w-5 border-2 <%= @todo_flags[:has_projects] ? 'bg-forest border-forest' : 'border-som-dark' %> flex items-center justify-center">
+          </div>
+        </div>
+        <span class="ml-2 <%= @todo_flags[:has_projects] ? 'text-forest' : 'text-som-dark' %>">
+          Create a project in the <a href="/my_projects" class="text-blue-500 underline hover:text-blue-700">Projects</a> tab
+        </span>
+      </li>
+
+      <li class="flex items-start">
+        <div class="flex-shrink-0 h-6 w-6 mt-0.5">
+          <div class="h-5 w-5 border-2 <%= @todo_flags[:has_devlogs] ? 'bg-forest border-forest' : 'border-som-dark' %> flex items-center justify-center">
+          </div>
+        </div>
+        <span class="ml-2 <%= @todo_flags[:has_devlogs] ? 'text-forest' : 'text-som-dark' %>">
+          Post updates on your devlog as you work
+        </span>
+      </li>
+
+      <li class="flex items-start">
+        <div class="flex-shrink-0 h-6 w-6 mt-0.5">
+          <div class="h-5 w-5 border-2 <%= @todo_flags[:has_ship_events] ? 'bg-forest border-forest' : 'border-som-dark' %> flex items-center justify-center">
+          </div>
+        </div>
+        <span class="ml-2 <%= @todo_flags[:has_ship_events] ? 'text-forest' : 'text-som-dark' %>">
+          Ship your project when it is ready for others to experience
+        </span>
+      </li>
+
+      <li class="flex items-start">
+        <div class="flex-shrink-0 h-6 w-6 mt-0.5">
+          <div class="h-5 w-5 border-2 <%= @todo_flags[:has_votes] ? 'bg-forest border-forest' : 'border-som-dark' %> flex items-center justify-center">
+          </div>
+        </div>
+        <span class="ml-2 <%= @todo_flags[:has_votes] ? 'text-forest' : 'text-som-dark' %>">
+          <a href="<%= new_vote_path %>" class="text-blue-500 hover:text-blue-700 underline">Vote</a> on other people's projects to receive your shells
+        </span>
+      </li>
+
+      <li class="flex items-start">
+        <div class="flex-shrink-0 h-6 w-6 mt-0.5">
+          <div class="h-5 w-5 border-2 <%= @todo_flags[:has_non_free_order] ? 'bg-forest border-forest' : 'border-som-dark' %> flex items-center justify-center">
+          </div>
+        </div>
+        <span class="ml-2 <%= @todo_flags[:has_non_free_order] ? 'text-forest' : 'text-som-dark' %>">
+          Spend your hard-earned shells in the <a href="<%= shop_path %>" class="text-blue-500 hover:text-blue-700 underline">shop</a>
+        </span>
+      </li>
+    </ul>
+  </div>
+</div>

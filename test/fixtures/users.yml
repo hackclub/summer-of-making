@@ -9,6 +9,7 @@
 #  display_name                         :string
 #  email                                :string
 #  first_name                           :string
+#  fraud_team_member                    :boolean          default(FALSE), not null
 #  freeze_shop_activity                 :boolean          default(FALSE)
 #  has_black_market                     :boolean
 #  has_clicked_completed_tutorial_modal :boolean          default(FALSE), not null

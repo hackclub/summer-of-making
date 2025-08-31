@@ -1,0 +1,44 @@
+<div class="mt-4 space-y-3 relative">
+  <div>
+    <a href="<%= SinkeningSetting.story_url %>" target="_blank"
+       class="inline-flex items-center gap-2 px-4 py-2 rounded-md bg-[#f07b68] text-white font-bold shadow hover:shadow-md hover:translate-y-[-1px] active:translate-y-[0px] transition-all">
+      <span>JOIN THE BALLOON BRIGADE</span>
+      <span aria-hidden>🎈</span>
+    </a>
+  </div>
+
+  <%# <%= render partial: "campfire/balloon_brigade_story" %>
+
+  <div class="balloon-brigade-boat" aria-hidden="true">
+    <%= image_tag "heidiorphsinkingrowboat.png", alt: "Heidi and Orph rowing a sinking boat" %>
+  </div>
+</div>
+
+<% content_for :head do %>
+  <style>
+    .definition-paper .inline-cta-note {
+      opacity: 0.85;
+    }
+
+    .definition-paper .balloon-brigade-boat {
+      position: absolute;
+      right: -10px;
+      bottom: -45px;
+      width: 120px;
+      pointer-events: none;
+      z-index: 20;
+      filter: drop-shadow(0 2px 2px rgba(0,0,0,0.15));
+      display: none;
+    }
+    @media (min-width: 640px) {
+      .definition-paper .balloon-brigade-boat { display: block; }
+    }
+    @media (min-width: 768px) {
+      .definition-paper .balloon-brigade-boat {
+        right: -6px;
+        bottom: -45px;
+        width: 150px;
+      }
+    }
+  </style>
+<% end %>

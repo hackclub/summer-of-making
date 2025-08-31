@@ -10,4 +10,6 @@ services:
     environment:
       - BROWSER_USE_DISABLE_TELEMETRY=true
       - DISPLAY=:1     # Virtual display
+      - STEEL_API_KEY=${STEEL_API_KEY}
+      - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY}
     privileged: true   # Required for VNC operations

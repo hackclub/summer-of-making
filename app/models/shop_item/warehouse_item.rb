@@ -42,4 +42,14 @@
 #  updated_at                        :datetime         not null
 #
 class ShopItem::WarehouseItem < ShopItem
+  def get_agh_contents(order)
+    return [] unless agh_contents.present?
+
+    agh_contents.map do |content_item|
+      {
+        sku: content_item["sku"],
+        quantity: content_item["quantity"] * order.quantity
+      }
+    end
+  end
 end

@@ -1,6 +1,8 @@
 module Admin
   class FraudReportsController < ApplicationController
+    before_action :auth
     before_action :set_fraud_report, only: [ :show, :resolve, :unresolve ]
+    skip_before_action :authenticate_admin!
 
     def index
       @total_reports = FraudReport.count
@@ -16,7 +18,7 @@ module Admin
     end
 
     def resolve
-      @fraud_report.resolve!
+      @fraud_report.resolve!(user: current_user)
       redirect_to admin_fraud_report_path(@fraud_report), notice: "Fraud report marked as resolved."
     end
 
@@ -26,6 +28,12 @@ module Admin
     end
 
     private
+
+    def auth
+      unless current_user&.is_admin? || current_user&.fraud_team_member?
+        redirect_to root_path, alert: "whomp whomp"
+      end
+    end
 
     def set_fraud_report
       @fraud_report = FraudReport.find(params[:id])

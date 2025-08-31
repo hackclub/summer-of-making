@@ -6,7 +6,8 @@ module Api
       include Pagy::Backend
 
       def index
-        page = params[:page].to_i
+        page = Integer(params[:page], exception: false) || 1
+        page = 1 if page < 1
         if page < 1
           render json: {
             error: "Page out of bounds"
@@ -15,7 +16,11 @@ module Api
         end
 
         begin
-          pagy, comments = pagy(Comment.all.order(:id), items: 20, page: page) # order by id
+          pagy, comments = pagy(
+            Comment.order(:id).includes(:user, :devlog),
+            items: 20,
+            page: page
+          )
         rescue Pagy::OverflowError
           render json: {
             error: "Page out of bounds"
@@ -27,7 +32,7 @@ module Api
           {
             text: comment.content,
             devlog_id: comment.devlog_id,
-            slack_id: comment.user.slack_id,
+            slack_id: comment.user&.slack_id,
             created_at: comment.created_at
           }
         end
@@ -44,11 +49,11 @@ module Api
       end
 
       def show
-        @comment = Comment.find(params[:id])
+        @comment = Comment.includes(:user, :devlog).find(params[:id])
         render json: {
           text: @comment.content,
           devlog_id: @comment.devlog_id,
-          slack_id: @comment.user.slack_id,
+          slack_id: @comment.user&.slack_id,
           created_at: @comment.created_at
         }
       end

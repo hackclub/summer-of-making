@@ -194,7 +194,7 @@
 
       <div>
         <strong>Votes:</strong><br>
-        <%= @user.votes.count %>
+        <%= @user.votes.active.count %>
       </div>
     </div>
 
@@ -557,8 +557,47 @@
       <% else %>
         <%= button_to "grant ship certifier permissions", grant_ship_certifier_admin_user_path(@user), class: "abtn primary" %>
       <% end %>
+
+      <%= button_to "force refresh hackatime", refresh_hackatime_admin_user_path(@user), class: 'abtn secondary' %>
+
+      <% if @user.fraud_team_member? %>
+        <%= button_to "revoke fraud reviewer permissions", revoke_fraud_reviewer_admin_user_path(@user), confirm: "ya sure you wanna do that?", class: "abtn secondary" %>
+      <% else %>
+        <%= button_to "grant fraud reviewer permissions", grant_fraud_reviewer_admin_user_path(@user), class: "abtn primary" %>
+      <% end %>
     </div>
   </div>
+    <div class="asec" style="padding: 1.5em;">
+    <h2>🦭 six flipper rolls!</h2>
+    <% @flipper_flags.each do |flag| %>
+      <div>
+        <strong><%= flag.name %></strong>
+        <% if (desc = Rails.configuration.flipper_features[flag.name].presence) %>
+          (<abbr title="<%= desc %>">?</abbr>)
+        <% end %>
+        <% global = flag.state == :on %>
+        <% user_enabled = flag.enabled?(@user) %>
+        <% case flag.state; when :on %>
+        <% color = "lawngreen" %>
+        <% desc = "globally enabled" %>
+        <% when :off %>
+        <% color = "red" %>
+        <% desc = "not enabled for anyone yet" %>
+        <% when :conditional %>
+        <% color = "yellow" %>
+        <% desc = "conditionally enabled" %>
+        <% end %>
+        <span style="color: <%= color %>">
+          <abbr title="<%= desc %>">[<%= desc.first %>]</abbr>
+        </span>
+        <a href="/admin/flipper/features/<%= flag.name %>" target="_blank"><small>🔗</small></a> <br>
+        this user: <i><%= user_enabled ? "enabled" : "disabled" %><% if global %>, because it's on for everyone<% end %></i>
+        <% unless global %>
+          <%= button_to user_enabled ? "flip off" : "flip on", flip_admin_user_path(@user, flag: flag.name, state: !user_enabled), class: "abtn small", style: "margin-top: 0.5em;" %>
+        <% end %>
+        <hr>
+      </div>
+    <% end %>
 </div>
 
 <div class="asec" style="padding: 1.5em; margin-bottom: 2em; border: 2px dashed var(--color-red);">

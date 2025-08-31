@@ -7,7 +7,7 @@
     <% if @projects.any? %>
       <% @projects.each do |project| %>
         <%= link_to project_path(project) do %>
-          <div class="bg-[#F3ECD8] rounded-2xl border-4 border-[#E4DCC6] transform hover:scale-[1.02] transition-transform duration-300 flex flex-col h-full">
+          <div class="bg-[#F3ECD8] rounded-2xl border-4 border-[#E4DCC6] transform hover:scale-[1.02] transition-transform duration-300 flex flex-col h-full <%= 'animate-bounce' if current_user.devlogs.empty? && current_user.projects.count == 1 %>">
             <% project_image = project.banner.attached? ? url_for(project.banner) : (project.devlogs.find { |u| u.file.attached? && u.file.image? }&.file&.then { |f| url_for(f) } || "https://hc-cdn.hel1.your-objectstorage.com/s/v3/42eb885e3ebc20bd5e94782b7b4bcb31bcc956d3_i.png") %>
             <div class="h-36 md:h-48 overflow-hidden relative">
               <img src="<%= project_image %>" alt="<%= project.title %>" class="w-full h-full object-cover rounded-xl" loading="lazy">
@@ -27,7 +27,7 @@
               <p class="text-gray-400">
                 <%= format_seconds(project.total_seconds_coded) %>
                 <br>
-                <%= project.devlogs_count %> devlogs
+                <%= project.devlogs_count %> <%= "devlog".pluralize(project.devlogs_count) %>
               </p>
 
               <% if project.ship_events.empty? %>
@@ -35,21 +35,22 @@
               <% else %>
                 <% latest_ship_event = project.ship_events.last %>
                 <% ship_certified = project.certification_status == "approved" %>
-                <% latest_ship_has_payouts = latest_ship_event.payouts.any? %>
+                <% latest_ship_has_payouts = latest_ship_event.payouts.where(escrowed: false).any? %>
 
                 <% if latest_ship_has_payouts %>
-                  <% latest_shells = latest_ship_event.payouts.sum(:amount) %>
-                  <% total_shells = project.ship_events.sum { |se| se.payouts.sum(:amount) } %>
+                  <% latest_shells = latest_ship_event.payouts.where(escrowed: false).sum(:amount) %>
+                  <% total_shells = project.ship_events.sum { |se| se.payouts.where(escrowed: false).sum(:amount) } %>
                   <p class="text-gray-400">You earned <%= pluralize(latest_shells.to_i, "shells") %> on the latest ship and <%= pluralize(total_shells.to_i, "shells") %> total!</p>
                 <% elsif ship_certified && !latest_ship_has_payouts %>
-                  <% if current_user.votes.size < (20 * current_user.unpaid_ship_events_count) %>
-                    <p class="text-red-400">Your latest ship is being voted on. You should go vote - hang tight for your payout!</p>
+                  <% remaining = current_user.remaining_votes_to_ship %>
+                  <% if remaining > 0 %>
+                    <p class="text-red-400">Your latest payout is on hold — you need <%= pluralize(remaining, 'more vote') %> since your last ship to release your shells. <span data-action="click->modal#startVoting" data-vote-path="<%= new_vote_path %>" class="underline text-blue-700 hover:text-blue-800 cursor-pointer">Start voting</span>.</p>
                   <% else %>
                     <p class="text-red-400">Your latest ship is being voted on. Hang tight - you'll get your payout soon!</p>
                   <% end %>
                 <% elsif project.certification_status == "rejected" %>
                   <% if project.can_request_recertification? %>
-                    <p class="text-red-400">Ship certification was rejected. Fix issues and request re-certification!</p>
+                    <p class="text-red-400">Changes are needed. Fix issues and request re-certification!</p>
                   <% else %>
                     <p class="text-yellow-600">Re-certification requested - awaiting review!</p>
                   <% end %>
@@ -105,7 +106,7 @@
                 action: "click->modal#open",
                 modal_type: "create-project"
               },
-              classes: "mx-auto" %>
+              classes: "mx-auto animate-bounce #{'animate-bounce' if current_user.projects.empty?}" %>
         </div>
       <% end %>
     <% end %>

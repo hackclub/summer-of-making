@@ -1,8 +1,6 @@
 <% content_for :head do %>
-  <%= preload_link_tag asset_path("peaceful_glade.mp3"), as: :audio %>
-  <%= preload_link_tag asset_path("luce.wav"), as: :audio %>
-  <%= preload_link_tag asset_path("viscosity.wav"), as: :audio %>
-  <%= preload_link_tag asset_path("meowmeow.wav"), as: :audio %>
+  <%= preload_link_tag asset_path("allhailasc.mp3"), as: :audio %>
+  <%= preload_link_tag asset_path("the_stash.mp3"), as: :audio %>
 
   <% if @projects.present? && @ship_events.present? %>
     <% @projects.each_with_index do |project, index| %>
@@ -37,9 +35,70 @@
   <%= render "shared/page_title",
       title: "Vote",
       subtitle: "Vote on others' projects! #{Vote.count} votes have been submitted so far!" %>
-  <% more_votes_required = current_user.unpaid_ship_events_count * 20 - @user_vote_count %>
+  <%# so amber doesn't have to answer the same question over and over%>
+  <% if flash[:vote_rejected].present? %>
+    <div id="vote-rejected-modal" data-controller="modal" class="hidden fixed inset-0 z-50 overflow-auto bg-black/30 flex items-center justify-center p-2 md:p-4" data-action="click->modal#clickOutsideHandler">
+      <div class="bg-[#F3ECD8] rounded-2xl border-4 border-[#E4DCC6] w-full max-w-lg mx-2 md:mx-auto relative" data-modal-target="container">
+        <div class="p-3 md:p-4 border-b border-saddle-taupe border-opacity-30">
+          <div class="flex justify-between items-center">
+            <h3 class="text-lg md:text-2xl">Heads up!</h3>
+            <button type="button" class="text-gray-600 hover:text-vintage-red cursor-pointer transition-colors duration-200" data-action="click->modal#close">
+              <%= inline_svg "icons/close.svg", class: "h-6 w-6" %>
+            </button>
+          </div>
+        </div>
+        <div class="p-3 md:p-4 space-y-3">
+          <%= audio_tag "chipmunk.mp3", id: "yap-sfx", preload: "auto", class: "hidden" %>
+          <div class="flex justify-center mb-2">
+            <%= image_tag "rac_yap.gif", alt: "Friendly Mascot", class: "w-20 h-20 md:w-28 md:h-28 object-contain" %>
+          </div>
+          <p class="text-som-dark text-base">We couldn't accept that vote. No worries – a quick tune-up will get you back on track :)</p>
+          <ul class="list-disc pl-5 text-sm text-gray-700 space-y-1">
+            <li>Share a bit more about why you chose one project (100+ characters) and how both projects can improve.</li>
+            <li>Consider technical depth, creativity, and storytelling.</li>
+            <li>Peek at the demo/repo and skim the devlogs to make an informed pick.</li>
+          </ul>
+          <div class="pt-2">
+            <%= render "shared/button", text: "Okay, I’ll improve it", classes: "w-full", data: { action: "click->modal#close" } %>
+          </div>
+        </div>
+      </div>
+    </div>
+    <script>
+      function initializeVoteRejectedModal() {
+        var modal = document.getElementById('vote-rejected-modal');
+        if (!modal) return;
+        modal.classList.remove('hidden');
+        document.body.classList.add('overflow-hidden');
+        var sfx = document.getElementById('yap-sfx');
+        if (sfx) {
+          try {
+            sfx.volume = 0.4;
+            sfx.loop = true;
+            sfx.currentTime = 0;
+            var p = sfx.play();
+            if (p && typeof p.catch === 'function') { p.catch(function(){}) }
+          } catch(e) {}
+          try {
+            var observer = new MutationObserver(function() {
+              if (modal.classList.contains('hidden')) {
+                sfx.pause();
+                sfx.currentTime = 0;
+                observer.disconnect();
+              }
+            });
+            observer.observe(modal, { attributes: true, attributeFilter: ['class'] });
+          } catch(e) {}
+        }
+      }
+      document.addEventListener('DOMContentLoaded', initializeVoteRejectedModal);
+      document.addEventListener('turbo:load', initializeVoteRejectedModal);
+      document.addEventListener('turbo:render', initializeVoteRejectedModal);
+    </script>
+  <% end %>
+  <% more_votes_required = current_user.remaining_votes_to_ship %>
   <% if more_votes_required > 0 %>
-    <p class="text-center text-nice-blue text-lg mb-6">You need to vote <%= pluralize(more_votes_required, "more time") %>!</p>
+    <p class="text-center text-nice-blue text-lg mb-6">You need <%= pluralize(more_votes_required, "more vote") %> since your last ship to release your shells.</p>
   <% end %>
 
   <% if @projects.size < 2 %>
@@ -50,9 +109,7 @@
       <% end %>
     </div>
   <% else %>
-    <div data-controller="voting-steps"
-         data-action="music:played@window->voting-steps#handleMusicPlayed"
-         class="space-y-6 sm:space-y-8">
+    <div class="space-y-6 sm:space-y-8">
 
       <div class="grid grid-cols-1 lg:grid-cols-2 gap-0 sm:gap-16 mobile-divide-dashed">
         <% @projects.each_with_index do |project, index| %>
@@ -109,31 +166,23 @@
                   <% if project.demo_link.present? %>
                     <%= render "shared/button",
                         text: "Demo",
-                        link: project.demo_link,
+                        link: track_demo_votes_path(position: index + 1),
                         link_target: "_blank",
-                        type: "secondary",
+                        method: :post,
                         icon: "world.svg",
-                        onclick: "event.stopPropagation()",
-                        data: {
-                          analytics_link: "demo",
-                          action: "mousedown->voting-steps#trackLinkClick touchstart->voting-steps#trackLinkClick keydown->voting-steps#trackLinkClick"
-                        } %>
+                        onclick: "event.stopPropagation()" %>
                   <% end %>
                   <% if project.repo_link.present? %>
                     <%= render "shared/button",
                         text: "Repository",
-                        link: project.repo_link,
+                        link: track_repo_votes_path(position: index + 1),
                         link_target: "_blank",
-                        type: "secondary",
+                        method: :post,
                         icon: "git.svg",
-                        onclick: "event.stopPropagation()",
-                        data: {
-                          analytics_link: "repo",
-                          action: "mousedown->voting-steps#trackLinkClick touchstart->voting-steps#trackLinkClick keydown->voting-steps#trackLinkClick"
-                        } %>
+                        onclick: "event.stopPropagation()" %>
                   <% end %>
 
-                  <%= render "projects/report_button", project: project %>
+                  <%= render "shared/report", suspect: ship_event %>
                 </div>
               </div>
 
@@ -165,7 +214,7 @@
   <% end %>
 </div>
 
-<div data-controller="music" class="fixed -bottom-28 sm:-bottom-32 -right-12 max-sm:mb-[140px]">
+<div id="journey-music" data-turbo-permanent data-controller="music" class="fixed -bottom-28 sm:-bottom-32 -right-12 max-sm:mb-[140px]">
   <div data-music-target="speechBubble" class="absolute -top-12 -left-10 2xl:-top-16 2xl:-left-12 p-3 bg-[#F3ECD8] rounded-2xl border-4 border-[#E4DCC6] max-w-[150px] opacity-50">
     <div class="text-sm text-forest font-medium">Click me, please!</div>
   </div>
@@ -177,10 +226,8 @@
     <%= image_tag "journeypheusmusic.png", alt: "Toggle Music", class: "w-full h-full object-contain" %>
 
     <div data-music-target="audioTracks" class="hidden">
-      <%= audio_tag "peaceful_glade.mp3", class: "music-track", data: { track_name: "peaceful_glade" } %>
-      <%= audio_tag "luce.wav", class: "music-track", data: { track_name: "luce" } %>
-      <%= audio_tag "viscosity.wav", class: "music-track", data: { track_name: "viscosity" } %>
-      <%= audio_tag "meowmeow.wav", class: "music-track", data: { track_name: "meowmeow" } %>
+      <%= audio_tag "allhailasc.mp3", class: "music-track", data: { track_name: "allhailasc" } %>
+      <%= audio_tag "the_stash.mp3", class: "music-track", data: { track_name: "the_stash" } %>
     </div>
   </button>
 </div>

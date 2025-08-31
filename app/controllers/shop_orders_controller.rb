@@ -2,7 +2,7 @@ class ShopOrdersController < ApplicationController
   before_action :set_shop_order, only: [ :show ]
   before_action :set_shop_item, only: [ :new, :create ]
   before_action :check_freeze, except: [ :index, :show ]
-  # before_action :check_circuit_breaker, only: [ :new, :create ]
+  before_action :check_circuit_breaker, only: [ :new, :create ]
 
   def index
     @orders = current_user.shop_orders.includes(:shop_item).order(created_at: :desc)
@@ -44,6 +44,14 @@ class ShopOrdersController < ApplicationController
     if @regional_price.present? && @regional_price > 0 && current_user.balance < @regional_price
       redirect_to shop_path, alert: "You don't have enough tickets to purchase #{@item.name}. You need #{@regional_price - current_user.balance} more tickets."
       return
+    end
+
+    # Check to make sure sinkening balloons can only be ordered if user is participating
+    if !Flipper.enabled?(:enable_shop_balloons, current_user)
+      if @item.is_a?(ShopItem::SinkeningBalloons) && !current_user.sinkening_participation?
+        redirect_to shop_path, alert: "Hey! You're not supposed to be here."
+        return
+      end
     end
 
     render :new_black_market, layout: "black_market" if @item.requires_black_market?

@@ -3,7 +3,9 @@
 module Admin
   class ShopOrdersController < ApplicationController
     include Pagy::Backend
+    before_action :ensure_authorized_user
     before_action :set_shop_order, except: [ :index, :pending, :awaiting_fulfillment ]
+    skip_before_action :authenticate_admin!
 
     def scope
       ShopOrder.all.includes(:user, :shop_item)
@@ -40,6 +42,14 @@ module Admin
         base = base.where("created_at <= ?", Date.parse(params[:date_to]).end_of_day)
       end
 
+      if params[:country].present?
+        base = base.where("frozen_address->>'country' ILIKE ?", "%#{params[:country]}%")
+      end
+
+      if params[:item_type].present?
+        base = base.joins(:shop_item).where(shop_items: { type: params[:item_type] })
+      end
+
       case params[:sort]
       when "id_asc"
         base = base.order(id: :asc)
@@ -63,7 +73,12 @@ module Admin
     end
 
     def index
-      @pagy, @shop_orders = pagy(filtered_scope)
+      if params[:goob] == "true"
+        @grouped_orders = group_all(filtered_scope)
+        @pagy = nil
+      else
+        @pagy, @shop_orders = pagy(filtered_scope)
+      end
       get_stats
     end
 
@@ -74,7 +89,13 @@ module Admin
     end
 
     def awaiting_fulfillment
-      @pagy, @shop_orders = pagy(filtered_scope.manually_fulfilled.awaiting_periodical_fulfillment)
+      scope = filtered_scope.manually_fulfilled.awaiting_periodical_fulfillment
+      if params[:goob] == "true"
+        @grouped_orders = group_all(scope)
+        @pagy = nil
+      else
+        @pagy, @shop_orders = pagy(scope)
+      end
       get_stats
       render :index, locals: { title: "fulfillment queue – " }
     end
@@ -138,36 +159,108 @@ module Admin
       redirect_to [ :admin, @shop_order ]
     end
 
+    def convert_to_preauth
+      amount_dollars = params[:amount_dollars].presence&.to_f || @shop_order.shop_item.usd_cost * @shop_order.quantity
+      amount_cents = (amount_dollars * 100).to_i
+      email = @shop_order.user.email
+
+      begin
+        grant_rec = ShopCardGrant.new(
+          user: @shop_order.user,
+          shop_item: @shop_order.shop_item
+        )
+
+        grant_rec.transaction do
+          grant_response = HCBService.create_card_grant(
+            email: email,
+            amount_cents: amount_cents,
+            purpose: "SOM: #{@shop_order.shop_item.name}",
+            instructions: "Hello, Please use this grant to buy a #{@shop_order.shop_item.name}. Got any questions or something to say? Contact @3kh0 on Slack, and I can help you there! Make sure you upload receipts once you are done otherwise bad things will happen..."
+          )
+
+          grant_rec.hcb_grant_hashid = grant_response["id"]
+          grant_rec.expected_amount_cents = amount_cents
+          grant_rec.save!
+
+          latest_disbursement = grant_response.dig("disbursements", 0, "transaction_id")
+          memo = "[preauth grant] #{@shop_order.shop_item.name} for #{@shop_order.user.display_name}"
+
+          @shop_order.shop_card_grant = grant_rec
+          @shop_order.mark_fulfilled! "SCG #{grant_rec.id}", nil, "System"
+
+          if latest_disbursement
+            begin
+              HCBService.rename_transaction(hashid: latest_disbursement, new_memo: memo)
+            rescue => e
+              Honeybadger.notify(e)
+            end
+          end
+        end
+
+        @shop_order.create_activity("convert_to_preauth", parameters: { amount_dollars: amount_dollars, grant_id: grant_rec.id })
+        flash[:success] = "its done you lazy bum #{@shop_order.user.email}"
+      rescue => e
+        Honeybadger.notify(e)
+        flash[:error] = "dude stop being lazy: #{e.message}"
+      end
+
+      redirect_to [ :admin, @shop_order ]
+    end
+
     private
+
+    def group_all(scope)
+      orders = scope.includes(:user, :shop_item).to_a
+      grouped = orders.group_by(&:user)
+
+      grouped.map do |user, user_orders|
+      total_shells = user_orders.sum { |o| o.frozen_item_price * o.quantity }
+      total_items = user_orders.sum(&:quantity)
+
+      {
+        user: user,
+        orders: user_orders.sort_by(&:created_at),
+        total_shells: total_shells,
+        total_items: total_items,
+        address: user_orders.first&.frozen_address || {}
+      }
+      end.sort_by { |group| -group[:orders].size }
+    end
+
+    def ensure_authorized_user
+      unless current_user&.is_admin? || current_user&.fraud_team_member?
+        redirect_to root_path, alert: "whomp whomp"
+      end
+    end
 
     def set_shop_order
       @shop_order = scope.find(params[:id])
     end
 
     def get_stats
-      r = params[:stats_range] == "all" ? nil : 1.week.ago
       b = scope
       b = b.joins(:shop_item).where.not(shop_items: { type: "ShopItem::FreeStickers" }) unless params[:show_free_stickers] == "true"
-      b = r ? b.where("shop_orders.created_at >= ?", r) : b
+      all_s = b
+      week_s = b.where("shop_orders.created_at >= ?", 1.week.ago)
 
       @c = {
-        pending: b.where(aasm_state: "pending").count,
-        awaiting_fulfillment: b.where(aasm_state: "awaiting_periodical_fulfillment").count,
-        fulfilled: b.where(aasm_state: "fulfilled").count,
-        rejected: b.where(aasm_state: "rejected").count
+        pending: all_s.where(aasm_state: "pending").count,
+        awaiting_fulfillment: all_s.where(aasm_state: "awaiting_periodical_fulfillment").count,
+        fulfilled: week_s.where(aasm_state: "fulfilled").count,
+        rejected: week_s.where(aasm_state: "rejected").count
       }
-      @c[:in_verification_limbo] = b.where(aasm_state: "in_verification_limbo").count if params[:show_free_stickers] == "true"
+      @c[:in_verification_limbo] = all_s.where(aasm_state: "in_verification_limbo").count if params[:show_free_stickers] == "true"
 
-      mf = b.joins(:shop_item)
+      mf = week_s.joins(:shop_item)
             .where(shop_items: { type: ShopItem::MANUAL_FULFILLMENT_TYPES.map(&:name) })
             .where(aasm_state: "fulfilled")
             .where.not(fulfilled_at: nil)
             .where.not(awaiting_periodical_fulfillment_at: nil)
 
       @f = mf.average("EXTRACT(EPOCH FROM fulfilled_at - shop_orders.created_at)")&.to_i
-      @a = b.where.not(awaiting_periodical_fulfillment_at: nil)
+      @a = week_s.where.not(awaiting_periodical_fulfillment_at: nil)
             .average("EXTRACT(EPOCH FROM awaiting_periodical_fulfillment_at - shop_orders.created_at)")&.to_i
-      @d = b.where(aasm_state: "fulfilled")
+      @d = week_s.where(aasm_state: "fulfilled")
             .where.not(awaiting_periodical_fulfillment_at: nil)
             .where.not(fulfilled_at: nil)
             .average("EXTRACT(EPOCH FROM fulfilled_at - awaiting_periodical_fulfillment_at)")&.to_i

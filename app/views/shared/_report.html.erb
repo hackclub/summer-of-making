@@ -1,76 +1,84 @@
-<%= turbo_frame_tag "my_form" do %>
-  <% if current_user && FraudReport.already_reported_by?(current_user, suspect) %>
-    <div class="inline-flex items-center gap-2 px-6 sm:px-8 py-3 text-base sm:text-lg 2xl:text-xl rounded-lg font-medium cursor-default bg-gray-300 text-gray-600"
-         title="You have already reported this project">
-      <%= inline_svg "icons/flag.svg", class: "w-5 h-5 sm:w-6 sm:h-6 mr-1" %>
-      Already Reported
+<% if current_user && FraudReport.already_reported_by?(current_user, suspect) %>
+  <%= render "shared/button",
+      text: "Already Reported",
+      icon: "flag.svg",
+      classes: "opacity-75 cursor-not-allowed pointer-events-none",
+      title: "You have already reported this #{suspect.class.name.downcase}" %>
+<% else %>
+  <%= render "shared/button",
+      text: "Report",
+      icon: "flag.svg",
+      data: {
+        controller: "modal",
+        action: "click->modal#open",
+        modal_id: "#{suspect.class.name.downcase}-#{suspect.id}",
+        modal_type: "report"
+      } %>
+
+<%
+  modal_title = if suspect.respond_to?(:title) && suspect.title.present?
+                  suspect.title
+                elsif suspect.respond_to?(:project) && suspect.project.respond_to?(:title) && suspect.project.title.present?
+                  suspect.project.title
+                else
+                  "this project"
+                end
+%>
+
+<%= render "shared/modal",
+    id: "report-modal-#{suspect.class.name.downcase}-#{suspect.id}",
+    title: "Report #{modal_title}?",
+    max_width: "max-w-2xl" do %>
+  <%= form_with model: FraudReport.new, url: fraud_reports_path, method: :post, data: { turbo: false }, local: true do |form| %>
+    <%= form.hidden_field :suspect_type, value: suspect.class.name %>
+    <%= form.hidden_field :suspect_id, value: suspect.id %>
+
+    <div class="mb-4" data-controller="report-form">
+      <p class="text-md mb-4 leading-relaxed">We want good, high quality projects on Summer of Making. If you believe this project does not follow that mission, please let us know why:</p>
+
+      <div class="bg-amber-50 border border-amber-200 text-amber-900 rounded-lg p-4 shadow-sm mb-4" data-report-form-target="lowEffortInfo">
+        <p class="text-sm font-medium mb-1">What is a low-effort project?</p>
+        <ul class="list-disc list-inside text-sm space-y-2 leading-relaxed">
+            <li>Little to no original work (e.g. direct copy of a tutorial)</li>
+            <li>Mainly AI-generated with minimal human effort or creativity</li>
+            <li>Basic apps (to-do lists, tic-tac-toe, 2048, etc.) without meaningful improvements or unique features</li>
+        </ul>
+      </div>
+
+      <div class="space-y-2 mb-4">
+        <label class="flex items-center space-x-3 cursor-pointer">
+          <input type="radio" name="report_kind" value="low_quality" class="radio radio-sm" checked data-action="change->report-form#update">
+          <span class="text-sm">Low-effort project</span>
+        </label>
+        <label class="flex items-center space-x-3 cursor-pointer">
+          <input type="radio" name="report_kind" value="ai_undeclared" class="radio radio-sm" data-action="change->report-form#update">
+          <span class="text-sm">Uses AI but it's undeclared</span>
+        </label>
+        <label class="flex items-center space-x-3 cursor-pointer">
+          <input type="radio" name="report_kind" value="demo_does_not_work" class="radio radio-sm" data-action="change->report-form#update">
+          <span class="text-sm">Demo does not work</span>
+        </label>
+        <label class="flex items-center space-x-3 cursor-pointer">
+          <input type="radio" name="report_kind" value="other" class="radio radio-sm" data-action="change->report-form#update">
+          <span class="text-sm">Other</span>
+        </label>
+      </div>
+
+      <div class="mb-2">
+        <%= form.text_area :reason,
+            placeholder: "Share a short explanation (20+ characters).",
+            class: "som-horizontal-input w-full rounded-lg resize-none focus:ring-2 focus:ring-nice-blue focus:border-nice-blue transition-colors",
+            rows: 4 %>
+        <p class="text-xs text-gray-500 mt-1">Why are you reporting this project? (20+ characters)</p>
+      </div>
     </div>
-  <% else %>
-    <button
-      type="button"
-      class="inline-flex items-center gap-2 px-6 sm:px-8 py-3 text-base sm:text-lg 2xl:text-xl rounded-lg font-medium cursor-pointer bg-red-300 hover:bg-red-400 active:bg-red-500 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2"
-      data-turbo-method="get"
-      data-turbo-frame="my_form"
-      onclick='event.stopPropagation(); document.getElementById(<%= "report-modal-#{suspect.class.name.downcase}-#{suspect.id}".to_json %>).showModal();'
-      title="Report this project for suspicious activity">
-      <%= inline_svg "icons/flag.svg", class: "w-5 h-5 sm:w-6 sm:h-6 mr-1" %>
-      Report
-    </button>
 
-    <dialog id="report-modal-<%= suspect.class.name.downcase %>-<%= suspect.id %>" class="modal p-0 rounded-lg" style="background: none;">
-        <div class="report-card-modal" style="border-radius: 0.5rem; border: 2px solid rgba(124, 74, 51, 0.1); background: radial-gradient(circle at 50% 50%, #F6DBBA, #E6D4BE); padding: 1.5rem; box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1); max-width: 28rem; width: 100%; margin: 2rem auto;">
-          <h3 class="font-bold text-lg mb-4">Report <%= suspect.class.name.downcase %></h3>
-          <p class="text-sm text-gray-600 mb-6">Help us keep the voting pool clean by reporting projects that violate our community guidelines.</p>
-          <%= form_with model: FraudReport.new, url: fraud_reports_path, method: :post, data: { turbo_frame: "my_form" }, class: "space-y-4" do |form| %>
-            <%= form.hidden_field :suspect_type, value: suspect.class.name %>
-            <%= form.hidden_field :suspect_id, value: suspect.id %>
-            <div class="space-y-3">
-              <label class="flex items-center space-x-3 cursor-pointer">
-                <%= form.radio_button :reason, "Did not declare AI help", class: "radio radio-sm radio-error" %>
-                <span class="text-sm">Did not declare AI help</span>
-              </label>
-              <label class="flex items-center space-x-3 cursor-pointer">
-                <%= form.radio_button :reason, "Spam or promotional content", class: "radio radio-sm radio-error" %>
-                <span class="text-sm">Spam or promotional content</span>
-              </label>
-              <label class="flex items-center space-x-3 cursor-pointer">
-                <%= form.radio_button :reason, "Fake or misleading project", class: "radio radio-sm radio-error" %>
-                <span class="text-sm">Fake or misleading project</span>
-              </label>
-              <label class="flex items-center space-x-3 cursor-pointer">
-                <%= form.radio_button :reason, "Plagiarism or stolen content", class: "radio radio-sm radio-error" %>
-                <span class="text-sm">Plagiarism or stolen content</span>
-              </label>
-              <label class="flex items-center space-x-3 cursor-pointer">
-                <%= form.radio_button :reason, "Other", class: "radio radio-sm radio-error" %>
-                <span class="text-sm">Other</span>
-              </label>
-            </div>
-
-            <div class="modal-action pt-4 flex gap-2 justify-end">
-              <button type="button" class="marble-button btn-error text-black" onclick='document.getElementById(<%= "report-modal-#{suspect.class.name.downcase}-#{suspect.id}".to_json %>).close()'>
-                Cancel
-              </button>
-              <%= form.submit "Submit", class: "marble-button btn-error text-black" %>
-            </div>
-          <% end %>
-        </div>
-        <style>
-          .report-card-modal label span {
-            color: rgb(55, 65, 81);
-          }
-          .report-card-modal h3 {
-            font-size: 1.25rem;
-            font-weight: 600;
-          }
-          .report-card-modal {
-            animation: fadeInCard 0.2s;
-          }
-          @keyframes fadeInCard {
-            from { opacity: 0; transform: translateY(16px); }
-            to { opacity: 1; transform: translateY(0); }
-          }
-        </style>
-      </dialog>
+    <div class="flex justify-end space-x-3 mt-6">
+      <button type="button" class="som-button-primary" data-action="click->modal#close">
+        Cancel
+      </button>
+      <%= form.submit "Submit", class: "som-button-primary" %>
+    </div>
   <% end %>
+<% end %>
 <% end %>

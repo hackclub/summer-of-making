@@ -1,5 +1,5 @@
 <%= link_to "🔨", admin_user_path(user) %>
-<% if current_user&.is_admin? %>
+<% if current_user&.is_admin?  || current_user&.fraud_team_member? %>
   <% if user.has_black_market? %>
     <button style="display: inline; all: revert" class="btn" disabled>B☑</button>
   <% else %>

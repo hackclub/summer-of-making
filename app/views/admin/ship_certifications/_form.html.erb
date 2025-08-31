@@ -20,20 +20,43 @@
     <b style="color: var(--color-muted);">Certification Type:</b> <span style="color: var(--color-primary); font-weight: 600;"> <%= project.certification_type&.humanize %></span><br>
     <b style="color: var(--color-muted);">Created:</b> <span style="color: var(--color-primary); font-weight: 600;"> <%= project.created_at.strftime("%m/%d/%Y at %I:%M %p") %></span><br>
     <b style="color: var(--color-muted);">Last Updated:</b> <span style="color: var(--color-primary); font-weight: 600;"> <%= project.updated_at.strftime("%m/%d/%Y at %I:%M %p") %></span><br>
+    <i style="color: var(--color-muted); margin-top: 0.5em;">Remember, you are only testing to see "does this work as intended?" You are not checking for other things.</i>
   </div>
 
-  <div class="field">
-    <%= f.label :judgement, nil, style: 'color: var(--color-muted); font-weight: 600;' %>
-    <%= f.select :judgement, options_for_select([
-      ['Pending', 'pending'],
-      ['Approved', 'approved'],
-      ['Rejected', 'rejected']
-    ], ship_certification.judgement), {}, { class: 'form-control', style: 'color: var(--color-primary); font-weight: 600; background: var(--color-darker); border-radius: 7px; border: 1px solid var(--color-border); padding: 0.7em 1em; margin-bottom: 0.2em;' } %>
-  </div>
+  <%= f.hidden_field :judgement %>
 
   <div class="field">
     <%= f.label :notes, nil, style: 'color: var(--color-muted); font-weight: 600;' %>
-    <%= f.text_area :notes, rows: 4, style: 'padding:0.7em 1em; border-radius:7px; border:1px solid var(--color-border); background:var(--color-darker); color:var(--color-text); font-size:1em; margin-bottom:0.2em; min-height:100px; resize:vertical;' %>
+    <div style="margin: 0.8em 0; padding: 1em; background: var(--color-sheet); border-radius: 7px; border: 1px solid var(--color-border);">
+      <div style="margin-bottom: 0.8em; color: var(--color-text);">
+        I <select id="approval_status" onchange="updateJudgement(this.value)" style="background: var(--color-darker); border: 1px solid var(--color-border); border-radius: 4px; padding: 0.3em; color: var(--color-text); margin: 0 0.3em;">
+          <option value="pending" <%= 'selected' if ship_certification.judgement.blank? || ship_certification.judgement == 'pending' %>>pending</option>
+          <option value="approved" <%= 'selected' if ship_certification.judgement == 'approved' %>>approved</option>
+          <option value="rejected" <%= 'selected' if ship_certification.judgement == 'rejected' %>>rejected</option>
+        </select> <strong><%= project.title %></strong> because:
+      </div>
+      <div style="margin: 0.6em 0; color: var(--color-text);">
+        <label style="display: block; margin: 0.4em 0; cursor: pointer;">
+          <input type="checkbox" name="checked_demo" style="margin-right: 0.5em;"> I looked at the demo
+        </label>
+        <label style="display: block; margin: 0.4em 0; cursor: pointer;">
+          <input type="checkbox" name="checked_repo" style="margin-right: 0.5em;"> I looked at the repo
+        </label>
+        <label style="display: block; margin: 0.4em 0; cursor: pointer;">
+          <input type="checkbox" name="checked_description" style="margin-right: 0.5em;"> I looked at the description
+        </label>
+      </div>
+      <div style="margin-top: 0.8em; color: var(--color-text);">
+        and deemed it works as intended
+      </div>
+      <%= f.text_area :notes, rows: 4, placeholder: "Explain your reasoning...", style: 'padding:0.7em 1em; border-radius:7px; border:1px solid var(--color-border); background:var(--color-darker); color:var(--color-text); font-size:1em; margin-top:0.8em; min-height:100px; resize:vertical; width: 100%; box-sizing: border-box;' %>
+    </div>
+  </div>
+
+  <div class="field">
+    <label style="color: var(--color-muted); font-weight: 600;">Friendly Suggestion</label>
+    <textarea name="improvement_suggestion" rows="3" placeholder="send the user some kind words, maybe some advice, maybe a suggestion that can take this project further in voting..." style="padding:0.7em 1em; border-radius:7px; border:1px solid var(--color-border); background:var(--color-darker); color:var(--color-text); font-size:1em; margin-bottom:0.2em; min-height:80px; resize:vertical; width: 100%; box-sizing: border-box;"></textarea>
+    <small style="color: var(--color-muted); font-style: italic;">This will appear in the author's activity feed, author's can view projects you've built</small>
   </div>
 
   <div class="field">
@@ -52,5 +75,13 @@
   <div class="actions">
     <%= f.submit "Update Ship Certification", class: 'abtn small' %>
   </div>
-  <i style="color: var(--color-muted); margin-top: 0.5em;">Remember, you are only testing to see "does this work?" You are not checking for hour inflation or other things.</i>
 <% end %>
+
+<script>
+function updateJudgement(value) {
+  const judgementField = document.getElementById('ship_certification_judgement');
+  if (judgementField) {
+    judgementField.value = value;
+  }
+}
+</script>

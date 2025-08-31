@@ -2,22 +2,22 @@
   url: votes_path,
   class: "space-y-6",
   data: {
+    turbo: true,
     controller: "form",
-    action: "submit->form#preventDoubleSubmission",
-    "data-analytics-form": ""
+    action: "submit->form#validateAndPreventDoubleSubmission"
   }) do |f| %>
 
   <%# Ship event IDs and signature for secure voting %>
-  <%= f.hidden_field :ship_event_1_id, value: @ship_events&.first&.id %>
-  <%= f.hidden_field :ship_event_2_id, value: @ship_events&.last&.id %>
+  <%= f.hidden_field :ship_event_1_id, value: @ship_events&.first&.id, data: { form_target: "shipEvent1" } %>
+  <%= f.hidden_field :ship_event_2_id, value: @ship_events&.last&.id, data: { form_target: "shipEvent2" } %>
   <%= f.hidden_field :signature, value: @vote_signature %>
 
-  <%= f.hidden_field :project_1_demo_opened, value: false, data: { voting_steps_target: "project1DemoOpenedInput" } %>
-  <%= f.hidden_field :project_1_repo_opened, value: false, data: { voting_steps_target: "project1RepoOpenedInput" } %>
-  <%= f.hidden_field :project_2_demo_opened, value: false, data: { voting_steps_target: "project2DemoOpenedInput" } %>
-  <%= f.hidden_field :project_2_repo_opened, value: false, data: { voting_steps_target: "project2RepoOpenedInput" } %>
-  <%= f.hidden_field :time_spent_voting_ms, value: 0, data: { voting_steps_target: "timeSpentVotingInput" } %>
-  <%= f.hidden_field :music_played, value: false, data: { voting_steps_target: "musicPlayedInput" } %>
+  <% if ENV['TURNSTILE_SITE_KEY'].present? %>
+    <div class="flex flex-col items-center mb-4">
+      <div data-controller="turnstile" data-sitekey="<%= ENV['TURNSTILE_SITE_KEY'] %>" data-theme="auto"></div>
+      <div id="turnstile-error"></div>
+    </div>
+  <% end %>
 
   <div class="text-center">
     <h2 class="text-md sm:text-md md:text-lg lg:text-2xl mb-6 sm:mb-8 text-center">
@@ -66,6 +66,8 @@
       class: "som-horizontal-input w-full rounded-lg resize-none focus:ring-2 focus:ring-nice-blue focus:border-nice-blue transition-colors #{'border-vintage-red' if vote.errors[:explanation].any?}",
       rows: 4,
       required: true,
+      minlength: 100,
+      data: { form_target: "explanation" },
       placeholder: "Tell us why you made this choice..." %>
 
     <% if vote.errors[:explanation].any? %>
@@ -73,12 +75,15 @@
         <%= vote.errors[:explanation].join(", ") %>
       </div>
     <% end %>
+
+    <div class="text-sm mt-1" data-form-target="counter"></div>
   </div>
 
   <div class="flex justify-center items-center w-full">
     <%= render "shared/button",
         text: "Submit Vote",
         type: :submit,
+        classes: "opacity-75 cursor-not-allowed pointer-events-none",
         data: { form_target: "submitButton" } %>
   </div>
 <% end %>

@@ -39,7 +39,32 @@ end
 ##   Flipper.enable_group :my_feature, :admins
 ##
 ## See https://www.flippercloud.io/docs/features#enablement-group
-#
-# Flipper.register(:admins) do |actor|
-#  actor.respond_to?(:admin?) && actor.admin?
-# end
+
+Flipper.register(:admins) do |actor|
+ actor.respond_to?(:is_admin?) && actor.is_admin?
+end
+
+Flipper::UI.configure do |config|
+  if Rails.env.production?
+    config.banner_text = "hey, you're in prod... be careful :3"
+    config.banner_class = "warning"
+  end
+
+  config.actor_names_source = ->(actor_ids) do
+    grouped_actors = actor_ids.each_with_object(Hash.new { |h, k| h[k] = [] }) do |actor_id, result|
+      parts = actor_id.split(";")
+      result[parts.first] << parts.second
+    end
+    actor_names = {}
+    grouped_actors.each do |type, ids|
+      model = type.constantize rescue nil
+      next unless model
+      model.where(id: ids).find_each do |actor|
+        actor_names[actor.flipper_id] = actor.try(:display_name) || actor.try(:name) || actor.try(:title)
+      end
+    end
+    actor_names.compact_blank
+  end
+
+  config.descriptions_source = ->(_keys) { Rails.configuration.flipper_features }
+end

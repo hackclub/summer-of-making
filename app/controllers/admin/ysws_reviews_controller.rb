@@ -9,7 +9,7 @@ module Admin
       .select("projects.*,
                COUNT(DISTINCT devlogs.id) as devlogs_count,
                (SELECT elo_after FROM vote_changes WHERE project_id = projects.id ORDER BY created_at DESC LIMIT 1) as elo_score")
-      .includes(:user, :devlogs)
+      .includes(:user, :devlogs, ship_certifications: :reviewer)
 
     case @filter
     when "pending"
@@ -92,10 +92,11 @@ module Admin
 
     # Create or update the YSWS submission record
     submission = @project.ysws_review_submission || @project.build_ysws_review_submission
+    submission.reviewer ||= current_user
     submission.save!
 
     # Sync to Airtable immediately after approval
-    YswsReview::SyncSubmissionJob.perform_now(submission.id)
+    YswsReview::SyncSubmissionJob.perform_later(submission.id)
 
     redirect_to admin_ysws_reviews_path, notice: "Project review completed successfully"
   rescue ActiveRecord::RecordInvalid => e

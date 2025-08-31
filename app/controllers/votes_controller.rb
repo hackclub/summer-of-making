@@ -2,15 +2,36 @@
 
 class VotesController < ApplicationController
   before_action :authenticate_user!
+  before_action :ensure_voting_not_paused, only: %i[new create]
   before_action :set_projects, only: %i[new]
   before_action :check_identity_verification
+  before_action :set_tracking, only: %i[track_demo track_repo]
 
   def new
     @vote = Vote.new
-    @user_vote_count = current_user.votes.count
+    @user_vote_count = current_user.votes.active.count
   end
 
   def create
+    if TurnstileService.enabled?
+      token = params[:"cf-turnstile-response"] || params[:cf_turnstile_response] || params.dig(:vote, :cf_turnstile_response)
+      verification = TurnstileService.verify(token, remote_ip: request.remote_ip)
+      unless verification[:success]
+        respond_to do |format|
+          format.turbo_stream do
+            render turbo_stream: turbo_stream.update(
+              "turnstile-error",
+              ActionController::Base.helpers.content_tag(:div, "Turnstile verification failed. Please try again.", class: "text-vintage-red text-sm mt-2")
+            ), status: :unprocessable_entity
+          end
+          format.html do
+            redirect_to new_vote_path, alert: "Turnstile verification failed. Please try again."
+          end
+        end
+        return
+      end
+    end
+
     ship_event_1_id = params[:vote][:ship_event_1_id]&.to_i
     ship_event_2_id = params[:vote][:ship_event_2_id]&.to_i
     signature = params[:vote][:signature]
@@ -30,6 +51,20 @@ class VotesController < ApplicationController
       return
     end
 
+    # we should have done this from the start but it's time when this is excuted - started_at
+    time_spt_ms = nil
+    if verification_result[:valid]
+      payload = verification_result[:payload]
+      if payload && payload["timestamp"].present?
+        begin
+          started_at = Time.at(payload["timestamp"].to_i)
+          time_spt_ms = ((Time.current - started_at) * 1000).to_i.clamp(0, 86_400_000)
+        rescue StandardError
+          time_spt_ms = nil
+        end
+      end
+    end
+
     ship_events = ShipEvent.where(id: [ ship_event_1_id, ship_event_2_id ]).includes(:project)
     if ship_events.size != 2
       redirect_to new_vote_path, alert: "Invalid ship events selected"
@@ -42,8 +77,8 @@ class VotesController < ApplicationController
     @vote = current_user.votes.build(vote_params.except(:ship_event_1_id, :ship_event_2_id, :signature))
     @vote.ship_event_1_id = ship_event_1_id
     @vote.ship_event_2_id = ship_event_2_id
+    @vote.time_spent_voting_ms = time_spt_ms
 
-    # Backward compatibility
     @vote.project_1_id = @ship_events[0].project.id
     @vote.project_2_id = @ship_events[1].project.id
     # Handle tie case
@@ -58,16 +93,52 @@ class VotesController < ApplicationController
     end
 
     if @vote.save
-      vote_result = if @vote.winning_project_id.nil?
-                     "Tie vote submitted!"
-      else
-                     "Vote submitted!"
+      begin
+        pair_key = "#{@vote.ship_event_1_id}-#{@vote.ship_event_2_id}"
+        clicks = session.dig(:voting_clicks, pair_key)
+        if clicks.present?
+          @vote.update_columns(
+            project_1_demo_opened: clicks["project_1_demo_opened"],
+            project_1_repo_opened: clicks["project_1_repo_opened"],
+            project_2_demo_opened: clicks["project_2_demo_opened"],
+            project_2_repo_opened: clicks["project_2_repo_opened"]
+          )
+          session[:voting_clicks].delete(pair_key)
+        end
+      rescue StandardError => e
+        Rails.logger.warn("Failed to apply voting click analytics: #{e.message}")
+      end
+      current_user.advance_vote_queue!
+      session.delete(:current_vote_signature)
+
+      begin
+        @vote.reload
+      rescue StandardError
       end
 
-      redirect_to new_vote_path, notice: vote_result
+      if @vote.status == "invalid"
+        flash[:vote_rejected] = true
+        redirect_to new_vote_path
+      else
+        vote_result = if @vote.winning_project_id.nil?
+                       "Tie vote submitted!"
+        else
+                       "Vote submitted!"
+        end
+
+        redirect_to new_vote_path, notice: vote_result
+      end
     else
       redirect_to new_vote_path, alert: @vote.errors.full_messages.join(", ")
     end
+  end
+
+  def track_demo
+    track_and_redirect!("demo")
+  end
+
+  def track_repo
+    track_and_redirect!("repo")
   end
 
   def locked
@@ -85,6 +156,78 @@ class VotesController < ApplicationController
 
   private
 
+  def ensure_voting_not_paused
+    if defined?(Flipper)
+      if Flipper.enabled?(:lock_voting, current_user)
+        redirect_to locked_votes_path, alert: "Your voting access has been temporarily disabled due to too many low-quality votes." and return
+      end
+      if Flipper.enabled?(:voting_paused)
+        redirect_to locked_votes_path, alert: "Voting is temporarily paused. Please try again later." and return
+      end
+    end
+  end
+
+  def set_tracking
+    position = params[:position].to_i
+    unless [ 1, 2 ].include?(position)
+      redirect_to new_vote_path, alert: "Invalid link" and return
+    end
+
+    queue = current_user.user_vote_queue
+    ship_events = queue&.current_ship_events || []
+    if ship_events.size != 2
+      redirect_to new_vote_path, alert: "Voting pair unavailable" and return
+    end
+
+    signature = session[:current_vote_signature]
+    unless signature.present?
+      redirect_to new_vote_path, alert: "Missing signature" and return
+    end
+    verification = VoteSignatureService.verify_signature_with_ship_events(
+      signature,
+      ship_events[0].id,
+      ship_events[1].id,
+      current_user.id
+    )
+    unless verification[:valid]
+      redirect_to new_vote_path, alert: "Invalid or expired link" and return
+    end
+
+    @project_index = position
+    @project = ship_events[position - 1].project
+  end
+
+  def record_voting_click_for_current_pair!(link_type, project_index)
+    return unless current_user&.user_vote_queue
+
+    ship_events = current_user.user_vote_queue.current_ship_events
+    return if ship_events.size != 2
+
+    se_ids = [ ship_events[0].id, ship_events[1].id ].sort
+    pair_key = "#{se_ids[0]}-#{se_ids[1]}"
+    session[:voting_clicks] ||= {}
+    session[:voting_clicks][pair_key] ||= {
+      "project_1_demo_opened" => false,
+      "project_1_repo_opened" => false,
+      "project_2_demo_opened" => false,
+      "project_2_repo_opened" => false
+    }
+
+    field = "project_#{project_index}_#{link_type}_opened"
+    session[:voting_clicks][pair_key][field] = true
+  end
+
+  def track_and_redirect!(link_type)
+    authorize @project, :show?
+    record_voting_click_for_current_pair!(link_type, @project_index)
+    target_url = case link_type
+    when "demo" then @project.demo_link
+    when "repo" then @project.repo_link
+    else nil
+    end
+    redirect_to(target_url.presence || project_path(@project), allow_other_host: true)
+  end
+
   def redirect_to_locked
     redirect_to locked_votes_path
   end
@@ -97,206 +240,41 @@ class VotesController < ApplicationController
   end
 
   def set_projects
-    # Get projects that haven't been voted on by current user
-    voted_ship_event_ids = current_user.votes
-                                      .joins(vote_changes: { project: :ship_events })
-                                      .distinct
-                                      .pluck("ship_events.id")
-
-    projects_with_latest_ship = Project
-                                  .joins(:ship_events)
-                                  .joins(:ship_certifications)
-                                  .joins(:devlogs)
-                                  .includes(ship_events: :payouts)
-                                  .where(ship_certifications: { judgement: :approved })
-                                  .where.not(user_id: current_user.id)
-                                  .where(
-                                    ship_events: {
-                                      id: ShipEvent.select("MAX(ship_events.id)")
-                                                  .where("ship_events.project_id = projects.id")
-                                                  .group("ship_events.project_id")
-                                                  .where.not(id: voted_ship_event_ids)
-                                    }
-                                  )
-                                  .distinct
-
-    if projects_with_latest_ship.count < 2
-      @projects = []
-      return
-    end
-
-    eligible_projects = projects_with_latest_ship.to_a
-
-    latest_ship_event_ids = eligible_projects.map { |project|
-      project.ship_events.max_by(&:created_at).id
-    }
-
-    total_times_by_ship_event = Devlog
-      .joins("INNER JOIN ship_events ON devlogs.project_id = ship_events.project_id")
-      .where(ship_events: { id: latest_ship_event_ids })
-      .where("devlogs.created_at <= ship_events.created_at")
-      .group("ship_events.id")
-      .sum(:duration_seconds)
-
-    projects_with_time = eligible_projects.map do |project|
-      latest_ship_event = project.ship_events.max_by(&:created_at)
-      total_time_seconds = total_times_by_ship_event[latest_ship_event.id] || 0
-      is_paid = latest_ship_event.payouts.any?
-
-      {
-        project: project,
-        total_time: total_time_seconds,
-        ship_event: latest_ship_event,
-        is_paid: is_paid,
-        ship_date: latest_ship_event.created_at
-      }
-    end
-
-    # sort by ship date – disabled until genesis
-    projects_with_time.sort_by! { |p| p[:ship_date] }
-
-    unpaid_projects = projects_with_time.select { |p| !p[:is_paid] }
-    paid_projects = projects_with_time.select { |p| p[:is_paid] }
-
-    # we need at least 1 unpaid project and 1 other project (status doesn't matter)
-    if unpaid_projects.empty? || projects_with_time.size < 2
-      @projects = []
-      return
-    end
-
-    selected_projects = []
-    selected_project_data = []
-    used_user_ids = Set.new
-    used_repo_links = Set.new
-    max_attempts = 25 # infinite loop!
-
-    attempts = 0
-    # TODO: change to weighted_sample after genesis
-    while selected_projects.size < 2 && attempts < max_attempts
-      attempts += 1
-
-      # pick a random unpaid project first
-      if selected_projects.empty?
-        available_unpaid = unpaid_projects.select { |p| !used_user_ids.include?(p[:project].user_id) && !used_repo_links.include?(p[:project].repo_link) }
-        first_project_data = weighted_sample(available_unpaid)
-        next unless first_project_data
-
-        selected_projects << first_project_data[:project]
-        selected_project_data << first_project_data
-        used_user_ids << first_project_data[:project].user_id
-        used_repo_links << first_project_data[:project].repo_link if first_project_data[:project].repo_link.present?
-        first_time = first_project_data[:total_time]
-
-        # find projects within the constraints (set to 30%)
-        min_time = first_time * 0.7
-        max_time = first_time * 1.3
-
-        compatible_projects = projects_with_time.select do |p|
-          !used_user_ids.include?(p[:project].user_id) &&
-          !used_repo_links.include?(p[:project].repo_link) &&
-          p[:total_time] >= min_time &&
-          p[:total_time] <= max_time
-        end
-
-        if compatible_projects.any?
-          second_project_data = weighted_sample(compatible_projects)
-          selected_projects << second_project_data[:project]
-          selected_project_data << second_project_data
-          used_user_ids << second_project_data[:project].user_id
-          used_repo_links << second_project_data[:project].repo_link if second_project_data[:project].repo_link.present?
-        else
-          selected_projects.clear
-          selected_project_data.clear
-          used_user_ids.clear
-          used_repo_links.clear
+    @vote_queue = current_user.user_vote_queue || current_user.build_user_vote_queue.tap do |queue|
+      queue.save!
+      queue.with_lock do
+        if queue.queue_exhausted?
+          queue.refill_queue!(UserVoteQueue::QUEUE_SIZE)
         end
       end
     end
 
-    # js getting smtth if after 25 attemps we have nothing
-    if selected_projects.size < 2 && unpaid_projects.any?
-      first_project_data = weighted_sample(unpaid_projects)
-      remaining_projects = projects_with_time.reject { |p|
-        p[:project].user_id == first_project_data[:project].user_id ||
-        (p[:project].repo_link.present? && p[:project].repo_link == first_project_data[:project].repo_link)
-      }
+    Rails.logger.info("bc js work #{@vote_queue.inspect}")
 
-      if remaining_projects.any?
-        second_project_data = weighted_sample(remaining_projects)
-        selected_projects = [ first_project_data[:project], second_project_data[:project] ]
-        selected_project_data = [ first_project_data, second_project_data ]
-      end
-    end
+    @projects = @vote_queue.current_projects
 
-    if selected_projects.size < 2
+    if @projects.size < 2
       @projects = []
       return
     end
 
-    # load what we need
-    selected_project_ids = selected_projects.map(&:id)
-    @projects = Project
-                .includes(:banner_attachment,
-                          :ship_certifications,
-                          ship_events: :payouts,
-                          devlogs: [ :user, :file_attachment ])
-                .where(id: selected_project_ids)
-                .index_by(&:id)
-                .values_at(*selected_project_ids)
+    @ship_events = @vote_queue.current_ship_events
 
-    @ship_events = selected_project_data.map { |data| data[:ship_event] }
-
+    # what in the vibe code did rowan do here before :skulk:
     @project_ai_used = {}
     @projects.each do |project|
       ai_used = if project.respond_to?(:ai_used?)
         project.ai_used?
-      elsif project.ship_certifications.loaded? && project.ship_certifications.any? { |cert| cert.respond_to?(:ai_used?) }
-        latest_cert = project.ship_certifications.max_by(&:created_at)
-        latest_cert&.ai_used? || false
-      else
-        false
       end
       @project_ai_used[project.id] = ai_used
     end
 
-    if @ship_events.size == 2
-      @vote_signature = VoteSignatureService.generate_signature(
-        @ship_events[0].id,
-        @ship_events[1].id,
-        current_user.id
-      )
-    end
+    @vote_signature = @vote_queue.generate_current_signature
+    session[:current_vote_signature] = @vote_signature
   end
 
   def vote_params
     params.expect(vote: %i[winning_project_id explanation
-                           project_1_demo_opened project_1_repo_opened
-                           project_2_demo_opened project_2_repo_opened
-                           time_spent_voting_ms music_played
-                           ship_event_1_id ship_event_2_id signature])
-  end
-
-  # this function is what we used in High seas
-  def weighted_sample(projects)
-    return nil if projects.empty?
-    return projects.first if projects.size == 1
-
-    # Create weights where earlier projects (index 0) have higher weight
-    # Weight decreases exponentially: first project gets weight 1.0, second gets 0.95, third gets 0.90, etc.
-    weights = projects.map.with_index { |_, index| 0.95 ** index }
-    total_weight = weights.sum
-
-    # Generate random number between 0 and total_weight
-    random = rand * total_weight
-
-    # Find the project corresponding to this random weight
-    cumulative_weight = 0
-    projects.each_with_index do |project, index|
-      cumulative_weight += weights[index]
-      return project if random <= cumulative_weight
-    end
-
-    # Fallback (should never reach here)
-    projects.first
+                           ship_event_1_id ship_event_2_id signature cf_turnstile_response])
   end
 end

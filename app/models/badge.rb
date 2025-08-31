@@ -42,7 +42,7 @@ class Badge
       flavor_text: "vote 100 times.",
       icon: "i_voted.png",
       color: "border-green-500 bg-green-500/10 text-green-800",
-      criteria: ->(user) { user.votes.count >= 100 }
+      criteria: ->(user) { user.votes.active.count >= 100 }
     },
     graphic_design_is_my_passion: {
       name: "Graphic Design is My Passion",
@@ -109,6 +109,19 @@ class Badge
       color: "border-gray-500 bg-gray-500/10 text-gray-800",
       full_size_icon: true,
       criteria: ->(user) { false }
+    },
+    yapper_level_1: {
+      name: "Yapper I",
+      flavor_text: "Posted 10 comments on devlogs.",
+      icon: "💬",
+      criteria: ->(user) { user.comments.count >= 5 }
+    },
+    no_fun: {
+      name: "No Fun",
+      flavor_text: "opt-out added for the whimsy-impaired",
+      icon: "🚫",
+      color: "border-red-500 bg-red-500/10",
+      criteria: ->(user) { false }
     }
   }.freeze
 
@@ -136,6 +149,9 @@ class Badge
           earned_at: Time.current
         )
         newly_earned << badge_key
+
+        # Handle special badge effects
+        handle_special_badge_effects(badge_key, user)
 
         # Send Slack DM notification
         send_badge_notification(user, badge_key, badge_definition, backfill: backfill)
@@ -190,6 +206,15 @@ class Badge
   end
 
   private
+
+  def self.handle_special_badge_effects(badge_key, user)
+    case badge_key
+    when :no_fun
+      # Enable the disable_sinkening_visuals flipper flag for this user
+      Flipper.enable(:disable_sinkening_visuals, user)
+      Rails.logger.info("Enabled disable_sinkening_visuals flipper flag for user #{user.id}")
+    end
+  end
 
   def self.profile_url(user)
     Rails.application.routes.url_helpers.user_url(user, host: ENV.fetch("APP_HOST", "summer.hackclub.com"))

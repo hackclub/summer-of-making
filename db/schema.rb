@@ -10,8 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-
-ActiveRecord::Schema[8.0].define(version: 2025_07_30_182737) do
+ActiveRecord::Schema[8.0].define(version: 2025_08_27_192404) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -257,6 +256,7 @@ ActiveRecord::Schema[8.0].define(version: 2025_07_30_182737) do
     t.integer "duration_seconds", default: 0, null: false
     t.jsonb "hackatime_projects_key_snapshot", default: [], null: false
     t.boolean "is_neighborhood_migrated", default: false, null: false
+    t.boolean "for_sinkening", default: false, null: false
     t.index ["project_id"], name: "index_devlogs_on_project_id"
     t.index ["user_id"], name: "index_devlogs_on_user_id"
     t.index ["views_count"], name: "index_devlogs_on_views_count"
@@ -339,9 +339,11 @@ ActiveRecord::Schema[8.0].define(version: 2025_07_30_182737) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.string "reason"
+    t.boolean "escrowed", default: false, null: false
     t.index ["created_at", "amount"], name: "index_payouts_on_created_at_and_amount"
     t.index ["created_at", "payable_type", "amount"], name: "index_payouts_on_date_type_amount"
     t.index ["created_at"], name: "index_payouts_on_created_at"
+    t.index ["escrowed"], name: "index_payouts_on_escrowed"
     t.index ["payable_type", "payable_id"], name: "index_payouts_on_payable"
     t.index ["payable_type"], name: "index_payouts_on_payable_type"
     t.index ["user_id"], name: "index_payouts_on_user_id"
@@ -379,6 +381,7 @@ ActiveRecord::Schema[8.0].define(version: 2025_07_30_182737) do
     t.integer "views_count", default: 0, null: false
     t.float "x"
     t.float "y"
+    t.boolean "is_sinkening_ship"
     t.index ["is_shipped"], name: "index_projects_on_is_shipped"
     t.index ["user_id"], name: "index_projects_on_user_id"
     t.index ["views_count"], name: "index_projects_on_views_count"
@@ -433,7 +436,24 @@ ActiveRecord::Schema[8.0].define(version: 2025_07_30_182737) do
     t.bigint "project_id", null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.boolean "for_sinkening", default: false, null: false
+    t.boolean "excluded_from_pool", default: false, null: false
     t.index ["project_id"], name: "index_ship_events_on_project_id"
+  end
+
+  create_table "shipwright_advices", force: :cascade do |t|
+    t.bigint "project_id", null: false
+    t.bigint "ship_certification_id", null: false
+    t.text "description"
+    t.string "proof_link"
+    t.integer "status", default: 0
+    t.integer "shell_reward", default: 0
+    t.datetime "completed_at"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["project_id", "status"], name: "index_shipwright_advices_on_project_id_and_status"
+    t.index ["project_id"], name: "index_shipwright_advices_on_project_id"
+    t.index ["ship_certification_id"], name: "index_shipwright_advices_on_ship_certification_id"
   end
 
   create_table "shop_card_grants", force: :cascade do |t|
@@ -505,9 +525,28 @@ ActiveRecord::Schema[8.0].define(version: 2025_07_30_182737) do
     t.bigint "shop_card_grant_id"
     t.decimal "fulfillment_cost", precision: 6, scale: 2, default: "0.0"
     t.string "fulfilled_by"
+    t.bigint "warehouse_package_id"
     t.index ["shop_card_grant_id"], name: "index_shop_orders_on_shop_card_grant_id"
     t.index ["shop_item_id"], name: "index_shop_orders_on_shop_item_id"
     t.index ["user_id"], name: "index_shop_orders_on_user_id"
+    t.index ["warehouse_package_id"], name: "index_shop_orders_on_warehouse_package_id"
+  end
+
+  create_table "shop_warehouse_packages", force: :cascade do |t|
+    t.bigint "user_id", null: false
+    t.jsonb "frozen_address", null: false
+    t.string "theseus_package_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["theseus_package_id"], name: "index_shop_warehouse_packages_on_theseus_package_id", unique: true
+    t.index ["user_id"], name: "index_shop_warehouse_packages_on_user_id"
+  end
+
+  create_table "sinkening_settings", force: :cascade do |t|
+    t.float "intensity"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.string "slack_story_url"
   end
 
   create_table "slack_emotes", force: :cascade do |t|
@@ -727,7 +766,21 @@ ActiveRecord::Schema[8.0].define(version: 2025_07_30_182737) do
     t.datetime "updated_at", null: false
     t.text "custom_css"
     t.boolean "hide_from_logged_out", default: false
+    t.string "balloon_color"
     t.index ["user_id"], name: "index_user_profiles_on_user_id"
+  end
+
+  create_table "user_vote_queues", force: :cascade do |t|
+    t.bigint "user_id", null: false
+    t.jsonb "ship_event_pairs", default: [], null: false
+    t.integer "current_position", default: 0, null: false
+    t.datetime "last_generated_at"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["current_position"], name: "index_user_vote_queues_on_current_position"
+    t.index ["last_generated_at"], name: "index_user_vote_queues_on_last_generated_at"
+    t.index ["user_id"], name: "index_user_vote_queues_on_user_id"
+    t.index ["user_id"], name: "index_user_vote_queues_on_user_id_unique", unique: true
   end
 
   create_table "users", force: :cascade do |t|
@@ -756,6 +809,7 @@ ActiveRecord::Schema[8.0].define(version: 2025_07_30_182737) do
     t.text "permissions", default: "[]"
     t.jsonb "shenanigans_state", default: {}
     t.boolean "is_banned", default: false
+    t.boolean "fraud_team_member", default: false, null: false
   end
 
   create_table "versions", force: :cascade do |t|
@@ -765,6 +819,8 @@ ActiveRecord::Schema[8.0].define(version: 2025_07_30_182737) do
     t.string "item_type", null: false
     t.string "event", null: false
     t.text "object"
+    t.jsonb "object_changes"
+    t.jsonb "extra_data"
     t.index ["item_type", "item_id"], name: "index_versions_on_item_type_and_item_id"
   end
 
@@ -819,6 +875,7 @@ ActiveRecord::Schema[8.0].define(version: 2025_07_30_182737) do
     t.bigint "ship_event_2_id", null: false
     t.datetime "processed_at"
     t.text "ai_feedback"
+    t.boolean "is_low_quality", default: false, null: false
     t.index ["marked_invalid_at"], name: "index_votes_on_marked_invalid_at"
     t.index ["marked_invalid_by_id"], name: "index_votes_on_marked_invalid_by_id"
     t.index ["project_1_id"], name: "index_votes_on_project_1_id"
@@ -847,7 +904,9 @@ ActiveRecord::Schema[8.0].define(version: 2025_07_30_182737) do
     t.bigint "project_id", null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.bigint "reviewer_id"
     t.index ["project_id"], name: "index_ysws_review_submissions_on_project_id", unique: true
+    t.index ["reviewer_id"], name: "index_ysws_review_submissions_on_reviewer_id"
   end
 
   add_foreign_key "active_storage_attachments", "active_storage_blobs", column: "blob_id"
@@ -870,11 +929,15 @@ ActiveRecord::Schema[8.0].define(version: 2025_07_30_182737) do
   add_foreign_key "ship_certifications", "users", column: "reviewer_id"
   add_foreign_key "ship_event_feedbacks", "ship_events"
   add_foreign_key "ship_events", "projects"
+  add_foreign_key "shipwright_advices", "projects"
+  add_foreign_key "shipwright_advices", "ship_certifications"
   add_foreign_key "shop_card_grants", "shop_items"
   add_foreign_key "shop_card_grants", "users"
   add_foreign_key "shop_orders", "shop_card_grants"
   add_foreign_key "shop_orders", "shop_items"
+  add_foreign_key "shop_orders", "shop_warehouse_packages", column: "warehouse_package_id"
   add_foreign_key "shop_orders", "users"
+  add_foreign_key "shop_warehouse_packages", "users"
   add_foreign_key "solid_queue_blocked_executions", "solid_queue_jobs", column: "job_id", on_delete: :cascade
   add_foreign_key "solid_queue_claimed_executions", "solid_queue_jobs", column: "job_id", on_delete: :cascade
   add_foreign_key "solid_queue_failed_executions", "solid_queue_jobs", column: "job_id", on_delete: :cascade
@@ -891,6 +954,7 @@ ActiveRecord::Schema[8.0].define(version: 2025_07_30_182737) do
   add_foreign_key "user_badges", "users"
   add_foreign_key "user_hackatime_data", "users"
   add_foreign_key "user_profiles", "users"
+  add_foreign_key "user_vote_queues", "users"
   add_foreign_key "view_events", "users"
   add_foreign_key "vote_changes", "projects"
   add_foreign_key "vote_changes", "votes"
@@ -903,4 +967,5 @@ ActiveRecord::Schema[8.0].define(version: 2025_07_30_182737) do
   add_foreign_key "ysws_review_devlog_approvals", "devlogs"
   add_foreign_key "ysws_review_devlog_approvals", "users"
   add_foreign_key "ysws_review_submissions", "projects"
+  add_foreign_key "ysws_review_submissions", "users", column: "reviewer_id"
 end

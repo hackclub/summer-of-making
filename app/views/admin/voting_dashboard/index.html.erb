@@ -56,6 +56,74 @@
   </tbody>
 </table>
 
+<h2>rating distribution</h2>
+<p style="color: var(--color-muted);">Projects with ≥ 18 votes • ELO histogram with normal overlay</p>
+<% if @ratings_count > 0 %>
+  <% width = 1000; height = 340; padding = 40; %>
+  <% max_bar_height = height - padding * 2 %>
+  <% bar_w = (@rating_bins > 0 ? (width - padding * 2).to_f / @rating_bins : 0) %>
+  <svg width="<%= width %>" height="<%= height %>" viewBox="0 0 <%= width %> <%= height %>" style="background: var(--color-sheet); border-radius: 8px; box-shadow: 0 2px 8px #0002;">
+    <%# axes %>
+    <line x1="<%= padding %>" y1="<%= height - padding %>" x2="<%= width - padding %>" y2="<%= height - padding %>" stroke="var(--color-muted)" stroke-width="1" />
+    <line x1="<%= padding %>" y1="<%= padding %>" x2="<%= padding %>" y2="<%= height - padding %>" stroke="var(--color-muted)" stroke-width="1" />
+
+    <%# y-axis ticks and labels (0, 25%, 50%, 75%, 100%) %>
+    <%
+      max_count = [@rating_hist_max_count, 1].max
+      ticks = [0, 0.25, 0.5, 0.75, 1.0]
+      ticks.each do |t|
+        y = height - padding - (t * max_bar_height)
+    %>
+      <line x1="<%= padding - 4 %>" y1="<%= y %>" x2="<%= padding %>" y2="<%= y %>" stroke="var(--color-muted)" stroke-width="1" />
+      <text x="<%= padding - 8 %>" y="<%= y + 4 %>" fill="var(--color-muted)" font-size="11" text-anchor="end"><%= (max_count * t).round %></text>
+    <% end %>
+    <text x="<%= padding - 28 %>" y="<%= padding - 8 %>" fill="var(--color-muted)" font-size="12" text-anchor="start">count</text>
+
+    <%# bars %>
+    <% @rating_hist_norm.each_with_index do |norm, i| %>
+      <% h = norm * max_bar_height %>
+      <% x = padding + i * bar_w %>
+      <% y = height - padding - h %>
+      <rect x="<%= x %>" y="<%= y %>" width="<%= [bar_w - 1, 0].max %>" height="<%= h %>" fill="var(--color-blue)" opacity="0.75" />
+    <% end %>
+
+    <%# normal curve overlay sampled across bins and scaled to histogram %>
+    <%
+      # Use pre-normalized curve values
+      dens = @rating_curve_norm
+      scale = max_bar_height
+      path = []
+      @rating_bins.times do |i|
+        x = padding + i * bar_w + bar_w * 0.5
+        y = height - padding - (dens[i] * scale)
+        path << (i == 0 ? "M #{x} #{y}" : "L #{x} #{y}")
+      end
+    %>
+    <path d="<%= path.join(' ') %>" fill="none" stroke="var(--color-red)" stroke-width="2.25" />
+
+    <%# labels: min/max at bottom; mean & sd at top-right %>
+    <text x="<%= padding %>" y="<%= height - padding + 18 %>" fill="var(--color-muted)" font-size="12">min <%= @rating_min %></text>
+    <text x="<%= width - padding %>" y="<%= height - padding + 18 %>" fill="var(--color-muted)" font-size="12" text-anchor="end">max <%= @rating_max %></text>
+    <text x="<%= width - padding - 6 %>" y="<%= padding + 12 %>" fill="var(--color-muted)" font-size="12" text-anchor="end">mean <%= @rating_mean.round(1) %></text>
+    <text x="<%= width - padding - 6 %>" y="<%= padding + 28 %>" fill="var(--color-muted)" font-size="12" text-anchor="end">sd <%= @rating_stddev.round(1) %></text>
+
+    <%# x-axis tick labels showing bin ranges (label every bin) %>
+    <% @rating_bins.times do |i| %>
+      <% x = padding + i * bar_w %>
+      <% from = @rating_bin_edges[i] %>
+      <% to = @rating_bin_edges[i + 1] %>
+      <text x="<%= x + bar_w * 0.5 %>" y="<%= height - padding + 16 %>" fill="var(--color-muted)" font-size="11" text-anchor="middle">
+        <%= from %>-<%= to %>
+      </text>
+    <% end %>
+
+    <%# x-axis label %>
+    <text x="<%= width/2 %>" y="<%= height - 6 %>" fill="var(--color-muted)" font-size="12" text-anchor="middle">rating</text>
+  </svg>
+<% else %>
+  <p style="color: var(--color-muted);">No ratings yet.</p>
+<% end %>
+
 <h1 style="font-size: 2rem;">Voting Quality Dashboard</h1>
 <p style="color: var(--color-muted);">Recent votes flagged for review by AI</p>
 <div style="margin-bottom: 2em;">

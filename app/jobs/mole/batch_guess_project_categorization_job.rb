@@ -1,7 +1,7 @@
 class Mole::BatchGuessProjectCategorizationJob < ApplicationJob
   queue_as :literally_whenever
 
-  BATCH_SIZE = 10
+  BATCH_SIZE = 2
 
   def perform(project_ids = nil, recurring = false)
     @project_ids = project_ids || get_default_project_ids

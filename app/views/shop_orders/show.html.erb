@@ -18,6 +18,22 @@
     <%= render 'order_item_details', order: @order %>
     <%= render 'order_status_timeline', order: @order %>
 
+    <!-- Warehouse Tracking -->
+    <% if @order.warehouse_package&.theseus_package_id.present? %>
+      <div class="mt-8">
+        <h3 class="text-xl font-bold text-darker-taupe mb-4">Package Tracking</h3>
+        <div class="bg-white rounded-lg border-2 border-saddle-taupe/20">
+          <iframe
+            src="<%= TheseusService::BASE_URL %>/packages/<%= @order.warehouse_package.theseus_package_id %>/embed"
+            width="100%"
+            height="400"
+            frameborder="0"
+            class="rounded-lg">
+          </iframe>
+        </div>
+      </div>
+    <% end %>
+
     <!-- Actions -->
     <div class="flex flex-col sm:flex-row gap-4 mt-8">
       <%= link_to "View My Orders", shop_orders_path,

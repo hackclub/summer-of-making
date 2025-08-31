@@ -21,18 +21,21 @@
 #  shop_card_grant_id                 :bigint
 #  shop_item_id                       :bigint           not null
 #  user_id                            :bigint           not null
+#  warehouse_package_id               :bigint
 #
 # Indexes
 #
-#  index_shop_orders_on_shop_card_grant_id  (shop_card_grant_id)
-#  index_shop_orders_on_shop_item_id        (shop_item_id)
-#  index_shop_orders_on_user_id             (user_id)
+#  index_shop_orders_on_shop_card_grant_id    (shop_card_grant_id)
+#  index_shop_orders_on_shop_item_id          (shop_item_id)
+#  index_shop_orders_on_user_id               (user_id)
+#  index_shop_orders_on_warehouse_package_id  (warehouse_package_id)
 #
 # Foreign Keys
 #
 #  fk_rails_...  (shop_card_grant_id => shop_card_grants.id)
 #  fk_rails_...  (shop_item_id => shop_items.id)
 #  fk_rails_...  (user_id => users.id)
+#  fk_rails_...  (warehouse_package_id => shop_warehouse_packages.id)
 #
 require "test_helper"
 

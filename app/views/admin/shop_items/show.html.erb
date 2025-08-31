@@ -169,6 +169,14 @@
         <th>Updated</th>
         <td><%= @shop_item.updated_at.strftime("%B %d, %Y at %I:%M %p") %></td>
       </tr>
+      <tr>
+        <th>Total Orders</th>
+        <td><%= @total_orders %></td>
+      </tr>
+      <tr>
+        <th>Total Spent</th>
+        <td><%= @total_spent %></td>
+      </tr>
     </table>
   </div>
 </div>
@@ -183,6 +191,7 @@
         <th>Total Cost</th>
         <th>Status</th>
         <th>Ordered At</th>
+        <th>Link</th>
       </tr>
     </thead>
     <tbody>
@@ -196,6 +205,7 @@
           <td><%= order.total_cost %></td>
           <td><%= order.aasm_state&.humanize %></td>
           <td><%= order.created_at.strftime("%m/%d/%Y") %></td>
+          <td><%= link_to "View", admin_shop_order_path(order) %></td>
         </tr>
       <% end %>
     </tbody>

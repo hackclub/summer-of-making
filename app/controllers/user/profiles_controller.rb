@@ -36,6 +36,6 @@ class User::ProfilesController < ApplicationController
   end
 
   def profile_params
-    params.require(:user_profile).permit(:bio, :custom_css, :hide_from_logged_out)
+    params.require(:user_profile).permit(:bio, :custom_css, :hide_from_logged_out, :balloon_color)
   end
 end

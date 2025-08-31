@@ -33,10 +33,35 @@
       border: 2px solid #f59e0b !important;
       transition: all 0.3s ease;
     }
+
+    .balloon-float-animation {
+      animation: balloon-float 3s ease-in-out;
+    }
+
+    @keyframes balloon-float {
+      0% {
+        transform: translateY(20px) scale(0.8);
+        opacity: 0;
+      }
+      20% {
+        opacity: 1;
+      }
+      50% {
+        transform: translateY(-10px) scale(1.1);
+      }
+      70% {
+        transform: translateY(-5px) scale(1.05);
+      }
+      100% {
+        transform: translateY(0px) scale(1);
+        opacity: 1;
+      }
+    }
   </style>
   <script>
     document.addEventListener('DOMContentLoaded', function() {
       let targetDevlogId = <%= @target_devlog_id.to_json.html_safe %>;
+      let newDevlogId = <%= @new_devlog_id.to_json.html_safe %>;
 
       if (!targetDevlogId && window.location.hash) {
         const hashMatch = window.location.hash.match(/^#devlog_(\d+)$/);
@@ -105,65 +130,172 @@
             <div class="grow-1">
               <% if item.is_a? Devlog %>
                 <%= render "devlogs/devlog", devlog: item %>
-              <% elsif item.is_a? ShipEvent %>
-                <%= render "shared/card", padding: "lg" do %>
-                  <% admin_tool do %>
-                    <%= link_to "New ship feedback!", new_ship_event_feedback_path(ship_event_id: item.id) %>
-                  <% end %>
-
-                  <% ship_data = @ship_event_data[item.id] %>
-                  <p class="font-extrabold text-base sm:text-lg 2xl:text-xl mb-1 flex items-center gap-1">
-                    <%= inline_svg("icons/ship.svg", class: "w-6 h-6") %>
-                    Ship <%= ship_data[:position] %>
-                  </p>
-
-                  <p class="mb-6">
-                    <%= pluralize(ship_data[:payout_count], "payout") %> of
-                    <picture class="inline-block w-6 h-6 flex-shrink-0">
-                      <source srcset="/shell.avif" type="image/avif">
-                      <source srcset="/shell.webp" type="image/webp">
-                      <img src="/shell.png" class="inline-block w-6 h-6" alt="shell" loading="lazy">
-                    </picture>
-                    <%= ship_data[:payout_sum] %> shells
-                  </p>
-
-                  <div class="flex items-center">
-                    <% if item.user.avatar.present? %>
-                      <img src="<%= item.user.avatar %>" alt="<%= item.user.display_name %>" class="w-8 h-8 sm:w-10 sm:h-10 rounded-full mr-2 sm:mr-3" loading="lazy">
-                    <% end %>
-                    <div>
-                      <p class="text-som-detail text-xs sm:text-sm 2xl:text-base">
-                        <%= time_ago_in_words item.created_at %> ago
+              <% elsif item.is_a? ShipwrightAdvice %>
+                <% reviewer = item.ship_certification.reviewer %>
+                <%= render layout: "shared/card", locals: { padding: "lg", classes: "bg-blue-50 border-blue-200" } do %>
+                  <div class="z-10">
+                    <div class="flex items-center justify-between mb-3">
+                      <div class="flex items-center">
+                        <% if reviewer&.avatar.present? %>
+                          <a href="<%= user_path(reviewer) %>" class="flex-shrink-0">
+                            <img src="<%= reviewer.avatar %>" alt="<%= reviewer.display_name %>" class="w-10 h-10 rounded-full mr-3 hover:ring-2 hover:ring-blue-300 transition-all cursor-pointer" loading="lazy">
+                          </a>
+                        <% else %>
+                          <div class="w-10 h-10 rounded-full mr-3 bg-blue-100 flex items-center justify-center flex-shrink-0">
+                            <span class="text-blue-600 text-lg">💡</span>
+                          </div>
+                        <% end %>
+                        <div>
+                          <p class="font-extrabold text-base sm:text-lg 2xl:text-xl mb-1 flex items-center gap-2 text-blue-800">
+                            Shipwright Feedback
+                          </p>
+                          <p class="text-som-detail text-xs sm:text-sm 2xl:text-base">
+                            <% if reviewer %>
+                              from <%= reviewer.display_name %>
+                            <% else %>
+                              from Shipwright
+                            <% end %>
+                            • <%= time_ago_in_words(item.created_at) %> ago
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="mb-4">
+                      <p class="text-gray-800 text-base sm:text-lg 2xl:text-xl leading-relaxed">
+                        <%= simple_format(item.description) %>
                       </p>
-
-                      <span class="text-base sm:text-lg 2xl:text-xl">
-                        <%= render "shared/user_display_name", user: item.user %><% admin_user_visit(item.user) %>
-                      </span>
-
-                      <span class="text-som-detail text-xs sm:text-sm 2xl:text-base">•</span>
-
-                      <span class="text-som-detail text-xs sm:text-sm 2xl:text-base">
-                        Covers <%= pluralize(ship_data[:devlogs_since_last_count], "devlog") %>
-                      </span>
-
-                      <%
-                        # Get devlogs since previous ship event or project start
-                        # previous_ship = p.last
-                        # start_time = previous_ship&.created_at || @project.created_at
-                        # devlogs_in_period = @project.devlogs.where("created_at > ? AND created_at <= ?", start_time, item.created_at)
-
-                        #                         # Get time data for this period (simplified - getting project total)
-                        # time = @project.total_seconds_coded / 3600.0
-
-                        # devlog_count = devlogs_in_period.count
-
-                        # hours = time.to_i
-                        # minutes = ((time - hours) * 60).to_i
-                        #  class="text-gray-600 text-xs sm:text-sm 2xl:text-base">contains <%= pluralize(devlog_count, 'devlog')  across <hours h minutes mins of coding.
-                      %>
-
+                      <% if item.completed? %>
+                        <div class="mt-4 p-3 bg-green-50 border border-green-200 rounded-lg">
+                          <p class="text-green-800 font-medium mb-2 flex items-center gap-2">
+                            <span>✓</span>
+                            <span>You addressed this feedback!</span>
+                          </p>
+                        </div>
+                      <% elsif item.pending? %>
+                        <div class="mt-4 p-3 bg-amber-50 border border-amber-200 rounded-lg">
+                          <p class="text-amber-800 text-sm">
+                            This is expert advice from your shipwright, click <%= reviewer.display_name %>'s avatar to check out their projects
+                          </p>
+                        </div>
+                      <% end %>
                     </div>
                   </div>
+                <% end %>
+              <% elsif item.is_a? ShipEvent %>
+                <%= render layout: "shared/card", locals: { padding: "lg", classes: (item.for_sinkening ? '-rotate-1' : '') } do %>
+                  <div class="z-10">
+                    <div class="relative">
+                      <% admin_tool do %>
+                        <%= link_to "New ship feedback!", new_ship_event_feedback_path(ship_event_id: item.id) %>
+                      <% end %>
+                      <% ship_data = @ship_event_data[item.id] %>
+                      <p class="font-extrabold text-base sm:text-lg 2xl:text-xl mb-1 flex items-center gap-1">
+                          <%= inline_svg("icons/ship.svg", class: "w-6 h-6") %>
+                          Ship <%= ship_data[:position] %>
+                      </p>
+                      <div class="flex flex-col mb-6 space-y-1">
+                        <% if ship_data[:payout_count].positive? %>
+                          <p class="">
+                            <%= pluralize(ship_data[:payout_count], "payout") %> of
+                            <picture class="inline-block w-6 h-6 flex-shrink-0">
+                              <source srcset="/shell.avif" type="image/avif">
+                              <source srcset="/shell.webp" type="image/webp">
+                              <img src="/shell.png" class="inline-block w-6 h-6" alt="shell" loading="lazy">
+                            </picture>
+                            <%= ship_data[:payout_sum] %> shells
+                          </p>
+                        <% elsif ship_data[:escrow_count].to_i.positive? %>
+                          <p class="">
+                            <%= pluralize(ship_data[:escrow_count], "payout") %> totaling
+                            <picture class="inline-block w-6 h-6 flex-shrink-0">
+                              <source srcset="/shell.avif" type="image/avif">
+                              <source srcset="/shell.webp" type="image/webp">
+                              <img src="/shell.png" class="inline-block w-6 h-6" alt="shell" loading="lazy">
+                            </picture>
+                            <%= ship_data[:escrow_sum] %> shells are in escrow pending your voting.
+                          </p>
+                        <% else %>
+                          <% if @latest_ship_certification&.approved? %>
+                            <p class="">
+                              This ship is currently being voted on by the community. Check back later!
+                            </p>
+                          <% end %>
+                        <% end %>
+                        <% if current_user && current_user == item.user && ship_data[:escrow_count].to_i.positive? %>
+                          <% remaining = current_user.remaining_votes_to_ship %>
+                          <% if remaining > 0 %>
+                            <p class="">You need <%= pluralize(remaining, 'more vote') %> since your last ship to release your shells. <span data-action="click->modal#startVoting" data-vote-path="<%= new_vote_path %>" class="underline text-blue-700 hover:text-blue-800 cursor-pointer">Start voting</span>.</p>
+                          <% end %>
+                        <% end %>
+                      </div>
+                      <div class="flex items-center">
+                        <% if item.user.avatar.present? %>
+                          <img src="<%= item.user.avatar %>" alt="<%= item.user.display_name %>" class="w-8 h-8 sm:w-10 sm:h-10 rounded-full mr-2 sm:mr-3" loading="lazy">
+                        <% end %>
+                        <div>
+                          <p class="text-som-detail text-xs sm:text-sm 2xl:text-base">
+                            <%= time_ago_in_words item.created_at %> ago
+                          </p>
+                          <span class="text-base sm:text-lg 2xl:text-xl">
+                            <%= render "shared/user_display_name", user: item.user %><% admin_user_visit(item.user) %>
+                          </span>
+                          <span class="text-som-detail text-xs sm:text-sm 2xl:text-base">•</span>
+                          <span class="text-som-detail text-xs sm:text-sm 2xl:text-base">
+                            Covers <%= pluralize(ship_data[:devlogs_since_last_count], "devlog") %> and <%= ship_data[:hours_covered] %>
+                          </span>
+                          <%
+                            # Get devlogs since previous ship event or project start
+                            # previous_ship = p.last
+                            # start_time = previous_ship&.created_at || @project.created_at
+                            # devlogs_in_period = @project.devlogs.where("created_at > ? AND created_at <= ?", start_time, item.created_at)
+                            #                         # Get time data for this period (simplified - getting project total)
+                            # time = @project.total_seconds_coded / 3600.0
+                            # devlog_count = devlogs_in_period.count
+                            # hours = time.to_i
+                            # minutes = ((time - hours) * 60).to_i
+                            #  class="text-gray-600 text-xs sm:text-sm 2xl:text-base">contains <%= pluralize(devlog_count, 'devlog')  across <hours h minutes mins of coding.
+                          %>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <% if item.for_sinkening %>
+                    <%# Show balloon for sinkening ShipEvents %>
+                    <%
+                      intensity = SinkeningSetting.current.intensity
+                      adjusted_intensity = intensity * intensity
+                      rotation_intensity = 1 + (Flipper.enabled?(:sinkening, current_user) ? 5 * adjusted_intensity + 1 : 0)
+                      random_delay = rand(0..6000) # Random delay between 0-6000ms (full animation cycle)
+                    %>
+                    <div class="absolute top-0 right-0 p-2 z-0 origin-bottom"
+                    style="transform: rotate(<%= rotation_intensity %>deg) translateY(calc(-100% + 2rem)) translateX(1rem); color: <%= item.user.user_profile&.balloon_color || '#ff6b6b' %>">
+                      <%= inline_svg "balloon.svg", height: "10rem", width: "auto",
+                      class: "shipevent-balloon",
+                      style: "animation-delay: -#{random_delay}ms;" %>
+                    </div>
+
+                    <div class="absolute -inset-0 rounded-lg"
+                    style="background: radial-gradient(circle at 62.814829% 45.688167%, rgb(246, 219, 186), rgb(230, 212, 190))"></div>
+
+                    <style>
+                      .shipevent-balloon {
+                        transform-origin: bottom;
+                        animation: shipevent-balloon-idle 6s ease-in-out infinite;
+                      }
+                      @keyframes shipevent-balloon-idle {
+                        0%, 50% {
+                          transform: rotate(0deg);
+                        }
+                        25% {
+                          transform: rotate(3deg);
+                        }
+                        75% {
+                          transform: rotate(-3deg);
+                        }
+                      }
+                    </style>
+                  <% end %>
                 <% end %>
               <% end %>
             </div>

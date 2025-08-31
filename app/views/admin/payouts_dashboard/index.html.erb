@@ -2,15 +2,77 @@
 
 <h1>when can we rugpull?</h1>
 
-<h3>market cap <%= number_with_delimiter(@cap) %></h3>
+<div class="kpi-grid">
+  <div class="kpi-card">
+    <div class="kpi-label">market cap</div>
+    <div class="kpi-value"><%= number_with_delimiter(@cap) %></div>
+  </div>
+  <div class="kpi-card">
+    <div class="kpi-label">released cap</div>
+    <div class="kpi-value"><%= number_with_delimiter(@released_cap) %></div>
+  </div>
+  <div class="kpi-card">
+    <div class="kpi-label">inflows (24h)</div>
+    <div class="kpi-value positive">+<%= number_with_delimiter(@created) %></div>
+  </div>
+  <div class="kpi-card">
+    <div class="kpi-label">outflows (24h)</div>
+    <div class="kpi-value negative">-<%= number_with_delimiter(@destroyed) %></div>
+  </div>
+  <div class="kpi-card">
+    <div class="kpi-label">txns (24h)</div>
+    <div class="kpi-value"><%= number_with_delimiter(@txns) %></div>
+  </div>
+  <div class="kpi-card">
+    <div class="kpi-label">volume (24h)</div>
+    <div class="kpi-value"><%= number_with_delimiter(@volume) %></div>
+  </div>
+  <div class="kpi-card">
+    <div class="kpi-label">pending payouts (count)</div>
+    <div class="kpi-value"><%= number_with_delimiter(@escrow_count) %></div>
+  </div>
+  <div class="kpi-card">
+    <div class="kpi-label">pending payouts (amount)</div>
+    <div class="kpi-value"><%= number_with_delimiter(@escrow_amount) %></div>
+  </div>
+  <div class="kpi-card">
+    <div class="kpi-label">pending created (24h)</div>
+    <div class="kpi-value"><%= number_with_delimiter(@escrow_recent_amount) %></div>
+  </div>
+  <div class="kpi-card">
+    <div class="kpi-label">users with escrow</div>
+    <div class="kpi-value"><%= number_with_delimiter(@escrow_users) %></div>
+  </div>
+  <div class="kpi-card">
+    <div class="kpi-label">release-ready users</div>
+    <div class="kpi-value"><%= number_with_delimiter(@escrow_release_ready) %></div>
+  </div>
+  <div class="kpi-card">
+    <div class="kpi-label">total votes needed (escrow users)</div>
+    <div class="kpi-value"><%= number_with_delimiter(@total_votes_needed) %></div>
+  </div>
+</div>
 
-<h3>+<%= number_with_delimiter(@created) %> inflows (24h)</h3>
-
-<h3>-<%= number_with_delimiter(@destroyed) %> outflows (24h)</h3>
-
-<h3><%= number_with_delimiter(@txns) %> txns (24h) </h3>
-
-<h3><%= number_with_delimiter(@volume) %> volume (24h) </h3>
+  <div>
+    <h3>top escrow holders</h3>
+    <% if @escrow_holders.any? %>
+      <ul class="people-list">
+        <% @escrow_holders.each_with_index do |(user_data, amount), index| %>
+          <li>
+            <span class="rank">#<%= index + 1 %></span>
+            <% user_id, display_name, avatar = user_data %>
+            <img src="<%= avatar %>" alt="<%= display_name %>" width="28" height="28">
+            <span class="name"><strong><%= display_name %></strong> (id <%= user_id %>)</span>
+            <span class="value"><%= number_with_delimiter(amount) %></span>
+            <% votes_needed = @votes_needed_by_user_id[user_id] || 0 %>
+            <span class="votes-needed"><%= votes_needed %> to release</span>
+          </li>
+        <% end %>
+      </ul>
+    <% else %>
+      <p>nobody in escrow (phew)</p>
+    <% end %>
+  </div>
 
 <h2>whos the richest</h2>
 <% if @holders.any? %>
@@ -79,6 +141,26 @@
   </tbody>
 </table>
 
+<h2>ship events</h2>
+<div class="kpi-grid">
+  <div class="kpi-card">
+    <div class="kpi-label">total ship events</div>
+    <div class="kpi-value"><%= number_with_delimiter(@total_ship_events) %></div>
+  </div>
+  <div class="kpi-card">
+    <div class="kpi-label">unpaid ship events (no payouts yet)</div>
+    <div class="kpi-value"><%= number_with_delimiter(@total_unpaid_ship_events) %></div>
+  </div>
+  <div class="kpi-card">
+    <div class="kpi-label">escrow-pending ship events</div>
+    <div class="kpi-value"><%= number_with_delimiter(@escrow_pending_ship_events) %></div>
+  </div>
+  <div class="kpi-card">
+    <div class="kpi-label">rough next ship date</div>
+    <div class="kpi-value"><%= @rough_next_ship_date ? l(@rough_next_ship_date, format: :long) : 'n/a' %></div>
+  </div>
+</div>
+
 <h2>recent payouts</h2>
 <% if @recent.any? %>
   <table>
@@ -116,8 +198,8 @@
               <% when ShopOrder %>
                 🛒 <%= link_to "ShopOrder ##{payout.payable.id}", admin_shop_order_path(payout.payable) %>
               <% when ShipEvent %>
-                🚢 <%= link_to "ShipEvent ##{payout.payable.id}", project_path(payout.payable.project) %>
-                (<%= payout.payable.project.title %>)
+                🚢 <%= link_to "ShipEvent ##{payout.payable.id}", project_path(payout.payable.project) if payout.payable&.project.present? %>
+                (<%= payout.payable.project&.title || "no project????" %>)
               <% else %>
                 <%= payout.payable.class.name %> #<%= payout.payable.id %>
               <% end %>
@@ -143,3 +225,27 @@
 <% else %>
   <p>nuthing, ruh ro raggy</p>
 <% end %>
+
+<style>
+  .kpi-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; margin: 12px 0 24px; }
+  .kpi-card { background: transparent; border: 2px solid #E4DCC6; border-radius: 0; padding: 12px 14px; }
+  .kpi-label { font-size: 12px; text-transform: uppercase; color: #E4DCC6; opacity: 0.9; }
+  .kpi-value { font-size: 20px; font-weight: 700; color: #ffffff; }
+  .kpi-value.positive { color: #2ecc71; }
+  .kpi-value.negative { color: #e74c3c; }
+
+  .two-col { display: grid; grid-template-columns: 1fr; gap: 16px; margin: 16px 0 24px; }
+  @media (min-width: 900px) { .two-col { grid-template-columns: 1fr 1fr; } }
+
+  table { width: 100%; border-collapse: collapse; background: transparent; border: 2px solid #E4DCC6; border-radius: 0; }
+  th, td { padding: 10px 12px; text-align: left; border-bottom: 1px solid #E4DCC6; color: #ffffff; }
+  thead th { background: transparent; color: #E4DCC6; }
+  ul.people-list { list-style: none; padding: 0; margin: 0; }
+  ul.people-list li { display: grid; grid-template-columns: auto 28px 1fr auto; align-items: center; gap: 8px; padding: 8px 0; border-bottom: 1px solid #E4DCC6; }
+  ul.people-list li:last-child { border-bottom: none; }
+  .people-list .rank { width: 32px; display: inline-block; color: #E4DCC6; }
+  .people-list .name { color: #ffffff; }
+  .people-list .value { font-weight: 700; color: #ffffff; }
+  .p { color: #2ecc71; }
+  .n { color: #e74c3c; }
+</style>

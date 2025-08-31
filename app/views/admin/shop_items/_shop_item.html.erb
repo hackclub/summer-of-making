@@ -1,4 +1,4 @@
-<h3><%= shop_item.name %></h3>
+<a href="<%= admin_shop_item_path(shop_item) %>"><h3><%= shop_item.name %></h3></a>
 <b>Description: </b> <%= shop_item.description %> <br>
 <b>Internal description: </b> <%= shop_item.internal_description %> <br>
 <b>USD cost: </b> <%= number_to_currency(shop_item.usd_cost || 0) %> <br>

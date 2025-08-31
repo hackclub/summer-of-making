@@ -11,16 +11,17 @@ class UserHackatimeDataRefreshJob < ApplicationJob
   WARNING_COOLDOWN = 2.hours.to_i
 
   def perform
-    Rails.logger.tagged("UserHackatimeDataRefreshJob") do
-      Rails.logger.info("Starting")
-    end
+    Rails.logger.tagged("UserHackatimeDataRefreshJob") { Rails.logger.info("Starting") }
 
     warning_count = 0
 
-    User.where(has_hackatime: true).find_each do |user|
+    User.where(has_hackatime: true)
+        .includes(:user_hackatime_data, :projects)
+        .find_each do |user|
       user.refresh_hackatime_data_now
 
-      user.projects.where(is_deleted: false).each do |project|
+      user.projects.each do |project|
+        next if project.is_deleted
         # skip projects without a valid hackatime key
         next unless project.hackatime_keys.present? &&
                    project.hackatime_keys.all?(&:present?) &&
@@ -28,7 +29,7 @@ class UserHackatimeDataRefreshJob < ApplicationJob
 
         begin
           if should_send_unlogged_warning?(project)
-            send_unlogged_warning(project)
+            send_unlogged_warning(project, user)
             warning_count += 1
           end
         rescue => e
@@ -45,9 +46,7 @@ class UserHackatimeDataRefreshJob < ApplicationJob
       end
     end
 
-    Rails.logger.tagged("UserHackatimeDataRefreshJob") do
-      Rails.logger.info("Ended - sent #{warning_count} unlogged time warnings")
-    end
+    Rails.logger.tagged("UserHackatimeDataRefreshJob") { Rails.logger.info("Ended - sent #{warning_count} unlogged time warnings") }
   end
 
   private
@@ -60,8 +59,7 @@ class UserHackatimeDataRefreshJob < ApplicationJob
     !Rails.cache.exist?(cache_key)
   end
 
-  def send_unlogged_warning(project)
-    user = project.user
+  def send_unlogged_warning(project, user)
     cache_key = "unlogged_time_warning:#{project.id}"
 
     unlogged_seconds = project.unlogged_time

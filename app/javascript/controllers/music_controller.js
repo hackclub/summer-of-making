@@ -8,6 +8,29 @@ export default class extends Controller {
     this.currentTrack = null
     this.isPlaying = false
     this.musicHasPlayed = false
+
+    const storedPref = localStorage.getItem('summerofmakingmusic')
+    const shouldAutoPlay = storedPref !== 'false'
+    if (shouldAutoPlay) {
+      const savedTrackName = localStorage.getItem('summerofmakingmusicTrack')
+      let startIndex = null
+      if (savedTrackName) {
+        const arr = Array.from(this.tracks)
+        startIndex = arr.findIndex(t => t.dataset.trackName === savedTrackName)
+        if (startIndex < 0) startIndex = null
+      }
+      try {
+        this.playMusic(startIndex)
+      } catch (_) {
+        this._setupInteractionAutoplay(startIndex)
+      }
+      if (this.currentTrack && this.currentTrack.play) {
+        const p = this.currentTrack.play()
+        if (p && typeof p.catch === 'function') {
+          p.catch(() => this._setupInteractionAutoplay(startIndex))
+        }
+      }
+    }
   }
   
   toggleMusic() {
@@ -52,8 +75,8 @@ export default class extends Controller {
     }
     
     const trackName = this.currentTrack.dataset.trackName
-    localStorage.setItem('journeyMusicEnabled', 'true')
-    localStorage.setItem('journeyMusicTrack', trackName)
+    localStorage.setItem('summerofmakingmusic', 'true')
+    localStorage.setItem('summerofmakingmusicTrack', trackName)
   }
   
   playNextTrack() {
@@ -74,7 +97,7 @@ export default class extends Controller {
     } else {
       this.element.classList.remove('music-playing')
     }
-    localStorage.setItem('journeyMusicEnabled', 'false')
+    localStorage.setItem('summerofmakingmusic', 'false')
   }
   
   disconnect() {
@@ -83,5 +106,19 @@ export default class extends Controller {
       this.currentTrack.pause()
       this.currentTrack = null
     }
+  }
+
+  _setupInteractionAutoplay(startIndex) {
+    const handler = () => {
+      try {
+        this.playMusic(startIndex)
+      } catch (_) {}
+      document.removeEventListener('click', handler)
+      document.removeEventListener('keydown', handler)
+      document.removeEventListener('touchstart', handler)
+    }
+    document.addEventListener('click', handler)
+    document.addEventListener('keydown', handler)
+    document.addEventListener('touchstart', handler)
   }
 } 

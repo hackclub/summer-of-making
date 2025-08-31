@@ -1,5 +1,24 @@
 <h1>Edit Ship Certification</h1>
 
+<div class="project-info" style="margin-bottom: 2rem;">
+  <h2 style="color: var(--color-primary); margin-bottom: 1rem;"><%= @ship_certification.project.title %></h2>
+
+  <div class="project-description" style="margin-bottom: 1.5rem;">
+    <h3 style="color: var(--color-text); font-size: 1.1rem; margin-bottom: 0.5rem;">Project Description</h3>
+    <% if @ship_certification.project.description.present? %>
+      <div style="padding: 1rem; background-color: var(--color-card); border-radius: 8px; border-left: 4px solid var(--color-primary); margin-bottom: 1rem;">
+        <p style="margin: 0; font-size: 1rem; line-height: 1.6; color: var(--color-text); font-weight: normal;">
+          <%= simple_format(sanitize(@ship_certification.project.description)) %>
+        </p>
+      </div>
+    <% else %>
+      <div style="padding: 1rem; background-color: var(--color-muted); border-radius: 8px; font-style: italic; margin-bottom: 1rem;">
+        <p style="margin: 0; font-size: 1rem; color: var(--color-text-muted);">No description provided for this project.</p>
+      </div>
+    <% end %>
+  </div>
+</div>
+
 <div class="project-links" style="margin-bottom: 2em;">
   <b style="color: var(--color-muted);">Project Links:</b>
   <% if @ship_certification.project.demo_link.present? %>

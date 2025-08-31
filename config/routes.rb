@@ -207,6 +207,11 @@ Rails.application.routes.draw do
   delete "/logout", to: "sessions#destroy", as: :logout
   delete "/stop_impersonating", to: "sessions#stop_impersonating", as: :stop_impersonating
 
+  # Development auto-login (only available in development)
+  if Rails.env.development?
+    get "/auth/dev_login", to: "sessions#auto_login_dev", as: :dev_auto_login
+  end
+
   get "/magic-link", to: "sessions#magic_link", as: :magic_link # For users signing in
   post "/explorpheus/magic-link", to: "magic_link#get_secret_magic_url" # For the welcome bot to fetch the magic link.
 
@@ -256,6 +261,8 @@ Rails.application.routes.draw do
   resources :votes, only: [ :new, :create ] do
     collection do
       get :locked
+      post "track_demo/:position", to: "votes#track_demo", as: :track_demo
+      post "track_repo/:position", to: "votes#track_repo", as: :track_repo
     end
   end
 
@@ -306,11 +313,31 @@ Rails.application.routes.draw do
   namespace :api do
     namespace :v1 do
       get "users/me", to: "users#me"
-      resources :projects, only: [ :index, :show ]
+      resources :projects, only: [ :index, :show ] do
+        collection do
+          get :shipped
+        end
+      end
       resources :users, only: [ :index, :show ]
       resources :devlogs, only: [ :index, :show ]
       resources :comments, only: [ :index, :show ]
       resources :emotes, only: [ :show ]
+    end
+
+    namespace :v2 do
+      resources :projects, only: [ :index, :show ] do
+        collection do
+          get :search
+        end
+      end
+      resources :users, only: [ :index, :show ] do
+        collection do
+          get :search
+        end
+      end
+      resources :devlogs, only: [ :index, :show ]
+      resources :payouts, only: [ :index, :show ]
+      get "/", to: "base#index"
     end
   end
   get "api/check_user", to: "users#check_user"
@@ -332,6 +359,12 @@ Rails.application.routes.draw do
     resources :view_analytics, only: [ :index ]
     resources :voting_dashboard, only: [ :index ]
     resources :payouts_dashboard, only: [ :index ]
+    resources :low_quality_dashboard, only: [ :index ] do
+      collection do
+        post :mark_low_quality
+        post :mark_ok
+      end
+    end
     resources :fraud_reports, only: [ :index, :show ] do
       member do
         get :resolve
@@ -363,8 +396,13 @@ Rails.application.routes.draw do
         post :unban_user
         post :impersonate
         post :set_hackatime_trust_factor
+        post :refresh_hackatime
+        post :grant_fraud_reviewer
+        post :revoke_fraud_reviewer
+        post :flip
       end
     end
+    resources :special_access_users, only: [ :index ]
     resources :shop_items
     resources :projects, only: [] do
       member do
@@ -384,6 +422,7 @@ Rails.application.routes.draw do
         post :place_on_hold
         post :take_off_hold
         post :mark_fulfilled
+        post :convert_to_preauth
       end
     end
     resources :shop_card_grants, only: [ :index, :show ]
@@ -392,6 +431,7 @@ Rails.application.routes.draw do
         delete :zap
       end
     end
+    resources :sinkenings, only: [ :show, :update ], path: "sinkening"
   end
 
   get "leaderboard", to: "leaderboard#index"

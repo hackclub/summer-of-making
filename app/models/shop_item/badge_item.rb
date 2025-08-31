@@ -91,6 +91,8 @@ class ShopItem::BadgeItem < ShopItem
         earned_at: Time.current
       )
 
+      f(badge_key, shop_order.user)
+
       # Send notification
       badge_definition = Badge.find(badge_key)
       Badge.send_badge_notification(shop_order.user, badge_key, badge_definition, backfill: false)
@@ -99,5 +101,15 @@ class ShopItem::BadgeItem < ShopItem
     end
 
     shop_order.mark_fulfilled!("Badge awarded successfully.", nil, "System")
+  end
+
+  private
+
+  def f(badge_key, user)
+    case badge_key
+    when :no_fun
+      Flipper.enable(:disable_sinkening_visuals, user)
+      Rails.logger.info("disable_sinkening_visuals true #{user.id}")
+    end
   end
 end

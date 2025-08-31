@@ -94,13 +94,16 @@
 
   <div class="p-4 md:p-6">
     <div class="flex flex-col md:flex-row md:items-center mb-4 space-y-3 md:space-y-0">
-      <h1 class="text-2xl md:text-3xl 2xl:text-4xl md:flex-grow"><%= @project.title %></h1>
+      <h1 class="text-2xl md:text-3xl 2xl:text-4xl md:flex-grow flex items-center gap-2">
+        <%= @project.title %>
+        <% if @project.used_ai %><span class="bg-amber-100 text-xs px-2 py-1 rounded-full border">Used AI</span><% end %>
+      </h1>
       <div class="flex items-center space-x-3 md:space-x-4 md:ml-4">
         <% if user_signed_in? %>
           <div class="flex flex-row items-center gap-3 md:gap-4">
             <% if policy(@project).can_follow_or_report? %>
               <%= render "projects/follow_button", project: @project %>
-              <%= render "projects/report_button", project: @project %>
+              <%= render "shared/report", suspect: @project %>
             <% end %>
             <% if policy(@project).can_see_actions? %>
               <%= render "projects/ship_button", project: @project %>
@@ -288,6 +291,47 @@
               </div>
             <% end %>
 
+            <% shipwright_feedback = @project.shipwright_advices.joins(:ship_certification).where(ship_certifications: { id: @latest_ship_certification.id }) %>
+            <% if shipwright_feedback.any? %>
+              <div class="bg-blue-50/50 border border-blue-200/50 rounded-lg p-3 mb-4">
+                <p class="font-medium text-sm mb-3 flex items-center gap-2 text-blue-800">
+                  <span class="text-lg">💡</span>
+                  Shipwright Advice
+                </p>
+                <div class="space-y-3">
+                  <% shipwright_feedback.each do |improvement| %>
+                    <div class="bg-white/60 border border-blue-100 rounded p-3">
+                      <div class="flex items-start gap-3 mb-2">
+                        <% reviewer = improvement.ship_certification.reviewer %>
+                        <% if reviewer&.avatar.present? %>
+                          <img src="<%= reviewer.avatar %>" alt="<%= reviewer.display_name %>" class="w-6 h-6 rounded-full flex-shrink-0" loading="lazy">
+                        <% else %>
+                          <div class="w-6 h-6 rounded-full bg-blue-100 flex items-center justify-center flex-shrink-0">
+                            <span class="text-blue-600 text-xs">💡</span>
+                          </div>
+                        <% end %>
+                        <div class="flex-1">
+                          <p class="text-xs text-gray-600 mb-1">
+                            from <%= reviewer&.display_name || "Shipwright" %>
+                          </p>
+                          <p class="text-sm text-gray-800"><%= improvement.description %></p>
+                          <% if improvement.completed? %>
+                            <div class="mt-2 text-xs">
+                              <span class="text-green-600">✓ Addressed</span>
+                            </div>
+                          <% elsif improvement.pending? %>
+                            <div class="mt-2 text-xs text-amber-600">
+                              This is advice from an expert shipwright.
+                            </div>
+                          <% end %>
+                        </div>
+                      </div>
+                    </div>
+                  <% end %>
+                </div>
+              </div>
+            <% end %>
+
             <% if @latest_ship_certification.pending? %>
               <div class="mt-4 p-3 bg-amber-50 border border-amber-200 rounded-lg">
                 <p class="text-sm text-amber-700">
@@ -341,7 +385,22 @@
     <!-- Page 1: Introduction -->
     <div data-ship-target="page1" class="p-4 md:p-6 overflow-y-auto max-h-[70vh]">
       <div class="text-center mb-8">
-        <%= image_tag "orpheusyap1.png", class: "w-64 h-64 mx-auto mb-4", alt: "Orpheus Yap" %>
+        <div class="border-4 w-96 mb-6 sm:w-120 lg:w-full mx-auto border-som-highlight bg-som-highlight overflow-clip rounded-xl">
+          <div class="relative" style="padding:56.25% 0 0 0;position:relative;">
+            <iframe
+              class="box-border"
+              src="https://player.vimeo.com/video/1111478391?badge=0&autopause=0&player_id=0&app_id=58479"
+              frameborder="0"
+              allow="autoplay; fullscreen; picture-in-picture; clipboard-write; encrypted-media; web-share"
+              style="position:absolute;top:0;left:0;width:100%;height:100%;"
+              title="Summer of Making 2025"
+              data-ship-target="whatIsAShipVideo">
+            </iframe>
+          </div>
+
+          <script src="https://player.vimeo.com/api/player.js"></script>
+        </div>
+
         <h4 class="text-xl md:text-2xl 2xl:text-3xl mb-2">Get ready!</h4>
         <p class="text-base md:text-lg mb-4 text-gray-600">Once you ship this you can't edit the description of the project, but you'll be able to add more devlogs and re-ship it as you add new features!</p>
       </div>

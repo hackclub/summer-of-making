@@ -2,10 +2,12 @@
 #
 # Table name: ship_events
 #
-#  id         :bigint           not null, primary key
-#  created_at :datetime         not null
-#  updated_at :datetime         not null
-#  project_id :bigint           not null
+#  id                 :bigint           not null, primary key
+#  excluded_from_pool :boolean          default(FALSE), not null
+#  for_sinkening      :boolean          default(FALSE), not null
+#  created_at         :datetime         not null
+#  updated_at         :datetime         not null
+#  project_id         :bigint           not null
 #
 # Indexes
 #
@@ -17,10 +19,13 @@
 #
 class ShipEvent < ApplicationRecord
   include AirtableSyncable
+  include Balloonable
 
   belongs_to :project
+  has_one :user, through: :project
   has_one :ship_event_feedback
   has_many :payouts, as: :payable
+  attribute :excluded_from_pool, :boolean, default: false
 
   after_create :maybe_create_ship_certification
   after_create :award_user_badges
@@ -41,10 +46,6 @@ class ShipEvent < ApplicationRecord
     [ project.airtable_record_id ]
   end
 
-  def user
-    project.user
-  end
-
   def devlogs_since_last
     previous_ships = ShipEvent.where(project: project)
                               .where("created_at < ?", created_at)
@@ -61,7 +62,7 @@ class ShipEvent < ApplicationRecord
   end
 
   def seconds_covered
-    devlogs_since_last.sum(:duration_seconds)
+    devlogs_since_last.capped_duration_seconds
   end
   # this is the hours covered by the ship event, not the total hours up to the ship event
   def hours_covered

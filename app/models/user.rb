@@ -19,6 +19,7 @@
 #  internal_notes                       :text
 #  is_admin                             :boolean          default(FALSE), not null
 #  is_banned                            :boolean          default(FALSE)
+#  fraud_team_member                    :boolean          default(FALSE), not null
 #  last_name                            :string
 #  permissions                          :text             default([])
 #  shenanigans_state                    :jsonb
@@ -32,9 +33,12 @@
 #  slack_id                             :string
 #
 class User < ApplicationRecord
+  has_paper_trail
+
   has_many :projects
   has_many :devlogs
   has_many :votes
+  has_one :user_vote_queue, dependent: :destroy
   has_many :project_follows
   has_many :followed_projects, through: :project_follows, source: :project
   has_many :timer_sessions
@@ -49,6 +53,7 @@ class User < ApplicationRecord
   has_many :shop_orders
   has_many :shop_card_grants
   has_many :user_badges, dependent: :destroy
+  has_many :comments
 
   accepts_nested_attributes_for :user_profile
   has_many :hackatime_projects
@@ -75,10 +80,11 @@ class User < ApplicationRecord
   scope :search, ->(query) {
     return all if query.blank?
 
-    query = "%#{query}%"
+    fuzzy_query = "%#{query}%".downcase
+    query = query.downcase
     where(
-      "first_name ILIKE ? OR last_name ILIKE ? OR email ILIKE ? OR slack_id ILIKE ? OR display_name ILIKE ? OR identity_vault_id ILIKE ?",
-      query, query, query, query, query, query
+      "LOWER(first_name) ILIKE ? OR LOWER(last_name) ILIKE ? OR LOWER(email) ILIKE ? OR LOWER(slack_id) = ? OR LOWER(display_name) ILIKE ? OR identity_vault_id = ? OR LOWER(CONCAT(first_name, ' ', last_name)) ILIKE ?",
+      fuzzy_query, fuzzy_query, fuzzy_query, query, fuzzy_query, query, fuzzy_query
     )
   }
 
@@ -123,21 +129,52 @@ class User < ApplicationRecord
 
   def self.create_from_slack(slack_id)
     user_info = fetch_slack_user_info(slack_id)
+    if user_info.user.is_bot
+      Rails.logger.warn({
+        event: "slack_user_is_bot",
+        slack_id: slack_id,
+        user_info: user_info.to_h
+      }.to_json)
+      return nil
+    end
+
+    email = user_info.user.profile.email
+    display_name = user_info.user.profile.display_name.presence || user_info.user.profile.real_name
+    timezone = user_info.user.tz
+    avatar = user_info.user.profile.image_192 || user_info.user.profile.image_512
 
     Rails.logger.tagged("UserCreation") do
       Rails.logger.info({
         event: "slack_user_found",
         slack_id: slack_id,
-        email: user_info.user.profile.email
+        email: email,
+        display_name: display_name,
+        timezone: timezone,
+        avatar: avatar
       }.to_json)
+    end
+
+    if email.blank? || !(email =~ URI::MailTo::EMAIL_REGEXP)
+      Rails.logger.warn({
+        event: "slack_user_missing_or_invalid_email",
+        slack_id: slack_id,
+        email: email,
+        user_info: user_info.to_h
+      }.to_json)
+      Honeybadger.notify("slack email fuck up???", context: {
+        slack_id: slack_id,
+        email: email,
+        user_info: user_info.to_h
+      })
+      raise StandardError, "Slack ID #{slack_id} has an invalid email: #{email.inspect}"
     end
 
     User.create!(
       slack_id: slack_id,
-      display_name: user_info.user.profile.display_name.presence || user_info.user.profile.real_name,
-      email: user_info.user.profile.email,
-      timezone: user_info.user.tz,
-      avatar: user_info.user.profile.image_192 || user_info.user.profile.image_512,
+      display_name: display_name,
+      email: email,
+      timezone: timezone,
+      avatar: avatar,
       permissions: [],
       is_banned: false
     )
@@ -321,7 +358,10 @@ class User < ApplicationRecord
     if should_ban && !is_banned
       ban_user!("hackatime_ban")
     elsif !should_ban && is_banned
-      unban_user!
+      r = activities.where(key: "ban_user").order(created_at: :desc).first
+      if r&.parameters&.dig("reason") == "hackatime_ban"
+        unban_user!
+      end
     end
 
     if projects.empty?
@@ -399,6 +439,10 @@ class User < ApplicationRecord
     is_admin? || ship_certifier?
   end
 
+  def admin_or_fraud_team_member?
+    is_admin? || fraud_team_member?
+  end
+
   def blue_check?
     has_badge?(:verified)
   end
@@ -426,20 +470,64 @@ class User < ApplicationRecord
   end
 
   def balance
-    payouts.sum(&:amount)
+    if association(:payouts).loaded?
+      payouts.reject(&:escrowed).sum(&:amount)
+    else
+      payouts.where(escrowed: false).sum(:amount)
+    end
   end
 
-  def unpaid_ship_events_count
-    projects.joins(:ship_events)
-            .left_joins(ship_events: :payouts)
-            .where(payouts: { id: nil })
-            .distinct
-            .size
+  def escrowed_balance
+    if association(:payouts).loaded?
+      payouts.select(&:escrowed).sum(&:amount)
+    else
+      payouts.where(escrowed: true).sum(:amount)
+    end
+  end
+
+  def total_shells
+    balance + escrowed_balance
+  end
+
+  def votes_required_for_release
+    approved_count = ship_events
+      .joins(project: :ship_certifications)
+      .where(ship_certifications: { judgement: ShipCertification.judgements[:approved] })
+      .where.not(id: Payout.released.where(payable_type: "ShipEvent").select(:payable_id))
+      .count("ship_events.id")
+    [ approved_count, 1 ].min * 20
+  end
+
+  def has_met_voting_requirement?
+    votes.active.count >= votes_required_for_release
+  end
+
+  def votes_since_last_ship_count
+    last_ship_time = ship_events.order(:created_at).last&.created_at
+    scope = votes.active
+    scope = scope.where("created_at > ?", last_ship_time) if last_ship_time
+    scope.count
+  end
+
+  def remaining_votes_to_ship
+    [ 20 - votes_since_last_ship_count, 0 ].max
+  end
+
+  def release_escrowed_payouts_if_eligible!
+    # NOTE Aug 23, 2025 IST: Escrow is deprecated for new payouts.
+    return false unless has_met_voting_requirement?
+
+    updated = payouts.where(escrowed: true).update_all(escrowed: false)
+    updated > 0
   end
 
   # Avo backtraces
   def is_developer?
     slack_id == "U03DFNYGPCN"
+  end
+
+  def fraud_team_member?
+    fraud_team_member
   end
 
   def identity_vault_oauth_link(callback_url)
@@ -567,7 +655,12 @@ class User < ApplicationRecord
   end
 
   def has_badge?(badge_key)
-    user_badges.exists?(badge_key: badge_key)
+    # we're preload this in shop items controller
+    if association(:user_badges).loaded?
+      user_badges.any? { |ub| ub.badge_key.to_s == badge_key.to_s }
+    else
+      user_badges.exists?(badge_key: badge_key)
+    end
   end
 
   def award_badges!(backfill: false)
@@ -576,6 +669,23 @@ class User < ApplicationRecord
 
   def award_badges_async!(trigger_event = nil, backfill: false)
     AwardBadgesJob.perform_later(id, trigger_event, backfill)
+  end
+
+  def advance_vote_queue!
+    if user_vote_queue
+      result = user_vote_queue.advance_position!
+      result
+    else
+      false
+    end
+  end
+
+  def completed_todo?
+    devlogs.any? && projects.any? && votes.any? && shop_orders.joins(:shop_item).where.not(shop_items: { type: "ShopItem::FreeStickers" }).any?
+  end
+
+  def sinkening_participation?
+    devlogs.exists?(for_sinkening: true) || ship_events.exists?(for_sinkening: true)
   end
 
   private

@@ -30,15 +30,19 @@ class Shop::ProcessLetterMailOrdersJob < ApplicationJob
     rubber_stamps = build_rubber_stamps(orders)
 
     # Create letter via Theseus
-    response = TheseusService.create_letter_v1(
-      "som-fulfillment",
-      {
-        recipient_email: user.email,
-        address: frozen_address,
-        rubber_stamps: rubber_stamps,
-        idempotency_key: "som25_letter_mail_#{Rails.env}_#{generate_coalesced_key(orders)}"
-      }
-    )
+    begin
+      response = TheseusService.create_letter_v1(
+        "som-fulfillment",
+        {
+          recipient_email: user.email,
+          address: frozen_address,
+          rubber_stamps: rubber_stamps,
+          idempotency_key: "som25_letter_mail_#{Rails.env}_#{generate_coalesced_key(orders)}"
+        }
+      )
+    rescue Faraday::BadRequestError => e
+      return
+    end
 
     # Mark all orders as fulfilled
     orders.each do |order|
@@ -49,7 +53,7 @@ class Shop::ProcessLetterMailOrdersJob < ApplicationJob
   def build_rubber_stamps(orders)
     # Group by item name and sum quantities
     item_quantities = orders.group_by { |order| order.shop_item.name }
-                           .transform_values { |group| group.sum(&:quantity) }
+                            .transform_values { |group| group.sum(&:quantity) }
 
     # Format as "1x Item Name\n2x Another Item"
     item_quantities.map { |name, qty| "#{qty}x #{name}" }.join("\n")

@@ -10,6 +10,7 @@ require "cgi"
 #  attachment                      :string
 #  comments_count                  :integer          default(0), not null
 #  duration_seconds                :integer          default(0), not null
+#  for_sinkening                   :boolean          default(FALSE), not null
 #  hackatime_projects_key_snapshot :jsonb            not null
 #  hackatime_pulled_at             :datetime
 #  is_neighborhood_migrated        :boolean          default(FALSE), not null
@@ -35,6 +36,7 @@ require "cgi"
 #  fk_rails_...  (user_id => users.id)
 #
 class Devlog < ApplicationRecord
+  include Balloonable
   belongs_to :user
   belongs_to :project, counter_cache: { active: false }
   has_many :comments, -> { order(created_at: :desc) }, dependent: :destroy
@@ -52,6 +54,8 @@ class Devlog < ApplicationRecord
   validate :updates_not_locked, on: :create
 
   after_commit :notify_followers_and_stakers, on: :create
+  after_commit :recalculate_devlogs_if_new_key_used, on: :create
+  after_destroy_commit :recalculate_project_devlogs
 
   def formatted_text
     ApplicationController.helpers.markdown(text)
@@ -199,5 +203,29 @@ class Devlog < ApplicationRecord
 
   def notify_followers_and_stakers
     NotifyProjectDevlogJob.perform_later(id)
+  end
+
+  def recalculate_project_devlogs
+    return unless project_id
+    RecalculateProjectDevlogTimesJob.perform_later(project_id)
+  end
+
+  def recalculate_devlogs_if_new_key_used
+    return unless project_id
+    keys_now = Array(hackatime_projects_key_snapshot)
+    return if keys_now.blank?
+
+    previously_locked = project.devlogs
+                               .where.not(id: id)
+                               .where.not(hackatime_projects_key_snapshot: [])
+                               .pluck(:hackatime_projects_key_snapshot)
+                               .flatten
+                               .uniq
+
+    new_keys = keys_now - previously_locked
+    return if new_keys.empty?
+
+    # immeditately perform so we don't have 0 0 time
+    RecalculateProjectDevlogTimesJob.perform_now(project_id)
   end
 end

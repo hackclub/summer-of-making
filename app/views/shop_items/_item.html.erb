@@ -1,11 +1,20 @@
 <% if current_user %>
   <% ineligible = current_verification_status == :ineligible %>
-  <% out_of_stock = item.out_of_stock? %>
   <% regional_price = (@regionalization_enabled && @selected_region) ? item.price_for_region(@selected_region) : item.ticket_cost %>
-  <% badge_prerequisite_failed = item.is_a?(ShopItem::BadgeItem) && !item.can_purchase?(current_user) %>
-  <% disabled = ineligible || (!current_user.ysws_verified? && !item.is_a?(ShopItem::FreeStickers)) || (current_user.balance < regional_price) || out_of_stock || badge_prerequisite_failed %>
+  <% remaining = (item.limited? && item.stock.present?) ? (item.stock - (@ordered_quantity_by_item_id[item.id].to_i)) : nil %>
+  <% out_of_stock = item.limited? && remaining && remaining <= 0 %>
+  <% if item.is_a?(ShopItem::BadgeItem) %>
+    <% badge_key = item.internal_description&.to_sym %>
+    <% badge_prerequisite_failed = (badge_key == :gold_verified && !@user_badge_keys&.include?(:verified)) || (@user_badge_keys && badge_key && @user_badge_keys.include?(badge_key)) %>
+  <% else %>
+    <% badge_prerequisite_failed = false %>
+  <% end %>
+  <% user_balance = @current_balance || current_user.balance %>
+  <% disabled = ineligible || (!current_user.ysws_verified? && !item.is_a?(ShopItem::FreeStickers)) || (user_balance < regional_price) || out_of_stock || badge_prerequisite_failed %>
 <% else %>
   <% regional_price = (@regionalization_enabled && @selected_region) ? item.price_for_region(@selected_region) : item.ticket_cost %>
+  <% remaining = (item.limited? && item.stock.present?) ? (item.stock - (@ordered_quantity_by_item_id[item.id].to_i)) : nil %>
+  <% out_of_stock = item.limited? && remaining && remaining <= 0 %>
 <% end %>
 <%= render "shared/card", classes: "h-full #{"col-span-full" if item.is_free?}" do %>
   <div class="flex flex-col relative flex-1">
@@ -30,7 +39,6 @@
       <div class="mb-4">
         <p class="text-gray-700"><%= raw item.description %></p> <%# erb_lint:disable ErbSafety %>
         <% if item.limited? %>
-          <% remaining = item.remaining_stock %>
           <% if remaining && remaining > 0 %>
             <p class="text-sm text-orange-600 font-semibold mt-2">
               <%= remaining %> left
@@ -53,7 +61,7 @@
     <div class="flex-shrink-0 flex flex-col gap-2">
       <% if current_user %>
         <div class="">
-          <% already_ordered = item.one_per_person_ever? && current_user.shop_orders.joins(:shop_item).where(shop_item: item).exists? %>
+          <% already_ordered = item.one_per_person_ever? && @ordered_once_item_ids&.include?(item.id) %>
 
           <% if already_ordered %>
             <%= render "shared/button",
@@ -70,14 +78,16 @@
                               item.prereq(current_user)
                             elsif !current_user.ysws_verified? && !item.is_a?(ShopItem::FreeStickers)
                               "Get your ID verified first!"
-                            elsif current_user.balance >= regional_price
-                              if regional_price == 0
+                            elsif user_balance >= regional_price
+                              if item.is_a?(ShopItem::FreeStickers)
+                                "Verify ID to acquire!"
+                              elsif regional_price == 0
                                 "Acquire!"
                               else
                                 "Buy for #{render_shells(regional_price)} shells!"
                               end
                             else
-                              "#{render_shells(regional_price - current_user.balance)} more shells needed"
+                              "#{render_shells(regional_price - user_balance)} more shells needed"
                             end %>
             <%= form_with url: order_shop_item_path(item), method: :get, data: { turbo: false }, local: true, class: "w-full" do |form| %>
               <%= render "shared/button",

@@ -33,7 +33,7 @@ module ApplicationHelper
   end
 
   def admin_tool(class_name = "", element = "div", show_in_impersonate: false, **, &)
-    return unless current_user&.is_admin? || (show_in_impersonate && current_impersonator&.is_admin?)
+    return unless current_user&.admin_or_fraud_team_member? || (show_in_impersonate && current_impersonator&.admin_or_fraud_team_member?)
 
     concat content_tag(element,
                        class: "#{"p-2" unless element == "span"} border-2 border-dashed border-orange-500 bg-orange-500/10 w-fit h-fit #{class_name}", **, &)

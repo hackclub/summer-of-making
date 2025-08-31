@@ -6,6 +6,7 @@ module Admin
     def index
       @filter = params[:filter] || "pending"
       @category_filter = params[:category_filter]
+      @sort_by = params[:sort_by] || "votes_and_age"
 
       @category_filter = nil unless @category_filter.present? && Project.certification_types.keys.include?(@category_filter)
 
@@ -40,9 +41,26 @@ module Admin
         @ship_certifications = base.pending
       end
 
-      @ship_certifications = @ship_certifications.sort_by do |cert|
-        vote_count = @vote_counts[cert.project.user_id] || 0
-        [ -vote_count, cert.created_at ]
+      # Advanced sorting options
+      @ship_certifications = case @sort_by
+      when "oldest_first"
+        # Sort by time without certification (oldest first) - prioritizes queue tackling
+        @ship_certifications.sort_by { |cert| cert.created_at }
+      when "newest_first"
+        # Sort by newest submissions first
+        @ship_certifications.sort_by { |cert| -cert.created_at.to_i }
+      when "most_votes"
+        # Sort by user vote count (highest first)
+        @ship_certifications.sort_by do |cert|
+          vote_count = @vote_counts[cert.project.user_id] || 0
+          -vote_count
+        end
+      else # "votes_and_age" - default
+        # Original sorting: votes descending, then age
+        @ship_certifications.sort_by do |cert|
+          vote_count = @vote_counts[cert.project.user_id] || 0
+          [ -vote_count, cert.created_at ]
+        end
       end
 
       base = ShipCertification.joins(:project).where(projects: { is_deleted: false })
@@ -88,6 +106,14 @@ module Admin
         .limit(20)
         .pluck("users.display_name", "users.email", "COUNT(ship_certifications.id)")
 
+      @leaderboard_day = User.joins("INNER JOIN ship_certifications ON users.id = ship_certifications.reviewer_id")
+        .where.not(ship_certifications: { reviewer_id: nil })
+        .where("ship_certifications.updated_at >= ?", 24.hours.ago)
+        .group("users.id", "users.display_name", "users.email")
+        .order("COUNT(ship_certifications.id) DESC")
+        .limit(20)
+        .pluck("users.display_name", "users.email", "COUNT(ship_certifications.id)")
+
       @leaderboard_all = User.joins("INNER JOIN ship_certifications ON users.id = ship_certifications.reviewer_id")
         .where.not(ship_certifications: { reviewer_id: nil })
         .group("users.id", "users.display_name", "users.email")
@@ -116,6 +142,15 @@ module Admin
       @ship_certification = ShipCertification.find(params[:id])
 
       if @ship_certification.update(ship_certification_params)
+        # Create improvement suggestion if provided
+        if params[:improvement_suggestion].present?
+          ShipwrightAdvice.create!(
+            project: @ship_certification.project,
+            ship_certification: @ship_certification,
+            description: params[:improvement_suggestion].strip
+          )
+        end
+
         redirect_to admin_ship_certifications_path, notice: "Ship certification updated successfully."
       else
         render :edit, status: :unprocessable_entity

@@ -1,0 +1,9 @@
+shared:
+  block_shop_ordering: |
+    when enabled for a User actor, they can't create new shop orders.<br/>
+    global-enable this if there's a free money glitch.
+  real_time_balloons_2025_08_11: enables real-time balloonening for other users' Devlogs and ShipEvents
+  sinkening: it is upon us....
+  disable_sinkening_visuals: when enabled for a User actor, no water (and no fun!)
+  map_volcano: not yet....
+  enable_shop_balloons: allows a user to order sinkening balloons, only if they're eligible

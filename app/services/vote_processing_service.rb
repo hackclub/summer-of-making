@@ -6,6 +6,18 @@ class VoteProcessingService
   end
 
   def process
+    reason = low_quality_reason
+    if reason
+      updates = {
+        status: "invalid",
+        invalid_reason: reason,
+        marked_invalid_at: Time.current
+      }
+      updates[:is_low_quality] = true if Vote.column_names.include?("is_low_quality")
+      @vote.update!(updates)
+      return
+    end
+
     if @vote.winning_project_id.nil?
       process_tie
     else
@@ -65,6 +77,21 @@ class VoteProcessingService
   end
 
   private
+
+  def low_quality_reason
+    if @vote.time_spent_voting_ms && @vote.time_spent_voting_ms <= 30_000
+      return "too_fast_under_30s"
+    end
+
+    if @vote.explanation.present?
+      duplicate_exists = Vote.where(user_id: @vote.user_id, explanation: @vote.explanation)
+                             .where.not(id: @vote.id)
+                             .exists?
+      return "duplicate_explanation_for_user" if duplicate_exists
+    end
+
+    nil
+  end
 
   def get_loser_project_id(winner_id)
     project_1_id = @vote.ship_event_1.project_id

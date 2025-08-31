@@ -79,11 +79,12 @@ export default class extends Controller {
         point.dataset.projectId = project.id
 
         if (isOwner) {
-            point.classList.add("bg-green-500", "border-white", "cursor-grab")
+            point.classList.add("bg-green-500", "border-green-500", "cursor-grab")
             point.dataset.action = "mousedown->map#startPointDrag"
         } else {
-            point.classList.add("bg-red-500", "border-white")
+            point.classList.add("border-white")
         }
+        point.style.backgroundColor = project.user.favorite_color || "oklch(63.7% .237 25.331)"
 
         return point
     }

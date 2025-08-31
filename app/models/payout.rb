@@ -4,6 +4,7 @@
 #
 #  id           :bigint           not null, primary key
 #  amount       :decimal(6, 2)
+#  escrowed     :boolean          default(FALSE), not null
 #  payable_type :string
 #  reason       :string
 #  created_at   :datetime         not null
@@ -16,17 +17,22 @@
 #  index_payouts_on_created_at             (created_at)
 #  index_payouts_on_created_at_and_amount  (created_at,amount)
 #  index_payouts_on_date_type_amount       (created_at,payable_type,amount)
+#  index_payouts_on_escrowed               (escrowed)
 #  index_payouts_on_payable                (payable_type,payable_id)
 #  index_payouts_on_payable_type           (payable_type)
 #  index_payouts_on_user_id                (user_id)
 #
 class Payout < ApplicationRecord
+  # NOTE Aug 23, 2025 IST: Escrow is deprecated for new payouts.
   belongs_to :payable, polymorphic: true
   belongs_to :user
 
   validates_presence_of :amount
 
   before_validation :set_user_id
+
+  scope :escrowed, -> { where(escrowed: true) }
+  scope :released, -> { where(escrowed: false) }
 
   VOTE_COUNT_REQUIRED = 18
 

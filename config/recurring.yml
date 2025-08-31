@@ -14,6 +14,7 @@ production:
     class: UserHackatimeDataRefreshJob
     command: perform_unique
     queue: default
+    concurrency: 1
     schedule: every 15 minutes
     description: "Refresh Hackatime stats for all users with Hackatime enabled"
 
@@ -57,6 +58,12 @@ production:
     concurrency: 1
     description: "Sync email signups to Airtable every minute with single execution limit"
 
+  shop_kick_verification_limbo_orders:
+    class: Shop::KickVerificationLimboOrdersJob
+    schedule: every 30 minutes
+    concurrency: 1
+    description: "recheck verf on free stickers orders"
+
   shop_reap_free_stickers_orders:
     class: Shop::ReapFreeStickersOrdersJob
     schedule: at 1am every day
@@ -81,6 +88,12 @@ production:
     concurrency: 1
     description: "Process pending letter mail orders and send to Theseus som-fulfillment queue"
 
+  shop_process_warehouse_orders:
+    class: Shop::ProcessWarehouseOrdersJob
+    schedule: every 2 days
+    concurrency: 1
+    description: "Process pending warehouse item orders and create packages for warehouse fulfillment"
+
   airtable_syncable_update:
     class: AirtableSyncableUpdateJob
     schedule: every 2 minutes
@@ -92,3 +105,15 @@ production:
     schedule: every 5 minutes
     concurrency: 1
     description: "Upload approved YSWS from the SoM to the Unified db"
+
+  check_ysws_duplicates:
+    class: YswsReview::CheckDuplicatesJob
+    schedule: every 5 minutes
+    concurrency: 1
+    description: "Check for duplicate YSWS submissions across different programs"
+
+  mole_batch_guess_project_categorization:
+    class: Mole::BatchGuessProjectCategorizationJob
+    schedule: every 12 minutes # 5 times per hour
+    concurrency: 1
+    description: "Batch guess project categorization using Mole service"

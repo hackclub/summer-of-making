@@ -1,0 +1,148 @@
+<h1 style="color: var(--color-primary); margin-bottom: 1.5em;">Users with Special Access</h1>
+
+<%= form_with url: admin_special_access_users_path, method: :get, local: true, class: "search-form", style: "margin-bottom: 2em;" do |f| %>
+  <div style="display: flex; flex-wrap: wrap; gap: 1em; align-items: center; margin-bottom: 1em;">
+    <label style="display: flex; align-items: center; gap: 0.5em;">
+      <%= f.check_box :admin, { checked: params[:admin] == 'true' }, 'true', '' %>
+      Admin
+    </label>
+    <label style="display: flex; align-items: center; gap: 0.5em;">
+      <%= f.check_box :fraud_team, { checked: params[:fraud_team] == 'true' }, 'true', '' %>
+      Fraud Team
+    </label>
+    <label style="display: flex; align-items: center; gap: 0.5em;">
+      <%= f.check_box :black_market, { checked: params[:black_market] == 'true' }, 'true', '' %>
+      heidimart
+    </label>
+    <label style="display: flex; align-items: center; gap: 0.5em;">
+      <%= f.check_box :ship_certifier, { checked: params[:ship_certifier] == 'true' }, 'true', '' %>
+      Ship Certifier
+    </label>
+  </div>
+  <div>
+    <%= f.submit "Filter", class: "abtn primary small" %>
+    <%= link_to "Clear All", admin_special_access_users_path, class: "abtn secondary small" %>
+  </div>
+<% end %>
+
+<table class="atable">
+  <thead>
+    <tr>
+      <th>ID</th>
+      <th>Name</th>
+      <th>Email</th>
+      <th>Admin</th>
+      <th>Ship Certifier</th>
+      <th>Fraud Team</th>
+      <th>Black Market</th>
+      <th>Actions</th>
+    </tr>
+  </thead>
+  <tbody>
+    <% @users.each do |user| %>
+      <tr>
+        <td><%= user.id %></td>
+        <td><%= link_to "/admin/users/#{user.id}" do %><span style="color: var(--color-primary);"><%= user.display_name || "????" %></span><% end %></td>
+        <td><%= user.email %></td>
+        <td><%= user.is_admin? ? "✓" : "" %></td>
+        <td><%= user.ship_certifier? ? "✓" : "" %></td>
+        <td><%= user.fraud_team_member? ? "✓" : "" %></td>
+        <td><%= user.has_black_market? ? "✓" : "" %></td>
+        <td><%= link_to "View", "/admin/users/#{user.id}", class: 'abtn secondary', style: 'padding: 0.3em 0.8em; font-size: 0.95em;' %></td>
+      </tr>
+    <% end %>
+  </tbody>
+</table>
+
+<div style="margin: 2em 0;">
+  <h2 style="color: var(--color-primary); margin-bottom: 1em;"> Audit Log - we're watching ur every move  </h2>
+  <div style="background: var(--color-darker); padding: 1.5em; border-radius: 8px; border: 2px solid var(--color-primary);">
+    <% if @audit_log_activities&.any? %>
+      <div style="margin-bottom: 1em; padding: 0.5em; background: var(--color-border); border-radius: 4px; font-size: 0.9em; color: var(--color-muted);">
+        <strong>ℹ️ Note:</strong> This shows the 25 most recent administrative actions (excluding basic create/update operations) by users with special access privileges.
+      </div>
+      <% @audit_log_activities.each_with_index do |activity, index| %>
+        <div style="border-bottom: 1px solid var(--color-border-light); padding: 1em 0; margin-bottom: 0.5em; <%= 'background: rgba(255, 0, 0, 0.1); border-left: 3px solid var(--color-red); padding-left: 1em;' if ['ban_user', 'unban_user', 'impersonate', 'platform_ban', 'cancel_card_grants'].include?(activity.key) %>">
+          <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 0.5em;">
+            <div style="display: flex; align-items: center; gap: 0.5em;">
+              <span style="background: var(--color-primary); color: white; padding: 0.2em 0.5em; border-radius: 50%; font-size: 0.8em; font-weight: bold; min-width: 1.5em; text-align: center;">
+                <%= index + 1 %>
+              </span>
+              <strong style="color: var(--color-primary);">
+                <%= link_to activity.owner.display_name, "/admin/users/#{activity.owner.id}" if activity.owner %>
+              </strong>
+              <span style="display: flex; gap: 0.25em;">
+                <% if activity.owner&.is_admin? %>
+                  <span class="pill pill-red" style="font-size: 0.75em;">Admin</span>
+                <% end %>
+                <% if activity.owner&.ship_certifier? %>
+                  <span class="pill pill-blue" style="font-size: 0.75em;">Ship</span>
+                <% end %>
+                <% if activity.owner&.fraud_team_member? %>
+                  <span class="pill pill-orange" style="font-size: 0.75em;">Fraud</span>
+                <% end %>
+              </span>
+            </div>
+            <div style="text-align: right;">
+              <small style="color: var(--color-muted);">
+                <%= activity.created_at.strftime("%m/%d/%Y %I:%M %p") %>
+              </small>
+              <br>
+              <small style="color: var(--color-muted);">
+                (<%= time_ago_in_words(activity.created_at) %> ago)
+              </small>
+            </div>
+          </div>
+          <div style="color: var(--color-text); margin-left: 2em;">
+            <div style="display: flex; align-items: center; gap: 0.5em; margin-bottom: 0.5em;">
+              <% if ['ban_user', 'platform_ban'].include?(activity.key) %>
+                <span style="color: red;">🚫</span>
+              <% elsif activity.key == 'unban_user' %>
+                <span style="color: green;">✅</span>
+              <% elsif activity.key == 'impersonate' %>
+                <span style="color: orange;">👤</span>
+              <% elsif activity.key.include?('grant') || activity.key.include?('give') %>
+                <span style="color: green;">➕</span>
+              <% elsif activity.key.include?('revoke') || activity.key.include?('remove') %>
+                <span style="color: red;">➖</span>
+              <% else %>
+                <span style="color: blue;">🔧</span>
+              <% end %>
+              <strong style="<%= 'color: var(--color-red);' if ['ban_user', 'unban_user', 'impersonate', 'platform_ban'].include?(activity.key) %>">
+                <%= activity.key.humanize.upcase %>
+              </strong>
+            </div>
+            <% if activity.trackable.present? %>
+              <div style="margin-bottom: 0.5em;">
+                <strong>Target:</strong>
+                <% if activity.trackable_type == "Project" %>
+                  <%= link_to "#{activity.trackable.title} (##{activity.trackable.id})", project_path(activity.trackable), style: "color: var(--color-primary);" %>
+                <% elsif activity.trackable_type == "User" %>
+                  <%= link_to "#{activity.trackable.display_name} (##{activity.trackable.id})", "/admin/users/#{activity.trackable.id}", style: "color: var(--color-primary);" %>
+                <% else %>
+                  <%= activity.trackable_type %> #<%= activity.trackable_id %>
+                <% end %>
+              </div>
+            <% end %>
+            <% if activity.parameters.present? %>
+              <div>
+                <strong>Details:</strong>
+                <div style="background: var(--color-border); padding: 0.5em; border-radius: 4px; font-family: monospace; font-size: 0.85em; margin-top: 0.25em;">
+                  <% activity.parameters.each do |key, value| %>
+                    <div><strong><%= key.to_s.humanize %>:</strong> <%= value.is_a?(Hash) ? value.to_json : value.to_s %></div>
+                  <% end %>
+                </div>
+              </div>
+            <% end %>
+          </div>
+        </div>
+      <% end %>
+    <% else %>
+      <p style="color: var(--color-muted); text-align: center; padding: 2em;">
+         No recent actions found for users with special access.
+      </p>
+    <% end %>
+  </div>
+</div>
+
+<%= link_to "← back", admin_root_path, class: 'aout' %>

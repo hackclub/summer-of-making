@@ -145,4 +145,9 @@ export default class extends Controller {
       this.close()
     }
   }
+
+  startVoting(event) {
+    const path = event.currentTarget.dataset.votePath
+    window.location.href = path
+  }
 } 

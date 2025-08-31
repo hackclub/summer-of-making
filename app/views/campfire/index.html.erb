@@ -7,6 +7,15 @@
     </div>
   </div>
 
+  <% if current_user.tutorial_progress.completed? %>
+    <div class="mb-8">
+      <%= render "shared/definition",
+        term: "⚠️ THE SUMMER OF MAKING HAS BEEN EXTENDED! 🏝️",
+        mysterious: true,
+        definition: "Thanks to your balloons, the island has stabilized and we've pulled up new land. The island now sits proud and tall, with more land than ever ready to fill with an EXTRA MONTH of projects. The new deadline is September 30th -and you've gotten rid of all that water too!" %>
+    </div>
+  <% end %>
+
   <% if current_user.is_banned? %>
     <%= render "shared/card", classes: "bg-red-50/80 border-red-400 mb-8" do %>
       <div class="flex items-start gap-3">
@@ -25,8 +34,119 @@
     <% end %>
   <% end %>
 
+  <!-- Todo list -->
+  <% if current_user.tutorial_progress.completed? %>
+    <div class="mb-8">
+      <%= render "shared/card" do %>
+        <div class="text-som-dark flex flex-col xl:flex-row space-y-5 xl:space-y-0">
+          <div>
+            <div class="flex items-start justify-between mb-2 flex-col">
+              <h2 class="text-xl">Todo list:</h2>
+              <p>Follow me to get started!</p>
+            </div>
+
+            <ul class="space-y-2 text-left">
+              <li class="flex items-start">
+                <div class="flex-shrink-0 h-6 w-6 mt-0.5">
+                  <div class="h-5 w-5 border-2 <%= current_user.tutorial_video_seen? ? 'bg-forest border-forest' : 'border-som-dark' %> flex items-center justify-center">
+                  </div>
+                </div>
+                <span class="ml-2 <%= current_user.tutorial_video_seen? ? 'text-forest' : 'text-som-dark' %>">
+                  Watch the <a href="/onboarding.mp4" class="text-blue-500 hover:text-blue-700 underline">Introduction Video</a>
+                </span>
+              </li>
+
+              <li class="flex items-start">
+                <div class="flex-shrink-0 h-6 w-6 mt-0.5">
+                  <div class="h-5 w-5 border-2 <%= current_user.projects.any? ? 'bg-forest border-forest' : 'border-som-dark' %> flex items-center justify-center">
+                  </div>
+                </div>
+                <span class="ml-2 <%= current_user.projects.any? ? 'text-forest' : 'text-som-dark' %>">
+                  Create a project in the <a href="/my_projects" class="text-blue-500 hover:text-blue-700 underline">Projects</a> tab
+                </span>
+              </li>
+
+              <li class="flex items-start">
+                <div class="flex-shrink-0 h-6 w-6 mt-0.5">
+                  <div class="h-5 w-5 border-2 <%= current_user.devlogs.any? ? 'bg-forest border-forest' : 'border-som-dark' %> flex items-center justify-center">
+                  </div>
+                </div>
+                <span class="ml-2 <%= current_user.devlogs.any? ? 'text-forest' : 'text-som-dark' %>">
+                  Post updates on your devlog as you work
+                </span>
+              </li>
+
+              <li class="flex items-start">
+                <div class="flex-shrink-0 h-6 w-6 mt-0.5">
+                  <div class="h-5 w-5 border-2 <%= current_user.ship_events.any? ? 'bg-forest border-forest' : 'border-som-dark' %> flex items-center justify-center">
+                  </div>
+                </div>
+                <span class="ml-2 <%= current_user.ship_events.any? ? 'text-forest' : 'text-som-dark' %>">
+                  Ship your project when it is ready for others to experience
+                </span>
+              </li>
+
+              <li class="flex items-start">
+                <div class="flex-shrink-0 h-6 w-6 mt-0.5">
+                  <div class="h-5 w-5 border-2 <%= current_user.votes.any? ? 'bg-forest border-forest' : 'border-som-dark' %> flex items-center justify-center">
+                  </div>
+                </div>
+                <span class="ml-2 <%= current_user.votes.any? ? 'text-forest' : 'text-som-dark' %>">
+                  <a href="<%= new_vote_path %>" class="text-blue-500 hover:text-blue-700 underline">Vote</a> on other people's projects to receive your shells
+                </span>
+              </li>
+
+              <li class="flex items-start">
+                <div class="flex-shrink-0 h-6 w-6 mt-0.5">
+                  <div class="h-5 w-5 border-2 <%= current_user.shop_orders.joins(:shop_item).where.not(shop_items: { type: "ShopItem::FreeStickers" }).any? ? 'bg-forest border-forest' : 'border-som-dark' %> flex items-center justify-center">
+                  </div>
+                </div>
+                <span class="ml-2 <%= current_user.shop_orders.joins(:shop_item).where.not(shop_items: { type: "ShopItem::FreeStickers" }).any? ? 'text-forest' : 'text-som-dark' %>">
+                  Spend your hard-earned shells in the <a href="<%= shop_path %>" class="text-blue-500 hover:text-blue-700 underline">shop</a>
+                </span>
+              </li>
+            </ul>
+          </div>
+
+          <div class="grow flex relative">
+            <div class="h-auto xl:h-full w-full max-w-lg xl:w-auto xl:ml-auto aspect-video relative">
+              <video id="onboarding" class="absolute inset-0 overflow-clip rounded-md" style="box-sizing: border-box;" src="/onboarding.mp4" poster="/onboarding_poster.png" controls title="Onboarding tutorial video">
+              </video>
+            </div>
+          </div>
+        </div>
+
+        <script>
+          function initializeOnboardingVideo() {
+            const video = document.querySelector("video#onboarding");
+            const mascot = document.getElementById("onboarding-mascot");
+            const callout = document.getElementById("onboarding-callout");
+
+            if (!video || !mascot || !callout) return;
+
+            function playOnboarding() {
+              video.play();
+              mascot.style.display = "none";
+              callout.style.display = "none";
+            }
+
+            mascot.addEventListener("click", playOnboarding);
+            callout.addEventListener("click", playOnboarding);
+            video.addEventListener("play", function() {
+              mascot.style.display = "none";
+              callout.style.display = "none";
+            });
+          }
+
+          document.addEventListener("DOMContentLoaded", initializeOnboardingVideo);
+          document.addEventListener("turbo:load", initializeOnboardingVideo);
+        </script>
+      <% end %>
+    </div>
+  <% end %>
+
   <!-- Hackatime Dashboard Section -->
-  <% if @account_status[:hackatime_setup] %>
+  <% if current_user.tutorial_progress.completed? && @account_status[:hackatime_setup] %>
     <div class="mb-8 color-forest">
       <%= render "shared/card", data: { controller: "hackatime-dashboard" } do %>
         <div class="text-som-dark">
@@ -65,7 +185,8 @@
             </div>
           <% else %>
             <p class="text-lg mb-4">
-              Today you have logged <span data-hackatime-dashboard-target="todayTime"><%= current_user.format_seconds(@hackatime_dashboard[:today_time]) %></span> of coding time, and overall you have logged <span data-hackatime-dashboard-target="totalTime"><%= current_user.format_seconds(@hackatime_dashboard[:total_time]) %></span>.
+              Today you have logged <span data-hackatime-dashboard-target="todayTime"><%= current_user.format_seconds(@hackatime_dashboard[:today_time]) %></span> of coding time, and overall you have logged <span data-hackatime-dashboard-target="totalTime"><%= current_user.format_seconds(@hackatime_dashboard[:total_time]) %></span>.<br>
+              It may take up to 10 minutes for Hackatime data to show up here.
             </p>
             <p class="text-sm sm:text-sm md:text-md lg:text-md xl:text-lg">
               You will need to post a devlog <span class="text-[#E65A42]">after 10 hours of work</span> before you can log more time!
@@ -161,11 +282,12 @@
               </picture>,
               with up to 30x bonuses based on community votes!
               <br><br>
-              Make sure <span class="text-[#E65A42]">all your code editors</span> are connected to Hackatime. You can't get shells without it!
+              Make sure <span class="text-[#E65A42]">all your code editors</span> are connected to Hackatime. You can't get shells without it!<br>
+              It may take up to 10 minutes for Hackatime data to show up here.
             </p>
             <% if @account_status[:hackatime_projects] %>
               <span class="inline-flex items-center px-3 py-1 rounded-full text-sm bg-green-100 text-green-800" data-hackatime-status-target="status">
-                Hackatime is installed!
+                Hackatime is installed! You have <%= current_user.format_seconds(@hackatime_dashboard[:today_time] || 0) %> tracked.
               </span>
             <% elsif @account_status[:hackatime_setup] %>
               <span class="inline-flex items-center px-3 py-1 rounded-full text-sm bg-yellow-100 text-yellow-800" data-hackatime-status-target="status">
@@ -203,7 +325,7 @@
           </div>
 
           <div class="flex-1 md:ml-12">
-            <p class="mb-4">Now for the best part… getting free stuff! Order some stickers to get oriented with the shop.</p>
+            <p class="mb-4">Now for the best part… getting free stuff! Order some stickers, get oriented with the shop, and unlock the rest of the platform!</p>
             <% if current_user.shop_orders.joins(:shop_item).where(shop_items: { type: "ShopItem::FreeStickers" }).exists? %>
               <span class="inline-flex items-center px-3 py-1 rounded-full text-sm bg-green-100 text-green-800">
                 Ordered
@@ -216,266 +338,186 @@
 
         <!-- Step 3: Identity Verification -->
         <% if current_verification_status != :not_linked %>
-        <%= render "shared/card" do %>
-          <div class="flex items-start gap-4 mb-2">
-            <div class="flex-shrink-0">
-              <% if current_verification_status == :verified %>
-                <div class="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center">
-                  <%= inline_svg "icons/check_fill.svg", class: "w-5 h-5 text-green-600" %>
+          <%= render "shared/card" do %>
+            <div class="flex items-start gap-4 mb-2">
+              <div class="flex-shrink-0">
+                <% if current_verification_status == :verified %>
+                  <div class="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center">
+                    <%= inline_svg "icons/check_fill.svg", class: "w-5 h-5 text-green-600" %>
+                  </div>
+                <% else %>
+                  <div class="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
+                    <%= inline_svg "icons/to_do_fill.svg", class: "w-5 h-5 text-blue-600" %>
+                  </div>
+                <% end %>
+              </div>
+              <h3 class="text-lg font-semibold">Verify Your Age</h3>
+            </div>
+
+            <div class="flex-1 md:ml-12">
+              <% case current_verification_status %>
+              <% when :needs_resubmission %>
+                <div class="space-y-2">
+                  <span class="inline-flex items-center px-3 py-1 rounded-full text-sm bg-yellow-100 text-yellow-800">
+                    Needs Submission
+                  </span>
+                  <%= link_to "Submit Documents", IdentityVaultService.host, class: "inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 ml-2", target: "_blank" %>
                 </div>
+              <% when :pending %>
+                <span class="inline-flex items-center px-3 py-1 rounded-full text-sm bg-blue-100 text-blue-800">
+                  Pending Review
+                </span>
+              <% when :ineligible %>
+                <span class="inline-flex items-center px-3 py-1 rounded-full text-sm bg-red-100 text-red-800">
+                  Ineligible
+                </span>
               <% else %>
-                <div class="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
-                  <%= inline_svg "icons/to_do_fill.svg", class: "w-5 h-5 text-blue-600" %>
-                </div>
+                <span class="inline-flex items-center px-3 py-1 rounded-full text-sm bg-green-100 text-green-800">
+                  Verified
+                </span>
               <% end %>
             </div>
-            <h3 class="text-lg font-semibold">Verify Your Age</h3>
-          </div>
-
-          <div class="flex-1 md:ml-12">
-            <% case current_verification_status %>
-            <% when :needs_resubmission %>
-              <div class="space-y-2">
-                <span class="inline-flex items-center px-3 py-1 rounded-full text-sm bg-yellow-100 text-yellow-800">
-                  Needs Submission
-                </span>
-                <%= link_to "Submit Documents", IdentityVaultService.host, class: "inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 ml-2", target: "_blank" %>
-              </div>
-            <% when :pending %>
-              <span class="inline-flex items-center px-3 py-1 rounded-full text-sm bg-blue-100 text-blue-800">
-                Pending Review
-              </span>
-            <% when :ineligible %>
-              <span class="inline-flex items-center px-3 py-1 rounded-full text-sm bg-red-100 text-red-800">
-                Ineligible
-              </span>
-            <% else %>
-              <span class="inline-flex items-center px-3 py-1 rounded-full text-sm bg-green-100 text-green-800">
-                Verified
-              </span>
-            <% end %>
-          </div>
-        <% end %>
+          <% end %>
         <% end %>
       </div>
     </div>
   <% end %>
 
   <% if current_user.tutorial_progress.completed? %>
-    <!-- Account Status Section -->
-    <% if current_verification_status == :not_linked || current_verification_status == :needs_resubmission || current_verification_status == :pending || current_verification_status == :ineligible || !@account_status[:hackatime_projects] %>
-    <div class="mb-8">
-      <h2 class="text-xl mb-4">Account Status</h2>
-      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-
-        <!-- Hackatime Status Card -->
-        <% if !@account_status[:hackatime_projects] %>
-        <div class="bg-white rounded-lg border p-4">
-          <div class="flex items-center justify-between">
-            <div>
-              <h3>Hackatime</h3>
-            </div>
-            <% if @account_status[:hackatime_setup] %>
-              <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs bg-yellow-100 text-yellow-800">
-                Waiting for project data....
-              </span>
-            <% elsif @account_status[:hackatime_linked] %>
-              <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs bg-yellow-100 text-yellow-800">
-                Waiting for test data...
-              </span>
-            <% else %>
-              <div class="flex flex-col items-end space-y-2">
-                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs bg-red-100 text-red-800">
-                  Not Connected
-                </span>
-                <%= link_to "Connect", hackatime_auth_redirect_path, class: "inline-flex items-center px-3 py-1 border border-transparent text-xs rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500", target: "_blank" %>
-              </div>
-            <% end %>
-          </div>
-        </div>
-        <% end %>
-
-        <% if current_verification_status != :verified %>
-          <%= render "shared/card" do %>
-            <div class="flex items-center justify-between">
-              <div>
-                <h3>Identity Verification</h3>
-              </div>
-              <% case current_verification_status %>
-              <% when :not_linked %>
-                <div class="flex flex-col items-end space-y-2">
-                  <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs  bg-red-100 text-red-800">
-                    Not Started
-                  </span>
-                  <%= link_to "Verify", link_identity_vault_path, class: "inline-flex items-center px-3 py-1 border border-transparent text-xs  rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500", target: "_blank" %>
-                </div>
-              <% when :needs_resubmission %>
-                <div class="flex flex-col items-end space-y-2">
-                  <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs  bg-yellow-100 text-yellow-800">
-                    Needs Submission
-                  </span>
-                  <%= link_to "Submit", IdentityVaultService.host, class: "inline-flex items-center px-3 py-1 border border-transparent text-xs  rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500", target: "_blank" %>
-                </div>
-              <% when :pending %>
-                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs  bg-blue-100 text-blue-800">
-                  Pending Review
-                </span>
-              <% when :ineligible %>
-                <div class="flex flex-col items-end space-y-2">
-                  <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs  bg-red-100 text-red-800">
-                    Ineligible
-                  </span>
-                </div>
-              <% end %>
-            </div>
-          <% end %>
-        <% end %>
-      </div>
-    </div>
-    <% end %>
-
     <!-- Announcements Section -->
     <% if @announcements.any? %>
-    <div class="mb-8">
-      <h2 class="text-xl mb-4">Announcements</h2>
-      <div class="space-y-4">
-        <% @announcements.each do |announcement| %>
-          <%= render "shared/card" do %>
-            <div class="flex items-start justify-between">
-              <div class="flex-1">
-                <div class="flex items-center mb-2">
-                  <h3 class="mr-2"><%= announcement[:title] %></h3>
-                  <% case announcement[:type] %>
-                  <% when 'info' %>
-                    <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs bg-blue-100 text-blue-800">
-                      Info
-                    </span>
-                  <% when 'warning' %>
-                    <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs bg-yellow-100 text-yellow-800">
-                      Important
-                    </span>
-                  <% end %>
+      <div class="mb-8">
+        <h2 class="text-xl mb-4">Announcements</h2>
+        <div class="space-y-4">
+          <% @announcements.each do |announcement| %>
+            <%= render "shared/card" do %>
+              <div class="flex items-start justify-between">
+                <div class="flex-1">
+                  <div class="flex items-center mb-2">
+                    <h3 class="mr-2"><%= announcement[:title] %></h3>
+                    <% case announcement[:type] %>
+                    <% when 'info' %>
+                      <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs bg-blue-100 text-blue-800">
+                        Info
+                      </span>
+                    <% when 'warning' %>
+                      <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs bg-yellow-100 text-yellow-800">
+                        Important
+                      </span>
+                    <% end %>
+                  </div>
+                  <p class="mb-2 font-national-park font-bold tracking-tight"><%= announcement[:content] %></p>
+                  <p class="text-sm font-national-park font-bold tracking-tight">
+                    <%= time_ago_in_words(announcement[:created_at]) %> ago
+                  </p>
                 </div>
-                <p class="mb-2 font-national-park font-bold tracking-tight"><%= announcement[:content] %></p>
-                <p class="text-sm font-national-park font-bold tracking-tight">
-                  <%= time_ago_in_words(announcement[:created_at]) %> ago
-                </p>
+                <% if announcement[:action_url] %>
+                  <a href="<%= announcement[:action_url] %>"
+                    class="ml-4 inline-flex items-center px-3 py-1 border border-transparent text-sm  rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                    Take Action
+                  </a>
+                <% end %>
               </div>
-              <% if announcement[:action_url] %>
-                <a href="<%= announcement[:action_url] %>"
-                   class="ml-4 inline-flex items-center px-3 py-1 border border-transparent text-sm  rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
-                  Take Action
-                </a>
-              <% end %>
-            </div>
+            <% end %>
           <% end %>
-        <% end %>
+        </div>
       </div>
-    </div>
     <% end %>
 
-    <!-- Summer of Making Steps -->
-    <div class="mb-8">
-      <%= render "shared/card" do %>
-        <div class="text-som-dark flex flex-col xl:flex-row space-y-5 xl:space-y-0">
-          <div>
-            <div class="flex items-center justify-between mb-4">
-              <h2 class="text-xl">Todo list:</h2>
-            </div>
+    <!-- Account Status Section -->
+    <% if current_verification_status == :not_linked || current_verification_status == :needs_resubmission || current_verification_status == :pending || current_verification_status == :ineligible || !@account_status[:hackatime_projects] %>
+      <div class="mb-8">
+        <h2 class="text-xl mb-4">Account Status</h2>
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
 
-            <div class="space-y-4">
-              <div class="flex items-center gap-3">
-                <div class="flex-shrink-0">
-                  <input type="checkbox" class="w-5 h-5 text-som-dark border-som-dark rounded-md focus:ring-som-dark focus:ring-2" <%= current_user.projects.any? ? 'checked' : '' %> disabled>
+          <!-- Hackatime Status Card -->
+          <% if !@account_status[:hackatime_projects] %>
+            <div class="bg-white rounded-lg border p-4">
+              <div class="flex items-center justify-between">
+                <div>
+                  <h3>Hackatime</h3>
                 </div>
-                <div class="flex-1">
-                  <p>Create a project in the <a href="/my_projects" class="text-blue-500 hover:text-blue-700 underline">Projects</a> tab</p>
-                </div>
-              </div>
-
-              <div class="flex items-center gap-3">
-                <div class="flex-shrink-0">
-                  <input type="checkbox" class="w-5 h-5 text-som-dark border-som-dark rounded-md focus:ring-som-dark focus:ring-2" <%= current_user.devlogs.any? ? 'checked' : '' %> disabled>
-                </div>
-                <div class="flex-1">
-                  <p>Post updates on your devlog as you work</p>
-                </div>
-              </div>
-
-              <div class="flex items-center gap-3">
-                <div class="flex-shrink-0">
-                  <input type="checkbox" class="w-5 h-5 text-som-dark border-som-dark rounded-md focus:ring-som-dark focus:ring-2" <%= current_user.ship_events.any? ? 'checked' : '' %> disabled>
-                </div>
-                <div class="flex-1">
-                  <p>Ship your project when it is ready for others to experience</p>
-                </div>
-              </div>
-
-              <div class="flex items-center gap-3">
-                <div class="flex-shrink-0">
-                  <input type="checkbox" class="w-5 h-5 text-som-dark border-som-dark rounded-md focus:ring-som-dark focus:ring-2" <%= current_user.votes.any? ? 'checked' : '' %> disabled>
-                </div>
-                <div class="flex-1">
-                  <p>Vote on other people's projects to receive your shells</p>
-                </div>
-              </div>
-
-              <div class="flex items-center gap-3">
-                <div class="flex-shrink-0">
-                  <input type="checkbox" class="w-5 h-5 text-som-dark border-som-dark rounded-md focus:ring-som-dark focus:ring-2" <%= current_user.shop_orders.joins(:shop_item).where.not(shop_items: { type: "ShopItem::FreeStickers" }).any? ? 'checked' : '' %> disabled>
-                </div>
-                <div class="flex-1">
-                  <p>Spend your hard-earned shells in the shop</p>
-                </div>
+                <% if @account_status[:hackatime_setup] %>
+                  <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs bg-yellow-100 text-yellow-800">
+                    Waiting for project data....
+                  </span>
+                <% elsif @account_status[:hackatime_linked] %>
+                  <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs bg-yellow-100 text-yellow-800">
+                    Waiting for test data...
+                  </span>
+                <% else %>
+                  <div class="flex flex-col items-end space-y-2">
+                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs bg-red-100 text-red-800">
+                      Not Connected
+                    </span>
+                    <%= link_to "Connect", hackatime_auth_redirect_path, class: "inline-flex items-center px-3 py-1 border border-transparent text-xs rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500", target: "_blank" %>
+                  </div>
+                <% end %>
               </div>
             </div>
-          </div>
+          <% end %>
 
-          <div class="grow flex relative">
-            <div class="h-auto xl:h-full w-full max-w-lg xl:w-auto xl:ml-auto aspect-video relative">
-              <video id="onboarding" class="absolute inset-0 overflow-clip rounded-md" style="box-sizing: border-box;" src="/onboarding.mp4" poster="/onboarding_poster.png" controls title="Onboarding tutorial video for this page">
-              </video>
-              <div class="absolute z-50 -right-36 xl:left-12 -top-5 xl:-top-3 w-24 hidden md:block">
-                <div class="absolute -top-8 -left-24 p-3 bg-[#F3ECD8] rounded-2xl border-4 border-[#E4DCC6] max-w-[120px] animate-pulse rotate-24 xl:-rotate-24 cursor-pointer" id="onboarding-callout">
-                  <div class="text-[#4A2D24] font-bold text-center text-lg">Click me!</div>
-                  <div class="absolute top-full left-1/2 transform -translate-x-1/2 w-0 h-0 border-l-8 border-r-8 border-t-8 border-l-transparent border-r-transparent border-t-[#E4DCC6]"></div>
-                  <div class="absolute top-full left-1/2 transform -translate-x-1/2 translate-y-[-2px] w-0 h-0 border-l-6 border-r-6 border-t-6 border-l-transparent border-r-transparent border-t-[#F3ECD8]"></div>
+          <% if current_verification_status != :verified %>
+            <%= render "shared/card" do %>
+              <div class="flex items-center justify-between">
+                <div>
+                  <h3>Identity Verification</h3>
                 </div>
+                <% case current_verification_status %>
+                <% when :not_linked %>
+                  <div class="flex flex-col items-end space-y-2">
+                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs  bg-red-100 text-red-800">
+                      Not Started
+                    </span>
+                    <%= link_to "Verify", link_identity_vault_path, class: "inline-flex items-center px-3 py-1 border border-transparent text-xs  rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500", target: "_blank" %>
+                  </div>
+                <% when :needs_resubmission %>
+                  <div class="flex flex-col items-end space-y-2">
+                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs  bg-yellow-100 text-yellow-800">
+                      Needs Submission
+                    </span>
+                    <%= link_to "Submit", IdentityVaultService.host, class: "inline-flex items-center px-3 py-1 border border-transparent text-xs  rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500", target: "_blank" %>
+                  </div>
+                <% when :pending %>
+                  <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs  bg-blue-100 text-blue-800">
+                    Pending Review
+                  </span>
+                <% when :ineligible %>
+                  <div class="flex flex-col items-end space-y-2">
+                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs  bg-red-100 text-red-800">
+                      Ineligible
+                    </span>
+                  </div>
+                <% end %>
               </div>
-              <%= image_tag "tutorial-mascot.png",
-                class: "absolute hidden md:block -right-24 xl:-left-32 bottom-0 w-32 h-32 xl:w-40 xl:h-40 cursor-pointer transition-all duration-200 hover:scale-110 animate-bounce -rotate-12 xl:rotate-12 xl:-scale-x-100",
-                title: "Show tutorial for this page",
-                id: "onboarding-mascot" %>
-            </div>
-          </div>
+            <% end %>
+          <% end %>
         </div>
+      </div>
+    <% end %>
+  <% end %>
 
-        <script>
-          function initializeOnboardingVideo() {
-            const video = document.querySelector("video#onboarding");
-            const mascot = document.getElementById("onboarding-mascot");
-            const callout = document.getElementById("onboarding-callout");
-
-            if (!video || !mascot || !callout) return;
-
-            function playOnboarding() {
-              video.play();
-              mascot.style.display = "none";
-              callout.style.display = "none";
-            }
-
-            mascot.addEventListener("click", playOnboarding);
-            callout.addEventListener("click", playOnboarding);
-            video.addEventListener("play", function() {
-              mascot.style.display = "none";
-              callout.style.display = "none";
-            });
-          }
-
-          document.addEventListener("DOMContentLoaded", initializeOnboardingVideo);
-          document.addEventListener("turbo:load", initializeOnboardingVideo);
-        </script>
-      <% end %>
+  <!-- Onboarding Video Modal -->
+  <% if current_user.tutorial_progress.completed? && !current_user.tutorial_video_seen? %>
+    <div data-controller="onboarding-video-modal"
+      data-onboarding-video-modal-target="modal"
+      data-action="click->onboarding-video-modal#closeOnBackgroundClick"
+      class="fixed inset-0 bg-black/75 flex items-center justify-center z-50">
+      <div class="relative max-w-4xl w-full mx-4">
+        <button data-onboarding-video-modal-target="closeButton"
+          data-action="click->onboarding-video-modal#close"
+          class="absolute top-4 right-4 text-white p-2 hover:scale-110 transition-transform z-10">
+          <%= inline_svg "icons/close.svg", class: "h-6 w-6 md:h-8 md:w-8" %>
+        </button>
+        <video data-onboarding-video-modal-target="video"
+          data-action="ended->onboarding-video-modal#closeOnVideoEnd"
+          class="w-full rounded-lg"
+          controls
+          poster="/onboarding_poster.png">
+          <source src="/onboarding.mp4" type="video/mp4">
+          Your browser does not support the video tag.
+        </video>
+      </div>
     </div>
   <% end %>
 </div>

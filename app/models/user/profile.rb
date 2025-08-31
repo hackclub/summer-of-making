@@ -3,6 +3,7 @@
 # Table name: user_profiles
 #
 #  id                   :bigint           not null, primary key
+#  balloon_color        :string
 #  bio                  :text
 #  custom_css           :text
 #  hide_from_logged_out :boolean          default(FALSE)
@@ -19,12 +20,15 @@
 #  fk_rails_...  (user_id => users.id)
 #
 class User::Profile < ApplicationRecord
+  has_paper_trail
+
   belongs_to :user
 
   validates :bio, length: { maximum: 1000 }, allow_blank: true
   validates :custom_css, length: { maximum: 10_000 }, allow_blank: true
   validate :custom_css_requires_badge
   validate :fucking_xss
+  validates_format_of :balloon_color, with: /\A#(?:\h{3}){1,2}\z/, allow_blank: true
 
   before_save :clean_css
 

@@ -21,20 +21,25 @@
 #  shop_card_grant_id                 :bigint
 #  shop_item_id                       :bigint           not null
 #  user_id                            :bigint           not null
+#  warehouse_package_id               :bigint
 #
 # Indexes
 #
-#  index_shop_orders_on_shop_card_grant_id  (shop_card_grant_id)
-#  index_shop_orders_on_shop_item_id        (shop_item_id)
-#  index_shop_orders_on_user_id             (user_id)
+#  index_shop_orders_on_shop_card_grant_id    (shop_card_grant_id)
+#  index_shop_orders_on_shop_item_id          (shop_item_id)
+#  index_shop_orders_on_user_id               (user_id)
+#  index_shop_orders_on_warehouse_package_id  (warehouse_package_id)
 #
 # Foreign Keys
 #
 #  fk_rails_...  (shop_card_grant_id => shop_card_grants.id)
 #  fk_rails_...  (shop_item_id => shop_items.id)
 #  fk_rails_...  (user_id => users.id)
+#  fk_rails_...  (warehouse_package_id => shop_warehouse_packages.id)
 #
 class ShopOrder < ApplicationRecord
+  has_paper_trail
+
   include AASM
   include PublicActivity::Model
   include HasTableSync
@@ -46,6 +51,7 @@ class ShopOrder < ApplicationRecord
 
   has_many :payouts, as: :payable, dependent: :destroy
   belongs_to :shop_card_grant, optional: true
+  belongs_to :warehouse_package, class_name: "Shop::WarehousePackage", optional: true
 
   validates :quantity, presence: true, numericality: { greater_than: 0 }, on: :create
   validate :check_one_per_person_ever_limit, on: :create
@@ -54,6 +60,7 @@ class ShopOrder < ApplicationRecord
   validate :check_user_balance, on: :create
   validate :check_regional_availability, on: :create
   validate :check_badge, on: :create
+  validate :check_sinkening_participation, on: :create
   after_create :create_negative_payout
   before_create :set_initial_state_for_free_stickers
 
@@ -64,6 +71,8 @@ class ShopOrder < ApplicationRecord
 
   scope :standard_sync, -> { includes(:user).includes(:shop_item).without_item_type(ShopItem::FreeStickers) }
   scope :free_stickers_sync, -> { includes(:user).includes(:shop_item).with_item_type(ShopItem::FreeStickers) }
+
+  def get_agh_contents = shop_item.get_agh_contents(self)
 
   def full_name
     "#{user.display_name}'s order for #{quantity} #{shop_item.name.pluralize(quantity)}"
@@ -231,6 +240,14 @@ class ShopOrder < ApplicationRecord
     # Allow items enabled for the address region OR for XX (Rest of World)
     unless shop_item.enabled_in_region?(address_region) || shop_item.enabled_in_region?("XX")
       errors.add(:base, "This item is not available for shipping to #{address_country}.")
+    end
+  end
+
+  def check_sinkening_participation
+    return unless shop_item.is_a?(ShopItem::SinkeningBalloons)
+
+    unless Flipper.enabled?(:enable_shop_balloons, user) && user.sinkening_participation?
+      errors.add(:base, "You are not eligible to order Sinkening Balloons.")
     end
   end
 

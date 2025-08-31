@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+require "set"
+
 class ShopItemsController < ApplicationController
   before_action :authenticate_user!, except: [ :index, :black_market ]
   before_action :require_admin!, except: [ :index, :black_market ]
@@ -37,6 +39,34 @@ class ShopItemsController < ApplicationController
     filtered_items.reject! { |item| ordered_free_sticker_ids.include?(item.id) }
   end
 
+    visible_item_ids = filtered_items.map(&:id)
+
+    @ordered_quantity_by_item_id = if visible_item_ids.any?
+      ShopOrder.worth_counting.where(shop_item_id: visible_item_ids).group(:shop_item_id).sum(:quantity)
+    else
+      {}
+    end
+
+    if current_user
+      # load them already to avoid database queries
+      current_user.user_badges.load
+      current_user.payouts.load
+      @user_badge_keys = current_user.user_badges.map { |ub| ub.badge_key.to_sym }.to_set
+
+      @ordered_once_item_ids = current_user.shop_orders
+                                         .worth_counting
+                                         .where(shop_item_id: visible_item_ids)
+                                         .group(:shop_item_id)
+                                         .pluck(:shop_item_id)
+                                         .to_set
+
+      # for some reason we're doing current_user.balance on every item
+      @current_balance = current_user.balance
+    else
+      @ordered_once_item_ids = Set.new
+      @current_balance = 0
+    end
+
     # Separate badge items from regular items
     @badge_items = filtered_items.select { |item| item.is_a?(ShopItem::BadgeItem) }
     @regular_items = filtered_items.reject { |item| item.is_a?(ShopItem::BadgeItem) }
@@ -62,6 +92,32 @@ class ShopItemsController < ApplicationController
 
     if @regionalization_enabled && @selected_region
       filtered_items.select! { |item| item.enabled_in_region?(@selected_region) || item.enabled_in_region?("XX") }
+    end
+
+    visible_item_ids = filtered_items.map(&:id)
+
+    @ordered_quantity_by_item_id = if visible_item_ids.any?
+      ShopOrder.worth_counting.where(shop_item_id: visible_item_ids).group(:shop_item_id).sum(:quantity)
+    else
+      {}
+    end
+
+    if current_user
+      current_user.user_badges.load
+      current_user.payouts.load
+      @user_badge_keys = current_user.user_badges.map { |ub| ub.badge_key.to_sym }.to_set
+
+      @ordered_once_item_ids = current_user.shop_orders
+                                         .worth_counting
+                                         .where(shop_item_id: visible_item_ids)
+                                         .group(:shop_item_id)
+                                         .pluck(:shop_item_id)
+                                         .to_set
+
+      @current_balance = current_user.balance
+    else
+      @ordered_once_item_ids = Set.new
+      @current_balance = 0
     end
 
     @shop_items = filtered_items

@@ -8,6 +8,7 @@ dependencies = [
     "browser-use>=0.1.5",
     "python-dotenv>=1.0.0",
     "anthropic>=0.18.0",
+    "steel-sdk>=0.7.0",
 ]
 
 [build-system]

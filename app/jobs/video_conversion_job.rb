@@ -60,7 +60,7 @@ class VideoConversionJob < ApplicationJob
         "-crf", "23",              # Good quality setting
         "-movflags", "+faststart", # Enable progressive download
         "-pix_fmt", "yuv420p",     # Ensure compatibility
-        "-vf", "scale='min(1280,iw)':'min(720,ih)':force_original_aspect_ratio=decrease" # Max 1280x720, maintain aspect ratio
+        "-vf", "scale='min(1280,iw)':'min(720,ih)':force_original_aspect_ratio=decrease,scale=trunc(iw/2)*2:trunc(ih/2)*2"
       ]
     }
 

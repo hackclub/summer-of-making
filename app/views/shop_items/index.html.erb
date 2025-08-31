@@ -112,7 +112,7 @@
     </div>
   <% end %>
   <div class="my-6 text-center flex justify-center flex-col">
-    <% if @shop_items.empty? %>
+    <% if @shop_items.empty? || (Flipper.enabled?(:enable_shop_balloons, current_user) && @shop_items.count == 1 && @shop_items.first.is_a?(ShopItem::SinkeningBalloons) && (!current_user&.sinkening_participation? || @ordered_once_item_ids&.include?(@shop_items.first.id))) %>
       <%= render "shared/card", classes: 'max-w-md mx-auto' do %>
         <div class="text-lg font-semibold text-[#3a2f25] font-['DynaPuff',sans-serif] mb-1">
           <% if @regionalization_enabled %>
@@ -146,11 +146,17 @@
           <% end %>
           <div class="flex flex-col sm:grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
             <% sorted_items = @regular_items.sort_by { |item| item.price_for_region(@selected_region) } %>
-            <% unless cookies[:dismissed_raffle] == 'true' %>
+            <% if cookies[:dismissed_raffle_v2] != 'true' && current_user&.tutorial_progress&.completed? %>
               <%= render partial: "raffle_card" %>
             <% end %>
             <% sorted_items.each do |item| %>
-              <%= render partial: "item", locals: { item: } %>
+              <% if item.is_a?(ShopItem::SinkeningBalloons) %>
+                <% if Flipper.enabled?(:enable_shop_balloons, current_user) && current_user&.sinkening_participation? && !@ordered_once_item_ids&.include?(item.id) %>
+                  <%= render partial: "item", locals: { item: } %>
+                <% end %>
+              <% else %>
+                <%= render partial: "item", locals: { item: } %>
+              <% end %>
             <% end %>
           </div>
         </div>

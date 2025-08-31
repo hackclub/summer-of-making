@@ -13,6 +13,7 @@
 #  hackatime_project_keys :string           default([]), is an Array
 #  is_deleted             :boolean          default(FALSE)
 #  is_shipped             :boolean          default(FALSE)
+#  is_sinkening_ship      :boolean          default(FALSE)
 #  rating                 :integer
 #  readme_link            :string
 #  repo_link              :string
@@ -39,6 +40,8 @@
 #  fk_rails_...  (user_id => users.id)
 #
 class Project < ApplicationRecord
+  has_paper_trail
+
   include PublicActivity::Model
 
   belongs_to :user
@@ -71,6 +74,7 @@ class Project < ApplicationRecord
 
   has_many :ship_certifications
   has_many :readme_certifications
+  has_many :shipwright_advices, class_name: "ShipwrightAdvice"
 
   has_many :won_votes, class_name: "Vote", foreign_key: "winning_project_id"
   has_many :vote_changes, dependent: :destroy
@@ -159,6 +163,7 @@ class Project < ApplicationRecord
     athena: "Athena",
     boba_drops: "Boba Drops",
     cider: "Cider",
+    cmdk: "cmd + k",
     converge: "Converge",
     grub: "Grub",
     hackaccino: "Hackaccino",
@@ -318,6 +323,10 @@ class Project < ApplicationRecord
         met: devlogs_since_last_ship.count >= 1,
         message: "You must have at least one devlog #{ship_events.count > 0 ? "since the last ship" : ""}"
       },
+      voting_quota: {
+        met: user.votes_since_last_ship_count >= 20,
+        message: "You must vote #{user.remaining_votes_to_ship} more times to ship."
+      },
       repo_link: {
         met: repo_link.present?,
         message: "Project must have a repository link."
@@ -372,7 +381,7 @@ class Project < ApplicationRecord
     when "approved"
       "Ship certified"
     when "rejected"
-      "No ship certification"
+      "Changes needed"
     else
       nil
     end
@@ -405,22 +414,6 @@ class Project < ApplicationRecord
     @unpaid_ship_events_since_last_payout ||= ShipEvent.where(project: self)
                                                       .left_joins(:payouts)
                                                       .where(payouts: { id: nil })
-  end
-
-  def calculate_payout
-    vote_count = VoteChange.where(project: self).maximum(:project_vote_count)
-    min, max = VoteChange.cumulative_elo_range_for_vote_count(vote_count)
-
-    pc = unlerp(min, max, rating)
-
-    mult = Payout.calculate_multiplier pc
-
-    puts "mult", mult
-
-    hours = devlogs.sum(:duration_seconds).fdiv(3600)
-    puts "hours", hours
-
-    payout = hours * mult
   end
 
   def issue_genesis_payouts
@@ -485,13 +478,16 @@ class Project < ApplicationRecord
 
       reason = "Payout#{" recalculation" if ship.payouts.count > 0} for #{title}'s #{ship.created_at} ship."
 
-      payout = Payout.create!(amount: current_payout_difference, payable: ship, user:, reason:)
+      payout = Payout.create!(amount: current_payout_difference, payable: ship, user:, reason:, escrowed: false)
 
       puts "PAYOUTCREASED(#{payout.id}) ship.id:#{ship.id} min:#{min} max:#{max} rating_at_vote_count:#{current_rating} pc:#{pc} mult:#{mult} hours:#{hours} amount:#{amount} current_payout_sum:#{current_payout_sum} current_payout_difference:#{current_payout_difference}"
     end
   end
 
   def issue_payouts
+    # NOTE Aug 23, 2025 IST: Escrow deprecated for new payouts.
+    # Shipping is blocked until users reach the voting quota since last ship,
+    # so payouts created here should not require escrow going forward. that said, we can escrow payouts at will if needed.
     return unless unpaid_ship_events_since_last_payout.any?
 
     project_vote_count = VoteChange.where(project: self).count
@@ -555,7 +551,7 @@ class Project < ApplicationRecord
 
       reason = "Payout#{" recalculation" if ship.payouts.count > 0} for #{title}'s #{ship.created_at} ship."
 
-      payout = Payout.create!(amount: current_payout_difference, payable: ship, user:, reason:)
+      payout = Payout.create!(amount: current_payout_difference, payable: ship, user:, reason:, escrowed: false)
 
       puts "PAYOUTCREASED(#{payout.id}) ship.id:#{ship.id} min:#{min} max:#{max} rating_at_vote_count:#{current_rating} pc:#{pc} mult:#{mult} hours:#{hours} amount:#{amount} current_payout_sum:#{current_payout_sum} current_payout_difference:#{current_payout_difference}"
     end
@@ -638,6 +634,7 @@ class Project < ApplicationRecord
     converted_url = self.class.convert_github_blob_to_raw(url)
     send("#{field}=", converted_url) if converted_url != url
   end
+
 
   def self.convert_github_blob_to_raw(url)
     return url if url.blank?

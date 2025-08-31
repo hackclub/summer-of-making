@@ -20,12 +20,16 @@
     <%= stylesheet_link_tag "pixelart" %>
     <%= stylesheet_link_tag "som" %>
     <%= stylesheet_link_tag "tooltips" %>
+    <%= stylesheet_link_tag "balloons", "data-turbo-track": "reload" %>
     <%= stylesheet_link_tag "tutorial", "data-turbo-track": "reload" %>
     <%= javascript_importmap_tags %>
 
     <script defer data-domain="summer.hackclub.com" src="https://plausible.io/js/script.file-downloads.hash.outbound-links.tagged-events.js"></script>
     <script>
       window.plausible = window.plausible || function() { (window.plausible.q = window.plausible.q || []).push(arguments) }
+      window.flipperFlags = {
+          realTimeBalloons: <%= Flipper.enabled?(:real_time_balloons_2025_08_11, current_user).to_json %>
+      }
     </script>
 
     <script>
@@ -34,7 +38,7 @@
 
     <!-- Social Card Meta Tags -->
     <meta property="og:title" content="Hack Club Summer of Making">
-    <meta property="og:description" content="Build stuff, Get stuff, Repeat! Win awesome prizes for building personal coding projects, from June 16 - August 31, 2025">
+    <meta property="og:description" content="Build stuff, Get stuff, Repeat! Win awesome prizes for building personal coding projects, from June 16 - September 30, 2025">
     <meta property="og:image" content="<%= asset_url('social_card.png') %>">
     <meta property="og:url" content="<%= request.original_url %>">
     <meta property="og:type" content="website">
@@ -43,7 +47,7 @@
     <!-- Twitter Card Meta Tags -->
     <meta name="twitter:card" content="summary_large_image">
     <meta name="twitter:title" content="Hack Club Summer of Making">
-    <meta name="twitter:description" content="Build stuff, Get stuff, Repeat! Win awesome prizes for building personal coding projects, from June 16 - August 31, 2025">
+    <meta name="twitter:description" content="Build stuff, Get stuff, Repeat! Win awesome prizes for building personal coding projects, from June 16 - September 30, 2025">
     <meta name="twitter:image" content="<%= asset_url('social_card.png') %>">
     <% if current_user&.has_badge?(:spider) %>
     <%= javascript_include_tag "vendor/bug" %>
@@ -59,102 +63,265 @@
     <% end %>
   </head>
 
-  <body class="min-h-[100dvh] font-national-park font-bold text-som-dark">
+  <body class="min-h-[100dvh] font-national-park font-bold text-som-dark <%= user_signed_in? ? 'overflow-hidden' : '' %>">
+    <!-- Hidden balloon SVG template for JavaScript balloons -->
+    <div id="balloon-template" style="display: none;">
+      <%= inline_svg "balloon.svg", width: "60", height: "80" %>
+    </div>
+
     <%# admin_tool do %>
       <%# render "shared/stonk_tickler_marquee" %>
     <%# end %>
 
-    <% if user_signed_in? %>
-      <div data-controller="tutorial">
-        <%= render "tutorial/tutorial" %>
-        <% if current_user.tutorial_progress.should_show_completion_modal? %>
-          <%= render "tutorial/completion_modal" %>
-        <% end %>
-
-        <% if current_page?(map_path) %>
-          <%= yield %>
-        <% else %>
-          <div data-controller="sidebar" data-sidebar-collapsed-value="false">
-            <% if mobile_device? %>
-              <div class="flex flex-col h-[100dvh] box-border p-0">
-                <main class="py-4 px-0 sm:px-4 overflow-y-scroll flex-grow flex-shrink">
-                  <div id="flash-container">
-                    <%= render "shared/flash" %>
-                  </div>
-                  <%= yield %>
-                </main>
-                <%= render "shared/mobile_nav" %>
+    <div class="sinkening-container">
+      <% if user_signed_in? %>
+        <% if current_user.tutorial_progress.completed? && !mobile_device? %>
+          <div data-controller="todo">
+            <button
+              data-todo-target="todoButton"
+              id="todo-button"
+              data-action="click->todo#toggleAndComplete"
+              class="bg-[#523A52] hover:bg-[#856185] fixed hidden top-auto bottom-8 right-6 z-50 w-16 h-16 rounded-full md:flex items-center justify-center transition-all duration-200 hover:scale-110 text-white cursor-pointer drop-shadow-md sinkening-todo"
+              title="Show todo for this page">
+              <%= inline_svg "icons/clipboard.svg", class: "size-8" %>
+            </button>
+            <!-- Todo Modal -->
+            <%= render "tutorial/todo_modal" %>
+            <% if !current_page?(campfire_path) && !current_user.tutorial_progress.soft_step_completed?("todo") && current_user.tutorial_progress.completed? && current_user.projects.empty? %>
+              <div class="absolute inset-0 z-40 text-white cursor-pointer bg-black/75" data-todo-target="overlay" data-action="click->todo#completeAndHideOverlay">
+                <div class="absolute bottom-24 right-24">
+                  <p class="pb-4 pr-8 text-3xl">Check your todo list here!</p>
+                  <%= inline_svg "swirly-arrow.svg", class: "size-52 rotate-90 ml-auto" %>
+                </div>
               </div>
-            <% else %>
-              <div class="flex flex-col h-[100dvh] box-border p-0">
-                <% if !current_user.has_hackatime? && !current_user.tutorial_progress.completed_at.nil? %>
-                  <div class="w-full bg-vintage-red text-white flex flex-col justify-center py-2">
-                    <p class="text-center">
-                      Your time spent coding is not currently being tracked, therefore you can't create any projects.
-                      <br>
-                      <%= link_to "Connect Hackatime (our coding time tracking thing)", hackatime_auth_redirect_path, class: "underline", target: "_blank" %>
-                    </p>
-                  </div>
-                <% end %>
-
-                <div class="flex h-full min-h-0">
-                  <%= render "shared/sidebar" %>
-                  <main class="overflow-auto w-full" data-sidebar-target="mainContent">
+            <% end %>
+          </div>
+        <% end %>
+        <div>
+          <%= render "tutorial/tutorial" %>
+          <% if current_user.tutorial_progress.should_show_completion_modal? %>
+            <%= render "tutorial/completion_modal" %>
+          <% end %>
+          <% if current_page?(map_path) %>
+            <%= yield %>
+          <% else %>
+            <div data-controller="sidebar" data-sidebar-collapsed-value="false">
+              <% if mobile_device? %>
+                <div class="flex flex-col h-[100dvh] box-border p-0">
+                  <main class="flex-grow flex-shrink px-0 py-4 overflow-y-scroll sm:px-4">
                     <div id="flash-container">
                       <%= render "shared/flash" %>
                     </div>
                     <%= yield %>
                   </main>
+                  <%= render "shared/mobile_nav" %>
                 </div>
-              </div>
-            <% end %>
+              <% else %>
+                <div class="flex flex-col h-[100dvh] box-border p-0">
+                  <% if !current_user.has_hackatime? && !current_user.tutorial_progress.completed_at.nil? %>
+                    <div class="flex flex-col justify-center w-full py-2 text-white bg-vintage-red">
+                      <p class="text-center">
+                        Your time spent coding is not currently being tracked, therefore you can't create any projects.
+                        <br>
+                        <%= link_to "Connect Hackatime (our coding time tracking thing)", hackatime_auth_redirect_path, class: "underline", target: "_blank" %>
+                      </p>
+                    </div>
+                  <% end %>
+                  <div class="flex h-full min-h-0">
+                    <%= render "shared/sidebar" %>
+                    <main class="w-full overflow-auto" data-sidebar-target="mainContent">
+                      <div id="flash-container">
+                        <%= render "shared/flash" %>
+                      </div>
+                      <%= yield %>
+                    </main>
+                  </div>
+                </div>
+              <% end %>
+            </div>
+          <% end %>
+        </div>
+      <% else %>
+        <div id="flash-container">
+          <%= render "shared/flash" %>
+        </div>
+        <%= yield %>
+      <% end %>
+      <div id="modals"></div>
+    </div>
 
-            <!-- Tutorial angry button thingie-->
-            <% soft_step_paths = {
-              campfire: campfire_path,
-              explore: explore_path,
-              my_projects: my_projects_path,
-              vote: new_vote_path,
-              shop: shop_path
-            } %>
-            <% current_soft_step = soft_step_paths.find { |k, v|
-              if k == :explore
-                request.path == '/explore' || current_page?(v)
-              else
-                current_page?(v)
-              end
-            }&.first %>
-            <% should_shake = current_soft_step && !current_user.tutorial_progress.soft_step_completed?(current_soft_step) %>
-            <% if should_shake %>
-              <div class="fixed bottom-16 right-18 z-50" data-tutorial-target="helpButton" data-action="click->tutorial#toggle">
-                <div class="absolute -top-8 -left-24 p-3 bg-[#F3ECD8] rounded-2xl border-4 border-[#E4DCC6] max-w-[120px] animate-pulse -rotate-24">
-                  <div class="text-sm text-som-dark font-bold text-center lg:text-lg">Click me!</div>
-                  <div class="absolute top-full left-1/2 transform -translate-x-1/2 w-0 h-0 border-l-8 border-r-8 border-t-8 border-l-transparent border-r-transparent border-t-[#E4DCC6]"></div>
-                  <div class="absolute top-full left-1/2 transform -translate-x-1/2 translate-y-[-2px] w-0 h-0 border-l-6 border-r-6 border-t-6 border-l-transparent border-r-transparent border-t-[#F3ECD8]"></div>
-                </div>
-                <%= image_tag "tutorial-mascot.png",
-                  class: "w-32 h-32 2xl:w-40 2xl:h-40 cursor-pointer transition-all duration-200 hover:scale-110 animate-bounce -rotate-12",
-                  title: "Show tutorial for this page" %>
-              </div>
-            <% else %>
-              <button id="tutorial-help-btn"
-                data-tutorial-target="helpButton"
-                data-action="click->tutorial#toggle"
-                class="tutorial-help-btn fixed top-4 right-4 md:top-auto md:bottom-8 md:right-6 z-50 w-12 h-12 md:w-16 md:h-16 rounded-full flex items-center justify-center transition-all duration-200 hover:scale-110 bg-gray-600 text-white cursor-pointer drop-shadow-md"
-                title="Show tutorial for this page">
-                <span class="text-2xl font-bold">?</span>
-              </button>
-            <% end %>
-          </div>
-        <% end %>
+    <% if user_signed_in? && Flipper.enabled?(:sinkening, current_user) && SinkeningSetting.intensity > 0 && !current_page?(map_path) && !Flipper.enabled?(:disable_sinkening_visuals, current_user) %>
+      <div class="w-full overflow-hidden">
+        <div class="fixed bottom-0 left-0 right-0 sinkening-water z-[100] translate-y-8">
+          <svg viewBox="0 0 1200 200" class="w-full h-full" preserveAspectRatio="none">
+            <path d="M0,200 L0,150 Q100,145 200,150 Q300,155 400,150 Q500,145 600,150 Q700,155 800,150 Q900,145 1000,150 Q1100,155 1200,150 L1200,200 Z" fill="rgba(3, 105, 161, 0.4)" />
+          </svg>
+        </div>
+        <div class="fixed bottom-0 left-0 right-0 sinkening-water-2 z-[100] translate-y-8">
+          <svg viewBox="0 0 1200 200" class="w-full h-full" preserveAspectRatio="none">
+            <path d="M0,200 L0,160 Q120,155 240,160 Q360,165 480,160 Q600,155 720,160 Q840,165 960,160 Q1080,155 1200,160 L1200,200 Z" fill="rgba(3, 105, 161, 0.4)" />
+          </svg>
+        </div>
       </div>
-    <% else %>
-      <div id="flash-container">
-        <%= render "shared/flash" %>
-      </div>
-      <%= yield %>
+
+      <audio id="sinkening-wave-music" loop preload="auto" volume="0.1">
+        <source src="<%= asset_path('waves.mp3') %>" type="audio/mpeg">
+      </audio>
+
+      <script>
+        function initializeWaveMusic() {
+          const audio = document.getElementById('sinkening-wave-music');
+          if (!audio) return;
+
+          let hasPlayed = false;
+
+          let fadeOutInterval = null;
+          let fadeInInterval = null;
+
+          function fadeInAudio(audio, targetVolume = 0.05, duration = 5000) {
+            audio.volume = 0;
+            const steps = 50;
+            const volumeStep = targetVolume / steps;
+            const timeStep = duration / steps;
+
+            // Clear any existing fade intervals
+            if (fadeOutInterval) clearInterval(fadeOutInterval);
+            if (fadeInInterval) clearInterval(fadeInInterval);
+
+            let currentStep = 0;
+            fadeInInterval = setInterval(() => {
+              currentStep++;
+              audio.volume = Math.min(volumeStep * currentStep, targetVolume);
+
+              if (currentStep >= steps) {
+                clearInterval(fadeInInterval);
+                audio.volume = targetVolume;
+                fadeInInterval = null;
+              }
+            }, timeStep);
+          }
+
+          function fadeOutAudio(audio, duration = 5000) {
+            const currentVolume = audio.volume;
+            const targetVolume = 0.01;
+            const steps = 50;
+            const volumeStep = (currentVolume - targetVolume) / steps;
+            const timeStep = duration / steps;
+
+            // Clear any existing fade intervals
+            if (fadeOutInterval) clearInterval(fadeOutInterval);
+            if (fadeInInterval) clearInterval(fadeInInterval);
+
+            let currentStep = 0;
+            fadeOutInterval = setInterval(() => {
+              currentStep++;
+              audio.volume = Math.max(currentVolume - (volumeStep * currentStep), targetVolume);
+
+              if (currentStep >= steps || audio.volume <= targetVolume) {
+                clearInterval(fadeOutInterval);
+                audio.volume = targetVolume;
+                fadeOutInterval = null;
+              }
+            }, timeStep);
+          }
+
+          function setupLoopFading(audio) {
+            audio.addEventListener('timeupdate', () => {
+              const duration = audio.duration;
+              const currentTime = audio.currentTime;
+              const fadeOutTime = 6; // Start fade out 6 seconds before end
+
+              if (duration - currentTime <= fadeOutTime && audio.volume > 0.02 && !fadeOutInterval) {
+                fadeOutAudio(audio, 5000); // 5 second fade out to 0.01
+              }
+
+              // Detect when audio loops back to beginning and fade in
+              if (currentTime < 0.5 && audio.volume < 0.05) {
+                fadeInAudio(audio, 0.05, 5000);
+              }
+            });
+          }
+
+          function tryPlayAudio() {
+            if (!hasPlayed && audio) {
+              audio.play().then(() => {
+                hasPlayed = true;
+                setupLoopFading(audio);
+                fadeInAudio(audio);
+              }).catch(() => {
+                // If autoplay fails, set up interaction listeners
+                setupInteractionListeners();
+              });
+            }
+          }
+
+          function setupInteractionListeners() {
+            const playOnInteraction = () => {
+              if (!hasPlayed && audio) {
+                audio.play().then(() => {
+                  hasPlayed = true;
+                  setupLoopFading(audio);
+                  fadeInAudio(audio);
+                  // Remove listeners once audio starts playing
+                  document.removeEventListener('click', playOnInteraction);
+                  document.removeEventListener('keydown', playOnInteraction);
+                  document.removeEventListener('touchstart', playOnInteraction);
+                }).catch(() => {});
+              }
+            };
+
+            document.addEventListener('click', playOnInteraction);
+            document.addEventListener('keydown', playOnInteraction);
+            document.addEventListener('touchstart', playOnInteraction);
+          }
+
+          // Try to play on load
+          tryPlayAudio();
+        }
+
+        document.addEventListener('DOMContentLoaded', initializeWaveMusic);
+        document.addEventListener('turbo:load', initializeWaveMusic);
+        document.addEventListener('turbo:render', initializeWaveMusic);
+      </script>
+
+      <%
+        intensity = SinkeningSetting.current.intensity
+        adjusted_intensity = intensity * intensity
+        rotation_intensity = 5 * adjusted_intensity + 1
+        vertical_intensity = 50 * adjusted_intensity
+        water_rotation_intensity = 3 * adjusted_intensity + 2
+        water_vertical_intensity = 10 * adjusted_intensity + 10
+      %>
+
+      <style>
+        @keyframes water-rock {
+          0% { transform: rotate(-<%= water_rotation_intensity %>deg) translateY(<%= water_vertical_intensity * 0.2 %>px) translateX(-<%= adjusted_intensity * 100 %>px); }
+          40% { transform: rotate(<%= water_rotation_intensity * 0.2 %>deg) translateY(-<%= water_vertical_intensity * 0.8 %>px) translateX(<%= adjusted_intensity * 80 %>px); }
+          45% { transform: rotate(<%= water_rotation_intensity * 0.2 %>deg) translateY(-<%= water_vertical_intensity * 0.8 %>px) translateX(<%= adjusted_intensity * 80 %>px); }
+          95% { transform: rotate(-<%= water_rotation_intensity %>deg) translateY(<%= water_vertical_intensity * 0.2 %>px) translateX(-<%= adjusted_intensity * 100 %>px); }
+          100% { transform: rotate(-<%= water_rotation_intensity %>deg) translateY(<%= water_vertical_intensity * 0.2 %>px) translateX(-<%= adjusted_intensity * 100 %>px); }
+        }
+
+        .sinkening-container {
+          transform: rotate(-<%= rotation_intensity %>deg) translateY(<%= vertical_intensity %>px);
+        }
+
+        .sinkening-water {
+          animation: water-rock 10s ease-in-out -4s infinite;
+          pointer-events: none;
+          width: 150vw;
+          margin-left: -25vw;
+          height: calc(35rem + <%= adjusted_intensity*300 %>vh);
+        }
+
+        .sinkening-water-2 {
+          animation: water-rock 10s ease-in-out -8s infinite;
+          pointer-events: none;
+          width: 150vw;
+          margin-left: -25vw;
+          height: calc(35rem + <%= adjusted_intensity*300 %>vh);
+        }
+      </style>
     <% end %>
-
-    <div id="modals"></div>
   </body>
 </html>

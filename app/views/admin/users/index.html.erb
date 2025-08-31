@@ -24,12 +24,6 @@
     </tr>
   </thead>
   <tbody>
-    <tr>
-      <td><%= current_user.id %></td>
-      <td><%= link_to admin_user_path(current_user) do %><span style="color: var(--color-primary); font-weight: bold;">the girl(?) reading this &lt;3</span><% end %></td>
-      <td><%= current_user.email %></td>
-      <td><%= link_to "View", admin_user_path(current_user), class: 'abtn secondary', style: 'padding: 0.3em 0.8em; font-size: 0.95em;' %></td>
-    </tr>
     <% @users.each do |user| %>
       <tr>
         <td><%= user.id %></td>
@@ -38,10 +32,19 @@
         <td><%= link_to "View", admin_user_path(user), class: 'abtn secondary', style: 'padding: 0.3em 0.8em; font-size: 0.95em;' %></td>
       </tr>
     <% end %>
+    <% if @users.empty? %>
+      <tr>
+        <td colspan="4" style="text-align: center; padding: 2em;">nobody here but us chickens...</td>
+      </tr>
+    <% end %>
   </tbody>
 </table>
 <div style="margin: 2em 0;">
   <%== pagy_nav(@pagy) %> <br>
   <%== pagy_info(@pagy) %>
-</div>
+
 <%= link_to "← back", admin_root_path, class: 'aout' %>
+
+<br>
+<br>
+<%= link_to admin_user_path(current_user) do %><span style="color: var(--color-primary); font-weight: bold;">you</span><% end %>

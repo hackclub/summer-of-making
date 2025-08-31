@@ -41,6 +41,8 @@ module Journey
     # bring in game constants from yaml
     config.game_constants = config_for(:game_constants)
 
+    config.flipper_features = config_for(:flipper_features)
+
     # let sessions last a while >_<
     config.session_store :cookie_store,
                          key: "_journey_session",

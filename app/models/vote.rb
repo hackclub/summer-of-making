@@ -8,6 +8,7 @@
 #  ai_feedback           :text
 #  explanation           :text             not null
 #  invalid_reason        :text
+#  is_low_quality        :boolean          default(FALSE), not null
 #  marked_invalid_at     :datetime
 #  music_played          :boolean
 #  processed_at          :datetime
@@ -57,7 +58,7 @@ class Vote < ApplicationRecord
 
   has_many :vote_changes, dependent: :destroy
 
-  validates :explanation, presence: true, length: { minimum: 10, maximum: 2000 }
+  validates :explanation, presence: true, length: { minimum: 100, maximum: 2000 }
   validates :status, inclusion: { in: %w[active invalid] }
 
   validates :user_id, uniqueness: {
@@ -71,10 +72,12 @@ class Vote < ApplicationRecord
   scope :invalid, -> { where(status: "invalid") }
   scope :recent, -> { order(created_at: :desc) }
 
+  before_validation :no_whitesp_my_friend
   before_save :normalize_ship_event_order
 
   after_create :process_vote_results
   after_create :queue_badge_award
+  after_commit :maybe_release_user_escrow, on: :create
 
   # Helper methods to get winner/loser/tied projects
   def winner_project
@@ -118,6 +121,10 @@ class Vote < ApplicationRecord
 
   private
 
+  def no_whitesp_my_friend
+    self.explanation = explanation.to_s.strip
+  end
+
   def queue_badge_award
     AwardBadgesJob.perform_later(user_id, "vote_created")
   end
@@ -140,5 +147,10 @@ class Vote < ApplicationRecord
 
   def process_vote_results
     VoteProcessingService.new(self).process
+  end
+
+  def maybe_release_user_escrow
+    # NOTE Aug 23, 2025 IST: Escrow is deprecated for new payouts.
+    user.release_escrowed_payouts_if_eligible!
   end
 end

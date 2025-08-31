@@ -1,0 +1,45 @@
+# Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+# == Schema Information
+#
+# Table name: shipwright_advices
+#
+#  id                    :bigint           not null, primary key
+#  completed_at          :datetime
+#  description           :text
+#  proof_link            :string
+#  shell_reward          :integer          default(0)
+#  status                :integer          default("pending")
+#  created_at            :datetime         not null
+#  updated_at            :datetime         not null
+#  project_id            :bigint           not null
+#  ship_certification_id :bigint           not null
+#
+# Indexes
+#
+#  index_shipwright_advices_on_project_id             (project_id)
+#  index_shipwright_advices_on_project_id_and_status  (project_id,status)
+#  index_shipwright_advices_on_ship_certification_id  (ship_certification_id)
+#
+# Foreign Keys
+#
+#  fk_rails_...  (project_id => projects.id)
+#  fk_rails_...  (ship_certification_id => ship_certifications.id)
+#
+one:
+  project: one
+  ship_certification: one
+  description: MyText
+  proof_link: MyString
+  status: 1
+  shell_reward: 1
+  completed_at: 2025-08-25 14:04:03
+
+two:
+  project: two
+  ship_certification: two
+  description: MyText
+  proof_link: MyString
+  status: 1
+  shell_reward: 1
+  completed_at: 2025-08-25 14:04:03

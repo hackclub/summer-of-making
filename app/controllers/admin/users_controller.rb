@@ -1,7 +1,9 @@
 module Admin
   class UsersController < ApplicationController
     include Pagy::Backend
+    before_action :ensure_authorized_user
     before_action :set_user, except: [ :index ]
+    skip_before_action :authenticate_admin!
 
     def index
       @pagy, @users = pagy(
@@ -35,6 +37,8 @@ module Admin
       ).find(params[:id])
 
       @hackatime_id = fetch_hackatime(@user.email)
+
+      @flipper_flags = Flipper.features
     end
 
     def internal_notes
@@ -52,7 +56,7 @@ module Admin
       unless parameters[:reason].present?
         return redirect_to(admin_user_path(@user), notice: "Please provide a reason!")
       end
-      @payout = @user.payouts.build(parameters.merge(payable: @user))
+      @payout = @user.payouts.build(parameters.merge(payable: @user, escrowed: false))
 
       begin
         @payout.save!
@@ -139,6 +143,17 @@ module Admin
       redirect_to admin_user_path(@user)
     end
 
+    def flip
+      if params[:state] == "true"
+        Flipper.enable_actor(params[:flag], @user)
+      else
+        Flipper.disable_actor(params[:flag], @user)
+      end
+      @user.create_activity("flip", params: { flag: params[:flag], state: params[:state] })
+      flash[:success] = "gotcha, flipped #{params[:flag]} to #{params[:state]}"
+      redirect_to admin_user_path(@user)
+    end
+
     def impersonate
       unless current_user&.is_admin?
         Honeybadger.notify("what the h-e-double-hockey-sticks?")
@@ -218,7 +233,46 @@ module Admin
       redirect_to admin_user_path(@user)
     end
 
+    def refresh_hackatime
+      begin
+        @user.refresh_hackatime_data_now
+        flash[:success] = "your wish is my command"
+      rescue => e
+        Honeybadger.notify(e, context: { user_id: @user.id })
+        flash[:error] = "failed manual refresh ht #{e.message}"
+      end
+      redirect_to admin_user_path(@user)
+    end
+
+    def grant_fraud_reviewer
+      if @user.fraud_team_member?
+        flash[:notice] = "#{@user.email} nothing changed, they already have fraud reviewer permissions"
+      else
+        @user.update!(fraud_team_member: true)
+        @user.create_activity("grant_fraud_reviewer")
+        flash[:success] = "gotcha, granted fraud reviewer rights to #{@user.email}"
+      end
+      redirect_to admin_user_path(@user)
+    end
+
+    def revoke_fraud_reviewer
+      unless @user.fraud_team_member?
+        flash[:notice] = "#{@user.email} nothing changed, they don't have fraud reviewer permissions"
+      else
+        @user.update!(fraud_team_member: false)
+        @user.create_activity("revoke_fraud_reviewer")
+        flash[:success] = "gotcha, revoked fraud reviewer rights from #{@user.email}"
+      end
+      redirect_to admin_user_path(@user)
+    end
+
     private
+
+    def ensure_authorized_user
+      unless current_user&.is_admin? || current_user&.fraud_team_member?
+        redirect_to root_path, alert: "whomp whomp"
+      end
+    end
 
     def fetch_hackatime(email)
       return nil if email.blank?

@@ -23,13 +23,12 @@
       has_hackatime_time = time_since_last >= 300  # 5 minutes
     %>
 
-    <%= form_with(model: [@project, @project.devlogs.build], class: "space-y-3 md:space-y-4", data: { controller: "form", action: "submit->form#validateAndPreventDoubleSubmission" }) do |f| %>
-
+    <%= form_with(model: [@project, @project.devlogs.build], class: "space-y-3 md:space-y-4", data: { controller: "form devlog-attachment-paste", action: "submit->form#validateAndPreventDoubleSubmission" }) do |f| %>
       <% if !has_hackatime_time %>
         <div class="flex flex-col items-center justify-center space-y-6">
           <%= image_tag 'orpheustimer.png', class: 'w-48 h-48 md:w-64 md:h-64 2xl:w-80 2xl:h-80 mb-4' %>
           <p class="text-base md:text-lg 2xl:text-xl text-center">
-            To post a devlog, you need at least 5 minutes of Hackatime time.
+            To post a devlog, you need to code for at least 5 minutes.
             <% if @project.hackatime_project_keys.present? %>
               <br><br>Your Hackatime time since last devlog is
               <% time_since_last = @project.unlogged_time %>
@@ -38,6 +37,8 @@
               <% since_last_seconds = time_since_last % 60 %>
               <%= "#{since_last_hours}h #{since_last_minutes}m #{since_last_seconds}s" %>
             <% end %>
+            <br>
+            <span class="text-sm">It may take up to 10 minutes for Hackatime data to show up here.</span>
           </p>
         </div>
       <% end %>
@@ -88,7 +89,8 @@
               w-full p-2 border-2 border-som-bright focus:outline-none focus:border-som-dark text-base
               md:text-lg 2xl:text-xl rounded-md transition-colors
             }.squish,
-            rows: 4, required: true %>
+            rows: 4, required: true,
+            data: { form_target: "devlogText", devlog_attachment_paste_target: "devlogText" } %>
         </div>
 
         <div class="space-y-1.5 md:space-y-2">
@@ -97,17 +99,20 @@
             f.file_field :file,
               class: "w-full border-2 border-som-bright p-2 focus:outline-none focus:border-som-dark text-base md:text-lg 2xl:text-xl rounded-md cursor-pointer transition-colors",
               accept: "image/*,video/*,audio/*",
-              required: true
+              required: true,
+              data: { devlog_attachment_paste_target: "fileInput" }
           %>
           <p class="text-sm text-gray-600">Supports images, audio, video, and GIFs (Required)</p>
         </div>
 
+        <%= f.hidden_field :project_id, value: @project.id, data: { form_target: "projectId" } %>
         <div class="flex justify-end space-x-4 pt-6">
           <%=
             render "shared/button",
               data: { form_target: "submitButton" },
               icon: "quill.svg",
-              text: "Create Devlog"
+              text: "Create Devlog",
+              classes: current_user.devlogs.empty? && current_user.projects.count == 1 ? "animate-bounce" : ""
           %>
         </div>
       </div>

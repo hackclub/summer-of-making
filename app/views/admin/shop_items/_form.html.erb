@@ -163,7 +163,7 @@
         <small class="form-text text-muted">Used by HCB Preauth Grant items to provide spending instructions</small>
       </div>
 
-      <div x-show="selectedType === 'ShopItem::WarehouseItem'" class="mb-3">
+      <div x-show="selectedType === 'ShopItem::WarehouseItem' || selectedType === 'ShopItem::PileOfStickersItem'" class="mb-3">
         <%= form.label :agh_contents, "AGH Contents (JSON)", class: "form-label" %>
         <%= form.text_area :agh_contents, rows: 4, class: "form-control", placeholder: "Enter valid JSON" %>
       </div>

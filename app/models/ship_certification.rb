@@ -28,10 +28,11 @@ class ShipCertification < ApplicationRecord
   validates :reviewer, presence: true, unless: -> { pending? }
   belongs_to :project
   has_many :devlogs, through: :project
+  has_many :shipwright_advices, class_name: "ShipwrightAdvice"
   has_one_attached :proof_video, dependent: :destroy
 
   after_commit :schedule_video_conversion, if: :should_convert_video?
-  # after_commit :schedule_judgment_notification, if: :saved_change_to_judgement?
+  after_commit :schedule_judgment_notification, if: :saved_change_to_judgement?
 
   default_scope { joins(:project).where(projects: { is_deleted: false }) }
 
