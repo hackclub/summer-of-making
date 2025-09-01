@@ -11,8 +11,8 @@ class FraudReportsController < ApplicationController
 
     # must be in the current voting pair
     if fraud_report.suspect_type == "ShipEvent"
-      current_ids = current_user.user_vote_queue&.current_ship_events&.map(&:id) || []
-      unless current_ids.include?(fraud_report.suspect_id)
+      current_pair = current_user.user_vote_queue&.current_pair || []
+      unless current_pair.include?(fraud_report.suspect_id)
         flash[:alert] = "Invalid report target."
         redirect_to request.referer || root_path
         return
@@ -40,37 +40,26 @@ class FraudReportsController < ApplicationController
         fraud_report.update_column(:reason, "OTHER: #{fraud_report.reason.to_s.strip}")
       end
 
+      fraud_report.update_column(:category, kind.to_s)
+
       # only dm the first time and auto-exclude after 3 low-quality reports
       if fraud_report.reason.to_s.start_with?("LOW_QUALITY:")
         c = FraudReport.unresolved.where(suspect_type: fraud_report.suspect_type, suspect_id: fraud_report.suspect_id).count
-        if c == 1
-          owner = if fraud_report.suspect_type == "ShipEvent"
-            ShipEvent.find_by(id: fraud_report.suspect_id)&.user
-          else
-            Project.find_by(id: fraud_report.suspect_id)&.user
-          end
-          if owner&.slack_id.present?
-            thing = fraud_report.suspect_type == "ShipEvent" ? "ship" : "project"
-            msg = <<~EOT
-            Heads up — someone reported your #{thing} as low-effort.
-            Thanks for building! Our shipwrights will review and follow up if needed. No action is required right now.
-            EOT
-            SendSlackDmJob.perform_later(owner.slack_id, msg)
-          end
-        end
         if c >= 3 && fraud_report.suspect_type == "ShipEvent"
           ShipEvent.where(id: fraud_report.suspect_id).update_all(excluded_from_pool: true)
           msg = <<~EOT
           Heads up — your ship has been excluded from voting due to multiple low-quality reports.
           Thanks for building! Our shipwrights will review and follow up if needed. No action is required right now.
           EOT
-          SendSlackDmJob.perform_later(owner.slack_id, msg)
+          ship_event = ShipEvent.find_by(id: fraud_report.suspect_id)
+          SendSlackDmJob.perform_later(ship_event.user.slack_id, msg) if ship_event&.user&.slack_id.present?
         end
       end
 
       # advance the vote queue if this report was filed from the voting page
       if fraud_report.suspect_type == "ShipEvent"
-        if current_user.user_vote_queue&.current_ship_events&.map(&:id)&.include?(fraud_report.suspect_id)
+        current_pair = current_user.user_vote_queue&.current_pair || []
+        if current_pair.include?(fraud_report.suspect_id)
           current_user.advance_vote_queue!
           advanced = true
         end

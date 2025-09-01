@@ -23,6 +23,16 @@
       • Reviewed by <%= @project.ysws_review_submission.reviewer.display_name %>
     <% end %>
   </p>
+  <% if @project.latest_ship_certification&.reviewer %>
+    <div style="margin: 1rem 0; padding: 1rem; background: var(--color-success-subtle); border: 2px solid var(--color-success); border-radius: 8px;">
+      <h3 style="margin: 0; color: var(--color-success-dark); font-size: 1.4em; display: flex; align-items: center; gap: 0.5rem;">
+        <span>Ship Certified by <%= @project.latest_ship_certification.reviewer.display_name %></span>
+      </h3>
+      <p style="margin: 0.5rem 0 0 0; color: var(--color-success-dark); font-size: 0.9em;">
+        Approved <%= @project.latest_ship_certification.created_at.strftime("%B %d, %Y at %l:%M %p") %>
+      </p>
+    </div>
+  <% end %>
   <p style="margin: 1rem 0;"><%= @project.description %></p>
 
   <!-- Project Links -->
@@ -47,7 +57,14 @@
   <!-- Ship Certification Video -->
   <% if @project.latest_ship_certification&.proof_video&.attached? %>
     <div style="margin: 1rem 0;">
-      <h4 style="margin: 0 0 0.5rem 0;">Ship Certification Video</h4>
+      <h4 style="margin: 0 0 0.5rem 0;">
+        Ship Certification Video
+        <% if @project.latest_ship_certification.reviewer %>
+          <span style="font-size: 0.8em; color: var(--color-text-muted); font-weight: normal;">
+            by <%= @project.latest_ship_certification.reviewer.display_name %>
+          </span>
+        <% end %>
+      </h4>
       <video controls style="width: 100%; max-width: 600px; border-radius: 8px;">
         <source src="<%= url_for(@project.latest_ship_certification.proof_video) %>" type="video/mp4">
         Your browser does not support the video tag.

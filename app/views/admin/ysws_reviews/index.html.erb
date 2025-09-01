@@ -12,7 +12,6 @@
     </span>
   </h1>
 </div>
-
 <div style="display: flex; gap: 2rem; margin-bottom: 2rem;">
   <div style="background: var(--color-card); padding: 1rem; border-radius: 8px; flex: 1;">
     <h3>Review Stats</h3>
@@ -21,7 +20,6 @@
     <p><strong>Total Eligible:</strong> <span class="pill pill-dark"><%= @total_all %></span></p>
   </div>
 </div>
-
 <div style="display: flex; gap: 1rem; margin-bottom: 2rem;">
   <%= link_to "Pending", admin_ysws_reviews_path(filter: "pending"),
       class: "pill #{'pill-yellow' if @filter == 'pending'} #{'pill-gray' unless @filter == 'pending'}",
@@ -33,7 +31,6 @@
       class: "pill #{'pill-dark' if @filter == 'all'} #{'pill-gray' unless @filter == 'all'}",
       style: "text-decoration: none; padding: 0.5rem 1rem;" %>
 </div>
-
 <div style="background: var(--color-card); border-radius: 8px; overflow: hidden;">
   <% if @projects.any? %>
     <% @projects.each_with_index do |project, index| %>
@@ -65,5 +62,4 @@
     </div>
   <% end %>
 </div>
-
 </body>

@@ -29,7 +29,7 @@
     id: "report-modal-#{suspect.class.name.downcase}-#{suspect.id}",
     title: "Report #{modal_title}?",
     max_width: "max-w-2xl" do %>
-  <%= form_with model: FraudReport.new, url: fraud_reports_path, method: :post, local: true do |form| %>
+  <%= form_with model: FraudReport.new, url: fraud_reports_path, method: :post, data: { turbo: false }, local: true do |form| %>
     <%= form.hidden_field :suspect_type, value: suspect.class.name %>
     <%= form.hidden_field :suspect_id, value: suspect.id %>
 

@@ -5,8 +5,13 @@ module Admin
 
     def index
       @threshold = 1
-      proj_counts = FraudReport.unresolved.where(suspect_type: "Project").where("reason LIKE ?", "LOW_QUALITY:%").group(:suspect_id).count
-      se_counts = FraudReport.unresolved.where(suspect_type: "ShipEvent").where("reason LIKE ?", "LOW_QUALITY:%").group(:suspect_id).count
+      @state = params[:state].presence_in([ "resolved", "unresolved" ]) || "unresolved"
+
+      base = FraudReport.low_quality_category
+      base = @state == "resolved" ? base.resolved : base.unresolved
+
+      proj_counts = base.where(suspect_type: "Project").group(:suspect_id).count
+      se_counts = base.where(suspect_type: "ShipEvent").group(:suspect_id).count
       se_project_map = ShipEvent.where(id: se_counts.keys).pluck(:id, :project_id).to_h
       rolled = se_counts.each_with_object(Hash.new(0)) { |(se_id, count), h| h[se_project_map[se_id]] += count }
       merged = proj_counts.merge(rolled) { |_, a, b| a + b }
@@ -18,8 +23,8 @@ module Admin
       # get all reasons
       @project_reports = {}
       project_ids.each do |project_id|
-        project_reports = FraudReport.unresolved.where(suspect_type: "Project", suspect_id: project_id).where("reason LIKE ?", "LOW_QUALITY:%").includes(:reporter)
-        ship_reports = FraudReport.unresolved.where("reason LIKE ?", "LOW_QUALITY:%").joins("JOIN ship_events ON ship_events.id = fraud_reports.suspect_id").where(ship_events: { project_id: project_id }).includes(:reporter)
+        project_reports = base.where(suspect_type: "Project", suspect_id: project_id).includes(:reporter)
+        ship_reports = base.joins("JOIN ship_events ON ship_events.id = fraud_reports.suspect_id").where(ship_events: { project_id: project_id }).includes(:reporter)
 
         all_reports = project_reports.to_a + ship_reports.to_a
         @project_reports[project_id] = all_reports.sort_by(&:created_at)
@@ -46,8 +51,8 @@ module Admin
         end
       end
 
-      FraudReport.where(suspect_type: "Project", suspect_id: project.id, resolved: false).update_all(resolved: true)
-      FraudReport.where(suspect_type: "ShipEvent").joins("JOIN ship_events ON ship_events.id = fraud_reports.suspect_id").where(ship_events: { project_id: project.id }, resolved: false).update_all(resolved: true)
+      FraudReport.where(suspect_type: "Project", suspect_id: project.id, resolved: false).update_all(resolved: true, resolved_at: Time.current, resolved_by_id: current_user.id, resolved_outcome: "low_quality", resolved_message: reason)
+      FraudReport.where(suspect_type: "ShipEvent").joins("JOIN ship_events ON ship_events.id = fraud_reports.suspect_id").where(ship_events: { project_id: project.id }, resolved: false).update_all(resolved: true, resolved_at: Time.current, resolved_by_id: current_user.id, resolved_outcome: "low_quality", resolved_message: reason)
 
       if project.user&.slack_id.present?
         message = <<~EOT
@@ -65,7 +70,10 @@ module Admin
 
     def mark_ok
       project = Project.find(params[:project_id])
-      FraudReport.where(suspect_type: "Project", suspect_id: project.id, resolved: false).update_all(resolved: true)
+      ok_reason = params[:ok_reason].to_s.presence
+      FraudReport.where(suspect_type: "Project", suspect_id: project.id, resolved: false).update_all(resolved: true, resolved_at: Time.current, resolved_by_id: current_user.id, resolved_outcome: "ok", resolved_message: ok_reason)
+      FraudReport.where(suspect_type: "ShipEvent").joins("JOIN ship_events ON ship_events.id = fraud_reports.suspect_id").where(ship_events: { project_id: project.id }, resolved: false).update_all(resolved: true, resolved_at: Time.current, resolved_by_id: current_user.id, resolved_outcome: "ok", resolved_message: ok_reason)
+
       redirect_to admin_low_quality_dashboard_index_path, notice: "Marked OK and cleared reports."
     end
 
