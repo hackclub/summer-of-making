@@ -46,9 +46,7 @@
                   <% if remaining > 0 %>
                     <p class="text-red-400">Your latest payout is on hold — you need <%= pluralize(remaining, 'more vote') %> since your last ship to release your shells. <span data-action="click->modal#startVoting" data-vote-path="<%= new_vote_path %>" class="underline text-blue-700 hover:text-blue-800 cursor-pointer">Start voting</span>.</p>
                   <% else %>
-                   <% current_votes = latest_ship_event.vote_count %>
-                   <% votes_needed = latest_ship_event.votes_needed_for_payout %>
-                    <p class="text-red-400">Your latest ship has received <%= current_votes %> out of 18 needed and needs <%= votes_needed %> more for payout. Hang tight!</p>
+                    <p class="text-red-400">Your latest ship is being voted on. Hang tight - you'll get your payout soon!</p>
                   <% end %>
                 <% elsif project.certification_status == "rejected" %>
                   <% if project.can_request_recertification? %>
