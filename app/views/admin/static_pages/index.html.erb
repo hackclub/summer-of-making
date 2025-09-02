@@ -29,6 +29,7 @@
       <%= link_to awaiting_fulfillment_admin_shop_orders_path, class: 'abtn secondary' do %>
         Manual Fulfillment <span class="pill"><%= ShopOrder.manually_fulfilled.without_item_type("ShopItem::FreeStickers").where(aasm_state: :awaiting_periodical_fulfillment).count %></span>
       <% end %>
+      <%= link_to "stuff go out the door meter", admin_fulfillment_dashboard_index_path, class: 'abtn secondary' %>
       <%= link_to "Shop Items", admin_shop_items_path, class: 'abtn secondary' %>
       <%= link_to admin_users_path, class: 'abtn secondary' do %>
         Users

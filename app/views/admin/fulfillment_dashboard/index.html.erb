@@ -1,0 +1,205 @@
+<h1 style="color: var(--color-primary);margin-top: 0;">stuff go out the door dashboard:</h1>
+<div style="margin-bottom: 2em; padding: 1em; background: var(--color-darker); border-radius: 8px;">
+  <div>
+    <strong style="color: var(--color-text); display: block; margin-bottom: 0.5em;font-size: 1.2em;">
+      are ya winning son?
+    </strong>
+    <div style="display: grid; grid-template-columns: repeat(5, 1fr); gap: 1em;">
+      <div style="background: var(--color-dark); padding: 1em; border-radius: 6px; border-left: 4px solid #6366f1;">
+        <div style="font-size: 0.9em; color: var(--color-muted); margin-bottom: 0.5em; font-weight: bold;">all</div>
+        <div style="margin-bottom: 0.5em;">
+          <span class="pill pill-yellow">pending: <%= @s[:all][:pc] %></span>
+        </div>
+        <div style="margin-bottom: 0.5em;">
+          <span class="pill pill-blue">awaiting: <%= @s[:all][:ac] %></span>
+        </div>
+        <div style="font-size: 0.8em; color: var(--color-text); margin-bottom: 0.2em;">avg waiting fd</div>
+        <div style="font-family: monospace; font-weight: bold; color: <%= @s[:all][:aho] && @s[:all][:aho] > 172800 ? '#ff6b6b' : 'white' %>;">
+          <%= d(@s[:all][:aho]) %>
+        </div>
+        <div style="font-size: 0.8em; color: var(--color-text); margin-bottom: 0.2em;">avg avg awaiting fulfill check</div>
+        <div style="font-family: monospace; font-weight: bold; color: <%= @s[:all][:ahf] && @s[:all][:ahf] > 172800 ? '#ff6b6b' : 'white' %>;">
+          <%= d(@s[:all][:ahf]) %>
+        </div>
+      </div>
+
+      <div style="background: var(--color-dark); padding: 1em; border-radius: 6px; border-left: 4px solid #10b981;">
+        <div style="font-size: 0.9em; color: var(--color-muted); margin-bottom: 0.5em; font-weight: bold;">hq stuff</div>
+        <div style="margin-bottom: 0.5em;">
+          <span class="pill pill-yellow">pending: <%= @s[:hq_mail][:pc] %></span>
+        </div>
+        <div style="margin-bottom: 0.5em;">
+          <span class="pill pill-blue">awaiting: <%= @s[:hq_mail][:ac] %></span>
+        </div>
+        <div style="font-size: 0.8em; color: var(--color-text); margin-bottom: 0.2em;">avg waiting fd</div>
+        <div style="font-family: monospace; font-weight: bold; color: <%= @s[:hq_mail][:aho] && @s[:hq_mail][:aho] > 172800 ? '#ff6b6b' : 'white' %>;">
+          <%= d(@s[:hq_mail][:aho]) %>
+        </div>
+        <div style="font-size: 0.8em; color: var(--color-text); margin-bottom: 0.2em;">avg avg awaiting fulfill check</div>
+        <div style="font-family: monospace; font-weight: bold; color: <%= @s[:hq_mail][:ahf] && @s[:hq_mail][:ahf] > 172800 ? '#ff6b6b' : 'white' %>;">
+          <%= d(@s[:hq_mail][:ahf]) %>
+        </div>
+      </div>
+
+      <!-- Third Party Column -->
+      <div style="background: var(--color-dark); padding: 1em; border-radius: 6px; border-left: 4px solid #f59e0b;">
+        <div style="font-size: 0.9em; color: var(--color-muted); margin-bottom: 0.5em; font-weight: bold;">rowan & co stuff</div>
+        <div style="margin-bottom: 0.5em;">
+          <span class="pill pill-yellow">pending: <%= @s[:third_party][:pc] %></span>
+        </div>
+        <div style="margin-bottom: 0.5em;">
+          <span class="pill pill-blue">awaiting: <%= @s[:third_party][:ac] %></span>
+        </div>
+        <div style="font-size: 0.8em; color: var(--color-text); margin-bottom: 0.2em;">avg waiting fd</div>
+        <div style="font-family: monospace; font-weight: bold; color: <%= @s[:third_party][:aho] && @s[:third_party][:aho] > 172800 ? '#ff6b6b' : 'white' %>;">
+          <%= d(@s[:third_party][:aho]) %>
+        </div>
+        <div style="font-size: 0.8em; color: var(--color-text); margin-bottom: 0.2em;">avg avg awaiting fulfill check</div>
+        <div style="font-family: monospace; font-weight: bold; color: <%= @s[:third_party][:ahf] && @s[:third_party][:ahf] > 172800 ? '#ff6b6b' : 'white' %>;">
+          <%= d(@s[:third_party][:ahf]) %>
+        </div>
+      </div>
+
+      <div style="background: var(--color-dark); padding: 1em; border-radius: 6px; border-left: 4px solid #8b5cf6;">
+        <div style="font-size: 0.9em; color: var(--color-muted); margin-bottom: 0.5em; font-weight: bold;">sinkening</div>
+        <div style="margin-bottom: 0.5em;">
+          <span class="pill pill-yellow">pending: <%= @s[:sinkening][:pc] %></span>
+        </div>
+        <div style="margin-bottom: 0.5em;">
+          <span class="pill pill-blue">awaiting: <%= @s[:sinkening][:ac] %></span>
+        </div>
+        <div style="font-size: 0.8em; color: var(--color-text); margin-bottom: 0.2em;">avg waiting fd</div>
+        <div style="font-family: monospace; font-weight: bold; color: <%= @s[:sinkening][:aho] && @s[:sinkening][:aho] > 172800 ? '#ff6b6b' : 'white' %>;">
+          <%= d(@s[:sinkening][:aho]) %>
+        </div>
+        <div style="font-size: 0.8em; color: var(--color-text); margin-bottom: 0.2em;">avg avg awaiting fulfill check</div>
+        <div style="font-family: monospace; font-weight: bold; color: <%= @s[:sinkening][:ahf] && @s[:sinkening][:ahf] > 172800 ? '#ff6b6b' : 'white' %>;">
+          <%= d(@s[:sinkening][:ahf]) %>
+        </div>
+      </div>
+
+      <div style="background: var(--color-dark); padding: 1em; border-radius: 6px; border-left: 4px solid #ef4444;">
+        <div style="font-size: 0.9em; color: var(--color-muted); margin-bottom: 0.5em; font-weight: bold;">warehouse</div>
+        <div style="margin-bottom: 0.5em;">
+          <span class="pill pill-yellow">pending: <%= @s[:warehouse][:pc] %></span>
+        </div>
+        <div style="margin-bottom: 0.5em;">
+          <span class="pill pill-blue">awaiting: <%= @s[:warehouse][:ac] %></span>
+        </div>
+        <div style="font-size: 0.8em; color: var(--color-text); margin-bottom: 0.2em;">avg waiting fd</div>
+        <div style="font-family: monospace; font-weight: bold; color: <%= @s[:warehouse][:aho] && @s[:warehouse][:aho] > 172800 ? '#ff6b6b' : 'white' %>;">
+          <%= d(@s[:warehouse][:aho]) %>
+        </div>
+        <div style="font-size: 0.8em; color: var(--color-text); margin-bottom: 0.2em;">avg avg awaiting fulfill check</div>
+        <div style="font-family: monospace; font-weight: bold; color: <%= @s[:warehouse][:ahf] && @s[:warehouse][:ahf] > 172800 ? '#ff6b6b' : 'white' %>;">
+          <%= d(@s[:warehouse][:ahf]) %>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<table class="atable">
+  <thead>
+    <tr>
+      <th>id</th>
+      <th>who</th>
+      <th>what</th>
+      <th>paid</th>
+      <th>qty</th>
+      <th>now</th>
+      <th>time</th>
+      <th>addr</th>
+      <th>created</th>
+      <th>exec</th>
+    </tr>
+  </thead>
+  <tbody>
+    <div style="margin-bottom: 1em;">
+      <%= form_tag admin_fulfillment_dashboard_index_path, method: :get, local: true, style: "display: inline;" do %>
+        <%= select_tag :fulfillment_type,
+            options_for_select(@s.keys.map { |k| [k.to_s.humanize, k] }, @t),
+            {
+              onchange: "this.form.submit();",
+              style: "padding: 0.5em; border-radius: 6px; border: 1px solid var(--color-border); background: var(--color-darker); color: var(--color-text);"
+            } %>
+      <% end %>
+    </div>
+    <% @o.each do |o| %>
+      <% a = o.frozen_address || {} %>
+      <% hso = (Time.current - o.created_at).to_i %>
+      <% hsf = o.awaiting_periodical_fulfillment_at ? (Time.current - o.awaiting_periodical_fulfillment_at).to_i : nil %>
+      <tr>
+        <td>
+          <%= o.id %>
+        </td>
+        <td>
+          <%= link_to o.user.display_name || "Unknown", admin_user_path(o.user) %><br>
+          <small style="color: var(--color-muted);"><%= o.user.email %></small>
+        </td>
+        <td>
+          <%= o.shop_item.name %><br>
+          <small style="color: var(--color-muted);"><%= o.shop_item.type&.demodulize %></small>
+        </td>
+        <td>
+          <%= number_with_precision(o.frozen_item_price, precision: 0) %>
+        </td>
+        <td>
+          <%= o.quantity %>
+        </td>
+        <td>
+          <% case o.aasm_state %>
+          <% when 'pending' %>
+            <span class="pill pill-yellow">pending</span>
+          <% when 'awaiting_periodical_fulfillment' %>
+            <span class="pill pill-blue">awaiting fulfillment</span>
+          <% else %>
+            <span class="pill"><%= o.aasm_state.humanize %></span>
+          <% end %>
+        </td>
+        <td>
+          <div style="font-size: 0.8em;">
+            <div style="color: var(--color-text); margin-bottom: 0.2em;">since order:</div>
+            <div style="font-family: monospace; font-weight: bold; color: <%= hso > 172800 ? '#ff6b6b' : 'white' %>; margin-bottom: 0.3em;">
+              <%= d(hso) %>
+            </div>
+            <% if hsf %>
+              <div style="color: var(--color-text); margin-bottom: 0.2em;">time after fraud:</div>
+              <div style="font-family: monospace; font-weight: bold; color: <%= hsf > 172800 ? '#ff6b6b' : 'white' %>;">
+                <%= d(hsf) %>
+              </div>
+            <% end %>
+          </div>
+        </td>
+        <td>
+          <% if a.present? %>
+            <%= a["first_name"] %> <%= a["last_name"] %><br>
+            <small style="color: var(--color-muted);">
+              <%= a["city"] %>, <%= a["state"] %><br>
+              <%= a["country"] %><br>
+              <% if a["phone_number"].present? %>
+                <%= a["phone_number"] %>
+              <% end %>
+            </small>
+          <% else %>
+            <em style="color: var(--color-muted);">nuthing...</em>
+          <% end %>
+        </td>
+        <td>
+          <%= o.created_at.strftime("%m/%d/%y") %><br>
+          <small style="color: var(--color-muted);"><%= o.created_at.strftime("%l:%M %p") %></small>
+        </td>
+        <td>
+          <%= link_to "do shit", admin_shop_order_path(o), class: 'abtn secondary', style: 'padding: 0.3em 0.8em; font-size: 0.95em;' %>
+        </td>
+      </tr>
+    <% end %>
+  </tbody>
+</table>
+
+<% if @p %>
+  <%== pagy_nav(@p) %> <br>
+  <%== pagy_info(@p) %> <br>
+<% end %>
+
+<%= link_to "← back", admin_root_path %>
