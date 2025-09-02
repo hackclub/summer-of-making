@@ -198,7 +198,7 @@ class Devlog < ApplicationRecord
   def strip_formatting(text)
     return "" if text.nil?
 
-    text.gsub(/[\s\n\r\t\*\_\#\~\`\>\<\-\+\.\,\;\:\!\?\(\)\[\]\{\}]/i, "").downcase
+    text.gsub(/[\s\n\r\t\*\_\#\~\`\>\<\-\+\.\,\;\:\!\?\(\)\[\]\{\}\\]/i, "").downcase
   end
 
   def notify_followers_and_stakers
