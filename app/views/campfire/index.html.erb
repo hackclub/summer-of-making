@@ -1,6 +1,6 @@
 <div class="px-4 md:px-8">
   <div class="flex justify-between items-start" id="fxb">
-    <div>
+    <div id="new-tutorial-campfire-title">
       <%= render "shared/page_title",
         title: "Campfire",
         subtitle: "Huddle around! Get your news here." %>
@@ -299,7 +299,14 @@
               </span>
               <%= link_to "(here's the auth link, if you lost it)", hackatime_auth_redirect_path %>
             <% else %>
-              <%= link_to "Connect Hackatime", hackatime_auth_redirect_path, class: "inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500", target: "_blank" %>
+              <%# womp womp it's the safari z-index again %>
+              <div class="relative">
+                <span class="absolute" id="new-tutorial-hackatime-container">
+                  <%= link_to "Connect Hackatime", hackatime_auth_redirect_path, class: "inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500", target: "_blank", id: "new-tutorial-hackatime" %>
+                </span>
+                <%# z index, fake element to take up space %>
+                <%= link_to "Connect Hackatime", hackatime_auth_redirect_path, class: "inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 opacity-0 pointer-events-none", target: "_blank" %>
+              </div>
             <% end %>
           </div>
         <% end %>

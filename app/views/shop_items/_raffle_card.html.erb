@@ -1,6 +1,6 @@
 <%= render "shared/card", classes: "" do %>
   <div class="flex-grow flex flex-col justify-between min-h-0 relative">
-    <button onclick="document.cookie = 'dismissed_raffle_v2=true; path=/; max-age=31536000'; this.closest('.card-with-gradient').style.display='none';" class="absolute top-2 left-2 text-lg font-bold">×</button>
+    <button onclick="document.cookie = 'dismissed_raffle_v3=true; path=/; max-age=31536000'; this.closest('.card-with-gradient').style.display='none';" class="absolute top-2 left-2 text-lg font-bold">×</button>
     <div class="absolute top-2 right-2 text-lg font-bold whitespace-nowrap flex items-center">
       <picture class="inline-block mx-1 mb-2 w-5 h-5 mr-2">
         <source srcset="/shell.avif" type="image/avif">
@@ -12,7 +12,7 @@
     <h3 class="text-xl font-bold mb-2">win a free M4 MacBook Air?</h3>
     <div class="mb-4">
       <p class="text-gray-700">sign up for an HCB account and enter the raffle!</p>
-      <small>(this is a new one, you can enter again!)</small>
+      <small>(this is yet another one, you can still enter again!)</small>
     </div>
     <%= image_tag 'raffle.png', class: "rounded-lg w-full h-auto object-scale-down aspect-square max-h-48 mb-4" %>
     <div class="mt-auto pt-4">

@@ -278,7 +278,7 @@ Rails.application.routes.draw do
         post :buy, to: "shop_orders#create", as: :checkout
       end
     end
-    resources :shop_orders, path: :orders, except: %i[edit update new]
+    resources :shop_orders, path: :orders, except: %i[new]
   end
 
   resources :users, only: [ :show ] do
@@ -307,6 +307,7 @@ Rails.application.routes.draw do
 
   post "tutorial/complete_step", to: "tutorial_progress#complete_step"
   post "tutorial/complete_soft_tutorial_step", to: "tutorial_progress#complete_soft_step", as: :complete_soft_tutorial_step
+  post "tutorial/complete_new_tutorial_step", to: "tutorial_progress#complete_new_step", as: :complete_new_tutorial_step
 
   get "/payouts", to: "payouts#index"
 

@@ -1,13 +1,19 @@
+<%
+  button_id = local_assigns[:id]
+%>
+
 <% if current_user && FraudReport.already_reported_by?(current_user, suspect) %>
   <%= render "shared/button",
       text: "Already Reported",
       icon: "flag.svg",
       classes: "opacity-75 cursor-not-allowed pointer-events-none",
-      title: "You have already reported this #{suspect.class.name.downcase}" %>
+      title: "You have already reported this #{suspect.class.name.downcase}",
+      id: button_id %>
 <% else %>
   <%= render "shared/button",
       text: "Report",
       icon: "flag.svg",
+      id: button_id,
       data: {
         controller: "modal",
         action: "click->modal#open",

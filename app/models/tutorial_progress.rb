@@ -4,13 +4,14 @@
 #
 # Table name: tutorial_progresses
 #
-#  id                  :bigint           not null, primary key
-#  completed_at        :datetime
-#  soft_tutorial_steps :jsonb            not null
-#  step_progress       :jsonb            not null
-#  created_at          :datetime         not null
-#  updated_at          :datetime         not null
-#  user_id             :bigint           not null
+#  id                    :bigint           not null, primary key
+#  completed_at          :datetime
+#  new_tutorial_progress :jsonb            not null
+#  soft_tutorial_steps   :jsonb            not null
+#  step_progress         :jsonb            not null
+#  created_at            :datetime         not null
+#  updated_at            :datetime         not null
+#  user_id               :bigint           not null
 #
 # Indexes
 #
@@ -25,8 +26,10 @@ class TutorialProgress < ApplicationRecord
 
   TUTORIAL_STEPS = %w[hackatime_connected identity_verified free_stickers_ordered].freeze
   SOFT_TUTORIAL_STEPS = %w[campfire explore my_projects vote shop todo].freeze
+  NEW_TUTORIAL_PROGRESS = %w[hackatime identity free_stickers ship vote].freeze
 
   after_initialize :setup_default_progress, if: :new_record?
+  after_initialize :auto_backfill_new_tutorial_steps!, unless: :new_record?
 
   def complete_step!(step_name)
     return unless TUTORIAL_STEPS.include?(step_name.to_s)
@@ -91,14 +94,57 @@ class TutorialProgress < ApplicationRecord
     save!
   end
 
+  def complete_new_tutorial_step!(step_name)
+    return unless NEW_TUTORIAL_PROGRESS.include?(step_name.to_s)
+
+    new_tutorial_progress[step_name.to_s] = { "completed_at" => Time.current }
+    save!
+  end
+
+  def new_tutorial_step_completed?(step_name)
+    new_tutorial_progress.dig(step_name.to_s, "completed_at").present?
+  end
+
+  def reset_new_tutorial_step!(step_name)
+    return unless NEW_TUTORIAL_PROGRESS.include?(step_name.to_s)
+    new_tutorial_progress[step_name.to_s] = {}
+    save!
+  end
+
+  def reset_new_tutorial_steps!
+    setup_default_new_tutorial_steps
+    save!
+  end
+
+  def auto_backfill_new_tutorial_steps!
+    if user&.ship_events&.any?
+      unless new_tutorial_step_completed?("ship")
+        complete_new_tutorial_step!("ship")
+      end
+    end
+
+    if user&.votes&.any?
+      unless new_tutorial_step_completed?("vote")
+        complete_new_tutorial_step!("vote")
+      end
+    end
+  end
+
   private
 
   def setup_default_progress
     self.step_progress = TUTORIAL_STEPS.index_with { {} }
     setup_default_soft_steps
+    setup_default_new_tutorial_steps
   end
 
   def setup_default_soft_steps
     self.soft_tutorial_steps = SOFT_TUTORIAL_STEPS.index_with { {} }
+  end
+
+  def setup_default_new_tutorial_steps
+    self.new_tutorial_progress = NEW_TUTORIAL_PROGRESS.index_with { {} }
+
+    auto_backfill_new_tutorial_steps!
   end
 end

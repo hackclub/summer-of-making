@@ -51,7 +51,7 @@
                         <div style="font-size: 12px; color: #E4DCC6; margin-bottom: 4px;">
                           <%= report.reporter&.display_name || "Unknown" %> • <%= report.created_at.strftime('%b %d') %>
                           <% if report.resolved? %>
-                            • <span>resolved <%= time_ago_in_words(report.resolved_at) %> ago by <%= report.resolver&.display_name || 'Unknown' %> (<%= report.resolved_outcome == 'low_quality' ? 'Marked low-quality' : 'Marked OK' %>)</span>
+                            • <span>resolved <%= time_ago_in_words(report.resolved_at || Time.current) %> ago by <%= report.resolver&.display_name || report.resolver&.email || 'Unknown' %> (<%= report.resolved_outcome == 'low_quality' ? 'Marked low-quality' : (report.resolved_outcome == 'ok' ? 'Marked OK' : 'Resolved') %>)</span>
                           <% end %>
                         </div>
                         <div style="color: #ffffff; font-size: 14px;">
@@ -74,33 +74,58 @@
               <span style="color: #ffffff;"><%= last_ship&.payouts&.exists? ? 'yes' : 'no' %></span>
             </td>
             <td>
-              <div style="display: flex; gap: 8px;">
-                <details style="margin-right: 8px;">
-                  <summary style="color: #E4DCC6; cursor: pointer; font-size: 12px; background: #e74c3c; color: white; padding: 8px 12px; border-radius: 0;">Mark low-quality</summary>
-                  <div style="margin-top: 8px; padding: 12px; background: rgba(231, 76, 60, 0.1); border: 2px solid #e74c3c; border-radius: 0;">
-                    <%= form_with url: mark_low_quality_admin_low_quality_dashboard_index_path, method: :post, local: true do |form| %>
-                      <%= form.hidden_field :project_id, value: project.id %>
-                      <div style="margin-bottom: 12px;">
-                        <label style="display: block; color: #E4DCC6; font-size: 12px; margin-bottom: 4px; text-transform: uppercase;">Reason required:</label>
-                        <%= form.text_area :reason,
-                            placeholder: "Explain why this project doesn't meet quality standards...",
-                            required: true,
-                            style: "width: 100%; min-height: 80px; padding: 8px; background: transparent; border: 1px solid #E4DCC6; color: #ffffff; border-radius: 0; resize: vertical;" %>
+              <% if @state != 'resolved' %>
+                <div style="display: flex; gap: 8px;">
+                  <details style="margin-right: 8px;">
+                    <summary style="color: #E4DCC6; cursor: pointer; font-size: 12px; background: #e74c3c; color: white; padding: 8px 12px; border-radius: 0;">Mark low-quality</summary>
+                    <div style="margin-top: 8px; padding: 12px; background: rgba(231, 76, 60, 0.1); border: 2px solid #e74c3c; border-radius: 0;">
+                      <%= form_with url: mark_low_quality_admin_low_quality_dashboard_index_path, method: :post, local: true do |form| %>
+                        <%= form.hidden_field :project_id, value: project.id %>
+                        <div style="margin-bottom: 12px;">
+                          <label style="display: block; color: #E4DCC6; font-size: 12px; margin-bottom: 4px; text-transform: uppercase;">Reason required:</label>
+                          <%= form.text_area :reason,
+                              placeholder: "Explain why this project doesn't meet quality standards...",
+                              required: true,
+                              style: "width: 100%; min-height: 80px; padding: 8px; background: transparent; border: 1px solid #E4DCC6; color: #ffffff; border-radius: 0; resize: vertical;" %>
+                        </div>
+                        <%= form.submit "Confirm Low Quality",
+                            style: "background: #e74c3c; color: white; border: none; padding: 8px 16px; cursor: pointer; border-radius: 0; font-weight: 600;" %>
+                      <% end %>
+                    </div>
+                  </details>
+                  <%= form_with url: mark_ok_admin_low_quality_dashboard_index_path, method: :post, local: true do |form| %>
+                    <%= form.hidden_field :project_id, value: project.id %>
+                    <div style="margin-bottom: 12px;">
+                      <label style="display: block; color: #E4DCC6; font-size: 12px; margin-bottom: 4px; text-transform: uppercase;">Optional justification:</label>
+                      <%= form.text_field :ok_reason, placeholder: "Why is this OK?", style: "width: 100%; padding: 8px; background: transparent; border: 1px solid #E4DCC6; color: #ffffff; border-radius: 0;" %>
+                    </div>
+                    <%= form.submit "Mark OK", class: "marble-button" %>
+                  <% end %>
+                </div>
+              <% else %>
+                <% resolved_report = (@project_reports[project.id] || []).find(&:resolved?) %>
+                <% if resolved_report %>
+                  <div style="color: #E4DCC6; font-size: 12px;">
+                    <strong>Resolved</strong> <%= time_ago_in_words(resolved_report.resolved_at || Time.current) %> ago
+                    by <%= resolved_report.resolver&.display_name || resolved_report.resolver&.email || "Unknown" %><br>
+                    Outcome: <%= resolved_report.resolved_outcome == 'low_quality' ? 'Marked low-quality' : 'Marked OK' %>
+                  </div>
+                  <% if resolved_report.resolved_outcome == 'low_quality' %>
+                    <details style="margin-top: 6px;">
+                      <summary style="color: #E4DCC6; cursor: pointer; font-size: 12px;">View DM to user</summary>
+                      <div style="margin-top: 6px; padding: 8px; background: rgba(228, 220, 198, 0.08); border-left: 2px solid #E4DCC6; color: #ffffff; font-size: 13px;">
+                        <pre style="white-space: pre-wrap; font-family: inherit; margin: 0;">
+                        <%= resolved_report.resolved_message.to_s %>
+                        </pre>
                       </div>
-                      <%= form.submit "Confirm Low Quality",
-                          style: "background: #e74c3c; color: white; border: none; padding: 8px 16px; cursor: pointer; border-radius: 0; font-weight: 600;" %>
-                    <% end %>
-                  </div>
-                </details>
-                <%= form_with url: mark_ok_admin_low_quality_dashboard_index_path, method: :post, local: true do |form| %>
-                  <%= form.hidden_field :project_id, value: project.id %>
-                  <div style="margin-bottom: 12px;">
-                    <label style="display: block; color: #E4DCC6; font-size: 12px; margin-bottom: 4px; text-transform: uppercase;">Optional justification:</label>
-                    <%= form.text_field :ok_reason, placeholder: "Why is this OK?", style: "width: 100%; padding: 8px; background: transparent; border: 1px solid #E4DCC6; color: #ffffff; border-radius: 0;" %>
-                  </div>
-                  <%= form.submit "Mark OK", class: "marble-button" %>
+                    </details>
+                  <% else %>
+                    <div style="margin-top: 6px; color: #E4DCC6; font-size: 12px;">No DM sent; marked OK<% if resolved_report.resolved_message.present? %> — Note: <%= resolved_report.resolved_message %><% end %></div>
+                  <% end %>
+                <% else %>
+                  <span style="color: #E4DCC6;">Resolved</span>
                 <% end %>
-              </div>
+              <% end %>
             </td>
           </tr>
         <% end %>

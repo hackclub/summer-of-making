@@ -31,7 +31,7 @@
   <% end %>
 <% end %>
 
-<div class="container mx-auto px-0 sm:px-4 py-4 md:py-8">
+<div class="container mx-auto px-0 sm:px-4 py-4 md:py-8" id="new-tutorial-vote-container">
   <%= render "shared/page_title",
       title: "Vote",
       subtitle: "Vote on others' projects! #{Vote.count} votes have been submitted so far!" %>
@@ -170,7 +170,8 @@
                         link_target: "_blank",
                         method: :post,
                         icon: "world.svg",
-                        onclick: "event.stopPropagation()" %>
+                        onclick: "event.stopPropagation()",
+                        id: index == 0 ? 'new-tutorial-vote-demo' : nil %>
                   <% end %>
                   <% if project.repo_link.present? %>
                     <%= render "shared/button",
@@ -182,11 +183,11 @@
                         onclick: "event.stopPropagation()" %>
                   <% end %>
 
-                  <%= render "shared/report", suspect: ship_event %>
+                  <%= render "shared/report", id: index == 0 ? 'new-tutorial-vote-report' : nil, suspect: ship_event %>
                 </div>
               </div>
 
-              <div class="space-y-4 sm:space-y-8">
+              <div class="space-y-4 sm:space-y-8" id="<%= index == 0 ? 'new-tutorial-vote-devlogs' : nil %>">
                 <% ship_devlogs.each do |devlog| %>
                   <%= render "devlogs/devlog_card",
                       devlog: devlog,
@@ -203,7 +204,7 @@
         <% end %>
       </div>
 
-      <div class="mx-2 sm:mx-auto mt-8 sm:mt-12 max-w-220">
+      <div class="mx-2 sm:mx-auto mt-8 sm:mt-12 max-w-220" id="new-tutorial-vote-decision">
         <%= render layout: "shared/container" do %>
           <div class="p-0 sm:p-2">
             <%= render "form", vote: @vote %>

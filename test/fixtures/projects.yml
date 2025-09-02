@@ -5,6 +5,7 @@
 # Table name: projects
 #
 #  id                     :bigint           not null, primary key
+#  ai_explanation         :string
 #  category               :string
 #  certification_type     :integer
 #  demo_link              :string
@@ -13,7 +14,7 @@
 #  hackatime_project_keys :string           default([]), is an Array
 #  is_deleted             :boolean          default(FALSE)
 #  is_shipped             :boolean          default(FALSE)
-#  is_sinkening_ship      :boolean          default(FALSE)
+#  is_sinkening_ship      :boolean
 #  rating                 :integer
 #  readme_link            :string
 #  repo_link              :string

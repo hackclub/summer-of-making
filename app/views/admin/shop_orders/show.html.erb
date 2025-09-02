@@ -163,6 +163,7 @@
   <% state = @shop_order.aasm.current_state %>
 
   <div class="agrid">
+    <%= link_to "edit order", [:edit, :admin, @shop_order], class: 'abtn secondary' %>
     <% case state %>
     <% when :pending %>
       <%= button_to "lgtm, approve order!", [:approve, :admin, @shop_order], method: :post, class: 'abtn primary' %>
