@@ -175,7 +175,7 @@ module Admin
             email: email,
             amount_cents: amount_cents,
             purpose: "SOM: #{@shop_order.shop_item.name}",
-            instructions: "Hello, Please use this grant to buy a #{@shop_order.shop_item.name}. Got any questions or something to say? Contact @3kh0 on Slack, and I can help you there! Make sure you upload receipts once you are done otherwise bad things will happen..."
+            instructions: "Hello, Please use this grant to buy a #{@shop_order.shop_item.name}. Got any questions or something to say? Contact @3kh0 on Slack, and I can help you there! Make sure you upload receipts once you are done otherwise bad things will happen... Once you have spent the money, and uploaded your receipt, please hit 'Return grant' and you are all set!"
           )
 
           grant_rec.hcb_grant_hashid = grant_response["id"]
