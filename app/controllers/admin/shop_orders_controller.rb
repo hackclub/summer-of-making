@@ -104,6 +104,24 @@ module Admin
       @activities = @shop_order.activities.order(created_at: :desc).includes(:owner)
     end
 
+    def edit
+      authorize @shop_order
+    end
+
+    def update
+      authorize @shop_order
+      if @shop_order.update(shop_order_params)
+        @shop_order.create_activity("admin_edit", parameters: {
+          external_ref: @shop_order.external_ref,
+          address_updated: params[:shop_order][:address_attributes].present?
+        })
+        flash[:success] = "Order updated successfully!"
+        redirect_to [ :admin, @shop_order ]
+      else
+        render :edit
+      end
+    end
+
     def internal_notes
       @shop_order.update!(internal_notes: params[:internal_notes])
       @shop_order.create_activity("edit_internal_notes", params: { note: params[:internal_notes] })
@@ -208,6 +226,12 @@ module Admin
     end
 
     private
+
+    def shop_order_params
+      permitted = [ :external_ref ]
+      permitted << { frozen_address: [ :first_name, :last_name, :line_1, :line_2, :city, :state, :postal_code, :country, :phone_number ] } unless @shop_order&.fulfilled?
+      params.require(:shop_order).permit(*permitted)
+    end
 
     def group_all(scope)
       orders = scope.includes(:user, :shop_item).to_a

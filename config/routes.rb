@@ -277,7 +277,7 @@ Rails.application.routes.draw do
         post :buy, to: "shop_orders#create", as: :checkout
       end
     end
-    resources :shop_orders, path: :orders, except: %i[edit update new]
+    resources :shop_orders, path: :orders, except: %i[new]
   end
 
   resources :users, only: [ :show ] do
