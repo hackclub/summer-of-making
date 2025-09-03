@@ -190,7 +190,7 @@
           <small style="color: var(--color-muted);"><%= o.created_at.strftime("%l:%M %p") %></small>
         </td>
         <td>
-          <%= link_to "do shit", admin_shop_order_path(o), class: 'abtn secondary', style: 'padding: 0.3em 0.8em; font-size: 0.95em;' %>
+          <%= link_to "manage order", admin_shop_order_path(o), class: 'abtn secondary', style: 'padding: 0.3em 0.8em; font-size: 0.95em;' %>
         </td>
       </tr>
     <% end %>
