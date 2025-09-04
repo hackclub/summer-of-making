@@ -1,7 +1,7 @@
 import { Controller } from "@hotwired/stimulus"
 
 export default class extends Controller {
-  static targets = ["container", "text", "background", "dialogue", "focus", "video", "videoContainer", "videoHint", "avatar", "hint"]
+  static targets = ["container", "text", "background", "dialogue", "focus", "video", "videoContainer", "videoHint", "avatar", "hint", "toggle", "toggleLabel"]
   static values = {
     displayName: String,
     scene: String,
@@ -9,21 +9,27 @@ export default class extends Controller {
     checkpoint: String,
     currentPath: String,
     newTutorialProgress: Object,
-    newOnboardingEnabled: Boolean
+    newOnboardingEnabled: Boolean,
+    tutorialEnabled: { type: Boolean, default: true }
   }
 
   connect() {
-    // Don't start tutorial if new onboarding is not enabled for this user
-    if (!this.newOnboardingEnabledValue) {
-      return;
+    // Initialize tutorial enabled state from localStorage
+    const savedState = localStorage.getItem('tutorial_enabled');
+    if (savedState !== null) {
+      this.tutorialEnabledValue = savedState === 'true';
     }
+
+    // Update toggle state if toggle exists
+    this.updateToggleState();
+    
     if (this.currentPathValue.startsWith("/projects")) {
       if (this.isStepCompleted("shipped") && !this.isStepCompleted("vote")) {
         this.start("to_vote");
       }
     }
     if (this.currentPathValue == "/votes/new") {
-      if (!this.isStepCompleted("vote")) {
+      if (this.tutorialEnabledValue) {
         this.start("vote");
       }
     }
@@ -389,5 +395,36 @@ export default class extends Controller {
     this.newTutorialProgressValue = progress;
 
     return true;
+  }
+
+  toggleTutorial() {
+    this.tutorialEnabledValue = !this.tutorialEnabledValue;
+    localStorage.setItem('tutorial_enabled', this.tutorialEnabledValue);
+    this.updateToggleState();
+
+    // Refresh the page whenever the tutorial toggle is changed to ensure UI reflects the new state
+    // Use a small timeout to allow any UI click effects to complete gracefully
+    setTimeout(() => { window.location.reload(); }, 0);
+  }
+
+  updateToggleState() {
+    if (this.hasToggleTarget) {
+      const toggle = this.toggleTarget;
+      
+      // Update toggle label - look for toggleLabel target first, then fallback to label element
+      const labelElement = this.hasToggleLabelTarget ? this.toggleLabelTarget : toggle.querySelector('label');
+      if (labelElement) {
+        labelElement.textContent = this.tutorialEnabledValue ? 'Tutorial: On' : 'Tutorial: Off';
+      }
+    }
+  }
+
+  startTutorialManually() {
+    if (this.currentPathValue == "/votes/new" && !this.isStepCompleted("vote")) {
+      this.tutorialEnabledValue = true;
+      localStorage.setItem('tutorial_enabled', true);
+      this.updateToggleState();
+      this.start("vote");
+    }
   }
 }

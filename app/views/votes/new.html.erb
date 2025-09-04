@@ -9,7 +9,9 @@
       <% ship_devlogs = project.devlogs.where("created_at < ?", ship_event.created_at) %>
 
       <!-- Preload project banners -->
-      <%= preload_link_tag url_for(project.banner), as: :image %>
+      <% if project.banner.attached? %>
+        <%= preload_link_tag url_for(project.banner), as: :image %>
+      <% end %>
 
       <!-- Preload user avatars -->
       <% ship_devlogs.each do |devlog| %>
@@ -32,10 +34,23 @@
   <% end %>
 <% end %>
 
-<div class="container mx-auto px-0 sm:px-4 py-4 md:py-8" id="new-tutorial-vote-container">
-  <%= render "shared/page_title",
-      title: "Vote",
-      subtitle: "Vote on others' projects! #{Vote.count} votes have been submitted so far!" %>
+<div class="container mx-auto px-0 sm:px-4 py-4 md:py-8" id="new-tutorial-vote-container" data-controller="new-tutorial">
+  <div class="mb-8 md:mt-[53] mt-4">
+    <div class="flex items-center gap-4">
+      <h1 class="font-[Dynapuff] text-5xl mb-2">Vote</h1>
+      
+      <button 
+        data-new-tutorial-target="toggle"
+        data-action="click->new-tutorial#toggleTutorial"
+        class="som-button-secondary flex items-center gap-2 px-4 py-2 text-sm font-medium">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.746 0 3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/>
+        </svg>
+        <label data-new-tutorial-target="toggleLabel">Tutorial: On</label>
+      </button>
+    </div>
+    <p class="text-lg md:text-xl opacity-60">Vote on others' projects! <%= Vote.count %> votes have been submitted so far!</p>
+  </div>
   <%# so amber doesn't have to answer the same question over and over%>
   <% if flash[:vote_rejected].present? %>
     <div id="vote-rejected-modal" data-controller="modal" class="hidden fixed inset-0 z-50 overflow-auto bg-black/30 flex items-center justify-center p-2 md:p-4" data-action="click->modal#clickOutsideHandler">
@@ -151,7 +166,13 @@
             <div class="space-y-6 sm:space-y-8">
               <div class="flex items-start gap-3 sm:gap-4">
                 <div class="h-16 w-16 sm:h-20 sm:w-20 flex-shrink-0">
-                  <%= image_tag project.banner, alt: project.title, class: "w-full h-full object-cover rounded-lg", loading: "lazy" %>
+                  <% if project.banner.attached? %>
+                    <%= image_tag project.banner, alt: project.title, class: "w-full h-full object-cover rounded-lg", loading: "lazy" %>
+                  <% else %>
+                    <div class="w-full h-full bg-gray-200 rounded-lg flex items-center justify-center">
+                      <span class="text-gray-500 text-xs">No image</span>
+                    </div>
+                  <% end %>
                   <% if project.used_ai %>
                     <div class="mt-2 flex items-center justify-center group relative">
                       <span class="inline-flex items-center bg-[#FFE8CD] text-som-dark text-xs font-semibold px-2 py-1 rounded-full border border-[#a8956b] shadow-sm">
