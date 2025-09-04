@@ -610,10 +610,10 @@ class ProjectsController < ApplicationController
       render json: { success: false, errors: @project.errors.full_messages }, status: :unprocessable_entity
     end
   end
-  
-  def render_readme 
+
+  def render_readme
     @project = Project.find(params[:id])
-    authorize @project, :show? 
+    authorize @project, :show?
 
     if @project.readme_link.blank?
       return render json: { error: "No README link found" }, status: :unprocessable_entity
@@ -625,26 +625,26 @@ class ProjectsController < ApplicationController
 
     begin
       uri = URI.parse(@project.readme_link)
-      
+
       unless %w[http https].include?(uri.scheme&.downcase)
         return render json: { error: "Invalid URL scheme" }, status: :unprocessable_entity
       end
-      
+
       response = nil
       Net::HTTP.start(uri.host, uri.port, use_ssl: uri.scheme == "https", open_timeout: 5, read_timeout: 10) do |http|
         request = Net::HTTP::Get.new(uri)
         request["User-Agent"] = "HackClub-SummerOfMaking"
         response = http.request(request)
       end
-      
-      if response.is_a?(Net::HTTPSuccess) 
+
+      if response.is_a?(Net::HTTPSuccess)
         renderer = Redcarpet::Render::HTML.new(filter_html: true, no_images: false, no_styles: true)
         markdown = Redcarpet::Markdown.new(renderer)
         @readme_content = markdown.render(response.body)
         render json: { html: @readme_content }
-      else 
+      else
         render json: { error: "Failed to fetch README: Status #{response.code}" }, status: :unprocessable_entity
-      end 
+      end
     rescue URI::InvalidURIError
       render json: { error: "Invalid README URL" }, status: :unprocessable_entity
     rescue Net::OpenTimeout, Net::ReadTimeout
