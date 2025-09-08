@@ -116,4 +116,14 @@ class ShopItem < ApplicationRecord
   def out_of_stock?
     limited? && remaining_stock && remaining_stock <= 0
   end
+
+  after_save :clear_cache
+
+  def clear_cache
+    if requires_black_market?
+      Rails.cache.delete("all_black_market_shop_items_with_variants")
+    else
+      Rails.cache.delete("all_shop_items_with_variants_v2")
+    end
+  end
 end
