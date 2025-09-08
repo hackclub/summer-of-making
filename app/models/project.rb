@@ -14,6 +14,7 @@
 #  is_deleted             :boolean          default(FALSE)
 #  is_shipped             :boolean          default(FALSE)
 #  is_sinkening_ship      :boolean          default(FALSE)
+#  magicked_at            :datetime
 #  rating                 :integer
 #  readme_link            :string
 #  repo_link              :string
@@ -666,6 +667,15 @@ class Project < ApplicationRecord
     else
       url
     end
+  end
+
+  def magicked? = magicked_at.present?
+
+  def magic_happening!
+    return if magicked?
+
+    Project::PostToMagicJob.perform_later(self)
+    update!(magicked_at: Time.current)
   end
 
   private

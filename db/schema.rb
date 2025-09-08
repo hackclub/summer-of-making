@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_09_03_171043) do
+ActiveRecord::Schema[8.0].define(version: 2025_09_08_163719) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -404,6 +404,7 @@ ActiveRecord::Schema[8.0].define(version: 2025_09_03_171043) do
     t.float "x"
     t.float "y"
     t.boolean "is_sinkening_ship"
+    t.datetime "magicked_at"
     t.index ["is_shipped"], name: "index_projects_on_is_shipped"
     t.index ["user_id"], name: "index_projects_on_user_id"
     t.index ["views_count"], name: "index_projects_on_views_count"

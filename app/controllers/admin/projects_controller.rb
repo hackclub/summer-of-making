@@ -2,7 +2,7 @@
 
 module Admin
   class ProjectsController < ApplicationController
-    before_action :set_project, only: [ :destroy, :restore ]
+    before_action :set_project, only: [ :destroy, :restore, :magic_is_happening ]
 
     def destroy
       @project.update!(is_deleted: true)
@@ -36,6 +36,12 @@ module Admin
 
       flash[:success] = "#{@project.title} is back in black!"
       redirect_back(fallback_location: admin_root_path)
+    end
+
+    def magic_is_happening
+      @project.magic_happening!
+      flash[:success] = "posted!!"
+      redirect_back(fallback_location: admin_project_path(@project))
     end
 
     private
