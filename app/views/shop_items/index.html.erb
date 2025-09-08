@@ -145,17 +145,17 @@
             </div>
           <% end %>
           <div class="flex flex-col sm:grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
-            <% sorted_items = @regular_items.sort_by { |item| item.price_for_region(@selected_region) } %>
             <% if cookies[:dismissed_raffle_v3] != 'true' && current_user&.tutorial_completed? %>
               <%= render partial: "raffle_card" %>
             <% end %>
-            <% sorted_items.each do |item| %>
+            <% @regular_items.each do |item_data| %>
+              <% item = item_data[:item] %>
               <% if item.is_a?(ShopItem::SinkeningBalloons) %>
-                <% if Flipper.enabled?(:enable_shop_balloons, current_user) && current_user&.sinkening_participation? && !@ordered_once_item_ids&.include?(item.id) %>
-                  <%= render partial: "item", locals: { item: } %>
+                <% if Flipper.enabled?(:enable_shop_balloons, current_user) && current_user&.sinkening_participation? && !item_data[:already_ordered] %>
+                  <%= render partial: "item", locals: { item: item, item_data: item_data } %>
                 <% end %>
               <% else %>
-                <%= render partial: "item", locals: { item: } %>
+                <%= render partial: "item", locals: { item: item, item_data: item_data } %>
               <% end %>
             <% end %>
           </div>
@@ -172,8 +172,8 @@
             </div>
           <% end %>
           <div class="flex flex-col sm:grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
-            <% @badge_items.sort_by { |item| item.price_for_region(@selected_region) }.each do |item| %>
-              <%= render partial: "item", locals: { item: } %>
+            <% @badge_items.each do |item_data| %>
+              <%= render partial: "item", locals: { item: item_data[:item], item_data: item_data } %>
             <% end %>
           </div>
         </div>

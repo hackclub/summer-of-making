@@ -38,6 +38,7 @@
 #  index_votes_on_status                (status)
 #  index_votes_on_user_and_ship_events  (user_id,ship_event_1_id,ship_event_2_id) UNIQUE
 #  index_votes_on_user_id               (user_id)
+#  index_votes_on_user_id_and_status    (user_id,status)
 #
 # Foreign Keys
 #

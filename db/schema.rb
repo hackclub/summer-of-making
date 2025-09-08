@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_09_08_163719) do
+ActiveRecord::Schema[8.0].define(version: 2025_09_08_172755) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -259,6 +259,7 @@ ActiveRecord::Schema[8.0].define(version: 2025_09_08_163719) do
     t.boolean "for_sinkening", default: false, null: false
     t.datetime "deleted_at"
     t.index ["deleted_at"], name: "index_devlogs_on_deleted_at"
+    t.index ["project_id", "created_at"], name: "index_devlogs_on_project_id_and_created_at"
     t.index ["project_id"], name: "index_devlogs_on_project_id"
     t.index ["user_id"], name: "index_devlogs_on_user_id"
     t.index ["views_count"], name: "index_devlogs_on_views_count"
@@ -307,6 +308,7 @@ ActiveRecord::Schema[8.0].define(version: 2025_09_08_163719) do
     t.text "resolved_message"
     t.index ["category"], name: "index_fraud_reports_on_category"
     t.index ["resolved_by_id"], name: "index_fraud_reports_on_resolved_by_id"
+    t.index ["suspect_type", "suspect_id", "resolved_at"], name: "index_fraud_reports_on_suspect_and_resolution"
     t.index ["user_id", "suspect_type", "suspect_id"], name: "index_fraud_reports_on_user_and_suspect", unique: true
     t.index ["user_id"], name: "index_fraud_reports_on_user_id"
   end
@@ -403,9 +405,11 @@ ActiveRecord::Schema[8.0].define(version: 2025_09_08_163719) do
     t.integer "views_count", default: 0, null: false
     t.float "x"
     t.float "y"
-    t.boolean "is_sinkening_ship"
+    t.boolean "is_sinkening_ship", default: false
     t.datetime "magicked_at"
     t.index ["is_shipped"], name: "index_projects_on_is_shipped"
+    t.index ["rating"], name: "index_projects_on_rating"
+    t.index ["user_id", "is_deleted"], name: "index_projects_on_user_id_and_is_deleted"
     t.index ["user_id"], name: "index_projects_on_user_id"
     t.index ["views_count"], name: "index_projects_on_views_count"
     t.index ["x", "y"], name: "index_projects_on_x_and_y"
@@ -465,6 +469,7 @@ ActiveRecord::Schema[8.0].define(version: 2025_09_08_163719) do
     t.datetime "updated_at", null: false
     t.boolean "for_sinkening", default: false, null: false
     t.boolean "excluded_from_pool", default: false, null: false
+    t.index ["project_id", "created_at", "excluded_from_pool"], name: "index_ship_events_on_project_created_excluded"
     t.index ["project_id"], name: "index_ship_events_on_project_id"
   end
 
@@ -544,6 +549,9 @@ ActiveRecord::Schema[8.0].define(version: 2025_09_08_163719) do
     t.boolean "enabled"
     t.integer "site_action"
     t.text "hcb_preauthorization_instructions"
+    t.index ["enabled", "enabled_us", "enabled_eu", "enabled_in", "enabled_ca", "enabled_au", "enabled_xx"], name: "idx_shop_items_regional_enabled"
+    t.index ["enabled", "requires_black_market", "ticket_cost"], name: "idx_shop_items_enabled_black_market_price"
+    t.index ["type", "enabled"], name: "idx_shop_items_type_enabled"
     t.check_constraint "hacker_score >= 0 AND hacker_score <= 100", name: "hacker_score_percentage_check"
   end
 
@@ -568,7 +576,11 @@ ActiveRecord::Schema[8.0].define(version: 2025_09_08_163719) do
     t.string "fulfilled_by"
     t.bigint "warehouse_package_id"
     t.index ["shop_card_grant_id"], name: "index_shop_orders_on_shop_card_grant_id"
+    t.index ["shop_item_id", "aasm_state", "quantity"], name: "idx_shop_orders_item_state_qty"
+    t.index ["shop_item_id", "aasm_state"], name: "idx_shop_orders_stock_calc"
     t.index ["shop_item_id"], name: "index_shop_orders_on_shop_item_id"
+    t.index ["user_id", "shop_item_id", "aasm_state"], name: "idx_shop_orders_user_item_state"
+    t.index ["user_id", "shop_item_id"], name: "idx_shop_orders_user_item_unique"
     t.index ["user_id"], name: "index_shop_orders_on_user_id"
     t.index ["warehouse_package_id"], name: "index_shop_orders_on_warehouse_package_id"
   end
@@ -584,7 +596,7 @@ ActiveRecord::Schema[8.0].define(version: 2025_09_08_163719) do
   end
 
   create_table "sinkening_settings", force: :cascade do |t|
-    t.float "intensity"
+    t.float "intensity", default: 1.0
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.string "slack_story_url"
@@ -926,6 +938,7 @@ ActiveRecord::Schema[8.0].define(version: 2025_09_08_163719) do
     t.index ["ship_event_2_id"], name: "index_votes_on_ship_event_2_id"
     t.index ["status"], name: "index_votes_on_status"
     t.index ["user_id", "ship_event_1_id", "ship_event_2_id"], name: "index_votes_on_user_and_ship_events", unique: true
+    t.index ["user_id", "status"], name: "index_votes_on_user_id_and_status"
     t.index ["user_id"], name: "index_votes_on_user_id"
   end
 

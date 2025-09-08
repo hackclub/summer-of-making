@@ -39,5 +39,11 @@
 #  created_at                        :datetime         not null
 #  updated_at                        :datetime         not null
 #
+# Indexes
+#
+#  idx_shop_items_enabled_black_market_price  (enabled,requires_black_market,ticket_cost)
+#  idx_shop_items_regional_enabled            (enabled,enabled_us,enabled_eu,enabled_in,enabled_ca,enabled_au,enabled_xx)
+#  idx_shop_items_type_enabled                (type,enabled)
+#
 class ShopItem::ThirdPartyPhysical < ShopItem
 end
