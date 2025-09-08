@@ -3,7 +3,7 @@
 # Table name: sinkening_settings
 #
 #  id              :bigint           not null, primary key
-#  intensity       :float            default(1.0)
+#  intensity       :float
 #  slack_story_url :string
 #  created_at      :datetime         not null
 #  updated_at      :datetime         not null

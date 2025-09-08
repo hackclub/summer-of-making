@@ -8,14 +8,8 @@
   </header>
   <main>
     <div>
-      <% if defined?(@items_with_computed_data) && @items_with_computed_data %>
-        <% @items_with_computed_data.each do |item_data| %>
-          <%= render "shop_items/black_market/item", item: item_data[:item], item_data: item_data %>
-        <% end %>
-      <% else %>
-        <% @shop_items.each do |item| %>
-          <%= render "shop_items/black_market/item", item: %>
-        <% end %>
+      <% @shop_items.each do |item| %>
+        <%= render "shop_items/black_market/item", item: %>
       <% end %>
     </div>
   </main>

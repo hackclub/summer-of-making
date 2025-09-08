@@ -31,12 +31,10 @@
 #
 # Indexes
 #
-#  index_projects_on_is_shipped              (is_shipped)
-#  index_projects_on_rating                  (rating)
-#  index_projects_on_user_id                 (user_id)
-#  index_projects_on_user_id_and_is_deleted  (user_id,is_deleted)
-#  index_projects_on_views_count             (views_count)
-#  index_projects_on_x_and_y                 (x,y)
+#  index_projects_on_is_shipped   (is_shipped)
+#  index_projects_on_user_id      (user_id)
+#  index_projects_on_views_count  (views_count)
+#  index_projects_on_x_and_y      (x,y)
 #
 # Foreign Keys
 #
