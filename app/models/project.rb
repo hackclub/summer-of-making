@@ -579,6 +579,15 @@ class Project < ApplicationRecord
     end
   end
 
+  def magicked? = magicked_at.present?
+
+  def magic_happening!
+    return if magicked?
+
+    Project::PostToMagicJob.perform_later(self)
+    update!(magicked_at: Time.current)
+  end
+
   private
 
   def set_default_rating
@@ -667,15 +676,6 @@ class Project < ApplicationRecord
     else
       url
     end
-  end
-
-  def magicked? = magicked_at.present?
-
-  def magic_happening!
-    return if magicked?
-
-    Project::PostToMagicJob.perform_later(self)
-    update!(magicked_at: Time.current)
   end
 
   private

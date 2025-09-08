@@ -1,0 +1,5 @@
+<%= button_to project.magicked? ? "already magic!" : "Magic Happening",
+    magic_is_happening_admin_project_path(@project),
+    method: :post,
+    disabled: project.magicked?,
+    style: "color: white; border-radius: 12px; padding: 1rem 2rem; font-size: 1.1em; #{project.magicked? ? "cursor: not-allowed;" : "cursor: pointer;"} border: none; text-decoration: none; background-color:#{project.magicked? ? "rgb(134, 92, 143)" : "rgb(156, 0, 187)"};" %>

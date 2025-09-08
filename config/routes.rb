@@ -466,6 +466,7 @@ Rails.application.routes.draw do
         member do
           delete :destroy
           patch :restore
+          post :magic_is_happening
         end
       end
       resources :shop_card_grants, only: [ :index, :show ]
