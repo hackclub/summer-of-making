@@ -121,6 +121,9 @@ class ShopOrder < ApplicationRecord
         self.fulfillment_cost = fulfillment_cost
         self.fulfilled_by = fulfilled_by
       end
+      after do
+        Shop::SendOrderFulfilledDmJob.perform_later(self)
+      end
     end
 
     event :place_on_hold do

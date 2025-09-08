@@ -292,6 +292,7 @@ GEM
       pp (>= 0.6.0)
       rdoc (>= 4.0.0)
       reline (>= 0.4.2)
+    jb (0.8.2)
     jbuilder (2.14.1)
       actionview (>= 7.0.0)
       activesupport (>= 7.0.0)
@@ -679,6 +680,7 @@ DEPENDENCIES
   image_processing (~> 1.14)
   importmap-rails
   inline_svg
+  jb (~> 0.8.2)
   jbuilder
   kamal
   lz_string (~> 0.3.0)
