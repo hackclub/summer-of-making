@@ -588,6 +588,8 @@ GEM
     streamio-ffmpeg (3.0.2)
       multi_json (~> 1.8)
     stringio (3.1.7)
+    strong_migrations (2.5.0)
+      activerecord (>= 7.1)
     tailwindcss-rails (4.3.0)
       railties (>= 7.0.0)
       tailwindcss-ruby (~> 4.0)
@@ -710,6 +712,7 @@ DEPENDENCIES
   stackprof
   stimulus-rails
   streamio-ffmpeg (~> 3.0)
+  strong_migrations (~> 2.5)
   tailwindcss-rails
   tailwindcss-ruby
   thruster

@@ -165,3 +165,5 @@ gem "sanitize", "~> 7.0"
 gem "activeinsights"
 
 gem "paper_trail"
+
+gem "strong_migrations", "~> 2.5"
