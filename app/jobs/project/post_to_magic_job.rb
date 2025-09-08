@@ -29,7 +29,7 @@ class Project::PostToMagicJob < ApplicationJob
           },
           "accessory": {
             "type": "image",
-            "image_url": !project.banner.attached? ? project.banner.url : "https://crouton.net/crouton.png",
+            "image_url": project.banner.attached? ? project.banner.url : "https://crouton.net/crouton.png",
             "alt_text": "cute cat"
           }
         }
