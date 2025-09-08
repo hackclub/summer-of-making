@@ -117,6 +117,9 @@
             <%= render "projects/follow_button", project: @project %>
           <% end %>
         <% end %>
+        <% admin_tool do %>
+          <%= render "admin/projects/magic_happening_button", project: @project %>
+        <% end %>
       </div>
     </div>
 
