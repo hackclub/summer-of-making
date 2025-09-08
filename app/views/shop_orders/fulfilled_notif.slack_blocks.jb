@@ -16,7 +16,7 @@ blocks do
       mrkdwn_text("*Item:* #{@shop_order.shop_item.name}"),
       mrkdwn_text("*Quantity:* #{@shop_order.quantity}"),
       mrkdwn_text("*Total Cost:* #{number_with_delimiter(@shop_order.total_cost)} shells"),
-      mrkdwn_text("*Order placed:* #{time_ago_in_words(@shop_order.created_at)} ago"),
+      mrkdwn_text("*Order placed:* #{time_ago_in_words(@shop_order.created_at)} ago")
     ]
 
   if @shop_order.external_ref.present?
@@ -42,11 +42,11 @@ blocks do
   if @shop_order.fulfilled_by.present?
     context [
       mrkdwn_text("Fulfilled by: *#{@shop_order.fulfilled_by}*"),
-      mrkdwn_text("Thank you for *making* your *summer* count! ✨"),
+      mrkdwn_text("Thank you for *making* your *summer* count! ✨")
     ]
   else
     context [
-      mrkdwn_text("Thank you for *making* your *summer* count! ✨"),
+      mrkdwn_text("Thank you for *making* your *summer* count! ✨")
     ]
   end
 end
