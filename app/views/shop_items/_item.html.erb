@@ -1,5 +1,5 @@
-<% # Use pre-computed data if available, fallback to old logic for compatibility %>
-<% if defined?(item_data) && item_data %>
+<%# Use pre-computed data if available, fallback to old logic for compatibility %>
+<% if defined?(item_data) && item_data.is_a?(Hash) %>
   <% regional_price = item_data[:regional_price] %>
   <% remaining = item_data[:remaining_stock] %>
   <% out_of_stock = item_data[:out_of_stock] %>
@@ -15,7 +15,7 @@
     <% disabled = ineligible || (!@current_user_ysws_verified && !item.is_a?(ShopItem::FreeStickers)) || (@current_balance < regional_price) || out_of_stock || badge_prerequisite_failed %>
   <% end %>
 <% else %>
-  <% # Fallback to old logic for compatibility %>
+  <%# Fallback to old logic for compatibility %>
   <% if current_user %>
     <% ineligible = current_verification_status == :ineligible %>
     <% regional_price = (@regionalization_enabled && @selected_region) ? item.price_for_region(@selected_region) : item.ticket_cost %>
@@ -44,21 +44,21 @@
         <%= link_to "cfg", admin_shop_item_path(item), class: "underline text-sm", target: "_blank" %>
       </div>
     <% end %>
-
     <% if regional_price > 0 %>
       <div class="absolute top-2 right-2 text-lg font-bold whitespace-nowrap flex items-center">
         <picture class="inline-block mx-1 mb-2 w-5 h-5 mr-2">
           <source srcset="/shell.avif" type="image/avif">
           <source srcset="/shell.webp" type="image/webp">
           <img src="/shell.png" class="inline-block mx-1 mb-1 w-5 h-5" alt="shell" loading="lazy">
-          </picture>
+        </picture>
         <%= regional_price.round %>
       </div>
     <% end %>
     <div class="flex-1 flex flex-col">
       <h3 class="text-xl font-bold mb-2"><%= item.name %></h3>
       <div class="mb-4">
-        <p class="text-gray-700"><%= raw item.description %></p> <%# erb_lint:disable ErbSafety %>
+        <%# erb_lint:disable ErbSafety %>
+        <p class="text-gray-700"><%== ActiveSupport::SafeBuffer.new(item.description) %></p>
         <% if item.limited? %>
           <% if remaining && remaining > 0 %>
             <p class="text-sm text-orange-600 font-semibold mt-2">
@@ -71,7 +71,6 @@
           <% end %>
         <% end %>
       </div>
-
       <% if item.image.attached? %>
         <div class="mb-4 flex justify-center flex-shrink-0">
           <%= image_tag item.image.variant(:thumb), class: "rounded-lg w-full h-auto object-scale-down aspect-square max-h-48" %>
@@ -133,7 +132,6 @@
     </div>
   </div>
 <% end %>
-
 <!-- <script>
 document.addEventListener('DOMContentLoaded', () => {
   for (const itemContainer of document.querySelectorAll(".item-container")) {

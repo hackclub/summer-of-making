@@ -1,4 +1,4 @@
-<% # Use pre-computed data if available, fallback to old logic for compatibility %>
+<%# Use pre-computed data if available, fallback to old logic for compatibility %>
 <% if defined?(item_data) && item_data %>
   <% regional_price = item_data[:regional_price] %>
   <% out_of_stock = item_data[:out_of_stock] %>
@@ -9,7 +9,7 @@
     <% disabled = ineligible || (!@current_user_ysws_verified && !item.is_a?(ShopItem::FreeStickers)) || (@current_balance < regional_price) || out_of_stock %>
   <% end %>
 <% else %>
-  <% # Fallback to old logic for compatibility %>
+  <%# Fallback to old logic for compatibility %>
   <% if current_user %>
     <% ineligible = current_verification_status == :ineligible %>
     <% out_of_stock = item.out_of_stock? %>
