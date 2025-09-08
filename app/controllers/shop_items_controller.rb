@@ -199,7 +199,7 @@ class ShopItemsController < ApplicationController
       remaining = (item.limited? && item.stock.present?) ? (item.stock - (@ordered_quantity_by_item_id[item.id].to_i)) : nil
       out_of_stock = item.limited? && remaining && remaining <= 0
       already_ordered = item.one_per_person_ever? && @ordered_once_item_ids&.include?(item.id)
-      
+
       item.define_singleton_method(:item_data) do
         {
           regional_price: regional_price,

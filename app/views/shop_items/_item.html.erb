@@ -33,7 +33,7 @@
     <div class="flex-1 flex flex-col">
       <h3 class="text-xl font-bold mb-2"><%= item.name %></h3>
       <div class="mb-4">
-        <p class="text-gray-700"><%= raw item.description %></p>
+        <p class="text-gray-700"><%== item.description %></p>
         <%# erb_lint:disable ErbSafety %>
         <% if item.limited? %>
           <% if remaining && remaining > 0 %>
