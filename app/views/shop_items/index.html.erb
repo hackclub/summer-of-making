@@ -148,32 +148,13 @@
             <% if cookies[:dismissed_raffle_v3] != 'true' && current_user&.tutorial_completed? %>
               <%= render partial: "raffle_card" %>
             <% end %>
-            <%
-              # Set up instance variables for optimized rendering
-              @current_verification_status = current_verification_status if current_user
-              @current_user_ysws_verified = current_user&.ysws_verified?
-            %>
             <% @regular_items.each do |item| %>
-              <% 
-                # Create proper item_data hash for optimized rendering
-                regional_price = (@regionalization_enabled && @selected_region) ? item.price_for_region(@selected_region) : item.ticket_cost
-                remaining = (item.limited? && item.stock.present?) ? (item.stock - (@ordered_quantity_by_item_id[item.id].to_i)) : nil
-                out_of_stock = item.limited? && remaining && remaining <= 0
-                already_ordered = item.one_per_person_ever? && @ordered_once_item_ids&.include?(item.id)
-                
-                item_data = {
-                  regional_price: regional_price,
-                  remaining_stock: remaining,
-                  out_of_stock: out_of_stock,
-                  already_ordered: already_ordered
-                }
-              %>
               <% if item.is_a?(ShopItem::SinkeningBalloons) %>
                 <% if Flipper.enabled?(:enable_shop_balloons, current_user) && current_user&.sinkening_participation? && !@ordered_once_item_ids.include?(item.id) %>
-                  <%= render partial: "item", locals: { item: item, item_data: item_data } %>
+                  <%= render partial: "item", locals: { item: item, item_data: item.item_data } %>
                 <% end %>
               <% else %>
-                <%= render partial: "item", locals: { item: item, item_data: item_data } %>
+                <%= render partial: "item", locals: { item: item, item_data: item.item_data } %>
               <% end %>
             <% end %>
           </div>
@@ -191,21 +172,7 @@
           <% end %>
           <div class="flex flex-col sm:grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
             <% @badge_items.each do |item| %>
-              <% 
-                # Create proper item_data hash for optimized rendering  
-                regional_price = (@regionalization_enabled && @selected_region) ? item.price_for_region(@selected_region) : item.ticket_cost
-                remaining = (item.limited? && item.stock.present?) ? (item.stock - (@ordered_quantity_by_item_id[item.id].to_i)) : nil
-                out_of_stock = item.limited? && remaining && remaining <= 0
-                already_ordered = item.one_per_person_ever? && @ordered_once_item_ids&.include?(item.id)
-                
-                item_data = {
-                  regional_price: regional_price,
-                  remaining_stock: remaining,
-                  out_of_stock: out_of_stock,
-                  already_ordered: already_ordered
-                }
-              %>
-              <%= render partial: "item", locals: { item: item, item_data: item_data } %>
+              <%= render partial: "item", locals: { item: item, item_data: item.item_data } %>
             <% end %>
           </div>
         </div>
