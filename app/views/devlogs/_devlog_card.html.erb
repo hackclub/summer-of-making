@@ -11,6 +11,7 @@
   container_classes ||= ''                 # Additional container classes
   content_margin ||= ''                    # Content margin/padding classes
   no_parchment ||= false                   # Whether to disable parchment styling
+  liked ||= nil                            # Whether current user has liked this devlog (avoids N+1)
   show_animation = @new_devlog_id == devlog.id && devlog.for_sinkening && !Flipper.enabled?(:disable_sinkening_visuals, current_user)
 %>
 
@@ -153,7 +154,6 @@
         <div class="mt-3 sm:mt-4 flex flex-row items-center justify-left gap-x-4 max-w-prose w-full text-som-dark">
           <!-- Like button -->
           <% if show_likes && user_signed_in? %>
-            <% liked = defined?(@liked_devlog_ids) ? @liked_devlog_ids.include?(devlog.id) : nil %>
             <%= render "likes/button", likeable: devlog, liked: liked %>
           <% end %>
 

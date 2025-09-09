@@ -57,22 +57,22 @@
 
             <div class="grid grid-cols-2 gap-4">
               <div class="text-center profile-stat">
-                <div class="text-xl font-bold text-blue-600"><%= @user.projects.count %></div>
+                <div class="text-xl font-bold text-blue-600"><%= @stats[:projects_count] %></div>
                 <div class="text-xs">Projects</div>
               </div>
 
               <div class="text-center profile-stat">
-                <div class="text-xl font-bold text-green-600"><%= @user.devlogs.count %></div>
+                <div class="text-xl font-bold text-green-600"><%= @stats[:devlogs_count] %></div>
                 <div class="text-xs">Devlogs</div>
               </div>
 
               <div class="text-center profile-stat">
-                <div class="text-xl font-bold text-purple-600"><%= @user.votes.active.count %></div>
+                <div class="text-xl font-bold text-purple-600"><%= @stats[:votes_count] %></div>
                 <div class="text-xs">Votes</div>
               </div>
 
               <div class="text-center profile-stat">
-                <div class="text-xl font-bold text-orange-600"><%= @user.projects.joins(:ship_events).count %></div>
+                <div class="text-xl font-bold text-orange-600"><%= @stats[:ships_count] %></div>
                 <div class="text-xs">Ships</div>
               </div>
             </div>
@@ -129,12 +129,12 @@
       <% end %>
 
       <!-- Badges -->
-      <% if @user.badges.any? %>
+      <% if @user_badges.any? %>
         <%= render "shared/card" do %>
           <div class="space-y-4">
             <div class="flex items-center justify-between">
               <h3 class="text-lg font-semibold text-gray-800">Badges</h3>
-              <span class="text-sm text-gray-500"><%= @user.badges.count %></span>
+              <span class="text-sm text-gray-500"><%= @user_badges.count %></span>
             </div>
 
             <div class="flex flex-wrap gap-3 justify-center">
@@ -269,6 +269,7 @@
                    <% end %>
                  <% elsif activity[:type] == :devlog %>
                    <% devlog = activity[:item] %>
+                   <% liked = defined?(@liked_devlog_ids) ? @liked_devlog_ids.include?(devlog.id) : nil %>
                    <%= render "devlogs/devlog_card",
                      devlog: devlog,
                      context: 'activity',
@@ -276,7 +277,8 @@
                      show_project_link: true,
                      show_likes: user_signed_in?,
                      show_comment_modal: user_signed_in?,
-                     show_stonks: false %>
+                     show_stonks: false,
+                     liked: %>
                  <% elsif activity[:type] == :shipwright_advice %>
                    <% advice = activity[:item] %>
                    <% reviewer = advice.ship_certification.reviewer %>
