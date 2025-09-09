@@ -12,11 +12,11 @@ class ConvertLanguageStatsToJsonb < ActiveRecord::Migration[8.0]
       ProjectLanguage.find_each do |record|
         record.update_column(:language_stats_new, record.language_stats)
       end
-      
+
       # Step 3: Remove old column and rename new one
       safety_assured { remove_column :project_languages, :language_stats }
     end
-    
+
     # Rename the new column to the original name if needed
     if column_exists?(:project_languages, :language_stats_new)
       safety_assured { rename_column :project_languages, :language_stats_new, :language_stats }
