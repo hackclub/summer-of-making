@@ -219,27 +219,22 @@ class UsersController < ApplicationController
       # For current user, ensure user_badges is loaded
       current_user.tap { |user| user.user_badges.load unless user.association(:user_badges).loaded? }
     else
-      # Preload all associations we'll need to avoid multiple DB hits
-      # Use preload for better control over the query strategy
+      # Preload associations needed for the view and cached activities
       scope = User.preload(
         :user_profile,    # Used for bio, custom CSS checks
         :user_badges,     # Used for @user_badges and has_badge? checks  
         :payouts,         # Used for balance calculations
-        :likes,           # Used for current_user like checks
-        :comments,        # User's comments
-        :devlogs,         # Used in get_cached_activities and stats
-        { votes: [] },    # Used for vote count stats (with scope)
-        { projects: [     # Used in @all_projects and get_cached_activities
-          :user,
-          :devlogs,
-          :ship_events,
-          :followers,
-          :stonks,
-          :ship_certifications,
-          :shipwright_advices,
-          :banner_attachment,
-          :comments,
-          { devlogs: [:user, :comments, :likes, :file_attachment] }
+        { votes: [] },    # Used for vote count stats
+        { devlogs: [      # Used in activities feed - need project and user for devlog cards
+          :project,       # devlog.project.present? check and devlog card project info
+          :user,          # devlog.user.avatar and display_name in devlog cards
+          :file_attachment # devlog.file.attached? and file rendering
+        ]},
+        { projects: [     # Used in @all_projects sidebar and activities
+          :devlogs,       # For devlog count in sidebar
+          :ship_events,   # For "Shipped" status and ships count
+          :followers,     # For follower count in sidebar  
+          :banner_attachment  # For project thumbnails
         ]}
       )
       scope = scope.left_joins(:user_profile).where(user_profiles: { hide_from_logged_out: [ false, nil ] }) unless user_signed_in?
