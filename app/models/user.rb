@@ -351,17 +351,7 @@ class User < ApplicationRecord
     projects = result.dig("data", "projects")
     has_hackatime_account = result.dig("data", "status") == "ok"
 
-    trust_value = result.dig("trust_factor", "trust_value")
-    should_ban = trust_value == 1
-
-    if should_ban && !is_banned
-      ban_user!("hackatime_ban")
-    elsif !should_ban && is_banned
-      r = activities.where(key: "ban_user").order(created_at: :desc).first
-      if r&.parameters&.dig("reason") == "hackatime_ban"
-        unban_user!
-      end
-    end
+    ban_user!("hackatime_ban") if result.dig("trust_factor", "trust_value") == 1 && !is_banned
 
     if projects.empty?
       update!(has_hackatime_account:)
