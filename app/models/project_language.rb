@@ -6,7 +6,7 @@
 #
 #  id             :bigint           not null, primary key
 #  error_message  :text
-#  language_stats :json             not null
+#  language_stats :jsonb            not null
 #  last_synced_at :datetime
 #  status         :integer          default("pending"), not null
 #  created_at     :datetime         not null
@@ -33,6 +33,22 @@ class ProjectLanguage < ApplicationRecord
   }
 
   validates :status, presence: true
+
+  # Strong params for jsonb language_stats field
+  def language_stats=(value)
+    case value
+    when Hash
+      super(value)
+    when String
+      super(JSON.parse(value))
+    when ActionController::Parameters
+      super(value.permit!.to_h)
+    else
+      super(value)
+    end
+  rescue JSON::ParserError
+    super({})
+  end
 
   def sync_needed?
     pending? || failed? || (synced? && last_synced_at < 1.day.ago)

@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_09_08_172755) do
+ActiveRecord::Schema[8.0].define(version: 2025_09_09_174944) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -372,12 +372,12 @@ ActiveRecord::Schema[8.0].define(version: 2025_09_08_172755) do
 
   create_table "project_languages", force: :cascade do |t|
     t.bigint "project_id", null: false
-    t.json "language_stats", default: {}, null: false
     t.integer "status", default: 0, null: false
     t.text "error_message"
     t.datetime "last_synced_at"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.jsonb "language_stats", null: false
     t.index ["last_synced_at"], name: "index_project_languages_on_last_synced_at"
     t.index ["project_id"], name: "index_project_languages_on_project_id_unique", unique: true
     t.index ["status"], name: "index_project_languages_on_status"
