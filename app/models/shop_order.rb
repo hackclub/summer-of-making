@@ -57,7 +57,7 @@ class ShopOrder < ApplicationRecord
   belongs_to :shop_card_grant, optional: true
   belongs_to :warehouse_package, class_name: "Shop::WarehousePackage", optional: true
 
-  validates :quantity, presence: true, numericality: { greater_than: 0 }, on: :create
+  validates :quantity, presence: true, numericality: { only_integer: true, greater_than: 0 }, on: :create
   validate :check_one_per_person_ever_limit, on: :create
   validate :check_max_quantity_limit, on: :create
   validate :check_black_market_access, on: :create
