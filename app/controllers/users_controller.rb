@@ -165,7 +165,7 @@ class UsersController < ApplicationController
   private
 
   def get_cached_activities
-    # Create cache key based on user and their content timestamps  
+    # Create cache key based on user and their content timestamps
     # Use preloaded data for timestamp calculations to avoid DB hits
     projects_max = @user.projects.map(&:updated_at).max
     devlogs_max = @user.devlogs.map(&:updated_at).max
@@ -229,13 +229,13 @@ class UsersController < ApplicationController
           :project,       # devlog.project.present? check and devlog card project info
           :user,          # devlog.user.avatar and display_name in devlog cards
           :file_attachment # devlog.file.attached? and file rendering
-        ]},
+        ] },
         { projects: [     # Used in @all_projects sidebar and activities
           :devlogs,       # For devlog count in sidebar
           :ship_events,   # For "Shipped" status and ships count
-          :followers,     # For follower count in sidebar  
-          banner_attachment: [:attachment]  # For project thumbnails
-        ]}
+          :followers,     # For follower count in sidebar
+          banner_attachment: [ :attachment ]  # For project thumbnails
+        ] }
       )
       scope = scope.where(user_profiles: { hide_from_logged_out: [ false, nil ] }) unless user_signed_in?
       scope.find(params[:id])
