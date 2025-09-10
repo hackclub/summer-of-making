@@ -173,13 +173,13 @@
                           <%= project.title %>
                         </a>
                       </h4>
-                      <% if project.ship_events.any? %>
+                      <% if @project_shipped_status[project.id] %>
                         <span class="text-xs px-2 py-1 bg-green-100 text-green-800 rounded-full">Shipped</span>
                       <% end %>
                     </div>
 
                     <div class="flex items-center space-x-2 mt-1 text-xs text-gray-500">
-                      <span><%= pluralize(project.devlogs.count, 'devlog') %></span>
+                      <span><%= pluralize(@project_devlog_counts[project.id], 'devlog') %></span>
                       <span>•</span>
                       <span><%= time_ago_in_words(project.created_at) %> ago</span>
                     </div>
@@ -259,11 +259,11 @@
                        <% end %>
 
                        <div class="flex items-center space-x-4 mt-3 text-sm text-som-detail">
-                         <span><%= pluralize(project.devlogs.count, 'devlog') %></span>
-                         <span><%= pluralize(project.followers.count, 'follower') %></span>
-                         <% if project.ship_events.any? %>
-                           <span class="text-green-600">Shipped</span>
-                         <% end %>
+                       <span><%= pluralize(@project_devlog_counts[project.id], 'devlog') %></span>
+                       <span><%= pluralize(@project_follower_counts[project.id], 'follower') %></span>
+                       <% if @project_shipped_status[project.id] %>
+                       <span class="text-green-600">Shipped</span>
+                       <% end %>
                        </div>
                      </div>
                    <% end %>

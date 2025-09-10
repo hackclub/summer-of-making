@@ -81,6 +81,18 @@ class ApplicationController < ActionController::Base
 
   private
 
+  def preload_current_user_associations
+    return unless user_signed_in?
+
+    # Preload common associations to prevent N+1 queries in layouts and views
+    %w[user_badges payouts tutorial_progress user_hackatime_data].each do |association|
+      next unless current_user.respond_to?(association) && current_user.class.reflect_on_association(association)
+      next if current_user.association(association).loaded?
+
+      current_user.association(association).load_target
+    end
+  end
+
   def try_rack_mini_profiler_enable
     if current_user && current_user.is_admin?
       Rack::MiniProfiler.authorize_request

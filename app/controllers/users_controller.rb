@@ -4,6 +4,7 @@ class UsersController < ApplicationController
   before_action :authenticate_api_key, only: [ :check_user ]
   before_action :authenticate_user!,
                 only: %i[hackatime_auth_redirect identity_vault_callback]
+  before_action :preload_current_user_associations, only: [ :show ]
   before_action :set_user, only: [ :show ]
 
   def show
@@ -33,13 +34,20 @@ class UsersController < ApplicationController
       ships_count: @user.projects.count { |p| p.ship_events.any? }
     }
 
+    # Precompute project metrics to avoid N+1 in views
+    @project_devlog_counts = {}
+    @project_follower_counts = {}
+    @project_shipped_status = {}
+
+    @user.projects.each do |project|
+      @project_devlog_counts[project.id] = project.devlogs.size
+      @project_follower_counts[project.id] = project.followers.size
+      @project_shipped_status[project.id] = project.ship_events.any?
+    end
+
     # Precompute badges to avoid N+1 queries in the view
     @user_badges = @user.badges
 
-    # Ensure current_user's user_badges are loaded for has_badge? checks in view
-    if user_signed_in? && !current_user.association(:user_badges).loaded?
-      current_user.user_badges.load
-    end
 
     respond_to do |format|
       format.html
@@ -224,17 +232,19 @@ class UsersController < ApplicationController
         :user_profile,    # Used for bio, custom CSS checks
         :user_badges,     # Used for @user_badges and has_badge? checks
         :payouts,         # Used for balance calculations
+        :user_hackatime_data,  # Used for has_hackatime? and coding time stats
         { votes: [] },    # Used for vote count stats
         { devlogs: [      # Used in activities feed - need project and user for devlog cards
           :project,       # devlog.project.present? check and devlog card project info
-          :user,          # devlog.user.avatar and display_name in devlog cards
-          :file_attachment # devlog.file.attached? and file rendering
+          { user: [ :user_badges ] },  # devlog.user.avatar, display_name, and badge checks
+          file_attachment: [ :blob ] # devlog.file.attached? and file rendering
         ] },
         { projects: [     # Used in @all_projects sidebar and activities
           :devlogs,       # For devlog count in sidebar
           :ship_events,   # For "Shipped" status and ships count
           :followers,     # For follower count in sidebar
-          banner_attachment: [ :attachment ]  # For project thumbnails
+          { user: [ :user_badges ] },  # project.user.avatar, display_name, and badge checks
+          banner_attachment: [ :blob ]  # For project thumbnails
         ] }
       )
       scope = scope.where(user_profiles: { hide_from_logged_out: [ false, nil ] }) unless user_signed_in?
