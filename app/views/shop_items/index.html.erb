@@ -1,4 +1,4 @@
-<div class="mb-4 md:mb-6 px-4 md:px-8 pt-2 md:pt-8 pb-2 text-center w-full flex justify-center flex-col relative">
+<div class="px-4 md:px-8">
   <!-- Music Button -->
   <button id="music-toggle" class="fixed top-4 md:top-8 md:right-6 right-18 z-50 w-12 h-12 text-white rounded-full flex items-center justify-center transition-all duration-200 hover:scale-110" style="background: linear-gradient(135deg, #8b6f47 0%, #a0845c 50%, #8b6f47 100%); border: 2px solid #6b5439; box-shadow: 0 2px 4px rgba(107, 84, 57, 0.3);" title="Toggle Music">
     <span id="music-icon" class="text-lg leading-none cursor-pointer" style="display: flex; align-items: center; justify-content: center; height: 100%; width: 100%;">♪</span>
@@ -8,37 +8,36 @@
     Your browser does not support the audio element.
   </audio>
 
-  <h1 class="text-4xl sm:text-5xl mb-0">
-    <% unless current_user %>Summer of Making
-    <% end %>Shop</h1>
-
-  <% admin_tool("mb-4") do %>
-    <p><%= @shop_items.count %> items - <%= link_to "edit them?", admin_shop_items_path, class: "underline" %></p>
-  <% end %>
-
-  <% if current_user %>
-    <div class="justify-center flex">
-      <%= render "verification_callout" unless current_verification_status == :verified %>
+  <%= render "shared/page_title",
+    title: "#{current_user ? '' : 'Summer of Making '}Shop",
+    subtitle: "What catches your eye?" %>
+    <div class="fixed top-4 right-28 z-50">
+      <% admin_tool("mb-4") do %>
+        <p><%= @shop_items.count %> items - <%= link_to "edit them?", admin_shop_items_path, class: "underline" %></p>
+      <% end %>
     </div>
-    <div class="justify-center flex py-2">
-      <%= render "shared/button",
-        text: "View My Orders",
-        link: shop_orders_path,
-        kind: :primary,
-        fill_width: false,
-        icon: nil %>
+
+  <% if current_user && current_verification_status != :verified %>
+    <div class="flex justify-center mb-4">
+      <%= render "verification_callout" %>
     </div>
   <% end %>
 
-  <% if @regionalization_enabled %>
-    <div class="justify-center flex mt-4 flex-col items-center gap-4">
-      <%= render "shared/card", classes: 'max-w-md w-full' do %>
-        <div class="text-center mb-3">
-          <h3 class="text-lg font-semibold text-[#3a2f25] font-['DynaPuff',sans-serif] mb-1">🌍 Choose Your Region</h3>
-          <p class="text-sm text-[#666] font-['National Park',sans-serif]">Prices and availability vary by region</p>
-        </div>
-        <div class="flex flex-col gap-3">
-          <select id="region-selector" class="w-full px-4 py-3 border-2 border-[#8b6f47] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#8b6f47] focus:border-transparent text-center">
+  <div class="flex flex-col sm:flex-row items-center justify-between gap-4 mb-6">
+    <div class="flex flex-col sm:flex-row items-center gap-4">
+      <% if current_user&.shop_orders&.any? %>
+        <%= render "shared/button",
+          text: "View My Orders",
+          link: shop_orders_path,
+          kind: :primary,
+          fill_width: false,
+          icon: nil %>
+      <% end %>
+      
+      <% if @regionalization_enabled %>
+        <div class="flex items-center gap-2">
+          <span class="text-sm font-medium text-[#3a2f25]">🌍 Region:</span>
+          <select id="region-selector" class="px-3 py-2 border-2 border-[#8b6f47] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#8b6f47] focus:border-transparent text-sm">
             <% Shop::Regionalizable::REGIONS.each do |code, config| %>
               <option value="<%= code %>" <%= 'selected' if @selected_region == code %>>
                 <%= config[:name] %>
@@ -48,7 +47,7 @@
         </div>
       <% end %>
     </div>
-  <% end %>
+  </div>
 
   <% unless current_user %>
     <div id="how-it-works" class="mt-15">
@@ -135,16 +134,9 @@
         <% end %>
       <% end %>
     <% else %>
-      <!-- Regular Items Section -->
       <% if @regular_items.any? %>
-        <div class="mb-12">
-          <% if @badge_items.any? %>
-            <div class="text-center mb-8">
-              <h2 class="text-3xl font-bold text-[#3a2f25] font-['DynaPuff',sans-serif] mb-2">🛍️ Shop Items</h2>
-              <p class="text-lg text-[#666] font-['National Park',sans-serif]">Physical items, digital rewards, and more!</p>
-            </div>
-          <% end %>
-          <div class="flex flex-col sm:grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
+        <div class="mb-6">
+          <div class="flex flex-col sm:grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
             <% if cookies[:dismissed_raffle_v3] != 'true' && current_user&.tutorial_completed? %>
               <%= render partial: "raffle_card" %>
             <% end %>
@@ -163,14 +155,14 @@
 
       <!-- Badge Items Section -->
       <% if @badge_items.any? %>
-        <div class="mb-12">
-          <%= render "shared/card", classes: 'max-w-5xl mx-auto mb-8', padding: 'md' do %>
+        <div class="mb-6">
+          <%= render "shared/card", classes: 'max-w-5xl mx-auto mb-4', padding: 'md' do %>
             <div class="text-center">
-              <h2 class="text-3xl font-bold text-[#3a2f25] font-['DynaPuff',sans-serif] mb-2">🏆 Badge Collection</h2>
-              <p class="text-lg text-[#666] font-['National Park',sans-serif]">buy glory! buy fame! buy power.</p>
+              <h2 class="text-2xl font-bold text-[#3a2f25] font-['DynaPuff',sans-serif] mb-1">🏆 Badge Collection</h2>
+              <p class="text-base text-[#666] font-['National Park',sans-serif]">buy glory! buy fame! buy power.</p>
             </div>
           <% end %>
-          <div class="flex flex-col sm:grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
+          <div class="flex flex-col sm:grid grid-cols-1 lg:grid-cols-3 xl:grid-cols-4 gap-4">
             <% @badge_items.each do |item| %>
               <%= render partial: "item", locals: { item: item, item_data: item.item_data } %>
             <% end %>
