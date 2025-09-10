@@ -54,6 +54,7 @@ class User < ApplicationRecord
   has_many :shop_card_grants
   has_many :user_badges, dependent: :destroy
   has_many :comments
+  has_many :likes
 
   accepts_nested_attributes_for :user_profile
   has_many :hackatime_projects

@@ -222,7 +222,7 @@ class UsersController < ApplicationController
       # Preload associations needed for the view and cached activities
       scope = User.preload(
         :user_profile,    # Used for bio, custom CSS checks
-        :user_badges,     # Used for @user_badges and has_badge? checks  
+        :user_badges,     # Used for @user_badges and has_badge? checks
         :payouts,         # Used for balance calculations
         { votes: [] },    # Used for vote count stats
         { devlogs: [      # Used in activities feed - need project and user for devlog cards
@@ -234,10 +234,10 @@ class UsersController < ApplicationController
           :devlogs,       # For devlog count in sidebar
           :ship_events,   # For "Shipped" status and ships count
           :followers,     # For follower count in sidebar  
-          :banner_attachment  # For project thumbnails
+          banner_attachment: [:attachment]  # For project thumbnails
         ]}
       )
-      scope = scope.left_joins(:user_profile).where(user_profiles: { hide_from_logged_out: [ false, nil ] }) unless user_signed_in?
+      scope = scope.where(user_profiles: { hide_from_logged_out: [ false, nil ] }) unless user_signed_in?
       scope.find(params[:id])
     end
   end
