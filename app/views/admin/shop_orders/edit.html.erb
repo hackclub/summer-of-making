@@ -1,0 +1,120 @@
+<h1 style="color: var(--color-primary); margin-bottom: 1.5em;">edit shop order #<%= @shop_order.id %></h1>
+<p style="color: var(--color-muted); margin-bottom: 2em;"><%= @shop_order.full_name %></p>
+<%= form_with(model: [:admin, @shop_order], local: true) do |form| %>
+  <% if @shop_order.errors.any? %>
+    <div class="alert alert-danger" style="margin-bottom: 2em;">
+      <h4><%= pluralize(@shop_order.errors.count, "error") %> prohibited this order from being saved:</h4>
+      <ul>
+        <% @shop_order.errors.each do |error| %>
+          <li><%= error.full_message %></li>
+        <% end %>
+      </ul>
+    </div>
+  <% end %>
+  <div class="asecs">
+    <div class="asec" style="padding: 1.5em;">
+      <h2>external reference</h2>
+      <p style="color: var(--color-muted); margin-bottom: 1em;">
+        External tracking reference (always editable for admin purposes)
+      </p>
+      <div class="mb-3">
+        <%= form.label :external_ref, "External Reference:", class: "form-label", style: "font-weight: bold; margin-bottom: 0.5em; display: block;" %>
+        <%= form.text_field :external_ref,
+            class: "form-control",
+            style: "width: 100%; padding: 0.5em; border-radius: 6px; border: 1px solid var(--color-border); background: var(--color-darker); color: var(--color-text);",
+            placeholder: "Enter tracking number, order ID, or other reference" %>
+      </div>
+    </div>
+    <% unless @shop_order.aasm_state == 'fulfilled' %>
+      <div class="asec" style="padding: 1.5em;">
+        <h2>shipping address</h2>
+        <p style="color: var(--color-muted); margin-bottom: 1em;">
+          Shipping address (editable if order not yet fulfilled)
+        </p>
+        <% addy = @shop_order.frozen_address || {} %>
+        <%= form.fields_for :frozen_address do |address_form| %>
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1em; margin-bottom: 1em;">
+            <div>
+              <%= address_form.label :first_name, "First Name:", class: "form-label", style: "font-weight: bold; margin-bottom: 0.5em; display: block;" %>
+              <%= address_form.text_field :first_name,
+                  value: addy["first_name"],
+                  class: "form-control",
+                  style: "width: 100%; padding: 0.5em; border-radius: 6px; border: 1px solid var(--color-border); background: var(--color-darker); color: var(--color-text);" %>
+            </div>
+            <div>
+              <%= address_form.label :last_name, "Last Name:", class: "form-label", style: "font-weight: bold; margin-bottom: 0.5em; display: block;" %>
+              <%= address_form.text_field :last_name,
+                  value: addy["last_name"],
+                  class: "form-control",
+                  style: "width: 100%; padding: 0.5em; border-radius: 6px; border: 1px solid var(--color-border); background: var(--color-darker); color: var(--color-text);" %>
+            </div>
+          </div>
+          <div class="mb-3">
+            <%= address_form.label :line_1, "Address Line 1:", class: "form-label", style: "font-weight: bold; margin-bottom: 0.5em; display: block;" %>
+            <%= address_form.text_field :line_1,
+                value: addy["line_1"],
+                class: "form-control",
+                style: "width: 100%; padding: 0.5em; border-radius: 6px; border: 1px solid var(--color-border); background: var(--color-darker); color: var(--color-text);" %>
+          </div>
+          <div class="mb-3">
+            <%= address_form.label :line_2, "Address Line 2:", class: "form-label", style: "font-weight: bold; margin-bottom: 0.5em; display: block;" %>
+            <%= address_form.text_field :line_2,
+                value: addy["line_2"],
+                class: "form-control",
+                style: "width: 100%; padding: 0.5em; border-radius: 6px; border: 1px solid var(--color-border); background: var(--color-darker); color: var(--color-text);" %>
+          </div>
+          <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1em; margin-bottom: 1em;">
+            <div>
+              <%= address_form.label :city, "City:", class: "form-label", style: "font-weight: bold; margin-bottom: 0.5em; display: block;" %>
+              <%= address_form.text_field :city,
+                  value: addy["city"],
+                  class: "form-control",
+                  style: "width: 100%; padding: 0.5em; border-radius: 6px; border: 1px solid var(--color-border); background: var(--color-darker); color: var(--color-text);" %>
+            </div>
+            <div>
+              <%= address_form.label :state, "State/Province:", class: "form-label", style: "font-weight: bold; margin-bottom: 0.5em; display: block;" %>
+              <%= address_form.text_field :state,
+                  value: addy["state"],
+                  class: "form-control",
+                  style: "width: 100%; padding: 0.5em; border-radius: 6px; border: 1px solid var(--color-border); background: var(--color-darker); color: var(--color-text);" %>
+            </div>
+            <div>
+              <%= address_form.label :postal_code, "Postal Code:", class: "form-label", style: "font-weight: bold; margin-bottom: 0.5em; display: block;" %>
+              <%= address_form.text_field :postal_code,
+                  value: addy["postal_code"],
+                  class: "form-control",
+                  style: "width: 100%; padding: 0.5em; border-radius: 6px; border: 1px solid var(--color-border); background: var(--color-darker); color: var(--color-text);" %>
+            </div>
+          </div>
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1em; margin-bottom: 1em;">
+            <div>
+              <%= address_form.label :country, "Country:", class: "form-label", style: "font-weight: bold; margin-bottom: 0.5em; display: block;" %>
+              <%= address_form.text_field :country,
+                  value: addy["country"],
+                  class: "form-control",
+                  style: "width: 100%; padding: 0.5em; border-radius: 6px; border: 1px solid var(--color-border); background: var(--color-darker); color: var(--color-text);" %>
+            </div>
+            <div>
+              <%= address_form.label :phone_number, "Phone Number:", class: "form-label", style: "font-weight: bold; margin-bottom: 0.5em; display: block;" %>
+              <%= address_form.text_field :phone_number,
+                  value: addy["phone_number"],
+                  class: "form-control",
+                  style: "width: 100%; padding: 0.5em; border-radius: 6px; border: 1px solid var(--color-border); background: var(--color-darker); color: var(--color-text);" %>
+            </div>
+          </div>
+        <% end %>
+      </div>
+    <% end %>
+  </div>
+  <div style="margin-top: 2em; padding: 1.5em; background: var(--color-darker); border-radius: 8px;">
+    <div class="agrid" style="gap: 1em;">
+      <%= form.submit "Update Order",
+          class: "abtn primary",
+          style: "padding: 0.75em 1.5em;" %>
+      <%= link_to "Cancel",
+          [:admin, @shop_order],
+          class: "abtn secondary",
+          style: "padding: 0.75em 1.5em; text-decoration: none;" %>
+    </div>
+  </div>
+<% end %>

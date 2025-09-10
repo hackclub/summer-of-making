@@ -25,6 +25,10 @@
 #
 # Indexes
 #
+#  idx_shop_orders_item_state_qty             (shop_item_id,aasm_state,quantity)
+#  idx_shop_orders_stock_calc                 (shop_item_id,aasm_state)
+#  idx_shop_orders_user_item_state            (user_id,shop_item_id,aasm_state)
+#  idx_shop_orders_user_item_unique           (user_id,shop_item_id)
 #  index_shop_orders_on_shop_card_grant_id    (shop_card_grant_id)
 #  index_shop_orders_on_shop_item_id          (shop_item_id)
 #  index_shop_orders_on_user_id               (user_id)
@@ -53,7 +57,7 @@ class ShopOrder < ApplicationRecord
   belongs_to :shop_card_grant, optional: true
   belongs_to :warehouse_package, class_name: "Shop::WarehousePackage", optional: true
 
-  validates :quantity, presence: true, numericality: { greater_than: 0 }, on: :create
+  validates :quantity, presence: true, numericality: { only_integer: true, greater_than: 0 }, on: :create
   validate :check_one_per_person_ever_limit, on: :create
   validate :check_max_quantity_limit, on: :create
   validate :check_black_market_access, on: :create
@@ -116,6 +120,9 @@ class ShopOrder < ApplicationRecord
         self.external_ref = external_ref
         self.fulfillment_cost = fulfillment_cost
         self.fulfilled_by = fulfilled_by
+      end
+      after do
+        Shop::SendOrderFulfilledDmJob.perform_later(self)
       end
     end
 

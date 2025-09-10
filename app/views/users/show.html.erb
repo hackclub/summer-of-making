@@ -72,7 +72,7 @@
               </div>
 
               <div class="text-center profile-stat">
-                <div class="text-xl font-bold text-orange-600"><%= @user.projects.joins(:ship_events).distinct.count %></div>
+                <div class="text-xl font-bold text-orange-600"><%= @user.projects.joins(:ship_events).count %></div>
                 <div class="text-xs">Ships</div>
               </div>
             </div>
@@ -277,6 +277,71 @@
                      show_likes: user_signed_in?,
                      show_comment_modal: user_signed_in?,
                      show_stonks: false %>
+                 <% elsif activity[:type] == :shipwright_advice %>
+                   <% advice = activity[:item] %>
+                   <% reviewer = advice.ship_certification.reviewer %>
+                   <%= render "shared/card" do %>
+                     <div class="ml-4">
+                       <div class="flex items-center justify-between mb-2 sm:mb-3">
+                         <div class="flex items-center">
+                           <% if reviewer&.avatar.present? %>
+                             <img src="<%= reviewer.avatar %>" alt="<%= reviewer.display_name %>" class="w-8 h-8 sm:w-10 sm:h-10 rounded-full mr-2 sm:mr-3" loading="lazy">
+                           <% else %>
+                             <div class="w-8 h-8 sm:w-10 sm:h-10 rounded-full mr-2 sm:mr-3 bg-blue-100 flex items-center justify-center">
+                               <span class="text-blue-600 text-sm">💡</span>
+                             </div>
+                           <% end %>
+                           <div>
+                             <span class="text-base sm:text-lg 2xl:text-xl text-som-dark">
+                               <% if reviewer %>
+                                 <%= render "shared/user_display_name", user: reviewer %>
+                                 <span class="text-[#865c39]">Shipwright gave you feedback</span>
+                               <% else %>
+                                 <span class="text-[#865c39]">Shipwright gave you feedback</span>
+                               <% end %>
+                             </span>
+                             <div class="text-som-detail">
+                               <span>
+                                 <% time_diff = Time.current - advice.created_at %>
+                                 <% if time_diff >= 86400 %>
+                                   <% days = (time_diff / 86400).to_i %>
+                                   <%= "#{days}d ago" %>
+                                 <% elsif time_diff >= 3600 %>
+                                   <% hours = (time_diff / 3600).to_i %>
+                                   <%= "#{hours}h ago" %>
+                                 <% elsif time_diff >= 60 %>
+                                   <% minutes = (time_diff / 60).to_i %>
+                                   <%= "#{minutes}m ago" %>
+                                 <% else %>
+                                   <% seconds = time_diff.to_i %>
+                                   <%= "#{seconds}s ago" %>
+                                 <% end %>
+                               </span>
+                             </div>
+                           </div>
+                         </div>
+                       </div>
+
+                       <div class="prose max-w-[32em] text-som-dark mb-2 sm:mb-3 text-base sm:text-lg 2xl:text-xl break-words overflow-wrap-anywhere">
+                         <h3 class="text-xl font-extrabold text-som-dark mb-2 m-0">
+                           <a href="<%= project_path(advice.project) %>" class="hover:text-blue-600 transition-colors no-underline">
+                             <%= advice.project.title %>
+                           </a>
+                         </h3>
+
+                         <p class="text-som-dark text-base sm:text-lg 2xl:text-xl m-0">
+                           <%= advice.description %>
+                         </p>
+                       </div>
+
+                       <div class="flex items-center space-x-4 mt-3 text-sm text-som-detail">
+                         <span>from <%= advice.ship_certification.reviewer&.display_name || "Shipwright" %></span>
+                         <% if advice.completed? %>
+                           <span class="text-green-600">Addressed</span>
+                         <% end %>
+                       </div>
+                     </div>
+                   <% end %>
                  <% elsif activity[:type] == :user_joined %>
                    <% user = activity[:item] %>
                    <%= render "shared/card" do %>

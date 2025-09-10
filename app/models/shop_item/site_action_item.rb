@@ -39,14 +39,24 @@
 #  created_at                        :datetime         not null
 #  updated_at                        :datetime         not null
 #
+# Indexes
+#
+#  idx_shop_items_enabled_black_market_price  (enabled,requires_black_market,ticket_cost)
+#  idx_shop_items_regional_enabled            (enabled,enabled_us,enabled_eu,enabled_in,enabled_ca,enabled_au,enabled_xx)
+#  idx_shop_items_type_enabled                (type,enabled)
+#
 class ShopItem::SiteActionItem < ShopItem
-  def self.fulfill_immediately?
-    true
-  end
+  def self.fulfill_immediately? = true
+
+  CHANNEL_A = "C09EZAHMLQY"
+  CHANNEL_B = "C09EZ8WEYQ0"
 
   enum :site_action, {
     taco_bell_bong: 2,
-    neon_flair: 4
+    neon_flair: 4,
+    channel_a: 5,
+    channel_b: 6,
+    cheat_black_market_access: 7
   }
 
   def fulfill!(shop_order)
@@ -57,6 +67,12 @@ class ShopItem::SiteActionItem < ShopItem
     when "neon_flair"
       shop_order.user.shenanigans_state["neon_flair"] = true
       shop_order.user.save!
+    when "channel_a"
+      Slack::AddUserToChannelJob.perform_later(shop_order.user, CHANNEL_A)
+    when "channel_b"
+      Slack::AddUserToChannelJob.perform_later(shop_order.user, CHANNEL_B)
+    when "cheat_black_market_access"
+      # shop_order.user.give_black_market!
     else
       raise "unknown site action: #{site_action.inspect}"
     end

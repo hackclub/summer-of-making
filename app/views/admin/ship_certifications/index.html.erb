@@ -6,6 +6,7 @@
       when 'pending' then 'yellow'
       when 'approved' then 'green'
       when 'rejected' then 'red'
+      when 'returned' then 'orange'
       when 'all' then 'dark'
       else 'gray'
     end %>" style="font-size: 0.6em; margin-left: 0.5rem;">
@@ -20,6 +21,10 @@
   <div style="display: flex; gap: 1rem;">
     <%= link_to "View Logs", logs_admin_ship_certifications_path, class: "pill pill-gray", style: "text-decoration: none; padding: 0.5rem 1rem;" %>
     <%= link_to "Low Quality Dashboard", admin_low_quality_dashboard_index_path, class: "pill pill-gray", style: "text-decoration: none; padding: 0.5rem 1rem;" %>
+    <%= link_to "Payout Requests", admin_ship_reviewer_payout_requests_path, class: "pill pill-blue", style: "text-decoration: none; padding: 0.5rem 1rem;" %>
+    <% if current_user&.admin_or_ship_certifier? && ShipReviewerPayoutService.can_request_payout?(current_user) %>
+      <%= button_to "Request Payout", ship_reviewer_payout_requests_path, method: :post, class: "pill pill-green", style: "border: none; text-decoration: none; padding: 0.5rem 1rem; cursor: pointer;" %>
+    <% end %>
   </div>
 </div>
 
@@ -34,7 +39,7 @@
       <p><strong>Presidential Approval Rate:</strong> <span style="font-weight: bold;"><%= ((@total_approved.to_f / (@total_approved + @total_rejected)) * 100).round(1) %>%</span></p>
     <% end %>
     <% if @avg_turnaround %>
-      <p><strong>Avg Decision Time:</strong>
+      <p><strong>Avg Queue Time:</strong>
         <span style="font-weight: bold;">
           <% if @avg_turnaround[:d] > 0 %>
             <%= @avg_turnaround[:d] %>d <%= @avg_turnaround[:h] % 24 %>h
@@ -53,7 +58,7 @@
   <div style="background: var(--color-card); padding: 1rem; border-radius: 8px; flex: 2;">
     <h3>Shipwright Leaderboard</h3>
     <div id="b">
-      <p style="margin-bottom: 0.5rem; font-size: 0.95em; color: var(--color-primary);">Past 7 days</p>
+      <p style="margin-bottom: 0.5rem; font-size: 0.95em; color: var(--color-primary);">This week (Sunday-Sunday EST)</p>
       <% if @leaderboard_week.any? %>
         <table style="width: 100%; font-size: 0.9rem;">
           <thead>
@@ -123,6 +128,48 @@
         <p>nuthing here!</p>
       <% end %>
     </div>
+    <button id="p" class="abtn small">payment stats?</button>
+    <div id="payments" style="display: none; margin-top: 1rem;">
+      <p style="margin-bottom: 0.5rem; font-size: 0.95em; color: var(--color-primary);">Payment Stats (Shells per Review)</p>
+      <% if @payment_stats.any? %>
+        <table style="width: 100%; font-size: 0.9rem;">
+          <thead>
+            <tr>
+              <th style="text-align: left;">Shipwright</th>
+              <th style="text-align: right;">Total Shells Owed</th>
+              <th style="text-align: right;">Shells per Review</th>
+              <th style="text-align: center;">Payout request</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% @payment_stats.each do |name, email, total_paid, shells_per_review, pending_amount| %>
+              <% reviewer = User.find_by(display_name: name) || User.find_by(email: email) %>
+              <tr>
+                <td>
+                  <%= name || email %>
+                  <% if pending_amount > 0 %>
+                    <br><small style="color: #FFB347;">+<%= pending_amount %> pending</small>
+                  <% end %>
+                </td>
+                <td style="text-align: right;"><%= total_paid %></td>
+                <td style="text-align: right;"><%= shells_per_review %></td>
+                <td style="text-align: center;">
+                  <% if reviewer == current_user && ShipReviewerPayoutService.can_request_payout?(current_user) %>
+                    <%= button_to "Request Payout", ship_reviewer_payout_requests_path, method: :post, class: "pill pill-green", style: "border: none; padding: 0.3rem 0.6rem; cursor: pointer; font-size: 0.8rem;" %>
+                  <% elsif reviewer == current_user %>
+                    <small style="color: var(--color-text-muted);">Not eligible</small>
+                  <% else %>
+                    <span style="color: var(--color-text-muted);">-</span>
+                  <% end %>
+                </td>
+              </tr>
+            <% end %>
+          </tbody>
+        </table>
+      <% else %>
+        <p>nuthing here!</p>
+      <% end %>
+    </div>
     <script>
       document.addEventListener('DOMContentLoaded', function() {
         var a = document.getElementById('a');
@@ -141,6 +188,17 @@
           c.style.display = 'block';
           sd.style.display = 'none';
           d.style.display = 'none';
+        });
+        var p = document.getElementById('p');
+        var payments = document.getElementById('payments');
+        p.addEventListener('click', function() {
+          b.style.display = 'none';
+          c.style.display = 'none';
+          d.style.display = 'none';
+          a.style.display = 'none';
+          sd.style.display = 'none';
+          p.style.display = 'none';
+          payments.style.display = 'block';
         });
       });
     </script>
@@ -177,8 +235,11 @@
     <%= link_to admin_ship_certifications_path(filter: 'rejected', category_filter: @category_filter), class: "pill #{@filter == 'rejected' ? 'pill-red' : 'pill-gray'}", style: "text-decoration: none; padding: 0.5rem 1rem;" do %>
       Rejected (<%= @total_rejected %>)
     <% end %>
+    <%= link_to admin_ship_certifications_path(filter: 'returned', category_filter: @category_filter), class: "pill #{@filter == 'returned' ? 'pill-orange' : 'pill-gray'}", style: "text-decoration: none; padding: 0.5rem 1rem;" do %>
+      Returned (<%= @total_returned %>)
+    <% end %>
     <%= link_to admin_ship_certifications_path(filter: 'all', category_filter: @category_filter), class: "pill #{@filter == 'all' ? 'pill-dark' : 'pill-gray'}", style: "text-decoration: none; padding: 0.5rem 1rem;" do %>
-      All (<%= @total_approved + @total_rejected + @total_pending %>)
+      All (<%= @total_approved + @total_rejected + @total_pending + @total_returned %>)
     <% end %>
   </div>
 </div>
@@ -232,13 +293,29 @@
           </div>
         </td>
         <td>
-          <% case ship_certification.judgement %>
-          <% when 'approved' %>
-            <span class="pill pill-green">Approved</span>
-          <% when 'rejected' %>
-            <span class="pill pill-red">Rejected</span>
+          <% if ship_certification.ysws_returned? %>
+            <span class="pill pill-orange">RETURNED BY ADMIN</span>
+            <% if ship_certification.ysws_feedback_reason_labels.any? %>
+              <br>
+              <small style="color: var(--color-text-muted); font-size: 0.75em; margin-top: 0.3rem; display: block;">
+                <%= ship_certification.ysws_feedback_reason_labels.join(", ") %>
+              </small>
+            <% end %>
+            <% if ship_certification.ysws_returned_by_id && @returned_by_users&.dig(ship_certification.ysws_returned_by_id) %>
+              <br>
+              <small style="color: var(--color-text-muted); font-size: 0.75em;">
+                by <%= @returned_by_users[ship_certification.ysws_returned_by_id].display_name %> • <%= time_ago_in_words(ship_certification.ysws_returned_at) %> ago
+              </small>
+            <% end %>
           <% else %>
-            <span class="pill pill-yellow">Pending</span>
+            <% case ship_certification.judgement %>
+            <% when 'approved' %>
+              <span class="pill pill-green">Approved</span>
+            <% when 'rejected' %>
+              <span class="pill pill-red">Rejected</span>
+            <% else %>
+              <span class="pill pill-yellow">Pending</span>
+            <% end %>
           <% end %>
         </td>
         <td>

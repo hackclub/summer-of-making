@@ -1,20 +1,17 @@
+<%# Use pre-computed data %>
+<% regional_price = item_data[:regional_price] %>
+<% remaining = item_data[:remaining_stock] %>
+<% out_of_stock = item_data[:out_of_stock] %>
+<% already_ordered = item_data[:already_ordered] %>
 <% if current_user %>
-  <% ineligible = current_verification_status == :ineligible %>
-  <% regional_price = (@regionalization_enabled && @selected_region) ? item.price_for_region(@selected_region) : item.ticket_cost %>
-  <% remaining = (item.limited? && item.stock.present?) ? (item.stock - (@ordered_quantity_by_item_id[item.id].to_i)) : nil %>
-  <% out_of_stock = item.limited? && remaining && remaining <= 0 %>
+  <% ineligible = @current_verification_status == :ineligible %>
   <% if item.is_a?(ShopItem::BadgeItem) %>
     <% badge_key = item.internal_description&.to_sym %>
     <% badge_prerequisite_failed = (badge_key == :gold_verified && !@user_badge_keys&.include?(:verified)) || (@user_badge_keys && badge_key && @user_badge_keys.include?(badge_key)) %>
   <% else %>
     <% badge_prerequisite_failed = false %>
   <% end %>
-  <% user_balance = @current_balance || current_user.balance %>
-  <% disabled = ineligible || (!current_user.ysws_verified? && !item.is_a?(ShopItem::FreeStickers)) || (user_balance < regional_price) || out_of_stock || badge_prerequisite_failed %>
-<% else %>
-  <% regional_price = (@regionalization_enabled && @selected_region) ? item.price_for_region(@selected_region) : item.ticket_cost %>
-  <% remaining = (item.limited? && item.stock.present?) ? (item.stock - (@ordered_quantity_by_item_id[item.id].to_i)) : nil %>
-  <% out_of_stock = item.limited? && remaining && remaining <= 0 %>
+  <% disabled = ineligible || (!@current_user_ysws_verified && !item.is_a?(ShopItem::FreeStickers)) || (@current_balance < regional_price) || out_of_stock || badge_prerequisite_failed %>
 <% end %>
 <%= render "shared/card", classes: "h-full #{"col-span-full" if item.is_free?}" do %>
   <div class="flex flex-col relative flex-1">
@@ -23,21 +20,21 @@
         <%= link_to "cfg", admin_shop_item_path(item), class: "underline text-sm", target: "_blank" %>
       </div>
     <% end %>
-
-    <% if regional_price > 0 %>
+    <% if regional_price && regional_price > 0 %>
       <div class="absolute top-2 right-2 text-lg font-bold whitespace-nowrap flex items-center">
         <picture class="inline-block mx-1 mb-2 w-5 h-5 mr-2">
           <source srcset="/shell.avif" type="image/avif">
           <source srcset="/shell.webp" type="image/webp">
           <img src="/shell.png" class="inline-block mx-1 mb-1 w-5 h-5" alt="shell" loading="lazy">
-          </picture>
+        </picture>
         <%= regional_price.round %>
       </div>
     <% end %>
     <div class="flex-1 flex flex-col">
       <h3 class="text-xl font-bold mb-2"><%= item.name %></h3>
       <div class="mb-4">
-        <p class="text-gray-700"><%= raw item.description %></p> <%# erb_lint:disable ErbSafety %>
+        <p class="text-gray-700"><%== item.description %></p>
+        <%# erb_lint:disable ErbSafety %>
         <% if item.limited? %>
           <% if remaining && remaining > 0 %>
             <p class="text-sm text-orange-600 font-semibold mt-2">
@@ -50,7 +47,6 @@
           <% end %>
         <% end %>
       </div>
-
       <% if item.image.attached? %>
         <div class="mb-4 flex justify-center flex-shrink-0">
           <%= image_tag item.image.variant(:thumb), class: "rounded-lg w-full h-auto object-scale-down aspect-square max-h-48" %>
@@ -61,8 +57,6 @@
     <div class="flex-shrink-0 flex flex-col gap-2">
       <% if current_user %>
         <div class="">
-          <% already_ordered = item.one_per_person_ever? && @ordered_once_item_ids&.include?(item.id) %>
-
           <% if already_ordered %>
             <%= render "shared/button",
                 text: "Already Ordered",
@@ -70,13 +64,14 @@
                 fill_width: true,
                 disabled: true %>
           <% else %>
+            <% user_balance = @current_balance %>
             <% button_text = if out_of_stock
                               "Out of Stock"
                             elsif ineligible
                               "Not for you!"
                             elsif item.is_a?(ShopItem::BadgeItem) && !item.can_purchase?(current_user)
                               item.prereq(current_user)
-                            elsif !current_user.ysws_verified? && !item.is_a?(ShopItem::FreeStickers)
+                            elsif !@current_user_ysws_verified && !item.is_a?(ShopItem::FreeStickers)
                               "Get your ID verified first!"
                             elsif user_balance >= regional_price
                               if item.is_a?(ShopItem::FreeStickers)
@@ -113,7 +108,6 @@
     </div>
   </div>
 <% end %>
-
 <!-- <script>
 document.addEventListener('DOMContentLoaded', () => {
   for (const itemContainer of document.querySelectorAll(".item-container")) {

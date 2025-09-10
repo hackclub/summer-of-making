@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_08_12_185310) do
+ActiveRecord::Schema[8.0].define(version: 2025_09_09_183009) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -257,6 +257,9 @@ ActiveRecord::Schema[8.0].define(version: 2025_08_12_185310) do
     t.jsonb "hackatime_projects_key_snapshot", default: [], null: false
     t.boolean "is_neighborhood_migrated", default: false, null: false
     t.boolean "for_sinkening", default: false, null: false
+    t.datetime "deleted_at"
+    t.index ["deleted_at"], name: "index_devlogs_on_deleted_at"
+    t.index ["project_id", "created_at"], name: "index_devlogs_on_project_id_and_created_at"
     t.index ["project_id"], name: "index_devlogs_on_project_id"
     t.index ["user_id"], name: "index_devlogs_on_user_id"
     t.index ["views_count"], name: "index_devlogs_on_views_count"
@@ -298,6 +301,14 @@ ActiveRecord::Schema[8.0].define(version: 2025_08_12_185310) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.boolean "resolved", default: false, null: false
+    t.datetime "resolved_at"
+    t.bigint "resolved_by_id"
+    t.string "category"
+    t.string "resolved_outcome"
+    t.text "resolved_message"
+    t.index ["category"], name: "index_fraud_reports_on_category"
+    t.index ["resolved_by_id"], name: "index_fraud_reports_on_resolved_by_id"
+    t.index ["suspect_type", "suspect_id", "resolved_at"], name: "index_fraud_reports_on_suspect_and_resolution"
     t.index ["user_id", "suspect_type", "suspect_id"], name: "index_fraud_reports_on_user_and_suspect", unique: true
     t.index ["user_id"], name: "index_fraud_reports_on_user_id"
   end
@@ -359,6 +370,21 @@ ActiveRecord::Schema[8.0].define(version: 2025_08_12_185310) do
     t.index ["user_id"], name: "index_project_follows_on_user_id"
   end
 
+  create_table "project_languages", force: :cascade do |t|
+    t.bigint "project_id", null: false
+    t.json "old_language_stats", default: {}, null: false
+    t.integer "status", default: 0, null: false
+    t.text "error_message"
+    t.datetime "last_synced_at"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.jsonb "language_stats", default: "{}"
+    t.index ["language_stats"], name: "index_project_languages_on_language_stats", using: :gin
+    t.index ["last_synced_at"], name: "index_project_languages_on_last_synced_at"
+    t.index ["project_id"], name: "index_project_languages_on_project_id_unique", unique: true
+    t.index ["status"], name: "index_project_languages_on_status"
+  end
+
   create_table "projects", force: :cascade do |t|
     t.string "title"
     t.text "description"
@@ -382,7 +408,10 @@ ActiveRecord::Schema[8.0].define(version: 2025_08_12_185310) do
     t.float "x"
     t.float "y"
     t.boolean "is_sinkening_ship", default: false
+    t.datetime "magicked_at"
     t.index ["is_shipped"], name: "index_projects_on_is_shipped"
+    t.index ["rating"], name: "index_projects_on_rating"
+    t.index ["user_id", "is_deleted"], name: "index_projects_on_user_id_and_is_deleted"
     t.index ["user_id"], name: "index_projects_on_user_id"
     t.index ["views_count"], name: "index_projects_on_views_count"
     t.index ["x", "y"], name: "index_projects_on_x_and_y"
@@ -420,9 +449,13 @@ ActiveRecord::Schema[8.0].define(version: 2025_08_12_185310) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.text "recertification_instructions"
+    t.text "ysws_feedback_reasons"
+    t.bigint "ysws_returned_by_id"
+    t.datetime "ysws_returned_at"
     t.index ["project_id", "judgement"], name: "index_ship_certifications_on_project_id_and_judgement"
     t.index ["project_id"], name: "index_ship_certifications_on_project_id"
     t.index ["reviewer_id"], name: "index_ship_certifications_on_reviewer_id"
+    t.index ["ysws_returned_by_id"], name: "index_ship_certifications_on_ysws_returned_by_id"
   end
 
   create_table "ship_event_feedbacks", force: :cascade do |t|
@@ -439,7 +472,37 @@ ActiveRecord::Schema[8.0].define(version: 2025_08_12_185310) do
     t.datetime "updated_at", null: false
     t.boolean "for_sinkening", default: false, null: false
     t.boolean "excluded_from_pool", default: false, null: false
+    t.index ["project_id", "created_at", "excluded_from_pool"], name: "index_ship_events_on_project_created_excluded"
     t.index ["project_id"], name: "index_ship_events_on_project_id"
+  end
+
+  create_table "ship_reviewer_payout_requests", force: :cascade do |t|
+    t.bigint "reviewer_id", null: false
+    t.decimal "amount"
+    t.integer "status"
+    t.datetime "requested_at"
+    t.datetime "approved_at"
+    t.bigint "approved_by_id"
+    t.integer "decisions_count"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["approved_by_id"], name: "index_ship_reviewer_payout_requests_on_approved_by_id"
+    t.index ["reviewer_id"], name: "index_ship_reviewer_payout_requests_on_reviewer_id"
+  end
+
+  create_table "shipwright_advices", force: :cascade do |t|
+    t.bigint "project_id", null: false
+    t.bigint "ship_certification_id", null: false
+    t.text "description"
+    t.string "proof_link"
+    t.integer "status", default: 0
+    t.integer "shell_reward", default: 0
+    t.datetime "completed_at"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["project_id", "status"], name: "index_shipwright_advices_on_project_id_and_status"
+    t.index ["project_id"], name: "index_shipwright_advices_on_project_id"
+    t.index ["ship_certification_id"], name: "index_shipwright_advices_on_ship_certification_id"
   end
 
   create_table "shop_card_grants", force: :cascade do |t|
@@ -489,6 +552,9 @@ ActiveRecord::Schema[8.0].define(version: 2025_08_12_185310) do
     t.boolean "enabled"
     t.integer "site_action"
     t.text "hcb_preauthorization_instructions"
+    t.index ["enabled", "enabled_us", "enabled_eu", "enabled_in", "enabled_ca", "enabled_au", "enabled_xx"], name: "idx_shop_items_regional_enabled"
+    t.index ["enabled", "requires_black_market", "ticket_cost"], name: "idx_shop_items_enabled_black_market_price"
+    t.index ["type", "enabled"], name: "idx_shop_items_type_enabled"
     t.check_constraint "hacker_score >= 0 AND hacker_score <= 100", name: "hacker_score_percentage_check"
   end
 
@@ -513,7 +579,11 @@ ActiveRecord::Schema[8.0].define(version: 2025_08_12_185310) do
     t.string "fulfilled_by"
     t.bigint "warehouse_package_id"
     t.index ["shop_card_grant_id"], name: "index_shop_orders_on_shop_card_grant_id"
+    t.index ["shop_item_id", "aasm_state", "quantity"], name: "idx_shop_orders_item_state_qty"
+    t.index ["shop_item_id", "aasm_state"], name: "idx_shop_orders_stock_calc"
     t.index ["shop_item_id"], name: "index_shop_orders_on_shop_item_id"
+    t.index ["user_id", "shop_item_id", "aasm_state"], name: "idx_shop_orders_user_item_state"
+    t.index ["user_id", "shop_item_id"], name: "idx_shop_orders_user_item_unique"
     t.index ["user_id"], name: "index_shop_orders_on_user_id"
     t.index ["warehouse_package_id"], name: "index_shop_orders_on_warehouse_package_id"
   end
@@ -722,6 +792,7 @@ ActiveRecord::Schema[8.0].define(version: 2025_08_12_185310) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.jsonb "soft_tutorial_steps", default: {}, null: false
+    t.jsonb "new_tutorial_progress", default: {}, null: false
     t.index ["user_id"], name: "index_tutorial_progresses_on_user_id"
   end
 
@@ -870,6 +941,7 @@ ActiveRecord::Schema[8.0].define(version: 2025_08_12_185310) do
     t.index ["ship_event_2_id"], name: "index_votes_on_ship_event_2_id"
     t.index ["status"], name: "index_votes_on_status"
     t.index ["user_id", "ship_event_1_id", "ship_event_2_id"], name: "index_votes_on_user_and_ship_events", unique: true
+    t.index ["user_id", "status"], name: "index_votes_on_user_id_and_status"
     t.index ["user_id"], name: "index_votes_on_user_id"
   end
 
@@ -902,19 +974,26 @@ ActiveRecord::Schema[8.0].define(version: 2025_08_12_185310) do
   add_foreign_key "devlogs", "projects"
   add_foreign_key "devlogs", "users"
   add_foreign_key "fraud_reports", "users"
+  add_foreign_key "fraud_reports", "users", column: "resolved_by_id"
   add_foreign_key "hackatime_projects", "users"
   add_foreign_key "likes", "users"
   add_foreign_key "magic_links", "users"
   add_foreign_key "project_follows", "projects"
   add_foreign_key "project_follows", "users"
+  add_foreign_key "project_languages", "projects"
   add_foreign_key "projects", "users"
   add_foreign_key "readme_certifications", "projects"
   add_foreign_key "readme_certifications", "users", column: "reviewer_id"
   add_foreign_key "readme_checks", "projects"
   add_foreign_key "ship_certifications", "projects"
   add_foreign_key "ship_certifications", "users", column: "reviewer_id"
+  add_foreign_key "ship_certifications", "users", column: "ysws_returned_by_id"
   add_foreign_key "ship_event_feedbacks", "ship_events"
   add_foreign_key "ship_events", "projects"
+  add_foreign_key "ship_reviewer_payout_requests", "users", column: "approved_by_id"
+  add_foreign_key "ship_reviewer_payout_requests", "users", column: "reviewer_id"
+  add_foreign_key "shipwright_advices", "projects"
+  add_foreign_key "shipwright_advices", "ship_certifications"
   add_foreign_key "shop_card_grants", "shop_items"
   add_foreign_key "shop_card_grants", "users"
   add_foreign_key "shop_orders", "shop_card_grants"

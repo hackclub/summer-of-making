@@ -13,7 +13,7 @@ class MapController < ApplicationController
   end
 
   def check_identity_verification
-    return if current_user&.identity_vault_id.present? && current_user.verification_status != :ineligible
+    return if current_user&.identity_vault_id.present? && current_verification_status != :ineligible
 
     redirect_to campfire_path, alert: "Please verify your identity to access this page."
   end

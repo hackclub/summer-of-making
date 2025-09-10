@@ -5,7 +5,7 @@ class Rack::Attack
     "127.0.0.1" == req.ip || "::1" == req.ip
   end
 
-  Rack::Attack.throttle("fuck scrapers", limit: 400, period: 1.hour) do |req|
+  Rack::Attack.throttle("fuck scrapers", limit: 150, period: 1.hour) do |req|
     req.ip if req.path.start_with?("/api/")
     req.ip if req.path.start_with?("/shop")
     req.ip if req.path.start_with?("/votes")

@@ -104,19 +104,29 @@ class DevlogsController < ApplicationController
   end
 
   def destroy
-    if @devlog.user == current_user
-      @devlog.destroy
-      if @devlog.project
-        redirect_to @devlog.project, notice: "Devlog was successfully deleted."
-      else
-        redirect_to campfire_path, notice: "Devlog was successfully deleted."
-      end
-    else
+    if @devlog.user != current_user
       if @devlog.project
         redirect_to @devlog.project, alert: "You can only delete your own devlogs."
       else
         redirect_to campfire_path, alert: "You can only delete your own devlogs."
       end
+      return
+    end
+
+    if @devlog.covered_by_ship_event?
+      if @devlog.project
+        redirect_to @devlog.project, alert: "This devlog is covered by a ship event and cannot be deleted."
+      else
+        redirect_to campfire_path, alert: "This devlog is covered by a ship event and cannot be deleted."
+      end
+      return
+    end
+
+    @devlog.soft_delete!
+    if @devlog.project
+      redirect_to @devlog.project, notice: "Devlog was successfully deleted."
+    else
+      redirect_to campfire_path, notice: "Devlog was successfully deleted."
     end
   end
 

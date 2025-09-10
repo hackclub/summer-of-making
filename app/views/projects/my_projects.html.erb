@@ -42,12 +42,7 @@
                   <% total_shells = project.ship_events.sum { |se| se.payouts.where(escrowed: false).sum(:amount) } %>
                   <p class="text-gray-400">You earned <%= pluralize(latest_shells.to_i, "shells") %> on the latest ship and <%= pluralize(total_shells.to_i, "shells") %> total!</p>
                 <% elsif ship_certified && !latest_ship_has_payouts %>
-                  <% remaining = current_user.remaining_votes_to_ship %>
-                  <% if remaining > 0 %>
-                    <p class="text-red-400">Your latest payout is on hold — you need <%= pluralize(remaining, 'more vote') %> since your last ship to release your shells. <a href="<%= new_vote_path %>" class="underline text-blue-700 hover:text-blue-800">Start voting</a>.</p>
-                  <% else %>
                     <p class="text-red-400">Your latest ship is being voted on. Hang tight - you'll get your payout soon!</p>
-                  <% end %>
                 <% elsif project.certification_status == "rejected" %>
                   <% if project.can_request_recertification? %>
                     <p class="text-red-400">Changes are needed. Fix issues and request re-certification!</p>

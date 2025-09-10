@@ -65,6 +65,11 @@ class ShopOrdersController < ApplicationController
     @regional_price = @regionalization_enabled ? @item.price_for_region(@selected_region) : @item.ticket_cost
     @order.frozen_item_price = @regional_price
 
+    if params[:quantity].blank? || !params[:quantity].match?(/\A\d+\z/) || params[:quantity].to_i <= 0
+      flash[:alert] = "stop playing with me"
+      redirect_to new_shop_order_path(id: @item.id) and return
+    end
+
     # Use selected address from IDV data if provided, fallback to user's address
     if params[:shipping_address_id].present?
       # Find the selected address from IDV data

@@ -51,63 +51,65 @@
 <% final_class  = [base_class, local_assigns[:class]].compact.join(" ") %>
 
 <% icon_class = "w-#{icon_size} #{'mr-4' if large} h-#{icon_size}".strip %>
-<% underline_class = "
-  absolute transition-all duration-150 bottom-1 w-full pr-3 box-content
-  bg-som-highlight rounded-full z-0 group-hover:opacity-100
-  #{ large ? 'h-6' : 'h-4 -right-[6px]' }
-  #{ 'opacity-0' unless highlight }
-  #{ underline_attr.delete(:class) }
-".strip %>
+<%
+  underline_attr_class = underline_attr[:class]
+  underline_data       = (underline_attr[:data] || {})
+  underline_class = "
+    absolute transition-all duration-150 bottom-1 w-full pr-3 box-content
+    bg-som-highlight rounded-full z-0 group-hover:opacity-100
+    #{ large ? 'h-6' : 'h-4 -right-[6px]' }
+    #{ 'opacity-0' unless highlight }
+    #{ underline_attr_class }
+  ".strip
+%>
+
+<%
+  content_attr_class = content_attr[:class]
+  text_attr_class    = text_attr[:class]
+%>
+
+<%
+  inner = capture do
+%>
+  <%= tag.span(
+    class: "som-link-content #{'som-link-hop' if hop} #{'som-link-push' if animate_push} #{content_attr_class}".strip,
+    **content_attr.except(:class)
+  ) do %>
+    <% if local_assigns[:icon] %>
+      <% cache ["shared/link/icon", icon, icon_size, icon_class] do %>
+        <%= inline_svg "icons/#{icon}.svg", class: icon_class %>
+      <% end %>
+    <% end %>
+
+    <%= tag.span(
+      class: "text-nowrap tracking-tight #{http_method.to_s == 'get' ? 'pointer-events-none' : ''} #{text_attr_class}".strip,
+      **text_attr.except(:class)
+    ) do %>
+      <%= text %>
+    <% end %>
+  <% end %>
+
+  <%= tag.div(
+    class: underline_class,
+    data: { kind: "underline" }.merge(underline_data),
+    **underline_attr.except(:class, :data)
+  ) %>
+<% end %>
 
 <% if as_button %>
   <% btn_opts = { type: 'button', class: final_class } %>
   <% btn_opts[:data] = as_button[:data] if as_button[:data].is_a?(Hash) %>
-
   <%= content_tag :button, btn_opts do %>
-    <%= tag.span(
-      class: "som-link-content #{'som-link-hop' if hop} #{'som-link-push' if animate_push} #{content_attr.delete(:class)}".strip,
-      **content_attr
-    ) do %>
-      <% if local_assigns[:icon] %>
-        <%= inline_svg "icons/#{icon}.svg", class: icon_class %>
-      <% end %>
-
-      <%= tag.span(
-        class: "text-nowrap tracking-tight #{text_attr.delete(:class)}".strip,
-        **text_attr
-      ) do %>
-        <%= text %>
-      <% end %>
-    <% end %>
-
-    <%= tag.div(
-      class: underline_class,
-      data: { kind: "underline" }.merge(underline_attr.delete(:data) || {}),
-      **underline_attr
-    ) %>
+    <%= inner %>
   <% end %>
 <% else %>
-  <%= button_to target, method: http_method, class: final_class do %>
-    <%= tag.span(
-      class: "som-link-content #{'som-link-hop' if hop} #{'som-link-push' if animate_push} #{content_attr.delete(:class)}".strip,
-      **content_attr
-    ) do %>
-      <% if local_assigns[:icon] %>
-        <%= inline_svg "icons/#{icon}.svg", class: icon_class %>
-      <% end %>
-
-      <%= tag.span(
-        class: "text-nowrap tracking-tight pointer-events-none #{text_attr.delete(:class)}".strip,
-        **text_attr
-      ) do %>
-        <%= text %>
-      <% end %>
+  <% if http_method.to_s == 'get' %>
+    <%= link_to target, class: final_class do %>
+      <%= inner %>
     <% end %>
-
-    <%= tag.div(
-      class: underline_class,
-      data: { kind: "underline" }.merge(underline_attr.delete(:data) || {}),
-      **underline_attr
-    ) %>
+  <% else %>
+    <%= button_to target, method: http_method, class: final_class do %>
+      <%= inner %>
+    <% end %>
   <% end %>
 <% end %>

@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 class SessionsController < ApplicationController
-  skip_before_action :authenticate_user!, only: %i[new create failure magic_link]
+  skip_before_action :authenticate_user!, only: %i[new create failure magic_link auto_login_dev]
 
   def new
     state = SecureRandom.hex(24)
@@ -124,6 +124,29 @@ class SessionsController < ApplicationController
     ahoy.track "tutorial_step_magic_link_signin", user_id: magic_link.user.id
 
     redirect_to root_path
+  end
+
+  def auto_login_dev
+    # Only allow this in development environment for security
+    unless Rails.env.development?
+      redirect_to root_path, alert: "Not available in production"
+      return
+    end
+
+    user = User.find_by(id: 1)
+    if user
+      session[:user_id] = user.id
+      Rails.logger.tagged("Authentication") do
+        Rails.logger.info({
+          event: "auto_login_dev_successful",
+          user_id: user.id,
+          display_name: user.display_name
+        }.to_json)
+      end
+      redirect_to root_path, notice: "Auto-logged in as #{user.display_name}!"
+    else
+      redirect_to root_path, alert: "User 1 not found"
+    end
   end
 
   def stop_impersonating

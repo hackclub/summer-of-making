@@ -20,7 +20,6 @@ class ApplicationController < ActionController::Base
   before_action :authenticate_user!
   before_action :check_if_banned
   before_action :fetch_hackatime_data_if_needed
-  before_action :compute_todo_flags
   after_action :track_page_view
 
   helper_method :current_user, :user_signed_in?, :current_verification_status, :current_impersonator, :impersonating?
@@ -34,7 +33,17 @@ class ApplicationController < ActionController::Base
   end
 
   def current_verification_status
-    @current_verification_status ||= current_user&.verification_status
+    return @current_verification_status if defined?(@current_verification_status)
+
+    # cache the verif status for n seconds
+    if current_user
+      cache_key = "current_verification_status/#{current_user.id}"
+      @current_verification_status = Rails.cache.fetch(cache_key, expires_in: 60.seconds) do
+        current_user.verification_status
+      end
+    else
+      @current_verification_status = nil
+    end
   end
 
   def user_signed_in?
@@ -83,55 +92,6 @@ class ApplicationController < ActionController::Base
 
     Rails.cache.fetch("hackatime_fetch_#{current_user.id}", expires_in: 5.seconds) do
       current_user.refresh_hackatime_data_now
-    end
-  end
-
-  # precompute flags used by tutorial/_todo_modal to avoid pervew queries on every page and avoid hammering the db :heavysob:
-  # the db is like young kartikey and the hammering was from my parents :pf:
-  def compute_todo_flags
-    return unless user_signed_in?
-
-    @todo_flags = Rails.cache.fetch("todo_flags/#{current_user.id}", expires_in: 45.seconds) do
-      has_projects = if current_user.association(:projects).loaded?
-        current_user.projects.any?
-      else
-        current_user.projects.exists?
-      end
-
-      has_devlogs = if current_user.association(:devlogs).loaded?
-        current_user.devlogs.any?
-      else
-        current_user.devlogs.exists?
-      end
-
-      has_ship_events = if current_user.association(:projects).loaded?
-        current_user.ship_events.loaded? ? current_user.ship_events.any? : current_user.ship_events.exists?
-      else
-        current_user.ship_events.exists?
-      end
-
-      has_votes = if current_user.association(:votes).loaded?
-        current_user.votes.any?
-      else
-        current_user.votes.exists?
-      end
-
-      has_non_free_order = begin
-        orders_assoc = current_user.association(:shop_orders)
-        if orders_assoc.loaded?
-          current_user.shop_orders.any? { |o| o.shop_item && o.shop_item.type != "ShopItem::FreeStickers" }
-        else
-          current_user.shop_orders.joins(:shop_item).where.not(shop_items: { type: "ShopItem::FreeStickers" }).exists?
-        end
-      end
-
-      {
-        has_projects: has_projects,
-        has_devlogs: has_devlogs,
-        has_ship_events: has_ship_events,
-        has_votes: has_votes,
-        has_non_free_order: has_non_free_order
-      }
     end
   end
 

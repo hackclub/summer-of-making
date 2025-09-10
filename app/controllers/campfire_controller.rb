@@ -6,11 +6,11 @@ class CampfireController < ApplicationController
   def index
     @user = current_user
 
-    if params[:tutorial_completed] == "true" && @user.tutorial_progress.completed?
+    if params[:tutorial_completed] == "true" && @user.tutorial_completed?
       @user.update!(has_clicked_completed_tutorial_modal: true)
     end
 
-    if params[:mark_video_seen] == "true" && @user.tutorial_progress.completed?
+    if params[:mark_video_seen] == "true" && @user.tutorial_completed?
       @user.update!(tutorial_video_seen: true)
       if request.xhr?
         render json: { success: true }
@@ -104,13 +104,13 @@ class CampfireController < ApplicationController
   private
 
   def check_and_mark_tutorial_completion
-    return if current_user.tutorial_progress.completed?
+    return if current_user.tutorial_completed?
 
     if @account_status[:hackatime_setup] && !current_user.tutorial_progress.step_completed?("hackatime_connected")
       current_user.tutorial_progress.complete_step!("hackatime_connected")
     end
 
-    if current_user.identity_vault_id.present? && current_user.verification_status != :ineligible && !current_user.tutorial_progress.step_completed?("identity_verified")
+    if current_user.identity_vault_id.present? && current_verification_status != :ineligible && !current_user.tutorial_progress.step_completed?("identity_verified")
       current_user.tutorial_progress.complete_step!("identity_verified")
     end
 

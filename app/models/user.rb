@@ -339,7 +339,6 @@ class User < ApplicationRecord
 
       url = "https://hackatime.hackclub.com/api/v1/users/#{slack_id}/stats?features=projects&start_date=#{start_date}&test_param=true"
       url += "&end_date=#{end_date}" if end_date.present?
-
       Faraday.get(url, nil, { "RACK_ATTACK_BYPASS" => ENV["HACKATIME_BYPASS_KEYS"] }.compact)
     end
   end
@@ -352,17 +351,7 @@ class User < ApplicationRecord
     projects = result.dig("data", "projects")
     has_hackatime_account = result.dig("data", "status") == "ok"
 
-    trust_value = result.dig("trust_factor", "trust_value")
-    should_ban = trust_value == 1
-
-    if should_ban && !is_banned
-      ban_user!("hackatime_ban")
-    elsif !should_ban && is_banned
-      r = activities.where(key: "ban_user").order(created_at: :desc).first
-      if r&.parameters&.dig("reason") == "hackatime_ban"
-        unban_user!
-      end
-    end
+    ban_user!("hackatime_ban") if result.dig("trust_factor", "trust_value") == 1 && !is_banned
 
     if projects.empty?
       update!(has_hackatime_account:)
@@ -510,7 +499,9 @@ class User < ApplicationRecord
   end
 
   def remaining_votes_to_ship
-    [ 20 - votes_since_last_ship_count, 0 ].max
+    return 0 if can_ship_by_votes?
+    available = [ [ votes_since_last_ship_count, votes.active.count - (ship_events.count * 20) ].max, 0 ].max
+    [ 20 - available, 0 ].max
   end
 
   def release_escrowed_payouts_if_eligible!
@@ -519,6 +510,18 @@ class User < ApplicationRecord
 
     updated = payouts.where(escrowed: true).update_all(escrowed: false)
     updated > 0
+  end
+
+  # Roll Over Votes
+  def ship_credits
+    t = (votes.active.count / 20)
+    credits = t - ship_events.count
+    [ credits, 0 ].max
+  end
+
+  def can_ship_by_votes?
+    return true if ship_events.count == 0
+    ship_credits > 0 || votes_since_last_ship_count >= 20
   end
 
   # Avo backtraces
@@ -600,7 +603,7 @@ class User < ApplicationRecord
 
     # rapid identify theft
     if Rails.env.development? && ENV["BYPASS_IDV"] == "true"
-      notify_xyz_on_verified
+      notify_xyz_on_verified unless ysws_verified?
       update(ysws_verified: true) unless ysws_verified?
       return :verified
     end
@@ -614,7 +617,7 @@ class User < ApplicationRecord
       :needs_resubmission
     when "verified"
       if idv_data[:ysws_eligible]
-        notify_xyz_on_verified
+        notify_xyz_on_verified unless ysws_verified?
         update(ysws_verified: true) unless ysws_verified?
         :verified
       else
@@ -684,8 +687,37 @@ class User < ApplicationRecord
     devlogs.any? && projects.any? && votes.any? && shop_orders.joins(:shop_item).where.not(shop_items: { type: "ShopItem::FreeStickers" }).any?
   end
 
+  def self.project_devlog_cache_key(user_id)
+    "user:#{user_id}:proj_devlog_stats:v1"
+  end
+
+  def project_and_devlog_counts
+    Rails.cache.fetch(self.class.project_devlog_cache_key(id), expires_in: 2.hours) do
+      {
+        projects_count: Project.where(user_id: id).count,
+        devlogs_count: Devlog.where(user_id: id).count
+      }
+    end
+  end
+
+  def needs_projects_attention?
+    counts = project_and_devlog_counts
+    counts[:projects_count] == 0 || (counts[:projects_count] == 1 && counts[:devlogs_count] == 0)
+  end
+
   def sinkening_participation?
     devlogs.exists?(for_sinkening: true) || ship_events.exists?(for_sinkening: true)
+  end
+
+  def self.tutorial_completed_cache_key(user_id)
+    "user:#{user_id}:tutorial_completed:v1"
+  end
+
+  def tutorial_completed?
+    Rails.cache.fetch(self.class.tutorial_completed_cache_key(id), expires_in: 6.hour) do # kinda don't need to check it that much. either people go through it or js leave.
+      completed_at = TutorialProgress.where(user_id: id).limit(1).pluck(:completed_at).first
+      completed_at.present?
+    end
   end
 
   private

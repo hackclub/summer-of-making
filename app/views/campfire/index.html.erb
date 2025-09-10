@@ -1,20 +1,28 @@
 <div class="px-4 md:px-8">
   <div class="flex justify-between items-start" id="fxb">
-    <div>
+    <div id="new-tutorial-campfire-title">
       <%= render "shared/page_title",
         title: "Campfire",
         subtitle: "Huddle around! Get your news here." %>
     </div>
   </div>
 
-  <% if current_user.tutorial_progress.completed? %>
-    <div class="mb-8">
-      <%= render "shared/definition",
-        term: "⚠️ THE SUMMER OF MAKING HAS BEEN EXTENDED! 🏝️",
-        mysterious: true,
-        definition: "Thanks to your balloons, the island has stabilized and we've pulled up new land. The island now sits proud and tall, with more land than ever ready to fill with an EXTRA MONTH of projects. The new deadline is September 30th -and you've gotten rid of all that water too!" %>
-    </div>
-  <% end %>
+<% if Flipper.enabled?(:secret_third_thing_2025_09_02, current_user) %>
+  <div class="mb-8">
+    <%= render "shared/definition",
+      term: "⚠️ A FINAL ADVENTURE AWAITS ⚠️",
+      mysterious: true,
+      # this is a hack to get erb_lint to stfu about .html_safe:
+      definition: ActiveSupport::SafeBuffer.new("Heidi and Explorpheus have resolved to fully explore their island continent and conduct a grand survey — but they need your help! 100 locations call out for a developer with a creative spirit to play their part in constructing a massive point-and-click adventure. Shells, stickers, and special prizes will go to those who participate in this spectacular finale to the Summer of Making. Click <a href='https://hackclub.slack.com/archives/C09DQ3EB40L' target='_blank' class='underline'>here</a> for details!") %>
+  </div>
+<% elsif current_user.tutorial_completed? %>
+  <div class="mb-8">
+    <%= render "shared/definition",
+      term: "⚠️ THE SUMMER OF MAKING HAS BEEN EXTENDED! 🏝️",
+      mysterious: true,
+      definition: "Thanks to your balloons, the island has stabilized and we've pulled up new land. The island now sits proud and tall, with more land than ever ready to fill with an EXTRA MONTH of projects. The new deadline is September 30th - and you've gotten rid of all that water too!" %>
+  </div>
+<% end %>
 
   <% if current_user.is_banned? %>
     <%= render "shared/card", classes: "bg-red-50/80 border-red-400 mb-8" do %>
@@ -35,7 +43,7 @@
   <% end %>
 
   <!-- Todo list -->
-  <% if current_user.tutorial_progress.completed? %>
+  <% if current_user.tutorial_completed? %>
     <div class="mb-8">
       <%= render "shared/card" do %>
         <div class="text-som-dark flex flex-col xl:flex-row space-y-5 xl:space-y-0">
@@ -146,7 +154,7 @@
   <% end %>
 
   <!-- Hackatime Dashboard Section -->
-  <% if current_user.tutorial_progress.completed? && @account_status[:hackatime_setup] %>
+  <% if current_user.tutorial_completed? && @account_status[:hackatime_setup] %>
     <div class="mb-8 color-forest">
       <%= render "shared/card", data: { controller: "hackatime-dashboard" } do %>
         <div class="text-som-dark">
@@ -224,7 +232,7 @@
     </div>
   <% end %>
 
-  <% if !current_user.tutorial_progress.completed? %>
+  <% if !current_user.tutorial_completed? %>
     <!-- Set up your account! Section -->
     <div class="mb-4">
       <h2 class="text-2xl mb-4 flex gap-2 items-center">
@@ -244,7 +252,7 @@
 
       <div class="space-y-4">
         <!-- Step 1: Hackatime -->
-        <%= render "shared/card", data: { step: "hackatime", controller: "hackatime-status", hackatime_status_tutorial_active_value: !current_user.tutorial_progress.completed? } do %>
+        <%= render "shared/card", data: { step: "hackatime", controller: "hackatime-status", hackatime_status_tutorial_active_value: !current_user.tutorial_completed? } do %>
           <div class="flex items-start gap-4 mb-2">
             <div class="flex-shrink-0">
               <% if @account_status[:hackatime_projects] %>
@@ -299,7 +307,14 @@
               </span>
               <%= link_to "(here's the auth link, if you lost it)", hackatime_auth_redirect_path %>
             <% else %>
-              <%= link_to "Connect Hackatime", hackatime_auth_redirect_path, class: "inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500", target: "_blank" %>
+              <%# womp womp it's the safari z-index again %>
+              <div class="relative">
+                <span class="absolute" id="new-tutorial-hackatime-container">
+                  <%= link_to "Connect Hackatime", hackatime_auth_redirect_path, class: "inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500", target: "_blank", id: "new-tutorial-hackatime" %>
+                </span>
+                <%# z index, fake element to take up space %>
+                <%= link_to "Connect Hackatime", hackatime_auth_redirect_path, class: "inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 opacity-0 pointer-events-none", target: "_blank" %>
+              </div>
             <% end %>
           </div>
         <% end %>
@@ -383,7 +398,7 @@
     </div>
   <% end %>
 
-  <% if current_user.tutorial_progress.completed? %>
+  <% if current_user.tutorial_completed? %>
     <!-- Announcements Section -->
     <% if @announcements.any? %>
       <div class="mb-8">
@@ -498,7 +513,7 @@
   <% end %>
 
   <!-- Onboarding Video Modal -->
-  <% if current_user.tutorial_progress.completed? && !current_user.tutorial_video_seen? %>
+  <% if current_user.tutorial_completed? && !current_user.tutorial_video_seen? %>
     <div data-controller="onboarding-video-modal"
       data-onboarding-video-modal-target="modal"
       data-action="click->onboarding-video-modal#closeOnBackgroundClick"

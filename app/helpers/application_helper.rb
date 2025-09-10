@@ -55,7 +55,7 @@ module ApplicationHelper
   end
 
   def tab_unlocked?(tab)
-    unlocked = current_user.identity_vault_id.present? && current_user.verification_status != :ineligible
+    unlocked = current_user.identity_vault_id.present? && current_verification_status != :ineligible
     case tab
     when :campfire
       true

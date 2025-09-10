@@ -10,13 +10,11 @@
 #     schedule: at 5am every day
 
 production:
-  15_minutes_hackatime_refresh:
-    class: UserHackatimeDataRefreshJob
-    command: perform_unique
-    queue: default
-    concurrency: 1
-    schedule: every 15 minutes
-    description: "Refresh Hackatime stats for all users with Hackatime enabled"
+  # hourly_hackatime_refresh:
+  #   class: UserHackatimeDataRefreshJob
+  #   queue: literally_whenever
+  #   schedule: every hour
+  #   description: "Refresh Hackatime stats for all users with Hackatime enabled + DM people"
 
   # generate_stonk_reports:
   #   class: GenerateStonkReportJob
@@ -82,11 +80,11 @@ production:
     concurrency: 1
     description: "CSV-sync non-free-stickers orders into Airtable"
 
-  shop_process_letter_mail_orders:
-    class: Shop::ProcessLetterMailOrdersJob
-    schedule: every 2 days
-    concurrency: 1
-    description: "Process pending letter mail orders and send to Theseus som-fulfillment queue"
+  # shop_process_letter_mail_orders:
+  #   class: Shop::ProcessLetterMailOrdersJob
+  #   schedule: every 2 days
+  #   concurrency: 1
+  #   description: "Process pending letter mail orders and send to Theseus som-fulfillment queue"
 
   shop_process_warehouse_orders:
     class: Shop::ProcessWarehouseOrdersJob
@@ -106,8 +104,20 @@ production:
     concurrency: 1
     description: "Upload approved YSWS from the SoM to the Unified db"
 
+  check_ysws_duplicates:
+    class: YswsReview::CheckDuplicatesJob
+    schedule: every 5 minutes
+    concurrency: 1
+    description: "Check for duplicate YSWS submissions across different programs"
+
   mole_batch_guess_project_categorization:
     class: Mole::BatchGuessProjectCategorizationJob
     schedule: every 12 minutes # 5 times per hour
     concurrency: 1
     description: "Batch guess project categorization using Mole service"
+
+  sync_project_languages:
+    class: SyncProjectLanguagesJob
+    schedule: every minute
+    concurrency: 1
+    description: "Sync GitHub language stats for projects under review"

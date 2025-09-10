@@ -153,6 +153,7 @@ gem "awesome_print", "~> 1.9"
 gem "flipper", "1.3.4"
 gem "flipper-active_record", "1.3.4"
 gem "flipper-ui", "1.3.4"
+gem "flipper-active_support_cache_store", "1.3.4"
 
 gem "mini_magick", "~> 5.2"
 
@@ -165,3 +166,7 @@ gem "sanitize", "~> 7.0"
 gem "activeinsights"
 
 gem "paper_trail"
+
+gem "strong_migrations", "~> 2.5"
+
+gem "jb", "~> 0.8.2"

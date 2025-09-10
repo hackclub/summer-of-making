@@ -14,6 +14,7 @@
 #  is_deleted             :boolean          default(FALSE)
 #  is_shipped             :boolean          default(FALSE)
 #  is_sinkening_ship      :boolean          default(FALSE)
+#  magicked_at            :datetime
 #  rating                 :integer
 #  readme_link            :string
 #  repo_link              :string
@@ -30,10 +31,12 @@
 #
 # Indexes
 #
-#  index_projects_on_is_shipped   (is_shipped)
-#  index_projects_on_user_id      (user_id)
-#  index_projects_on_views_count  (views_count)
-#  index_projects_on_x_and_y      (x,y)
+#  index_projects_on_is_shipped              (is_shipped)
+#  index_projects_on_rating                  (rating)
+#  index_projects_on_user_id                 (user_id)
+#  index_projects_on_user_id_and_is_deleted  (user_id,is_deleted)
+#  index_projects_on_views_count             (views_count)
+#  index_projects_on_x_and_y                 (x,y)
 #
 # Foreign Keys
 #
@@ -74,11 +77,15 @@ class Project < ApplicationRecord
 
   has_many :ship_certifications
   has_many :readme_certifications
+  has_many :shipwright_advices, class_name: "ShipwrightAdvice"
 
   has_many :won_votes, class_name: "Vote", foreign_key: "winning_project_id"
   has_many :vote_changes, dependent: :destroy
 
+  has_one :project_language, dependent: :destroy
+
   has_many :timer_sessions
+  after_commit :bust_user_projects_devlogs_cache
 
   coordinate_min = 0
   coordinate_max = 100
@@ -111,6 +118,24 @@ class Project < ApplicationRecord
 
   scope :pending_certification, -> {
     joins(:ship_certifications).where(ship_certifications: { judgement: "pending" })
+  }
+
+  # Projects that need GitHub language stats syncing
+  scope :needs_language_sync, -> {
+    where.not(repo_link: [ nil, "" ])
+      .left_joins(:project_language)
+      .where(
+        "project_languages.id IS NULL OR " \
+        "project_languages.status IN (?) OR " \
+        "(project_languages.status = ? AND project_languages.last_synced_at < ?)",
+        [ ProjectLanguage.statuses[:pending], ProjectLanguage.statuses[:failed] ],
+        ProjectLanguage.statuses[:synced],
+        1.day.ago
+      )
+      .order(
+        Arel.sql("CASE WHEN project_languages.id IS NULL THEN 0 ELSE 1 END"),
+        Arel.sql("project_languages.last_synced_at ASC NULLS FIRST")
+      )
   }
 
   # Projects eligible for YSWS review
@@ -323,7 +348,7 @@ class Project < ApplicationRecord
         message: "You must have at least one devlog #{ship_events.count > 0 ? "since the last ship" : ""}"
       },
       voting_quota: {
-        met: user.votes_since_last_ship_count >= 20,
+        met: user.can_ship_by_votes?,
         message: "You must vote #{user.remaining_votes_to_ship} more times to ship."
       },
       repo_link: {
@@ -559,6 +584,15 @@ class Project < ApplicationRecord
     end
   end
 
+  def magicked? = magicked_at.present?
+
+  def magic_happening!
+    return if magicked?
+
+    Project::PostToMagicJob.perform_later(self)
+    update!(magicked_at: Time.current)
+  end
+
   private
 
   def set_default_rating
@@ -650,6 +684,10 @@ class Project < ApplicationRecord
   end
 
   private
+
+  def bust_user_projects_devlogs_cache
+    Rails.cache.delete(User.project_devlog_cache_key(user_id)) if user_id
+  end
 
   def link_check
     urls = [ readme_link, demo_link, repo_link ]

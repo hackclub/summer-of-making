@@ -11,7 +11,8 @@
 #
 # Indexes
 #
-#  index_ship_events_on_project_id  (project_id)
+#  index_ship_events_on_project_created_excluded  (project_id,created_at,excluded_from_pool)
+#  index_ship_events_on_project_id                (project_id)
 #
 # Foreign Keys
 #
@@ -29,6 +30,7 @@ class ShipEvent < ApplicationRecord
 
   after_create :maybe_create_ship_certification
   after_create :award_user_badges
+  after_create_commit :mark_new_tutorial_ship_steps
 
   def self.airtable_table_name
     "_ship_events"
@@ -87,5 +89,11 @@ class ShipEvent < ApplicationRecord
 
   def award_user_badges
     user.award_badges_async!("ship_event_created")
+  end
+
+  def mark_new_tutorial_ship_steps
+    tp = user.tutorial_progress || TutorialProgress.create!(user: user)
+    tp.complete_new_tutorial_step!("ship")
+    tp.complete_new_tutorial_step!("shipped")
   end
 end

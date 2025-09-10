@@ -32,6 +32,8 @@ module Admin
         @ship_certifications = base.approved
       when "rejected"
         @ship_certifications = base.rejected
+      when "returned"
+        @ship_certifications = base.where.not(ysws_returned_at: nil)
       when "pending"
         @ship_certifications = base.pending
       when "all"
@@ -71,6 +73,7 @@ module Admin
       @total_approved = base.approved.count
       @total_rejected = base.rejected.count
       @total_pending = base.pending.count
+      @total_returned = base.where.not(ysws_returned_at: nil).count
       @avg_turnaround = calc_avg_turnaround
 
       category_base = ShipCertification.joins(:project).where(projects: { is_deleted: false })
@@ -98,9 +101,13 @@ module Admin
       end
       @no_type_count = no_type_base.where(projects: { certification_type: [ nil ] }).count
 
+      # Calculate this week's Sunday in EST
+      est_zone = ActiveSupport::TimeZone.new("America/New_York")
+      current_est = Time.current.in_time_zone(est_zone)
+      week_start = current_est.beginning_of_week(:sunday)
       @leaderboard_week = User.joins("INNER JOIN ship_certifications ON users.id = ship_certifications.reviewer_id")
         .where.not(ship_certifications: { reviewer_id: nil })
-        .where("ship_certifications.updated_at >= ?", 7.days.ago)
+        .where("ship_certifications.updated_at >= ?", week_start)
         .group("users.id", "users.display_name", "users.email")
         .order("COUNT(ship_certifications.id) DESC")
         .limit(20)
@@ -131,6 +138,51 @@ module Admin
         .where("ship_certifications.created_at >= ?", 24.hours.ago)
         .joins(:project).where(projects: { is_deleted: false })
         .count
+
+      # Load ysws_returned_by users for the filtered certifications to avoid N+1 queries
+      returned_by_ids = @ship_certifications.map(&:ysws_returned_by_id).compact.uniq
+      @returned_by_users = User.where(id: returned_by_ids).index_by(&:id) if returned_by_ids.any?
+
+      # Get weekly leaderboard positions for tiered payment rates
+      weekly_positions = {}
+      @leaderboard_week.each_with_index do |(name, email, count), index|
+        user_key = name || email
+        weekly_positions[user_key] = index + 1
+      end
+
+      # Calculate payment stats for reviewers including pending requests
+      @payment_stats = User.joins("INNER JOIN ship_certifications ON users.id = ship_certifications.reviewer_id")
+        .joins("LEFT JOIN payouts ON users.id = payouts.user_id AND payouts.reason LIKE 'Ship certification review payment:%'")
+        .joins("LEFT JOIN ship_reviewer_payout_requests ON users.id = ship_reviewer_payout_requests.reviewer_id")
+        .where.not(ship_certifications: { reviewer_id: nil })
+        .group("users.id", "users.display_name", "users.email")
+        .select("users.display_name", "users.email", "COUNT(DISTINCT ship_certifications.id) as review_count", "COALESCE(SUM(payouts.amount), 0) as total_paid", "COALESCE(SUM(CASE WHEN ship_reviewer_payout_requests.status = 0 THEN ship_reviewer_payout_requests.amount ELSE 0 END), 0) as pending_amount")
+        .order("total_paid DESC")
+        .limit(20)
+        .map do |stat|
+          name = stat.display_name
+          email = stat.email
+          user_key = name || email
+
+          # Determine payment rate based on weekly leaderboard position
+          position = weekly_positions[user_key]
+          shells_per_review = case position
+          when 1..3
+            1.5  # 1st to 3rd place
+          when 4..7
+            1.0  # 4th to 7th place
+          else
+            0.75 # 8th place onward
+          end
+
+          total_earned = stat.review_count.to_i * shells_per_review
+          total_paid = stat.total_paid.to_f
+          total_owed = [ total_earned - total_paid, 0 ].max
+          pending_amount = stat.pending_amount.to_f
+          review_count = stat.review_count.to_i
+
+          [ name, email, total_owed, shells_per_review, pending_amount ]
+        end
     end
 
     def edit
@@ -141,7 +193,26 @@ module Admin
     def update
       @ship_certification = ShipCertification.find(params[:id])
 
+      # Validate form requirements
+      validation_errors = validate_certification_requirements
+
+      if validation_errors.any?
+        @ship_certification.errors.add(:base, "Please complete all requirements:")
+        validation_errors.each { |error| @ship_certification.errors.add(:base, "• #{error}") }
+        render :edit, status: :unprocessable_entity
+        return
+      end
+
       if @ship_certification.update(ship_certification_params)
+        # Create improvement suggestion if provided
+        if params[:improvement_suggestion].present?
+          ShipwrightAdvice.create!(
+            project: @ship_certification.project,
+            ship_certification: @ship_certification,
+            description: params[:improvement_suggestion].strip
+          )
+        end
+
         redirect_to admin_ship_certifications_path, notice: "Ship certification updated successfully."
       else
         render :edit, status: :unprocessable_entity
@@ -174,15 +245,49 @@ module Admin
 
     private
 
+    def validate_certification_requirements
+      errors = []
+
+      # Check if all required checkboxes are checked
+      unless params[:checked_demo] == "1" || params[:checked_demo] == "on"
+        errors << 'Check "I looked at the demo"'
+      end
+
+      unless params[:checked_repo] == "1" || params[:checked_repo] == "on"
+        errors << 'Check "I looked at the repo"'
+      end
+
+      unless params[:checked_description] == "1" || params[:checked_description] == "on"
+        errors << 'Check "I looked at the description"'
+      end
+
+      # Check if status is not pending
+      if params[:ship_certification][:judgement] == "pending"
+        errors << 'Change status from "pending" to approved or rejected'
+      end
+
+      # Check if proof video is uploaded (either new upload or existing)
+      has_new_video = params[:ship_certification][:proof_video].present?
+      has_existing_video = @ship_certification.proof_video.attached?
+
+      unless has_new_video || has_existing_video
+        errors << "Upload a proof video"
+      end
+
+      errors
+    end
+
     def calc_avg_turnaround
-      pc = ShipCertification
-        .where.not(judgement: :pending)
-        .where("ship_certifications.updated_at > ship_certifications.created_at")
+      pending_certs = ShipCertification
+        .where(judgement: :pending)
+        .joins(:project)
+        .where(projects: { is_deleted: false })
 
-      return nil if pc.empty?
+      return nil if pending_certs.empty?
 
-      total_time = pc.sum { |cert| cert.updated_at - cert.created_at }
-      avg_sec = total_time / pc.count
+      current_time = Time.current
+      total_time = pending_certs.sum { |cert| current_time - cert.created_at }
+      avg_sec = total_time / pending_certs.count
 
       {
         s: avg_sec,

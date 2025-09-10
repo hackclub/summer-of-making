@@ -18,3 +18,21 @@ cloudflare:
   # retry_limit: 0
   request_checksum_calculation: "when_required"
   response_checksum_validation: "when_required"
+
+# new thingie
+cloudflare_new:
+  service: S3
+  endpoint: https://<%= Rails.application.credentials.dig(:cloudflare_new, :account_id) %>.r2.cloudflarestorage.com
+  access_key_id: <%= Rails.application.credentials.dig(:cloudflare_new, :access_key_id) %>
+  secret_access_key: <%= Rails.application.credentials.dig(:cloudflare_new, :secret_access_key) %>
+  region: auto
+  bucket: <%= Rails.application.credentials.dig(:cloudflare_new, :bucket) %>
+  request_checksum_calculation: "when_required"
+  response_checksum_validation: "when_required"
+
+# mirror thingie (zero-downtime)
+cloudflare_mirror:
+  service: Mirror
+  primary: cloudflare_new
+  mirrors:
+    - cloudflare

@@ -1,13 +1,23 @@
-<% if current_user && FraudReport.already_reported_by?(current_user, suspect) %>
+<%
+  button_id = local_assigns[:id]
+%>
+
+<% already_reported = local_assigns.fetch(:already_reported, nil) %>
+<% if already_reported.nil? && defined?(@reported_ship_event_ids) && suspect.is_a?(ShipEvent) %>
+  <% already_reported = @reported_ship_event_ids.include?(suspect.id) %>
+<% end %>
+<% if current_user && already_reported %>
   <%= render "shared/button",
       text: "Already Reported",
       icon: "flag.svg",
       classes: "opacity-75 cursor-not-allowed pointer-events-none",
-      title: "You have already reported this #{suspect.class.name.downcase}" %>
+      title: "You have already reported this #{suspect.class.name.downcase}",
+      id: button_id %>
 <% else %>
   <%= render "shared/button",
       text: "Report",
       icon: "flag.svg",
+      id: button_id,
       data: {
         controller: "modal",
         action: "click->modal#open",
@@ -15,31 +25,51 @@
         modal_type: "report"
       } %>
 
+<%
+  modal_title = if suspect.respond_to?(:title) && suspect.title.present?
+                  suspect.title
+                elsif suspect.respond_to?(:project) && suspect.project.respond_to?(:title) && suspect.project.title.present?
+                  suspect.project.title
+                else
+                  "this project"
+                end
+%>
+
 <%= render "shared/modal",
     id: "report-modal-#{suspect.class.name.downcase}-#{suspect.id}",
-    title: "Report #{suspect.respond_to?(:title) ? suspect.title : suspect.class.name.downcase}?" do %>
-  <%= form_with model: FraudReport.new, url: fraud_reports_path, method: :post, local: true do |form| %>
+    title: "Report #{modal_title}?",
+    max_width: "max-w-2xl" do %>
+  <%= form_with model: FraudReport.new, url: fraud_reports_path, method: :post, data: { turbo: false }, local: true do |form| %>
     <%= form.hidden_field :suspect_type, value: suspect.class.name %>
     <%= form.hidden_field :suspect_id, value: suspect.id %>
 
-    <div class="mb-4">
-      <p class="text-md mb-3">We want good, high quality projects on Summer of Making. If you believe this <%= suspect.class.name.downcase %> does not follow that mission, please let us know why:</p>
+    <div class="mb-4" data-controller="report-form">
+      <p class="text-md mb-4 leading-relaxed">We want good, high quality projects on Summer of Making. If you believe this project does not follow that mission, please let us know why:</p>
+
+      <div class="bg-amber-50 border border-amber-200 text-amber-900 rounded-lg p-4 shadow-sm mb-4" data-report-form-target="lowEffortInfo">
+        <p class="text-sm font-medium mb-1">What is a low-effort project?</p>
+        <ul class="list-disc list-inside text-sm space-y-2 leading-relaxed">
+            <li>Little to no original work (e.g. direct copy of a tutorial)</li>
+            <li>Mainly AI-generated with minimal human effort or creativity</li>
+            <li>Basic apps (to-do lists, tic-tac-toe, 2048, etc.) without meaningful improvements or unique features</li>
+        </ul>
+      </div>
 
       <div class="space-y-2 mb-4">
         <label class="flex items-center space-x-3 cursor-pointer">
-          <input type="radio" name="report_kind" value="low_quality" class="radio radio-sm" checked>
-          <span class="text-sm">Low-quality <%= suspect.class.name.downcase == "ShipEvent" ? "ship" : "project" %></span>
+          <input type="radio" name="report_kind" value="low_quality" class="radio radio-sm" checked data-action="change->report-form#update">
+          <span class="text-sm">Low-effort project</span>
         </label>
         <label class="flex items-center space-x-3 cursor-pointer">
-          <input type="radio" name="report_kind" value="ai_undeclared" class="radio radio-sm">
+          <input type="radio" name="report_kind" value="ai_undeclared" class="radio radio-sm" data-action="change->report-form#update">
           <span class="text-sm">Uses AI but it's undeclared</span>
         </label>
         <label class="flex items-center space-x-3 cursor-pointer">
-          <input type="radio" name="report_kind" value="demo_does_not_work" class="radio radio-sm">
+          <input type="radio" name="report_kind" value="demo_does_not_work" class="radio radio-sm" data-action="change->report-form#update">
           <span class="text-sm">Demo does not work</span>
         </label>
         <label class="flex items-center space-x-3 cursor-pointer">
-          <input type="radio" name="report_kind" value="other" class="radio radio-sm">
+          <input type="radio" name="report_kind" value="other" class="radio radio-sm" data-action="change->report-form#update">
           <span class="text-sm">Other</span>
         </label>
       </div>
@@ -49,7 +79,7 @@
             placeholder: "Share a short explanation (20+ characters).",
             class: "som-horizontal-input w-full rounded-lg resize-none focus:ring-2 focus:ring-nice-blue focus:border-nice-blue transition-colors",
             rows: 4 %>
-        <p class="text-xs text-gray-500 mt-1">Why are you reporting this <%= suspect.class.name.downcase %>? (20+ characters)</p>
+        <p class="text-xs text-gray-500 mt-1">Why are you reporting this project? (20+ characters)</p>
       </div>
     </div>
 

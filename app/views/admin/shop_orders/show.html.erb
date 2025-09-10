@@ -163,6 +163,7 @@
   <% state = @shop_order.aasm.current_state %>
 
   <div class="agrid">
+    <%= link_to "edit order", [:edit, :admin, @shop_order], class: 'abtn secondary' %>
     <% case state %>
     <% when :pending %>
       <%= button_to "lgtm, approve order!", [:approve, :admin, @shop_order], method: :post, class: 'abtn primary' %>
@@ -227,10 +228,10 @@
       <div style="margin: 1em 0;">
         <%= f.label :amount_dollars, "how many mc chickens?", style: "display: block; margin-bottom: 0.5em;" %>
         <%= f.number_field :amount_dollars,
-            value: (@shop_order.shop_item.usd_cost * @shop_order.quantity).to_f,
+            value: ((@shop_order.shop_item.usd_cost || 0) * @shop_order.quantity).to_f,
             step: 0.01,
             style: "width: 100%; padding: 0.5em; border-radius: 6px; border: 1px solid var(--color-border); background: var(--color-darker); color: var(--color-text);" %>
-        <small style="color: var(--color-muted);">recommended: $<%= (@shop_order.shop_item.usd_cost * @shop_order.quantity).to_f %></small>
+        <small style="color: var(--color-muted);">recommended: $<%= ((@shop_order.shop_item.usd_cost || 0) * @shop_order.quantity).to_f %></small>
       </div>
 
       <div style="margin-top: 2em; display: flex; gap: 1em;">

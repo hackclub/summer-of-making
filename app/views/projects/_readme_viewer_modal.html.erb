@@ -1,0 +1,19 @@
+<!-- Readme Viewer Modal -->
+<div id="readme-modal-<%= project.id %>" data-controller="modal readme-viewer" data-readme-viewer-project-id-value="<%= project.id %>" class="hidden fixed inset-0 z-50 overflow-auto bg-black/30 flex items-center justify-center p-2 md:p-4" data-action="click->modal#clickOutsideHandler">
+    <div class="bg-[#F3ECD8] rounded-2xl border-4 border-[#E4DCC6] w-full max-w-4xl mx-2 md:mx-auto relative max-h-[90vh] flex flex-col" data-modal-target="container">
+        <div class="p-3 md:p-4 border-b border-saddle-taupe border-opacity-30 flex-shrink-0">
+            <div class="flex justify-between items-center">
+                <h3 class="text-lg md:text-2xl">README</h3>
+                <button type="button" class="text-gray-600 hover:text-vintage-red cursor-pointer" data-action="click->modal#close">
+                    <%= inline_svg "icons/close.svg", class: "h-6 w-6 2xl:h-8 2xl:w-8" %>
+                </button>
+            </div>
+        </div>
+
+        <div class="p-4 md:p-6 overflow-y-auto flex-grow">
+            <div data-readme-viewer-target="content" class="text-sm md:text-base bg-white p-4 rounded-lg border border-saddle-taupe border-opacity-30">
+                Loading README...
+            </div>
+        </div>
+  </div>
+</div>

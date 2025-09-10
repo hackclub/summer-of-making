@@ -41,6 +41,12 @@
 #  created_at                        :datetime         not null
 #  updated_at                        :datetime         not null
 #
+# Indexes
+#
+#  idx_shop_items_enabled_black_market_price  (enabled,requires_black_market,ticket_cost)
+#  idx_shop_items_regional_enabled            (enabled,enabled_us,enabled_eu,enabled_in,enabled_ca,enabled_au,enabled_xx)
+#  idx_shop_items_type_enabled                (type,enabled)
+#
 class ShopItem < ApplicationRecord
   has_paper_trail # this should NOT be necessary, but can't have shit in detroit
 
@@ -109,5 +115,15 @@ class ShopItem < ApplicationRecord
 
   def out_of_stock?
     limited? && remaining_stock && remaining_stock <= 0
+  end
+
+  after_save :clear_cache
+
+  def clear_cache
+    if requires_black_market?
+      Rails.cache.delete("all_black_market_shop_items_with_variants")
+    else
+      Rails.cache.delete("all_shop_items_with_variants_v2")
+    end
   end
 end

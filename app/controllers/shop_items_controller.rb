@@ -73,6 +73,16 @@ class ShopItemsController < ApplicationController
 
     # Keep original @shop_items for compatibility with any existing logic
     @shop_items = filtered_items
+
+    # Prepare optimized item data and verification status for views
+    if current_user
+      @current_verification_status = current_verification_status
+      @current_user_ysws_verified = current_user.ysws_verified?
+    end
+
+    # Pre-compute item data for optimized rendering
+    prepare_item_data_for(@regular_items)
+    prepare_item_data_for(@badge_items)
   end
 
   def black_market
@@ -179,6 +189,26 @@ class ShopItemsController < ApplicationController
     return unless current_user&.identity_vault_linked?
     return if current_verification_status == :verified
     current_user&.refresh_identity_vault_data!
+  end
+
+  private
+
+  def prepare_item_data_for(items)
+    items.each do |item|
+      regional_price = (@regionalization_enabled && @selected_region) ? item.price_for_region(@selected_region) : item.ticket_cost
+      remaining = (item.limited? && item.stock.present?) ? (item.stock - (@ordered_quantity_by_item_id[item.id].to_i)) : nil
+      out_of_stock = item.limited? && remaining && remaining <= 0
+      already_ordered = item.one_per_person_ever? && @ordered_once_item_ids&.include?(item.id)
+
+      item.define_singleton_method(:item_data) do
+        {
+          regional_price: regional_price,
+          remaining_stock: remaining,
+          out_of_stock: out_of_stock,
+          already_ordered: already_ordered
+        }
+      end
+    end
   end
 
   def shop_item_params

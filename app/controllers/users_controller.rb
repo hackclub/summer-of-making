@@ -165,6 +165,14 @@ class UsersController < ApplicationController
       # Add projects with type marker
       projects.each { |project| combined_activities << { type: :project, item: project, created_at: project.created_at } }
 
+      # Add shipwright advice for this user's projects
+      advices = ShipwrightAdvice.includes(:project, :ship_certification)
+                                .joins(:project)
+                                .where(projects: { user: @user })
+                                .order(created_at: :desc)
+
+      advices.each { |advice| combined_activities << { type: :shipwright_advice, item: advice, created_at: advice.created_at } }
+
       # Add user joined activity
       combined_activities << { type: :user_joined, item: @user, created_at: @user.created_at }
 

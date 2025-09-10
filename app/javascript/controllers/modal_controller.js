@@ -65,6 +65,9 @@ export default class extends Controller {
       case 'report':
         modalElement = document.getElementById(`report-modal-${modalId}`)
         break
+      case 'readme':
+        modalElement = document.getElementById(`readme-modal-${modalId}`)
+        break
     }
     
     if (!modalElement) {
@@ -130,6 +133,7 @@ export default class extends Controller {
           this.element.id.startsWith('delete-modal-') ||
           this.element.id.startsWith('certification-modal-') ||
           this.element.id.startsWith('report-modal-') ||
+          this.element.id.startsWith('readme-modal-') ||
           this.element.id === 'create-project-modal' ||
           this.element.id === 'hackatime-modal')) {
         this.close()
@@ -144,5 +148,10 @@ export default class extends Controller {
         event.target === this.element) {
       this.close()
     }
+  }
+
+  startVoting(event) {
+    const path = event.currentTarget.dataset.votePath
+    window.location.href = path
   }
 } 

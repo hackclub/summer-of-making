@@ -23,6 +23,16 @@
       • Reviewed by <%= @project.ysws_review_submission.reviewer.display_name %>
     <% end %>
   </p>
+  <% if @project.latest_ship_certification&.reviewer %>
+    <div style="margin: 1rem 0; padding: 1rem; background: var(--color-success-subtle); border: 2px solid var(--color-success); border-radius: 8px;">
+      <h3 style="margin: 0; color: var(--color-success-dark); font-size: 1.4em; display: flex; align-items: center; gap: 0.5rem;">
+        <span>Ship Certified by <%= @project.latest_ship_certification.reviewer.display_name %></span>
+      </h3>
+      <p style="margin: 0.5rem 0 0 0; color: var(--color-success-dark); font-size: 0.9em;">
+        Approved <%= @project.latest_ship_certification.created_at.strftime("%B %d, %Y at %l:%M %p") %>
+      </p>
+    </div>
+  <% end %>
   <p style="margin: 1rem 0;"><%= @project.description %></p>
 
   <!-- Project Links -->
@@ -47,7 +57,14 @@
   <!-- Ship Certification Video -->
   <% if @project.latest_ship_certification&.proof_video&.attached? %>
     <div style="margin: 1rem 0;">
-      <h4 style="margin: 0 0 0.5rem 0;">Ship Certification Video</h4>
+      <h4 style="margin: 0 0 0.5rem 0;">
+        Ship Certification Video
+        <% if @project.latest_ship_certification.reviewer %>
+          <span style="font-size: 0.8em; color: var(--color-text-muted); font-weight: normal;">
+            by <%= @project.latest_ship_certification.reviewer.display_name %>
+          </span>
+        <% end %>
+      </h4>
       <video controls style="width: 100%; max-width: 600px; border-radius: 8px;">
         <source src="<%= url_for(@project.latest_ship_certification.proof_video) %>" type="video/mp4">
         Your browser does not support the video tag.
@@ -147,11 +164,61 @@
                       class: "pill pill-gray",
                       style: "text-decoration: none; padding: 0.2rem 0.5rem;",
                       target: "_blank" %>
+                  <% if @project.repo_link.present? %>
+                    <%
+                      # Extract GitHub repo info and create commits URL
+                      repo_match = @project.repo_link.match(/github\.com\/([^\/]+\/[^\/]+)/)
+                      if repo_match
+                        repo_path = repo_match[1].sub(/\.git$/, '')
+
+                        # Find the first (initial) devlog for this project
+                        first_devlog = @project.devlogs.order(created_at: :asc).first
+                        # Find previous devlog for this project (created before current devlog)
+                        previous_devlog = @project.devlogs.where("created_at < ?", devlog.created_at).order(created_at: :desc).first
+
+                        if previous_devlog && first_devlog != devlog
+                          # Show commits between the initial devlog and the one before current devlog
+                          since_time = first_devlog.created_at.utc.iso8601
+                          until_time = previous_devlog.created_at.utc.iso8601
+                          commits_url = "https://github.com/#{repo_path}/commits?since=#{since_time}&until=#{until_time}"
+                          commits_title = "View GitHub commits between initial devlog (#{first_devlog.created_at}) and previous devlog (#{previous_devlog.created_at})"
+                        else
+                          # This is the first devlog: show all commits before it
+                          until_time = devlog.created_at.utc.iso8601
+                          commits_url = "https://github.com/#{repo_path}/commits?until=#{until_time}"
+                          commits_title = "View all GitHub commits before first devlog (#{devlog.created_at})"
+                        end
+                      end
+                    %>
+                    <% if commits_url %>
+                      <%= link_to "Commits", commits_url,
+                          class: "pill pill-blue",
+                          style: "text-decoration: none; padding: 0.2rem 0.5rem; margin-left: 0.25rem;",
+                          target: "_blank",
+                          title: commits_title %>
+                    <% end %>
+                  <% end %>
                 </span>
               </h4>
               <div style="max-height: 200px; overflow-y: auto; background: var(--color-background-subtle); padding: 1rem; border-radius: 4px; margin: 0.5rem 0;">
                 <%= simple_format(truncate(devlog.text, length: 500)) %>
               </div>
+              <!-- Devlog Media -->
+              <% if devlog.file.attached? %>
+                <div style="margin: 1rem 0;">
+                  <h4 style="margin: 0 0 0.5rem 0;">
+                    Devlog Media
+                  </h4>
+                  <% if devlog.file.content_type&.start_with?('image/') %>
+                    <img src="<%= url_for(devlog.file) %>" alt="Devlog attachment" style="width: 100%; max-width: 600px; border-radius: 8px;">
+                  <% else %>
+                    <video controls style="width: 100%; max-width: 600px; border-radius: 8px;">
+                      <source src="<%= url_for(devlog.file) %>" type="<%= devlog.file.content_type %>">
+                      Your browser does not support the video tag.
+                    </video>
+                  <% end %>
+                </div>
+              <% end %>
               <p style="font-size: 0.9em; color: var(--color-text-muted);">
                 <strong>Original Time:</strong> <%= formal_seconds devlog.duration_seconds %>
                 <% if devlog.ysws_review_approval&.seconds_changed? %>
@@ -165,21 +232,48 @@
 
               <div style="margin-bottom: 1rem;">
                 <label style="display: block; margin-bottom: 0.5rem; font-weight: bold;">Status:</label>
-                <%= form.radio_button "devlog_approvals[#{devlog.id}][approved]", "1",
-                    checked: devlog.ysws_review_approval&.approved? %>
-                <%= form.label "devlog_approvals_#{devlog.id}_approved_1", "Approve",
-                    style: "margin-right: 1rem;" %>
-                <%= form.radio_button "devlog_approvals[#{devlog.id}][approved]", "0",
-                    checked: devlog.ysws_review_approval&.approved? == false %>
-                <%= form.label "devlog_approvals_#{devlog.id}_approved_0", "Reject" %>
+                <div style="display: flex; gap: 1rem; align-items: center;">
+                  <label style="display: flex; align-items: center; cursor: pointer;">
+                    <%= form.check_box "devlog_approvals[#{devlog.id}][approved]",
+                        { checked: devlog.ysws_review_approval&.approved?,
+                          style: "margin-right: 0.5rem;" },
+                        "1", "0" %>
+                    Approve
+                  </label>
+                  <label style="display: flex; align-items: center; cursor: pointer;">
+                    <%= form.check_box "devlog_approvals[#{devlog.id}][rejected]",
+                        { checked: devlog.ysws_review_approval&.approved? == false,
+                          style: "margin-right: 0.5rem;" },
+                        "1", "0" %>
+                    Reject
+                  </label>
+                </div>
               </div>
 
               <div style="margin-bottom: 1rem;">
-                <%= form.label "devlog_approvals_#{devlog.id}_approved_seconds", "Approved Seconds:",
+                <%= form.label "devlog_approvals_#{devlog.id}_approved_minutes", "Approved Minutes:",
                     style: "display: block; margin-bottom: 0.5rem; font-weight: bold;" %>
-                <%= form.number_field "devlog_approvals[#{devlog.id}][approved_seconds]",
-                    value: devlog.ysws_review_approval&.approved_seconds || devlog.duration_seconds || 0,
-                    style: "width: 100%; padding: 0.5rem; border: 1px solid var(--color-border); border-radius: 4px;" %>
+                <div style="display: flex; gap: 0.5rem; align-items: center; margin-bottom: 0.5rem;">
+                  <%= form.number_field "devlog_approvals[#{devlog.id}][approved_minutes]",
+                      value: ((devlog.ysws_review_approval&.approved_seconds || devlog.duration_seconds || 0) / 60.0).round,
+                      id: "approved_minutes_#{devlog.id}",
+                      min: 0,
+                      style: "flex: 1; padding: 0.5rem; border: 1px solid var(--color-border); border-radius: 4px;" %>
+                  <span style="color: var(--color-text-muted); font-size: 0.9em;">minutes</span>
+                </div>
+
+                <div style="display: flex; gap: 0.25rem; flex-wrap: wrap; margin-bottom: 0.5rem;">
+                  <button type="button" class="pill pill-orange" style="font-size: 0.7em; padding: 0.25rem 0.5rem; cursor: pointer; border: none;"
+                          onclick="adjustTimeMinutes(<%= devlog.id.to_json %>, 'half')">50%</button>
+                  <button type="button" class="pill pill-orange" style="font-size: 0.7em; padding: 0.25rem 0.5rem; cursor: pointer; border: none;"
+                          onclick="adjustTimeMinutes(<%= devlog.id.to_json %>, 'quarter')">25%</button>
+                  <button type="button" class="pill pill-red" style="font-size: 0.7em; padding: 0.25rem 0.5rem; cursor: pointer; border: none;"
+                          onclick="adjustTimeMinutes(<%= devlog.id.to_json %>, 'minus30')">-30min</button>
+                  <button type="button" class="pill pill-red" style="font-size: 0.7em; padding: 0.25rem 0.5rem; cursor: pointer; border: none;"
+                          onclick="adjustTimeMinutes(<%= devlog.id.to_json %>, 'minus60')">-1hr</button>
+                  <button type="button" class="pill pill-gray" style="font-size: 0.7em; padding: 0.25rem 0.5rem; cursor: pointer; border: none;"
+                          onclick="resetToOriginal(<%= devlog.id.to_json %>, <%= ((devlog.duration_seconds || 0) / 60.0).round.to_json %>)">Reset</button>
+                </div>
               </div>
 
               <div style="margin-bottom: 1rem;">
@@ -210,44 +304,234 @@
         style="padding: 1rem 2rem; font-size: 1.1em; cursor: pointer; border: none; text-decoration: none;">
       Approve All Devlogs
     </button>
+    <button type="button" id="reject-all-btn"
+        class="pill pill-red"
+        style="padding: 1rem 2rem; font-size: 1.1em; cursor: pointer; border: none; text-decoration: none;">
+      Reject All Devlogs
+    </button>
+    <button type="button" id="return-to-certifier-btn"
+        class="pill pill-orange"
+        style="padding: 1rem 2rem; font-size: 1.1em; cursor: pointer; border: none; text-decoration: none; background-color: #ff8a00;">
+      Return to Ship Certifier
+    </button>
     <%= form.submit "Complete Review",
         class: "pill pill-green",
         style: "padding: 1rem 2rem; font-size: 1.1em; cursor: pointer; border: none; text-decoration: none;" %>
   </div>
 <% end %>
 
+<!-- Return to Certifier Modal -->
+<div id="return-modal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.5); z-index: 1000;">
+  <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); background: var(--color-background); padding: 2rem; border-radius: 8px; max-width: 500px; width: 90%;">
+    <h3 style="margin: 0 0 1rem 0;">Return Project to Ship Certifier</h3>
+    <p style="margin: 0 0 1.5rem 0; color: var(--color-text-muted);">
+      Select the reason(s) why this project needs to be returned to the ship certifier:
+    </p>
+
+    <%= form_with url: return_to_certifier_admin_ysws_review_path(@project), method: :patch, local: true, id: 'return-form' do |f| %>
+      <div style="margin-bottom: 1.5rem;">
+        <% ShipCertification::YSWS_FEEDBACK_REASONS.each do |reason| %>
+          <label style="display: block; margin: 0.5rem 0; cursor: pointer;">
+            <input type="checkbox" name="feedback_reasons[]" value="<%= reason %>" style="margin-right: 0.5rem;">
+            <%= ShipCertification::YSWS_FEEDBACK_REASON_LABELS[reason] %>
+          </label>
+        <% end %>
+      </div>
+      <div style="display: flex; gap: 1rem; justify-content: flex-end;">
+        <button type="button" id="cancel-return-btn" class="pill pill-gray" style="padding: 0.75rem 1.5rem; cursor: pointer; border: none; text-decoration: none;">
+          Cancel
+        </button>
+        <button type="submit" class="pill pill-orange" style="padding: 0.75rem 1.5rem; cursor: pointer; border: none; text-decoration: none; background-color: #ff8a00;">
+          Return Project
+        </button>
+      </div>
+    <% end %>
+    <%= render "admin/projects/magic_happening_button", project: @project %>
+  </div>
+</div>
+
 <script>
+// Time adjustment function for minutes
+function adjustTimeMinutes(devlogId, adjustment) {
+  const input = document.getElementById(`approved_minutes_${devlogId}`);
+  const currentValue = parseInt(input.value) || 0;
+  let newValue = currentValue;
+
+  switch(adjustment) {
+    case 'half':
+      newValue = Math.floor(currentValue * 0.5);
+      break;
+    case 'quarter':
+      newValue = Math.floor(currentValue * 0.25);
+      break;
+    case 'minus30':
+      newValue = Math.max(0, currentValue - 30); // 30 minutes
+      break;
+    case 'minus60':
+      newValue = Math.max(0, currentValue - 60); // 60 minutes (1 hour)
+      break;
+  }
+
+  input.value = newValue;
+}
+
+// Reset to original time function
+function resetToOriginal(devlogId, originalMinutes) {
+  const input = document.getElementById(`approved_minutes_${devlogId}`);
+  input.value = originalMinutes;
+}
+
 document.addEventListener('DOMContentLoaded', function() {
   const approveAllBtn = document.getElementById('approve-all-btn');
+  const rejectAllBtn = document.getElementById('reject-all-btn');
+  const returnToCertifierBtn = document.getElementById('return-to-certifier-btn');
+  const returnModal = document.getElementById('return-modal');
+  const cancelReturnBtn = document.getElementById('cancel-return-btn');
+  const returnForm = document.getElementById('return-form');
 
-  approveAllBtn.addEventListener('click', function() {
-    // Find all approve radio buttons and check them
-    const approveRadios = document.querySelectorAll('input[type="radio"][value="1"]');
-
-    approveRadios.forEach(function(radio) {
-      if (radio.name.includes('[approved]')) {
-        radio.checked = true;
-
-        // For each approved devlog, set the approved_seconds to the original duration
-        const devlogId = radio.name.match(/devlog_approvals\[(\d+)\]/)[1];
-        const secondsField = document.querySelector(`input[name="devlog_approvals[${devlogId}][approved_seconds]"]`);
-
-        if (secondsField && !secondsField.value) {
-          // Keep the current value or use the default that's already there
-          // The field should already have the original duration as the default
-        }
+  // Checkbox mutual exclusivity logic
+  document.addEventListener('change', function(e) {
+    if (e.target.type === 'checkbox' && (e.target.name.includes('[approved]') || e.target.name.includes('[rejected]'))) {
+      const devlogId = e.target.name.match(/devlog_approvals\[(\d+)\]/)[1];
+      const approveCheckbox = document.querySelector(`input[name="devlog_approvals[${devlogId}][approved]"]`);
+      const rejectCheckbox = document.querySelector(`input[name="devlog_approvals[${devlogId}][rejected]"]`);
+      // If approve is checked, uncheck reject
+      if (e.target.name.includes('[approved]') && e.target.checked) {
+        if (rejectCheckbox) rejectCheckbox.checked = false;
       }
-    });
+      // If reject is checked, uncheck approve and set minutes to 0
+      if (e.target.name.includes('[rejected]') && e.target.checked) {
+        if (approveCheckbox) approveCheckbox.checked = false;
+        const minutesField = document.getElementById(`approved_minutes_${devlogId}`);
+        if (minutesField) minutesField.value = 0;
+      }
+    }
+  });
 
-    // Update button text to indicate action was performed
-    approveAllBtn.textContent = 'All Devlogs Approved ✓';
-    approveAllBtn.style.backgroundColor = 'var(--color-success)';
+  // Approve all functionality with toggle
+  approveAllBtn.addEventListener('click', function() {
+    const isCurrentlyApproved = approveAllBtn.textContent.includes('✓');
 
-    // Reset button after 2 seconds
-    setTimeout(function() {
+    if (isCurrentlyApproved) {
+      // Clear all selections
+      const allCheckboxes = document.querySelectorAll('input[type="checkbox"]');
+      allCheckboxes.forEach(function(checkbox) {
+        if (checkbox.name.includes('[approved]') || checkbox.name.includes('[rejected]')) {
+          checkbox.checked = false;
+        }
+      });
+
+      // Reset button
       approveAllBtn.textContent = 'Approve All Devlogs';
       approveAllBtn.style.backgroundColor = '';
-    }, 2000);
+    } else {
+      // Find all approve checkboxes and check them
+      const approveCheckboxes = document.querySelectorAll('input[type="checkbox"]');
+
+      approveCheckboxes.forEach(function(checkbox) {
+        if (checkbox.name.includes('[approved]')) {
+          checkbox.checked = true;
+
+          // Uncheck corresponding reject checkbox
+          const devlogId = checkbox.name.match(/devlog_approvals\[(\d+)\]/)[1];
+          const rejectCheckbox = document.querySelector(`input[name="devlog_approvals[${devlogId}][rejected]"]`);
+          if (rejectCheckbox) rejectCheckbox.checked = false;
+        }
+      });
+
+      // Update button text to indicate action was performed
+      approveAllBtn.textContent = 'All Devlogs Approved ✓';
+      approveAllBtn.style.backgroundColor = 'var(--color-success)';
+
+      // Reset reject all button if it was active
+      rejectAllBtn.textContent = 'Reject All Devlogs';
+      rejectAllBtn.style.backgroundColor = '';
+    }
+  });
+
+  // Reject all functionality with toggle
+  rejectAllBtn.addEventListener('click', function() {
+    const isCurrentlyRejected = rejectAllBtn.textContent.includes('✓');
+
+    if (isCurrentlyRejected) {
+      // Clear all selections and restore original minutes
+      const allCheckboxes = document.querySelectorAll('input[type="checkbox"]');
+      allCheckboxes.forEach(function(checkbox) {
+        if (checkbox.name.includes('[approved]') || checkbox.name.includes('[rejected]')) {
+          checkbox.checked = false;
+
+          // If it was a reject checkbox, restore original minutes
+          if (checkbox.name.includes('[rejected]')) {
+            const devlogId = checkbox.name.match(/devlog_approvals\[(\d+)\]/)[1];
+            const minutesField = document.getElementById(`approved_minutes_${devlogId}`);
+            if (minutesField) {
+              // Find the original value from the reset button
+              const resetButton = document.querySelector(`[onclick*="resetToOriginal(${devlogId}"]`);
+              if (resetButton) {
+                const originalMatch = resetButton.getAttribute('onclick').match(/resetToOriginal\(\d+, (\d+)\)/);
+                if (originalMatch) {
+                  minutesField.value = originalMatch[1];
+                }
+              }
+            }
+          }
+        }
+      });
+
+      // Reset button
+      rejectAllBtn.textContent = 'Reject All Devlogs';
+      rejectAllBtn.style.backgroundColor = '';
+    } else {
+      // Find all reject checkboxes and check them
+      const rejectCheckboxes = document.querySelectorAll('input[type="checkbox"]');
+
+      rejectCheckboxes.forEach(function(checkbox) {
+        if (checkbox.name.includes('[rejected]')) {
+          checkbox.checked = true;
+
+          // Uncheck corresponding approve checkbox and set minutes to 0
+          const devlogId = checkbox.name.match(/devlog_approvals\[(\d+)\]/)[1];
+          const approveCheckbox = document.querySelector(`input[name="devlog_approvals[${devlogId}][approved]"]`);
+          if (approveCheckbox) approveCheckbox.checked = false;
+
+          const minutesField = document.getElementById(`approved_minutes_${devlogId}`);
+          if (minutesField) minutesField.value = 0;
+        }
+      });
+
+      // Update button text to indicate action was performed
+      rejectAllBtn.textContent = 'All Devlogs Rejected ✓';
+      rejectAllBtn.style.backgroundColor = 'var(--color-error)';
+
+      // Reset approve all button if it was active
+      approveAllBtn.textContent = 'Approve All Devlogs';
+      approveAllBtn.style.backgroundColor = '';
+    }
+  });
+
+  // Return to certifier functionality
+  returnToCertifierBtn.addEventListener('click', function() {
+    returnModal.style.display = 'block';
+  });
+
+  cancelReturnBtn.addEventListener('click', function() {
+    returnModal.style.display = 'none';
+  });
+
+  // Close modal when clicking outside
+  returnModal.addEventListener('click', function(e) {
+    if (e.target === returnModal) {
+      returnModal.style.display = 'none';
+    }
+  });
+
+  // Validate form submission
+  returnForm.addEventListener('submit', function(e) {
+    const checkedBoxes = returnForm.querySelectorAll('input[name="feedback_reasons[]"]:checked');
+    if (checkedBoxes.length === 0) {
+      e.preventDefault();
+      alert('Please select at least one reason for returning the project.');
+    }
   });
 });
 </script>

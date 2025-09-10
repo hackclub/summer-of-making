@@ -13,7 +13,7 @@
         </div>
         <div class="space-y-2">
           <div class="text-xs sm:text-sm md:text-base text-gray-600 break-words overflow-wrap-anywhere pr-2">
-            <%= h(comment.content) %>
+            <%= comment.formatted_content %>
           </div>
           <% if comment.user == current_user %>
             <div class="flex justify-end">
