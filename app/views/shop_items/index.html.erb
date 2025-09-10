@@ -49,6 +49,43 @@
     </div>
   </div>
 
+  <% f = (@regular_items + @badge_items).select(&:show_in_carousel).shuffle %>
+  <% if f.any? %>
+    <div class="mb-8">
+        <div class="text-center mb-4">
+          <h2 class="text-xl font-bold text-[#3a2f25] font-['DynaPuff',sans-serif] mb-1">Featured Items</h2>
+          <p class="text-sm text-[#666] font-['National Park',sans-serif]">not sure what to get? what about these?</p>
+        </div>
+        <div class="coolshits-grid grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3">
+          <% f.take(2).each_with_index do |item, index| %>
+            <div class="coolshit block sm:hidden">
+              <%= render partial: "item", locals: { item: item, item_data: item.item_data, minimal: true } %>
+            </div>
+          <% end %>
+          <% f.take(3).each_with_index do |item, index| %>
+            <div class="coolshit hidden sm:block md:hidden">
+              <%= render partial: "item", locals: { item: item, item_data: item.item_data, minimal: true } %>
+            </div>
+          <% end %>
+          <% f.take(4).each_with_index do |item, index| %>
+            <div class="coolshit hidden md:block lg:hidden">
+              <%= render partial: "item", locals: { item: item, item_data: item.item_data, minimal: true } %>
+            </div>
+          <% end %>
+          <% f.take(5).each_with_index do |item, index| %>
+            <div class="coolshit hidden lg:block xl:hidden">
+              <%= render partial: "item", locals: { item: item, item_data: item.item_data, minimal: true } %>
+            </div>
+          <% end %>
+          <% f.take(6).each_with_index do |item, index| %>
+            <div class="coolshit hidden xl:block">
+              <%= render partial: "item", locals: { item: item, item_data: item.item_data, minimal: true } %>
+            </div>
+          <% end %>
+        </div>
+    </div>
+  <% end %>
+
   <% unless current_user %>
     <div id="how-it-works" class="mt-15">
       <div class="relative mb-8 md:mb-16 flex flex-col items-center">
@@ -111,6 +148,10 @@
     </div>
   <% end %>
   <div class="my-6 text-center flex justify-center flex-col">
+    <div class="text-center mb-4">
+      <h2 class="text-xl font-bold text-[#3a2f25] font-['DynaPuff',sans-serif] mb-1">All Items</h2>
+      <p class="text-sm text-[#666] font-['National Park',sans-serif]">options? we got em</p>
+    </div>
     <% if @shop_items.empty? || (Flipper.enabled?(:enable_shop_balloons, current_user) && @shop_items.count == 1 && @shop_items.first.is_a?(ShopItem::SinkeningBalloons) && (!current_user&.sinkening_participation? || @ordered_once_item_ids&.include?(@shop_items.first.id))) %>
       <%= render "shared/card", classes: 'max-w-md mx-auto' do %>
         <div class="text-lg font-semibold text-[#3a2f25] font-['DynaPuff',sans-serif] mb-1">
@@ -194,6 +235,13 @@
   </div>
 <% end %>
 
+<style>
+  .coolshit {
+    user-select: none;
+    -webkit-tap-highlight-color: transparent;
+  }
+</style>
+
 <script>
   document.addEventListener('DOMContentLoaded', function () {
     const musicToggle = document.getElementById('music-toggle');
@@ -234,5 +282,28 @@
         window.location.href = currentUrl.toString();
       });
     }
+    const fi = document.querySelectorAll('.coolshit [data-item-id]');
+    fi.forEach(item => {
+      item.addEventListener('click', function(e) {
+        e.preventDefault();
+
+        const id = this.getAttribute('data-item-id');
+        if (id) {
+          this.style.transform = 'scale(0.95)';
+          setTimeout(() => {
+            this.style.transform = '';
+          }, 150);
+
+          window.location.hash = `item-${id}`;
+          const t = document.getElementById(`item-${id}`);
+          if (t) {
+            t.classList.add('ring', 'ring-4', 'ring-yellow-400');
+            setTimeout(() => {
+              t.classList.remove('ring', 'ring-4', 'ring-yellow-400');
+            }, 2000);
+          }
+        }
+      });
+    });
   });
 </script>
