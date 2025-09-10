@@ -9,7 +9,7 @@ class VotesController < ApplicationController
 
   def new
     @vote = Vote.new
-    @user_vote_count = current_user.votes.active.count
+    @user_vote_count = @user_vote_count || current_user.votes.active.count
   end
 
   def create
@@ -142,16 +142,15 @@ class VotesController < ApplicationController
   end
 
   def locked
-    @approve_projects_count = Project.joins(:ship_certifications)
-                                     .where(ship_certifications: { judgement: :approved })
-                                     .size
-    @full_projects_count = Project.joins(:ship_certifications, :devlogs)
-                                  .where(ship_certifications: { judgement: :approved })
-                                  .group("projects.id")
-                                  .having("SUM(COALESCE(devlogs.duration_seconds, 0)) > ?", 10 * 3600)
-                                  .count
-                                  .keys
-                                  .size
+    approved_projects = Project.joins(:ship_certifications)
+                              .where(ship_certifications: { judgement: :approved })
+    
+    @approve_projects_count = approved_projects.count
+    @full_projects_count = approved_projects.joins(:devlogs)
+                                          .group("projects.id")
+                                          .having("SUM(COALESCE(devlogs.duration_seconds, 0)) > ?", 10 * 3600)
+                                          .count
+                                          .size
   end
 
   private
@@ -259,6 +258,9 @@ class VotesController < ApplicationController
     end
 
     @ship_events = @vote_queue.current_ship_events
+    
+    # Cache user vote count for use in new action
+    @user_vote_count = current_user.votes.active.count
 
     # what in the vibe code did rowan do here before :skulk:
     @project_ai_used = {}
