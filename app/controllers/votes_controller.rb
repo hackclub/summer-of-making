@@ -144,7 +144,6 @@ class VotesController < ApplicationController
   def locked
     approved_projects = Project.joins(:ship_certifications)
                               .where(ship_certifications: { judgement: :approved })
-    
     @approve_projects_count = approved_projects.count
     @full_projects_count = approved_projects.joins(:devlogs)
                                           .group("projects.id")
@@ -258,7 +257,6 @@ class VotesController < ApplicationController
     end
 
     @ship_events = @vote_queue.current_ship_events
-    
     # Cache user vote count for use in new action
     @user_vote_count = current_user.votes.active.count
 
