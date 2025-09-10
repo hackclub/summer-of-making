@@ -286,14 +286,14 @@
     fi.forEach(item => {
       item.addEventListener('click', function(e) {
         e.preventDefault();
-        
+
         const id = this.getAttribute('data-item-id');
         if (id) {
           this.style.transform = 'scale(0.95)';
           setTimeout(() => {
             this.style.transform = '';
           }, 150);
-          
+
           window.location.hash = `item-${id}`;
           const t = document.getElementById(`item-${id}`);
           if (t) {
