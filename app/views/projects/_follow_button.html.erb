@@ -1,16 +1,22 @@
 <%= turbo_frame_tag dom_id(project, :follow_button) do %>
-  <% if defined?(following) ? following : current_user.project_follows.exists?(project_id: project.id) %>
-    <%= button_to project_unfollow_path(project), method: :delete, class: "group" do %>
-      <div class="som-button-secondary transition-colors">
-        <span class="group-hover:hidden">Following</span>
-        <span class="hidden group-hover:block">Unfollow?</span>
+  <% variant = (local_assigns[:variant] || params[:variant]).to_s == 'icon' ? :icon : :default %>
+  <% f = if local_assigns.key?(:following)
+           following
+         elsif defined?(@followed_project_ids) && @followed_project_ids.respond_to?(:include?)
+           @followed_project_ids.include?(project.id)
+         else
+           user_signed_in? && current_user.project_follows.exists?(project_id: project.id)
+         end %>
+  <% path = f ? project_unfollow_path(project) : project_follow_path(project) %>
+  <%= button_to path, method: (f ? :delete : :post), params: { variant: variant }, class: "group" do %>
+    <% if variant == :icon %>
+      <div class="som-button-<%= f ? 'secondary' : 'primary' %> som-button-rounded text-base">
+        <%= inline_svg("icons/#{f ? 'close' : 'plus'}.svg", class: "w-6 h-6") %>
       </div>
-    <% end %>
-  <% else %>
-    <%= button_to project_follow_path(project), class: "group" do %>
-      <div class="som-button-primary transition-colors">
-        <span class="group-hover:hidden">Follow</span>
-        <span class="hidden group-hover:block">Follow?</span>
+    <% else %>
+      <div class="som-button-<%= f ? 'secondary' : 'primary' %> transition-colors">
+        <span class="group-hover:hidden"><%= f ? 'Following' : 'Follow' %></span>
+        <span class="hidden group-hover:block"><%= f ? 'Unfollow?' : 'Follow?' %></span>
       </div>
     <% end %>
   <% end %>

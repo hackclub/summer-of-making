@@ -17,16 +17,7 @@
             </p>
           </div>
           <% if user_signed_in? && current_user != project.user %>
-            <% following = defined?(@followed_project_ids) ? @followed_project_ids&.include?(project.id) : current_user.project_follows.exists?(project_id: project.id) %>
-            <% if following %>
-              <%= button_to project_unfollow_path(project), method: :delete, class: "group" do %>
-                <div class="som-button-secondary som-button-rounded text-base"><%= inline_svg("icons/close.svg", class: "w-6 h-6") %></div>
-              <% end %>
-            <% else %>
-              <%= button_to project_follow_path(project), class: "group" do %>
-                <div class="som-button-primary som-button-rounded text-base"><%= inline_svg("icons/plus.svg", class: "w-6 h-6") %></div>
-              <% end %>
-            <% end %>
+            <%= render "projects/follow_button", project: project, following: (defined?(@followed_project_ids) ? @followed_project_ids&.include?(project.id) : nil), variant: :icon %>
           <% end %>
         </div>
         <p class="line-clamp-3 text-sm md:text-base 2xl:text-lg overflow-hidden mt-1 min-h-[63px] md:min-h-[72px] 2xl:min-h-[81px]"><%= project.description %></p>
