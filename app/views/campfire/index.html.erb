@@ -535,4 +535,76 @@
       </div>
     </div>
   <% end %>
+
+  <!-- Subway Surfers Popup Video -->
+  <div id="subway-popup" class="fixed bottom-4 right-4 z-50 hidden">
+    <div id="subway-container" class="relative w-20 transition-all duration-300">
+      <button id="subway-close" class="absolute -top-1 -right-1 bg-white rounded-full p-1 hover:bg-gray-100 transition-colors z-10 shadow-lg">
+        <svg class="h-3 w-3 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+        </svg>
+      </button>
+      <button id="subway-resize" class="absolute -top-1 -left-1 bg-white rounded-full p-1 hover:bg-gray-100 transition-colors z-10 shadow-lg">
+        <svg class="h-3 w-3 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4"></path>
+        </svg>
+      </button>
+      <video id="subway-video" class="w-full rounded-lg shadow-2xl" controls>
+        <source src="https://hc-cdn.hel1.your-objectstorage.com/s/v3/bd10b22610510b87bab4f9951f04cd6623a173e3_subway_surfers_1_hour_gameplay_no_commentary_free_to_use.mp4" type="video/mp4">
+        Your browser does not support the video tag.
+      </video>
+    </div>
+  </div>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      const popup = document.getElementById('subway-popup');
+      const video = document.getElementById('subway-video');
+      const closeBtn = document.getElementById('subway-close');
+      const resizeBtn = document.getElementById('subway-resize');
+      const container = document.getElementById('subway-container');
+      
+      let isLarge = false;
+
+      // Show popup (you can trigger this however you want)
+      function showPopup() {
+        popup.classList.remove('hidden');
+        video.play();
+      }
+
+      // Hide popup
+      function hidePopup() {
+        popup.classList.add('hidden');
+        video.pause();
+        video.currentTime = 0;
+      }
+
+      // Toggle size
+      function toggleSize() {
+        if (isLarge) {
+          container.classList.remove('w-40');
+          container.classList.add('w-20');
+          isLarge = false;
+        } else {
+          container.classList.remove('w-20');
+          container.classList.add('w-40');
+          isLarge = true;
+        }
+      }
+
+      // Event listeners
+      closeBtn.addEventListener('click', hidePopup);
+      resizeBtn.addEventListener('click', toggleSize);
+
+      // Close on escape key
+      document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape' && !popup.classList.contains('hidden')) {
+          hidePopup();
+        }
+      });
+
+      // Example: Show popup automatically after 3 seconds (remove this if not needed)
+      setTimeout(showPopup, 3000);
+    });
+  </script>
 </div>

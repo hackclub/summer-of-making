@@ -1,6 +1,7 @@
 class MapController < ApplicationController
   before_action :authenticate_user!
-  before_action :check_identity_verification
+  # OLD CODE: identity verification check that blocked access
+  # before_action :check_identity_verification
   include MapHelper
 
   def index
@@ -12,9 +13,17 @@ class MapController < ApplicationController
     render json: { projects: project_map_data(map_projects_query) }
   end
 
-  def check_identity_verification
-    return if current_user&.identity_vault_id.present? && current_verification_status != :ineligible
+  # OLD CODE: identity verification method that blocked access
+  # def check_identity_verification
+  #   return if current_user&.identity_vault_id.present? && current_verification_status != :ineligible
+  #
+  #   redirect_to campfire_path, alert: "Please verify your identity to access this page."
+  # end
 
-    redirect_to campfire_path, alert: "Please verify your identity to access this page."
+  # --- START temporarily disabled identity verification ---
+  def check_identity_verification
+    # Temporarily allow all users to access the map
+    return
   end
+  # --- END temporarily disabled identity verification ---
 end

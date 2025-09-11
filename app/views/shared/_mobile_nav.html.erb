@@ -22,6 +22,13 @@
     <span class="text-xs mt-1">Vote</span>
   <% end %>
 
+  <%# --- START temporarily added Map button --- %>
+  <%= link_to map_path, class: "flex flex-col items-center #{"opacity-50 pointer-events-none" unless tab_unlocked?(:map)} #{'text-saddle-taupe' if current_page?(map_path)}" do %>
+    <%= inline_svg "icons/map.svg", class: "h-8 w-8" %>
+    <span class="text-xs mt-1">Map</span>
+  <% end %>
+  <%# --- END temporarily added Map button --- %>
+
   <%= link_to shop_path, class: "flex flex-col items-center #{'text-saddle-taupe' if current_page?(shop_path)}" do %>
     <%= inline_svg "icons/shop.svg", class: "h-8 w-8" %>
     <span class="text-xs mt-1">Shop</span>
