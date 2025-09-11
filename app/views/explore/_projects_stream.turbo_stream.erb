@@ -3,7 +3,7 @@
 <% if projects&.any? %>
   <% projects.each do |project| %>
     <%= turbo_stream.append target_id do %>
-      <%= render partial: "projects/project_preview", locals: { project: project } %>
+      <%= render "projects/project_preview", project: project %>
     <% end %>
   <% end %>
 <% end %>

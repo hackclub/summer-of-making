@@ -5,7 +5,7 @@
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-8" id="projects-grid">
       <% if @projects&.any? %>
         <% @projects.each do |project| %>
-          <%= render partial: "projects/project_preview", locals: { project: project } %>
+          <%= render "projects/project_preview", project: project %>
         <% end %>
       <% end %>
     </div>
