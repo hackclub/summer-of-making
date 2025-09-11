@@ -71,14 +71,14 @@ class Devlog < ApplicationRecord
   scope :for_explore_feed, -> {
     joins(:project)
       .where(projects: { is_deleted: false })
-      .includes(:project, :file_attachment, :user, comments: :user)
+      .includes(:project, :file_attachment, :user)
       .order(created_at: :desc)
   }
 
   scope :for_user_following, ->(user_id) {
     joins(project: :project_follows)
       .where(project_follows: { user_id: user_id }, projects: { is_deleted: false })
-      .includes(:project, :file_attachment, :user, comments: :user)
+      .includes(:project, :file_attachment, :user)
       .order(created_at: :desc)
   }
 
