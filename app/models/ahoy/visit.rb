@@ -37,7 +37,7 @@
 #  index_ahoy_visits_on_visitor_token_and_started_at  (visitor_token,started_at)
 #
 class Ahoy::Visit < ApplicationRecord
-  include AhoyCaptain::Ahoy::VisitMethods
+  # include AhoyCaptain::Ahoy::VisitMethods
   self.table_name = "ahoy_visits"
 
   has_many :events, class_name: "Ahoy::Event"

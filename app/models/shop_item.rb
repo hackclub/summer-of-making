@@ -118,6 +118,7 @@ class ShopItem < ApplicationRecord
   end
 
   after_save :clear_cache
+  after_update_commit :clear_carousel_cache_if_image_changed
 
   def clear_cache
     if requires_black_market?
@@ -125,5 +126,12 @@ class ShopItem < ApplicationRecord
     else
       Rails.cache.delete("all_shop_items_with_variants_v2")
     end
+    Rails.cache.delete(Cache::CarouselPrizesJob::CACHE_KEY) if saved_change_to_show_in_carousel? || saved_change_to_name? || saved_change_to_ticket_cost?
+  end
+
+  private
+
+  def clear_carousel_cache_if_image_changed
+    Rails.cache.delete(Cache::CarouselPrizesJob::CACHE_KEY) if image.attached? && show_in_carousel?
   end
 end

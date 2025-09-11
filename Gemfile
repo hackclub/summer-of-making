@@ -34,7 +34,7 @@ gem "solid_queue"
 
 # Serverside analytics
 gem "ahoy_matey"
-gem "ahoy_captain", git: "https://github.com/johnmcdowall/ahoy_captain.git", branch: "fix_importmaps"
+# gem "ahoy_captain", git: "https://github.com/johnmcdowall/ahoy_captain.git", branch: "fix_importmaps"
 gem "geocoder"
 
 # Dashboard for solidqueue
@@ -55,7 +55,7 @@ gem "skylight"
 # For call-stack profiling flamegraphs
 gem "stackprof"
 # Rack Mini Profiler [https://github.com/MiniProfiler/rack-mini-profiler]
-gem "rack-mini-profiler", require: false
+gem "rack-mini-profiler"
 # For memory profiling via RMP
 gem "memory_profiler"
 gem "flamegraph"
@@ -170,3 +170,5 @@ gem "paper_trail"
 gem "strong_migrations", "~> 2.5"
 
 gem "jb", "~> 0.8.2"
+
+gem "rbtrace", "~> 0.5.2"

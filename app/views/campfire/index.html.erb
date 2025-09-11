@@ -7,7 +7,6 @@
     </div>
   </div>
 
-<% if Flipper.enabled?(:secret_third_thing_2025_09_02, current_user) %>
   <div class="mb-8">
     <%= render "shared/definition",
       term: "⚠️ A FINAL ADVENTURE AWAITS ⚠️",
@@ -15,14 +14,6 @@
       # this is a hack to get erb_lint to stfu about .html_safe:
       definition: ActiveSupport::SafeBuffer.new("Heidi and Explorpheus have resolved to fully explore their island continent and conduct a grand survey — but they need your help! 100 locations call out for a developer with a creative spirit to play their part in constructing a massive point-and-click adventure. Shells, stickers, and special prizes will go to those who participate in this spectacular finale to the Summer of Making. Click <a href='https://hackclub.slack.com/archives/C09DQ3EB40L' target='_blank' class='underline'>here</a> for details!") %>
   </div>
-<% elsif current_user.tutorial_completed? %>
-  <div class="mb-8">
-    <%= render "shared/definition",
-      term: "⚠️ THE SUMMER OF MAKING HAS BEEN EXTENDED! 🏝️",
-      mysterious: true,
-      definition: "Thanks to your balloons, the island has stabilized and we've pulled up new land. The island now sits proud and tall, with more land than ever ready to fill with an EXTRA MONTH of projects. The new deadline is September 30th - and you've gotten rid of all that water too!" %>
-  </div>
-<% end %>
 
   <% if current_user.is_banned? %>
     <%= render "shared/card", classes: "bg-red-50/80 border-red-400 mb-8" do %>

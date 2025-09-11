@@ -47,12 +47,12 @@ module Api
                                   .group_by(&:user_id)
 
         balances_by_user = {}
-        if current_user&.has_badge?(:pocket_watcher)
+        if current_user_has_badge?(:pocket_watcher)
           balances_by_user = Payout.where(user_id: user_ids, escrowed: false).group(:user_id).sum(:amount)
         end
 
         @users = users.map do |user|
-          balance_value = if current_user&.has_badge?(:pocket_watcher)
+          balance_value = if current_user_has_badge?(:pocket_watcher)
             user.has_badge?(:offshore_bank_account) ? "Nice try, but they've covered their tracks a little better than that." : (balances_by_user[user.id] || 0)
           else
             "You need to have a pocket watcher badge to view this."
@@ -71,7 +71,8 @@ module Api
             coding_time_seconds: user.has_hackatime? ? user.all_time_coding_seconds : 0,
             coding_time_seconds_today: user.has_hackatime? ? user.daily_coding_seconds : 0,
             balance: balance_value,
-            badges: user.badges.map { |b|
+            badges: user.badges.map { |k|
+              b = Badge.find k
               icon = b[:icon].include?(".") ? view_context.image_url(b[:icon]) : b[:icon]
               { name: b[:name], text: b[:flavor_text], icon: icon }
             },
@@ -107,8 +108,9 @@ module Api
           projects: @user.projects.map { |p| { id: p.id, title: p.title, devlogs_count: p.devlogs_count, created_at: p.created_at } },
           coding_time_seconds: @user.has_hackatime? ? @user.all_time_coding_seconds : 0,
           coding_time_seconds_today: @user.has_hackatime? ? @user.daily_coding_seconds : 0,
-          balance: current_user&.has_badge?(:pocket_watcher) ? (@user.has_badge?(:offshore_bank_account) ? "Nice try, but they've covered their tracks a little better than that." : @user.balance) : "You need to have a pocket watcher badge to view this.",
-          badges: @user.badges.map { |b|
+          balance: current_user_has_badge?(:pocket_watcher) ? (@user.has_badge?(:offshore_bank_account) ? "Nice try, but they've covered their tracks a little better than that." : @user.balance) : "You need to have a pocket watcher badge to view this.",
+          badges: @user.badges.map { |k|
+            b = Badge.find k
             icon = b[:icon].include?(".") ? view_context.image_url(b[:icon]) : b[:icon]
             {
               name: b[:name],
@@ -124,7 +126,7 @@ module Api
       end
 
       def me
-        user = User.includes(:user_profile, :user_hackatime_data, :user_badges, :projects).find(current_user.id)
+        user = current_user.includes(:user_profile, :user_hackatime_data, :user_badges, :projects)
         projects_with_ship_events = user.projects.joins(:ship_events).distinct.count
         render json: {
           id: user.id,
@@ -138,8 +140,9 @@ module Api
           projects: user.projects.map { |p| { id: p.id, title: p.title, devlogs_count: p.devlogs_count, created_at: p.created_at } },
           coding_time_seconds: user.has_hackatime? ? user.all_time_coding_seconds : 0,
           coding_time_seconds_today: user.has_hackatime? ? user.daily_coding_seconds : 0,
-          balance: user.has_badge?(:pocket_watcher) ? (user.has_badge?(:offshore_bank_account) ? "Nice try, but they've covered their tracks a little better than that." : user.balance) : "You need to have a pocket watcher badge to view this.",
-          badges: user.badges.map { |b|
+          balance: user.balance,
+          badges: user.badges.map { |k|
+            b = Badge.find k
             icon = b[:icon].include?(".") ? view_context.image_url(b[:icon]) : b[:icon]
             {
               name: b[:name],

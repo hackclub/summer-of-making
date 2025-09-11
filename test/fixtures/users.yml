@@ -6,6 +6,7 @@
 #
 #  id                                   :bigint           not null, primary key
 #  avatar                               :string
+#  badges                               :string           default([]), is an Array
 #  display_name                         :string
 #  email                                :string
 #  first_name                           :string

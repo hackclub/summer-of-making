@@ -11,278 +11,185 @@
   container_classes ||= ''                 # Additional container classes
   content_margin ||= ''                    # Content margin/padding classes
   no_parchment ||= false                   # Whether to disable parchment styling
-  show_animation = @new_devlog_id == devlog.id && devlog.for_sinkening && !Flipper.enabled?(:disable_sinkening_visuals, current_user)
+  liked ||= nil                            # Whether current user has liked this devlog (avoids N+1)
+  show_animation = false
 %>
 
-  <%= render layout: "shared/card", locals: { classes: devlog.for_sinkening ? "origin-top-right #{show_animation ? 'devlog-card-rotate' : '-rotate-1 '}" : '' } do %>
-    <div class="ml-4 z-10 <%= context == 'explore' || context == 'project' ? '' : '' %> <%= container_classes %> <%= 'cursor-pointer' if show_project_navigation %>"
-         id="<%= dom_id(devlog) %>"
-         data-controller="modal devlog-card"
-         data-devlog-card-project-path-value="<%= project_path(devlog.project) if show_project_navigation && devlog.project %>"
-         data-devlog-card-show-project-navigation-value="<%= show_project_navigation %>"
-         data-devlog-card-max-length-value="200"
-         data-action="<%= 'click->devlog-card#navigateToProject' if show_project_navigation %>"
-         data-viewable-type="Devlog"
-         data-viewable-id="<%= devlog.id %>">
+<%= render layout: "shared/card" do %>
+  <div class="ml-4 z-10 <%= context == 'explore' || context == 'project' ? '' : '' %> <%= container_classes %> <%= 'cursor-pointer' if show_project_navigation %>"
+       id="<%= dom_id(devlog) %>"
+       data-controller="modal devlog-card"
+       data-devlog-card-project-path-value="<%= project_path(devlog.project) if show_project_navigation && devlog.project %>"
+       data-devlog-card-show-project-navigation-value="<%= show_project_navigation %>"
+       data-devlog-card-max-length-value="200"
+       data-action="<%= 'click->devlog-card#navigateToProject' if show_project_navigation %>"
+       data-viewable-type="Devlog"
+       data-viewable-id="<%= devlog.id %>">
 
-      <% if show_animation %>
-        <script>
-          document.addEventListener('DOMContentLoaded', function() {
-            const balloonElement = document.getElementById(<%== dom_id(devlog).to_json %>);
-            if (balloonElement) {
-              setTimeout(function() {
-                balloonElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
-              }, 200);
-            }
-          });
-        </script>
-      <% end %>
-
-      <div class="flex items-center justify-between mb-2 sm:mb-3">
-        <div class="flex items-center">
-          <% if devlog.user.avatar.present? %>
-            <img src="<%= devlog.user.avatar %>" alt="<%= devlog.user.display_name %>" class="w-8 h-8 sm:w-10 sm:h-10 rounded-full mr-2 sm:mr-3" loading="lazy">
-          <% end %>
-          <div>
-            <% if show_project_link && devlog.project %>
+    <div class="flex items-center justify-between mb-2 sm:mb-3">
+      <div class="flex items-center">
+        <% if devlog.user.avatar.present? %>
+          <img src="<%= devlog.user.avatar %>" alt="<%= devlog.user.display_name %>" class="w-8 h-8 sm:w-10 sm:h-10 rounded-full mr-2 sm:mr-3" loading="lazy">
+        <% end %>
+        <div>
+          <% if show_project_link && devlog.project %>
               <span class="text-base sm:text-lg 2xl:text-xl text-som-dark">
-                <%= render "shared/user_display_name", user: devlog.user %><% admin_user_visit(devlog.user) %> <span class="text-[#865c39]">worked on</span>
+                <%= render "shared/user_display_name", user: devlog.user %>
+                <% admin_user_visit(devlog.user) %> <span class="text-[#865c39]">worked on</span>
                 <a href="<%= project_path(devlog.project) %>" class="transition-colors duration-200 hover:underline decoration-1 underline-offset-2">
                   <%= devlog.project.title %>
                 </a>
               </span>
-            <% elsif show_project_link && !devlog.project %>
+          <% elsif show_project_link && !devlog.project %>
               <span class="text-base sm:text-lg 2xl:text-xl text-som-dark">
-                <%= render "shared/user_display_name", user: devlog.user %><% admin_user_visit(devlog.user) %> <span class="text-[#865c39]">worked on</span>
+                <%= render "shared/user_display_name", user: devlog.user %>
+                <% admin_user_visit(devlog.user) %> <span class="text-[#865c39]">worked on</span>
                 <span class="text-gray-500 italic">a deleted project</span>
               </span>
-            <% else %>
+          <% else %>
               <span class="text-base sm:text-lg 2xl:text-xl">
-                <%= render "shared/user_display_name", user: devlog.user %><% admin_user_visit(devlog.user) %>
+                <%= render "shared/user_display_name", user: devlog.user %>
+                <% admin_user_visit(devlog.user) %>
               </span>
-            <% end %>
+          <% end %>
 
-            <div class="text-som-detail">
-              <!-- Time info -->
-              <% if devlog.duration_seconds.present? && devlog.duration_seconds > 0 %>
+          <div class="text-som-detail">
+            <!-- Time info -->
+            <% if devlog.duration_seconds.present? && devlog.duration_seconds > 0 %>
                 <span>
                   <%= format_seconds devlog.duration_seconds %>
                 </span>
-                <span> • </span>
-              <% end %>
+              <span> • </span>
+            <% end %>
 
-              <!-- Time ago -->
-              <span>
+            <!-- Time ago -->
+            <span>
               <%= link_to "#{time_ago_in_words(devlog.created_at)} ago",
-                  project_path(devlog.project_id, anchor: dom_id(devlog)),
-              target: "_blank",
-              class: "hover:underline hover:text-nice-blue transition-colors duration-200" %>
-              </span>
+                          project_path(devlog.project_id, anchor: dom_id(devlog)),
+                          target: "_blank",
+                          class: "hover:underline hover:text-nice-blue transition-colors duration-200" %>
+            </span>
 
-              <% if show_stonks && devlog.project&.stonks&.count %>
+            <% if show_stonks && devlog.project&.stonks&.count %>
                 <span>
                   • <%= pluralize(devlog.project.stonks.count, 'stonker') %>
                 </span>
-              <% end %>
-
-              <!-- <span> • </span> -->
-              <%# position = devlog.project.devlogs.where("created_at < ?", devlog.created_at).count + 1 %>
-              <!-- <span><%# position.ordinalize %> devlog</span> -->
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div class="<%= content_margin.present? ? content_margin : '' %>">
-        <!-- Update content -->
-        <div data-devlog-card-target="content" class="prose max-w-[32em] text-som-dark mb-2 sm:mb-3 text-base sm:text-lg 2xl:text-xl break-words overflow-wrap-anywhere">
-          <%= devlog.formatted_text %>
-        </div>
-
-        <!-- Attachments -->
-        <% if devlog.file.attached? %>
-          <div class="mt-2 sm:mt-3">
-            <% if devlog.file.try(:image?) %>
-              <%= image_tag devlog.file, alt: "Update attachment", class: "w-full object-contain cursor-pointer hover:opacity-90 transition-opacity rounded-lg max-h-96", data: { action: "click->image-viewer#open" }, loading: "lazy" %>
-            <% elsif devlog.file.try(:video?) %>
-              <%
-                video_autoplay = context == 'explore'
-                video_classes = "w-full object-contain rounded-lg cursor-pointer video-autoplay max-h-96"
-                video_attributes = {
-                  playsinline: true,
-                  preload: video_autoplay ? "metadata" : "none"
-                }
-
-                if video_autoplay
-                  video_attributes.merge!({
-                    muted: true,
-                    loop: true,
-                    autoplay: true
-                  })
-                else
-                  video_attributes[:controls] = true
-                end
-              %>
-              <div class="w-full flex items-center justify-center bg-black rounded-lg relative max-h-96"
-                   data-controller="video"
-                   data-video-context-value="<%= context %>"
-                   data-video-autoplay-value="<%= video_autoplay %>">
-                <%= video_tag url_for(devlog.file),
-                    class: video_classes,
-                    data: { video_target: "video" },
-                    **video_attributes do %>
-                  Your browser does not support the video tag.
-                <% end %>
-                <% if video_autoplay %>
-                  <div class="absolute bottom-2 right-2 bg-black bg-opacity-75 text-white px-2 py-1 rounded text-xs video-sound-hint pointer-events-none">
-                    🔇 Click for sound
-                  </div>
-                <% end %>
-              </div>
-            <% elsif devlog.file.try(:audio?) %>
-              <div class="w-full flex items-center justify-center py-4">
-                <%= audio_tag url_for(devlog.file), class: "w-full max-w-md", controls: true, controlslist: "nodownload" do %>
-                  Your browser does not support the audio tag.
-                <% end %>
-              </div>
             <% end %>
+
+            <!-- <span> • </span> -->
+            <%# position = devlog.project.devlogs.where("created_at < ?", devlog.created_at).count + 1 %>
+            <!-- <span><%# position.ordinalize %> devlog</span> -->
           </div>
-        <% end %>
-
-        <!-- Action buttons -->
-        <div class="mt-3 sm:mt-4 flex flex-row items-center justify-left gap-x-4 max-w-prose w-full text-som-dark">
-          <!-- Like button -->
-          <% if show_likes && user_signed_in? %>
-            <% liked = defined?(@liked_devlog_ids) ? @liked_devlog_ids.include?(devlog.id) : nil %>
-            <%= render "likes/button", likeable: devlog, liked: liked %>
-          <% end %>
-
-          <!-- Comment button -->
-          <% if show_comment_modal && user_signed_in? %>
-            <%= render "comments/button", devlog: devlog %>
-          <% end %>
-
-          <!-- More button -->
-          <% if user_signed_in? && current_user == devlog.user %>
-            <div class="relative flex items-center justify-start min-w-[2.5rem]" data-controller="dropdown">
-              <button data-action="click->dropdown#toggle" class="hover:text-nice-blue transition-colors duration-200 flex items-center justify-start w-full">
-                <%= inline_svg_tag "more.svg", class: "w-5 h-5 sm:w-6 sm:h-6" %>
-              </button>
-              <div data-dropdown-target="menu" class="absolute right-0 top-full mt-1 w-32 bg-[#F3ECD8] rounded-2xl border-4 border-[#E4DCC6] shadow-lg py-1 z-50 hidden">
-                <% unless defined?(@project) && @project&.is_shipped? %>
-                  <button data-action="click->modal#open" data-modal-id="<%= devlog.id %>" data-modal-type="edit" class="w-full px-4 py-2 text-left text-sm text-nice-blue hover:text-nice-blue transition-colors duration-200 cursor-pointer">
-                    Edit
-                  </button>
-                  <% if devlog.project %>
-                    <%= button_to "Delete", project_devlog_path(devlog.project, devlog),
-                        method: :delete,
-                        class: "w-full px-4 py-2 text-left text-sm text-vintage-red hover:bg-saddle-taupe/10 transition-colors duration-200 cursor-pointer",
-                        data: { controller: "delete-confirmation", action: "click->delete-confirmation#confirm" } %>
-                  <% else %>
-                    <%= button_to "Delete", devlog_path(devlog),
-                        method: :delete,
-                        class: "w-full px-4 py-2 text-left text-sm text-vintage-red hover:bg-saddle-taupe/10 transition-colors duration-200 cursor-pointer",
-                        data: { controller: "delete-confirmation", action: "click->delete-confirmation#confirm" } %>
-                  <% end %>
-                <% end %>
-              </div>
-            </div>
-          <% end %>
         </div>
-        <%= render "admin/inspector", record: devlog, always_inspect: true, show_in_impersonate: true %>
       </div>
-
-      <!-- Inline comments -->
-      <% if show_comments_inline %>
-        <div id="comments-<%= devlog.id %>" class="mt-4 ml-4 sm:ml-6 space-y-3">
-          <%= render devlog.comments %>
-        </div>
-      <% end %>
     </div>
 
-    <% if devlog.for_sinkening %>
-        <%# Show balloon for sinkening devlogs %>
-        <%
-          intensity = SinkeningSetting.current.intensity
-          adjusted_intensity = intensity * intensity
-          rotation_intensity = 1 + ((Flipper.enabled?(:sinkening, current_user) && !Flipper.enabled?(:disable_sinkening_visuals, current_user)) ? 5 * adjusted_intensity + 1 : 0)
-          random_delay = -rand(0..6000) # Random delay between 0-6000ms (full animation cycle)
-        %>
-        <div class="absolute top-0 right-0 p-2 z-0 origin-bottom"
-        style="transform: rotate(<%= rotation_intensity %>deg) translateY(calc(-100% + <%= context == 'explore' ? '2' : '2' %>rem)) translateX(<%= context == 'explore' ? '1' : '1' %>rem); color: <%= devlog.user.user_profile&.balloon_color || '#ff6b6b' %>">
-          <div class="devlog-card-rotate-counter">
-            <%= inline_svg "balloon.svg", height: "10rem", width: "auto",
-            class: show_animation ? "devlog-balloon-grow" : "devlog-balloon",
-            style: "animation-delay: #{show_animation ? '2000ms, 8000' : random_delay}ms;" %>
-          </div>
+    <div class="<%= content_margin.present? ? content_margin : '' %>">
+      <!-- Update content -->
+      <div data-devlog-card-target="content" class="prose max-w-[32em] text-som-dark mb-2 sm:mb-3 text-base sm:text-lg 2xl:text-xl break-words overflow-wrap-anywhere">
+        <%= devlog.formatted_text %>
+      </div>
+
+      <!-- Attachments -->
+      <% if devlog.file.attached? %>
+        <div class="mt-2 sm:mt-3">
+          <% if devlog.file.try(:image?) %>
+            <%= image_tag devlog.file, alt: "Update attachment", class: "w-full object-contain cursor-pointer hover:opacity-90 transition-opacity rounded-lg max-h-96", data: { action: "click->image-viewer#open" }, loading: "lazy" %>
+          <% elsif devlog.file.try(:video?) %>
+            <%
+              video_autoplay = context == 'explore'
+              video_classes = "w-full object-contain rounded-lg cursor-pointer video-autoplay max-h-96"
+              video_attributes = {
+                playsinline: true,
+                preload: video_autoplay ? "metadata" : "none"
+              }
+
+              if video_autoplay
+                video_attributes.merge!({
+                                          muted: true,
+                                          loop: true,
+                                          autoplay: true
+                                        })
+              else
+                video_attributes[:controls] = true
+              end
+            %>
+            <div class="w-full flex items-center justify-center bg-black rounded-lg relative max-h-96"
+                 data-controller="video"
+                 data-video-context-value="<%= context %>"
+                 data-video-autoplay-value="<%= video_autoplay %>">
+              <%= video_tag url_for(devlog.file),
+                            class: video_classes,
+                            data: { video_target: "video" },
+                            **video_attributes do %>
+                Your browser does not support the video tag.
+              <% end %>
+              <% if video_autoplay %>
+                <div class="absolute bottom-2 right-2 bg-black bg-opacity-75 text-white px-2 py-1 rounded text-xs video-sound-hint pointer-events-none">
+                  🔇 Click for sound
+                </div>
+              <% end %>
+            </div>
+          <% elsif devlog.file.try(:audio?) %>
+            <div class="w-full flex items-center justify-center py-4">
+              <%= audio_tag url_for(devlog.file), class: "w-full max-w-md", controls: true, controlslist: "nodownload" do %>
+                Your browser does not support the audio tag.
+              <% end %>
+            </div>
+          <% end %>
         </div>
-
-        <div class="absolute -inset-0 rounded-lg"
-        style="background: radial-gradient(circle at 62.814829% 45.688167%, rgb(246, 219, 186), rgb(230, 212, 190))"></div>
-
-        <style>
-          .devlog-balloon {
-            transform-origin: bottom;
-            animation: devlog-balloon-idle 6s ease-in-out infinite;
-          }
-
-          @keyframes devlog-balloon-idle {
-            0%, 100%% {
-              transform: rotate(3deg);
-            }
-            50% {
-              transform: rotate(-3deg);
-            }
-          }
-
-          .devlog-balloon-grow {
-            transform-origin: bottom;
-            animation: devlog-balloon-grow 6s linear forwards, devlog-balloon-idle 6s ease-in-out 8s infinite;
-          }
-
-          @keyframes devlog-balloon-grow {
-            0% {
-              transform: translateY(20%) scale(0) rotate(0deg);;
-            }
-            70% {
-              transform: translateY(30%) scale(1) rotate(1.5deg);
-            }
-            100%{
-              transform: translateY(0) scale(1) rotate(3deg);
-            }
-          }
-
-          .devlog-card-rotate {
-            transform-origin: top right;
-            animation: devlog-card-rotate 8.5s cubic-bezier(0.64, 0, 0.78, 0) forwards
-          }
-
-          @keyframes devlog-card-rotate {
-            0%, 88.2% {
-              transform: rotate(0deg);
-            }
-            100% {
-              transform: rotate(-1deg);
-            }
-          }
-
-          .devlog-card-rotate-counter {
-            transform-origin: bottom;
-            animation: devlog-card-rotate-counter 8.5s cubic-bezier(0.64, 0, 0.78, 0) forwards
-          }
-
-          @keyframes devlog-card-rotate-counter {
-            0%, 88.2% {
-              transform: rotate(0deg);
-            }
-            100% {
-              transform: rotate(1deg);
-            }
-          }
-        </style>
       <% end %>
 
-  <% end %>
+      <!-- Action buttons -->
+      <div class="mt-3 sm:mt-4 flex flex-row items-center justify-left gap-x-4 max-w-prose w-full text-som-dark">
+        <!-- Like button -->
+        <% if show_likes && user_signed_in? %>
+          <%= render "likes/button", likeable: devlog, liked: liked %>
+        <% end %>
+
+        <!-- Comment button -->
+        <% if show_comment_modal && user_signed_in? %>
+          <%= render "comments/button", devlog: devlog %>
+        <% end %>
+
+        <!-- More button -->
+        <% if user_signed_in? && current_user == devlog.user %>
+          <div class="relative flex items-center justify-start min-w-[2.5rem]" data-controller="dropdown">
+            <button data-action="click->dropdown#toggle" class="hover:text-nice-blue transition-colors duration-200 flex items-center justify-start w-full">
+              <%= inline_svg_tag "more.svg", class: "w-5 h-5 sm:w-6 sm:h-6" %>
+            </button>
+            <div data-dropdown-target="menu" class="absolute right-0 top-full mt-1 w-32 bg-[#F3ECD8] rounded-2xl border-4 border-[#E4DCC6] shadow-lg py-1 z-50 hidden">
+              <% unless defined?(@project) && @project&.is_shipped? %>
+                <button data-action="click->modal#open" data-modal-id="<%= devlog.id %>" data-modal-type="edit" class="w-full px-4 py-2 text-left text-sm text-nice-blue hover:text-nice-blue transition-colors duration-200 cursor-pointer">
+                  Edit
+                </button>
+                <% if devlog.project %>
+                  <%= button_to "Delete", project_devlog_path(devlog.project, devlog),
+                                method: :delete,
+                                class: "w-full px-4 py-2 text-left text-sm text-vintage-red hover:bg-saddle-taupe/10 transition-colors duration-200 cursor-pointer",
+                                data: { controller: "delete-confirmation", action: "click->delete-confirmation#confirm" } %>
+                <% else %>
+                  <%= button_to "Delete", devlog_path(devlog),
+                                method: :delete,
+                                class: "w-full px-4 py-2 text-left text-sm text-vintage-red hover:bg-saddle-taupe/10 transition-colors duration-200 cursor-pointer",
+                                data: { controller: "delete-confirmation", action: "click->delete-confirmation#confirm" } %>
+                <% end %>
+              <% end %>
+            </div>
+          </div>
+        <% end %>
+      </div>
+      <%= render "admin/inspector", record: devlog, always_inspect: true, show_in_impersonate: true %>
+    </div>
+
+    <!-- Inline comments -->
+    <% if show_comments_inline %>
+      <div id="comments-<%= devlog.id %>" class="mt-4 ml-4 sm:ml-6 space-y-3">
+        <%= render devlog.comments %>
+      </div>
+    <% end %>
+  </div>
+<% end %>
 
 <!-- Render comment modal based on context -->
 <% if show_comment_modal || context == 'project' %>

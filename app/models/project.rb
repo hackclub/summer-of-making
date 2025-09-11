@@ -86,6 +86,7 @@ class Project < ApplicationRecord
 
   has_many :timer_sessions
   after_commit :bust_user_projects_devlogs_cache
+  after_update :invalidate_map_cache_if_added_to_map
 
   coordinate_min = 0
   coordinate_max = 100
@@ -689,6 +690,15 @@ class Project < ApplicationRecord
 
   def bust_user_projects_devlogs_cache
     Rails.cache.delete(User.project_devlog_cache_key(user_id)) if user_id
+  end
+
+  def invalidate_map_cache_if_added_to_map
+    # Invalidate cache if project was added to map (x,y went from nil to values)
+    if (saved_change_to_x? && x_before_last_save.nil? && x.present?) ||
+       (saved_change_to_y? && y_before_last_save.nil? && y.present?)
+      Rails.cache.delete(Cache::MapPointsJob::CACHE_KEY)
+      Cache::MapPointsJob.perform_later
+    end
   end
 
   def link_check

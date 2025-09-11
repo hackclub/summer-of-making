@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_09_09_183009) do
+ActiveRecord::Schema[8.0].define(version: 2025_09_11_002216) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -866,6 +866,7 @@ ActiveRecord::Schema[8.0].define(version: 2025_09_09_183009) do
     t.jsonb "shenanigans_state", default: {}
     t.boolean "is_banned", default: false
     t.boolean "fraud_team_member", default: false, null: false
+    t.string "badges", default: [], array: true
   end
 
   create_table "versions", force: :cascade do |t|

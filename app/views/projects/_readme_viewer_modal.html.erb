@@ -1,5 +1,5 @@
 <!-- Readme Viewer Modal -->
-<div id="readme-modal-<%= project.id %>" data-controller="modal readme-viewer" data-readme-viewer-project-id-value="<%= project.id %>" class="hidden fixed inset-0 z-50 overflow-auto bg-black/30 flex items-center justify-center p-2 md:p-4" data-action="click->modal#clickOutsideHandler">
+<div id="readme-modal-<%= project.id %>" data-controller="modal" class="hidden fixed inset-0 z-50 overflow-auto bg-black/30 flex items-center justify-center p-2 md:p-4" data-action="click->modal#clickOutsideHandler">
     <div class="bg-[#F3ECD8] rounded-2xl border-4 border-[#E4DCC6] w-full max-w-4xl mx-2 md:mx-auto relative max-h-[90vh] flex flex-col" data-modal-target="container">
         <div class="p-3 md:p-4 border-b border-saddle-taupe border-opacity-30 flex-shrink-0">
             <div class="flex justify-between items-center">
@@ -11,9 +11,13 @@
         </div>
 
         <div class="p-4 md:p-6 overflow-y-auto flex-grow">
-            <div data-readme-viewer-target="content" class="text-sm md:text-base bg-white p-4 rounded-lg border border-saddle-taupe border-opacity-30">
-                Loading README...
-            </div>
+            <%= turbo_frame_tag "readme-content-#{project.id}",
+                src: project_readme_path(project),
+                loading: "lazy" do %>
+                <div class="flex justify-center items-center h-64">
+                    <div class="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-forest"></div>
+                </div>
+            <% end %>
         </div>
   </div>
 </div>

@@ -26,11 +26,13 @@ class UserBadge < ApplicationRecord
   validates :earned_at, presence: true
   validate :badge_key_exists
 
-  def badge_definition
-    Badge.find(badge_key)
-  end
+  after_commit :update_user_badges
+
+  def badge_definition = Badge.find(badge_key)
 
   private
+
+  def update_user_badges = user.update_cached_badges!
 
   def badge_key_exists
     errors.add(:badge_key, "is not a valid badge") unless Badge.exists?(badge_key)

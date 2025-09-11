@@ -21,9 +21,7 @@ class LandingController < ApplicationController
     else
       ahoy.track "tutorial_step_landing_first_visit"
 
-      @prizes = ShopItem.includes(image_attachment: { blob: :variant_records })
-                        .shown_in_carousel
-                        .order(:ticket_cost)
+      @prizes = Cache::CarouselPrizesJob.perform_now
     end
   end
 

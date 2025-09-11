@@ -76,9 +76,7 @@
     **content_attr.except(:class)
   ) do %>
     <% if local_assigns[:icon] %>
-      <% cache ["shared/link/icon", icon, icon_size, icon_class] do %>
-        <%= inline_svg "icons/#{icon}.svg", class: icon_class %>
-      <% end %>
+      <%= inline_svg "icons/#{icon}.svg", class: icon_class %>
     <% end %>
 
     <%= tag.span(

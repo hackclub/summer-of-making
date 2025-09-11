@@ -65,7 +65,8 @@ module Api
           },
           coding_time_seconds: user.has_hackatime? ? user.all_time_coding_seconds : 0,
           coding_time_seconds_today: user.has_hackatime? ? user.daily_coding_seconds : 0,
-          badges: user.badges.map { |b|
+          badges: user.badges.map { |k|
+            b = Badge.find k
             icon = b[:icon].include?(".") ? view_context.image_url(b[:icon]) : b[:icon]
             { name: b[:name], text: b[:flavor_text], icon: icon }
           },

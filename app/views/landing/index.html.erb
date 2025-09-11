@@ -186,17 +186,17 @@
                 <div class="parchment-prize-card p-3 md:p-3 sm:p-2 text-center transition-all duration-300 hover:shadow-xl hover:-translate-y-2 hover:scale-105" style="animation-delay: <%= (index * 0.3) %>s;">
                   <div class="parchment-texture"></div>
                     <div class="parchment-prize-image w-full h-full flex items-center justify-center mb-2 rounded-xl">
-                    <% if prize.image.present? %>
-                      <img src="<%= url_for(prize.image) %>" alt="<%= prize.name %>" class="w-full h-full object-cover rounded-xl" loading="lazy">
+                    <% if prize[:image_url].present? %>
+                      <img src="<%= prize[:image_url] %>" alt="<%= prize[:name] %>" class="w-full h-full object-cover rounded-xl" loading="lazy">
                     <% else %>
                       <%= image_tag "clubhuman.png", alt: "Prize", class: "w-full h-full object-cover rounded-xl" %>
                     <% end %>
                   </div>
                   <h3 class="parchment-prize-name font-['Fredoka'] font-semibold text-base md:text-base sm:text-sm leading-tight m-0">
-                    <%= prize.name %>
+                    <%= prize[:name] %>
                   </h3>
                   <p class="parchment-prize-time text-xs mt-1">
-                    <%= prize.hours_estimated >= 500 ? ">500 hours" : "~#{prize.hours_estimated} #{"hour".pluralize(prize.hours_estimated)}" %>
+                    <%= prize[:hours_estimated] >= 500 ? ">500 hours" : "~#{prize[:hours_estimated]} #{"hour".pluralize(prize[:hours_estimated])}" %>
                   </p>
                 </div>
               </div>
@@ -210,17 +210,17 @@
               <div class="carousel-slide flex-none w-40 md:w-44 sm:w-36" style="transform: <%= random_carousel_transform %>; animation-delay: <%= (index * 0.4) %>s;">
                 <div class="parchment-prize-card p-3 md:p-3 sm:p-2 text-center transition-all duration-300 hover:shadow-xl hover:-translate-y-2 hover:scale-105" style="animation-delay: <%= (index * 0.4) %>s;">
                   <div class="parchment-prize-image w-full h-full flex items-center justify-center mb-2 rounded-xl">
-                    <% if prize.image.present? %>
-                      <img src="<%= url_for(prize.image) %>" alt="<%= prize.name %>" class="w-full h-full object-cover rounded-xl" loading="lazy">
+                    <% if prize[:image_url].present? %>
+                      <img src="<%= prize[:image_url] %>" alt="<%= prize[:name] %>" class="w-full h-full object-cover rounded-xl" loading="lazy">
                     <% else %>
                       <%= image_tag "clubhuman.png", alt: "Prize", class: "w-full h-full object-cover rounded-xl" %>
                     <% end %>
                   </div>
                   <h3 class="parchment-prize-name font-['Fredoka'] font-semibold text-base md:text-base sm:text-sm leading-tight m-0">
-                    <%= prize.name %>
+                    <%= prize[:name] %>
                   </h3>
                   <p class="parchment-prize-time text-xs mt-1">
-                    <%= prize.hours_estimated >= 500 ? ">500 hours" : "~#{prize.hours_estimated} #{"hour".pluralize(prize.hours_estimated)}" %>
+                    <%= prize[:hours_estimated] >= 500 ? ">500 hours" : "~#{prize[:hours_estimated]} #{"hour".pluralize(prize[:hours_estimated])}" %>
                   </p>
                 </div>
               </div>

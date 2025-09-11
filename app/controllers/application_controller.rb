@@ -7,7 +7,7 @@ class ApplicationController < ActionController::Base
 
   before_action :set_paper_trail_whodunnit
 
-  # before_action :try_rack_mini_profiler_enable
+  before_action :try_rack_mini_profiler_enable
 
   # Only allow modern browsers supporting webp images, web push, badges, import maps, CSS nesting, and CSS :has.
   # allow_browser versions: :modern
@@ -22,10 +22,15 @@ class ApplicationController < ActionController::Base
   before_action :fetch_hackatime_data_if_needed
   after_action :track_page_view
 
-  helper_method :current_user, :user_signed_in?, :current_verification_status, :current_impersonator, :impersonating?
+  helper_method :current_user, :user_signed_in?, :current_verification_status, :current_impersonator, :impersonating?, :current_user_has_badge?
 
   def current_user
     @current_user ||= User.find_by(id: session[:user_id]) if session[:user_id]
+  end
+
+  def current_user_has_badge?(badge)
+    @current_user_badges ||= current_user&.badges
+    @current_user_badges&.include?(badge)
   end
 
   def current_impersonator
@@ -69,7 +74,7 @@ class ApplicationController < ActionController::Base
   end
 
   def require_admin!
-    redirect_to "/" unless current_user && current_user.is_admin?
+    redirect_to "/" unless current_user&.is_admin?
   end
 
   def require_fraud_team!
@@ -77,9 +82,21 @@ class ApplicationController < ActionController::Base
   end
 
   def user_for_paper_trail = current_impersonator&.id || current_user&.id
+
   def info_for_paper_trail = { extra_data: { impersonating: impersonating?, pretending_to_be: current_impersonator && current_user }.compact_blank }
 
   private
+
+  def preload_current_user_associations
+    return unless user_signed_in?
+
+    %w[user_badges payouts tutorial_progress].each do |association|
+      next unless current_user.respond_to?(association) && current_user.class.reflect_on_association(association)
+      next if current_user.association(association).loaded?
+
+      current_user.association(association).load_target
+    end
+  end
 
   def try_rack_mini_profiler_enable
     if current_user && current_user.is_admin?
@@ -88,7 +105,12 @@ class ApplicationController < ActionController::Base
   end
 
   def fetch_hackatime_data_if_needed
-    return if !user_signed_in? || current_user.hackatime_projects.any?
+    return if session[:skip_hackatime_data] || !user_signed_in?
+
+    if current_user.hackatime_projects.any?
+      session[:skip_hackatime_data] = true
+      return
+    end
 
     Rails.cache.fetch("hackatime_fetch_#{current_user.id}", expires_in: 5.seconds) do
       current_user.refresh_hackatime_data_now

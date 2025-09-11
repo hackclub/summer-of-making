@@ -254,8 +254,8 @@ Rails.application.routes.draw do
   get "check_github_readme", to: "projects#check_github_readme"
   get "campfire", to: "campfire#index"
   get "campfire/hackatime_status", to: "campfire#hackatime_status"
+
   get "/map", to: "map#index", as: :map
-  get "/map/points", to: "map#points", as: :map_points
 
   # Global timer session check - must be before projects resource
   get "timer_sessions/active", to: "timer_sessions#global_active"
@@ -272,6 +272,9 @@ Rails.application.routes.draw do
     post "follow", to: "projects/follows#create", as: :follow
     delete "unfollow", to: "projects/follows#destroy", as: :unfollow
 
+    # Projects::ReadmesController
+    get "readme", to: "projects/readmes#show", as: :readme
+
     # Projects::RecertificationsController
     resource :recertification, only: [ :create ], controller: "projects/recertifications"
 
@@ -283,7 +286,6 @@ Rails.application.routes.draw do
       delete :unstake_stonks
       patch :update_coordinates
       delete :unplace_coordinates
-      get :render_readme
       # patch :recover
       get "devlog/:devlog_id", action: :show, as: :devlog
     end
@@ -452,7 +454,7 @@ Rails.application.routes.draw do
 
     constraints AdminConstraint do
       mount MissionControl::Jobs::Engine, at: "jobs"
-      mount AhoyCaptain::Engine, at: "ahoy_captain"
+      # mount AhoyCaptain::Engine, at: "ahoy_captain"
       mount Flipper::UI.app(Flipper), at: "flipper"
       # mount_avo
       resources :view_analytics, only: [ :index ]

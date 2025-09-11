@@ -4,6 +4,7 @@ class UsersController < ApplicationController
   before_action :authenticate_api_key, only: [ :check_user ]
   before_action :authenticate_user!,
                 only: %i[hackatime_auth_redirect identity_vault_callback]
+  before_action :preload_current_user_associations, only: [ :show ]
   before_action :set_user, only: [ :show ]
 
   def show
@@ -13,12 +14,40 @@ class UsersController < ApplicationController
     end
     @user.user_profile ||= @user.build_user_profile
 
-    # All projects for the sidebar
-    @all_projects = @user.projects.includes(:user, :banner_attachment, :ship_events)
-                         .order(created_at: :desc)
+    # All projects for the sidebar - use preloaded data and sort in memory
+    @all_projects = @user.projects.sort_by(&:created_at).reverse
 
     # Get all activities from cache
     @activities = get_cached_activities
+
+    # Preload liked devlog IDs for the current user to avoid N+1 queries in like buttons
+    if user_signed_in?
+      devlog_ids = @activities.select { |a| a[:type] == :devlog }.map { |a| a[:item].id }
+      @liked_devlog_ids = current_user.likes.where(likeable_type: "Devlog", likeable_id: devlog_ids).pluck(:likeable_id).to_set
+    end
+
+    # Precompute stats using preloaded data - no additional DB queries needed
+    @stats = {
+      projects_count: @user.projects.size,
+      devlogs_count: @user.devlogs.size,
+      votes_count: @user.votes.count { |v| v.status == "active" },  # Use preloaded data with scope logic
+      ships_count: @user.projects.count { |p| p.ship_events.any? }
+    }
+
+    # Precompute project metrics to avoid N+1 in views
+    @project_devlog_counts = {}
+    @project_follower_counts = {}
+    @project_shipped_status = {}
+
+    @user.projects.each do |project|
+      @project_devlog_counts[project.id] = project.devlogs.size
+      @project_follower_counts[project.id] = project.followers.size
+      @project_shipped_status[project.id] = project.ship_events.any?
+    end
+
+    # Precompute badges to avoid N+1 queries in the view
+    @user_badges = @user.badges
+
 
     respond_to do |format|
       format.html
@@ -145,16 +174,17 @@ class UsersController < ApplicationController
 
   def get_cached_activities
     # Create cache key based on user and their content timestamps
-    cache_key = "user_activities_#{@user.id}_#{@user.updated_at.to_i}_#{@user.projects.maximum(:updated_at)&.to_i}_#{@user.devlogs.maximum(:updated_at)&.to_i}"
+    # Use preloaded data for timestamp calculations to avoid DB hits
+    projects_max = @user.projects.map(&:updated_at).max
+    devlogs_max = @user.devlogs.map(&:updated_at).max
+    cache_key = "user_activities_#{@user.id}_#{@user.updated_at.to_i}_#{projects_max&.to_i}_#{devlogs_max&.to_i}"
 
     Rails.cache.fetch(cache_key, expires_in: 1.hour) do
-      # Get user's devlogs and projects with includes
-      devlogs = @user.devlogs.includes(:project, :user, :comments, :likes, :file_attachment)
-                            .where.not(project: nil)
-                            .order(created_at: :desc)
+      # Use preloaded data instead of making new DB queries
+      devlogs = @user.devlogs.select { |d| d.project.present? }
+                             .sort_by(&:created_at).reverse
 
-      projects = @user.projects.includes(:user, :banner_attachment)
-                             .order(created_at: :desc)
+      projects = @user.projects.sort_by(&:created_at).reverse
 
       # Combine and sort chronologically
       combined_activities = []
@@ -166,10 +196,12 @@ class UsersController < ApplicationController
       projects.each { |project| combined_activities << { type: :project, item: project, created_at: project.created_at } }
 
       # Add shipwright advice for this user's projects
-      advices = ShipwrightAdvice.includes(:project, :ship_certification)
-                                .joins(:project)
-                                .where(projects: { user: @user })
-                                .order(created_at: :desc)
+      advices = ShipwrightAdvice.includes(
+        :project,
+        ship_certification: [ :reviewer ]
+      ).joins(:project)
+       .where(projects: { user: @user })
+       .order(created_at: :desc)
 
       advices.each { |advice| combined_activities << { type: :shipwright_advice, item: advice, created_at: advice.created_at } }
 
@@ -192,10 +224,30 @@ class UsersController < ApplicationController
 
   def set_user
     @user = if params[:id] == "me"
-      current_user
+      # For current user, ensure user_badges is loaded
+      current_user.tap { |user| user.user_badges.load unless user.association(:user_badges).loaded? }
     else
-      scope = User.includes(:user_profile, :user_badges)
-      scope = scope.left_joins(:user_profile).where(user_profiles: { hide_from_logged_out: [ false, nil ] }) unless user_signed_in?
+      # Preload associations needed for the view and cached activities
+      scope = User.preload(
+        :user_profile,    # Used for bio, custom CSS checks
+        :user_badges,     # Used for @user_badges and has_badge? checks
+        :payouts,         # Used for balance calculations
+        :user_hackatime_data,  # Used for has_hackatime? and coding time stats
+        { votes: [] },    # Used for vote count stats
+        { devlogs: [      # Used in activities feed - need project and user for devlog cards
+          :project,       # devlog.project.present? check and devlog card project info
+          { user: [ :user_badges ] },  # devlog.user.avatar, display_name, and badge checks
+          file_attachment: [ :blob ] # devlog.file.attached? and file rendering
+        ] },
+        { projects: [     # Used in @all_projects sidebar and activities
+          :devlogs,       # For devlog count in sidebar
+          :ship_events,   # For "Shipped" status and ships count
+          :followers,     # For follower count in sidebar
+          { user: [ :user_badges ] },  # project.user.avatar, display_name, and badge checks
+          banner_attachment: [ :blob ]  # For project thumbnails
+        ] }
+      )
+      scope = scope.where(user_profiles: { hide_from_logged_out: [ false, nil ] }) unless user_signed_in?
       scope.find(params[:id])
     end
   end
