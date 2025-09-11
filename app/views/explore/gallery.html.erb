@@ -1,8 +1,8 @@
 <div>
   <%= render "explore/nav" %>
 
-  <div class="px-4 md:px-8 max-w-7xl mx-auto">
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-8" id="projects-grid">
+  <div class="px-4 md:px-8 max-w-8xl mx-auto">
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4 gap-6 lg:gap-8 2xl:gap-10" id="projects-grid">
       <% if @projects&.any? %>
         <% @projects.each do |project| %>
           <%= render "projects/project_preview", project: project %>

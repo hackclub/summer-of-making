@@ -262,6 +262,10 @@ textarea.som-horizontal-input[placeholder=" "] {
   }
 }
 
+.som-button-rounded {
+  padding: .5em 1em;
+}
+
 .som-button-primary {
   --bg-color: #FFE8CD;
   --bg-disabled-color: #b8a795;
