@@ -4,6 +4,7 @@ class ApplicationController < ActionController::Base
   include Pagy::Backend
   include PublicActivity::StoreController
   include Pundit::Authorization
+  include MemoryMonitor
 
   before_action :set_paper_trail_whodunnit
 
