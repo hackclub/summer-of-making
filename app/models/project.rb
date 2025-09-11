@@ -146,6 +146,11 @@ class Project < ApplicationRecord
       .where(is_deleted: false)
   }
 
+  scope :for_gallery, -> {
+    includes(:user, banner_attachment: :blob)
+      .order(devlogs_count: :desc, created_at: :desc)
+  }
+
   has_one :ysws_review_submission, class_name: "YswsReview::Submission", dependent: :destroy
 
   validates :title, presence: true, length: { maximum: 200 }

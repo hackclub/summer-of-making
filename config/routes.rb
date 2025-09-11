@@ -245,7 +245,10 @@ Rails.application.routes.draw do
   # Dashboard
   # get "dashboard", to: "dashboard#index"
 
-  get "explore", to: "projects#index"
+  get "explore", to: "explore#index", as: :explore
+  get "explore/following", to: "explore#following", as: :explore_following
+  get "explore/gallery", to: "explore#gallery", as: :explore_gallery
+
   get "my_projects", to: "projects#my_projects"
   post "check_link", to: "projects#check_link"
   get "check_github_readme", to: "projects#check_github_readme"
