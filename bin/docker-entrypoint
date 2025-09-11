@@ -11,6 +11,21 @@ if [ "${@: -2:1}" == "./bin/rails" ] && [ "${@: -1:1}" == "server" ]; then
   ./bin/rails db:prepare
   
   ./bin/rails solid_queue:start &
+  
+  # Start memory leak debugging if enabled
+  if [ "${MEMORY_DEBUG_ENABLED}" = "true" ]; then
+    echo "[MLD] Starting memory leak debugging cron..."
+    
+    # Start cron daemon in background
+    cron -f &
+    echo "[MLD] Cron daemon started in background (PID $!)"
+    
+    # Install crontab if exists
+    if [ -f /rails/config/crontab ]; then
+      crontab /rails/config/crontab
+      echo "[MLD] Crontab installed - memory checks will run every 5 minutes"
+    fi
+  fi
 fi
 
 exec "${@}"
