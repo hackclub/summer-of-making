@@ -38,7 +38,8 @@ module Shop
     end
 
     def price_for_region(region_code)
-      return apply_sale_discount(ticket_cost) unless REGION_CODES.include?(region_code.upcase)
+      # bro actually sold the bag
+      region_code = "XX" unless REGION_CODES.include?(region_code.upcase)
 
       base_price = nil
       # If item is enabled for this region, use regional pricing
