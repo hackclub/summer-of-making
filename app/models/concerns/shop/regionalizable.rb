@@ -60,7 +60,7 @@ module Shop
     private
 
     def apply_sale_discount(price)
-      return price unless sale_percentage.present? && sale_percentage > 0
+      return price unless sale_percentage.present? && sale_percentage > 0 && sale_percentage <= 100
 
       discount_multiplier = (100 - sale_percentage) / 100.0
       discounted_price = price * discount_multiplier
