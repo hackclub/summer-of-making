@@ -18,8 +18,11 @@ class ShopItemsController < ApplicationController
   all_shop_items = Rails.cache.fetch("all_shop_items_with_variants_v2", expires_in: 10.minutes) do
   ShopItem.enabled.with_attached_image.not_black_market
   .includes(image_attachment: { blob: { variant_records: :image_attachment } })
-  .order(ticket_cost: :asc)
-            .to_a
+  .to_a
+    end
+
+    all_shop_items.sort_by! do |item|
+      @regionalization_enabled && @selected_region ? item.price_for_region(@selected_region) : item.price_for_region("XX")
     end
 
     # Filter in memory
@@ -94,8 +97,13 @@ class ShopItemsController < ApplicationController
     all_shop_items = Rails.cache.fetch("all_black_market_shop_items_with_variants", expires_in: 2.minutes) do
       ShopItem.enabled.with_attached_image.black_market
         .includes(image_attachment: { blob: { variant_records: :image_attachment } })
-        .order(ticket_cost: :asc)
         .to_a
+    end
+
+    all_shop_items.sort_by! do |item|
+      @regionalization_enabled && @selected_region ?
+        item.price_for_region(@selected_region) :
+        item.price_for_region("XX")
     end
 
     filtered_items = all_shop_items.dup

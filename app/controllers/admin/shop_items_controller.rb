@@ -131,6 +131,10 @@ module Admin
         items = items.order(:ticket_cost)
       when "cost_desc"
         items = items.order(ticket_cost: :desc)
+      when "sale_cost_asc"
+        items = items.to_a.sort_by { |item| item.price_for_region("US") }
+      when "sale_cost_desc"
+        items = items.to_a.sort_by { |item| -item.price_for_region("US") }
       when "created_asc"
         items = items.order(:created_at)
       when "type_asc"

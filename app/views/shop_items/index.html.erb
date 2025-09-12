@@ -49,7 +49,12 @@
     </div>
   </div>
 
-  <% f = (@regular_items + @badge_items).select(&:show_in_carousel).shuffle %>
+  <%
+     items = (@regular_items + @badge_items).select(&:show_in_carousel)
+     sales = items.select(&:on_sale?)
+     regulars = items.reject(&:on_sale?)
+     sales.sort_by! { |item| -item.sale_percentage.to_i }
+     f = sales + regulars.shuffle %>
   <% if f.any? %>
     <div class="mb-8">
         <div class="text-center mb-4">
