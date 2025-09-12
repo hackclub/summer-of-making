@@ -217,7 +217,7 @@ class ShopItemsController < ApplicationController
                     actual_irl_fr_cost cost hacker_score
                     requires_black_market hcb_merchant_lock
                     hcb_category_lock hcb_keyword_lock agh_contents
-                    image]
+                    image sale_percentage]
     )
   end
 end

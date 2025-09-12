@@ -29,6 +29,7 @@
 #  price_offset_us                   :decimal(6, 2)    default(0.0)
 #  price_offset_xx                   :decimal(6, 2)    default(0.0)
 #  requires_black_market             :boolean
+#  sale_percentage                   :integer
 #  show_in_carousel                  :boolean
 #  site_action                       :integer
 #  stock                             :integer
