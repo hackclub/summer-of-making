@@ -30,54 +30,52 @@ class C::ClickableBase < C::Base
     inline_svg("icons/#{@icon}.svg", class: icon_class)
   end
 
+  BASE_CLASSES = "relative inline-block group py-2 cursor-pointer"
+  BASE_CLASSES_LARGE = "relative inline-block group py-2 cursor-pointer text-2xl"
+  CONTENT_BASE = "som-link-content"
+  TEXT_BASE = "text-nowrap tracking-tight"
+  UNDERLINE_BASE = "absolute transition-all duration-150 bottom-1 w-full pr-3 box-content bg-som-highlight rounded-full z-0 group-hover:opacity-100"
+  UNDERLINE_LARGE = "#{UNDERLINE_BASE} h-6"
+  UNDERLINE_SMALL = "#{UNDERLINE_BASE} h-4 -right-[6px]"
+  UNDERLINE_HIDDEN_LARGE = "#{UNDERLINE_LARGE} opacity-0"
+  UNDERLINE_HIDDEN_SMALL = "#{UNDERLINE_SMALL} opacity-0"
+
   def base_class
-    classes = [ "relative", "inline-block", "group", "py-2", "cursor-pointer" ]
-    classes << "text-2xl" if @large
-    classes.join(" ")
+    @large ? BASE_CLASSES_LARGE : BASE_CLASSES
   end
 
   def final_class
-    [ base_class, @css_class ].compact.join(" ")
+    @css_class ? "#{base_class} #{@css_class}" : base_class
   end
 
   def icon_class
     size = @icon_size || (@large ? "8" : "6")
-    classes = [ "w-#{size}", "h-#{size}" ]
-    classes << "mr-4" if @large
-    classes.join(" ")
+    base = "w-#{size} h-#{size}"
+    @large ? "#{base} mr-4" : base
   end
 
   def content_class
-    classes = [ "som-link-content" ]
-    classes << "som-link-hop" if @hop
-    classes << "som-link-push" if @animate_push
-    classes << @content_attr[:class] if @content_attr[:class]
-    classes.compact.join(" ")
+    result = CONTENT_BASE
+    result = "#{result} som-link-hop" if @hop
+    result = "#{result} som-link-push" if @animate_push
+    if @content_attr[:class]
+      result = "#{result} #{@content_attr[:class]}"
+    end
+    result
   end
 
   def text_class
-    classes = [ "text-nowrap", "tracking-tight" ]
-    classes << @text_attr[:class] if @text_attr[:class]
-    classes.compact.join(" ")
+    @text_attr[:class] ? "#{TEXT_BASE} #{@text_attr[:class]}" : TEXT_BASE
   end
 
   def underline_class
-    base_underline = [
-      "absolute", "transition-all", "duration-150", "bottom-1", "w-full",
-      "pr-3", "box-content", "bg-som-highlight", "rounded-full", "z-0",
-      "group-hover:opacity-100"
-    ]
-
-    if @large
-      base_underline << "h-6"
+    base = if @large
+      @highlight ? UNDERLINE_LARGE : UNDERLINE_HIDDEN_LARGE
     else
-      base_underline.concat([ "h-4", "-right-[6px]" ])
+      @highlight ? UNDERLINE_SMALL : UNDERLINE_HIDDEN_SMALL
     end
 
-    base_underline << "opacity-0" unless @highlight
-    base_underline << @underline_attr[:class] if @underline_attr[:class]
-
-    base_underline.compact.join(" ")
+    @underline_attr[:class] ? "#{base} #{@underline_attr[:class]}" : base
   end
 
   def underline_data
