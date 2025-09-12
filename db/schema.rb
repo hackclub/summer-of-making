@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_09_11_002216) do
+ActiveRecord::Schema[8.0].define(version: 2025_09_12_001640) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -551,6 +551,7 @@ ActiveRecord::Schema[8.0].define(version: 2025_09_11_002216) do
     t.boolean "enabled"
     t.integer "site_action"
     t.text "hcb_preauthorization_instructions"
+    t.integer "sale_percentage"
     t.index ["enabled", "enabled_us", "enabled_eu", "enabled_in", "enabled_ca", "enabled_au", "enabled_xx"], name: "idx_shop_items_regional_enabled"
     t.index ["enabled", "requires_black_market", "ticket_cost"], name: "idx_shop_items_enabled_black_market_price"
     t.index ["type", "enabled"], name: "idx_shop_items_type_enabled"

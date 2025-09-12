@@ -67,6 +67,12 @@
         </div>
       </div>
 
+      <div class="mb-3">
+        <%= form.label :sale_percentage, "Sale Percentage (%)", class: "form-label" %>
+        <%= form.number_field :sale_percentage, min: 0, max: 100, class: "form-control", placeholder: "0" %>
+        <small class="form-text text-muted">percent off base price (carries over by region)</small>
+      </div>
+
       <!-- Calculation Results -->
       <div class="row">
         <div class="col-md-6">
