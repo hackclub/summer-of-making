@@ -54,7 +54,8 @@
      sales = items.select(&:on_sale?)
      regulars = items.reject(&:on_sale?)
      sales.sort_by! { |item| -item.sale_percentage.to_i }
-     f = sales + regulars.shuffle %>
+     f = sales + regulars.shuffle
+  %>
   <% if f.any? %>
     <div class="mb-8">
         <div class="text-center mb-4">
