@@ -199,3 +199,18 @@ video[data-loading="true"] {
 .video-overlay {
   transition: all 0.3s ease;
 }
+
+.sale-ribbon {
+  animation: sp 1.5s ease-in-out infinite;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+  background: linear-gradient(45deg, #dc2626, #ef4444);
+}
+
+@keyframes sp {
+  0%, 100% {
+    transform: rotate(-12deg) translate(-0.5rem, 0.5rem) scale(1);
+  }
+  50% {
+    transform: rotate(-12deg) translate(-0.5rem, 0.5rem) scale(1.05);
+  }
+}
