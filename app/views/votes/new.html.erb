@@ -60,7 +60,7 @@
             <li>Peek at the demo/repo and skim the devlogs to make an informed pick.</li>
           </ul>
           <div class="pt-2">
-            <%= render "shared/button", text: "Okay, I’ll improve it", classes: "w-full", data: { action: "click->modal#close" } %>
+            <%= render C::StyledButton.new(text: "Okay, I’ll improve it", css_classes: "w-full", data: { action: "click->modal#close" }) %>
           </div>
         </div>
       </div>
@@ -195,23 +195,23 @@
               <div class="space-y-4 sm:space-y-6">
                 <div class="grid grid-cols-1 sm:flex sm:flex-wrap justify-center gap-3 sm:gap-4">
                   <% if project.demo_link.present? %>
-                    <%= render "shared/button",
+                    <%= render C::StyledButton.new(
                         text: "Demo",
                         link: track_demo_votes_path(position: index + 1),
                         link_target: "_blank",
                         method: :post,
                         icon: "world.svg",
                         onclick: "event.stopPropagation()",
-                        id: index == 0 ? 'new-tutorial-vote-demo' : nil %>
+                        id: index == 0 ? 'new-tutorial-vote-demo' : nil) %>
                   <% end %>
                   <% if project.repo_link.present? %>
-                    <%= render "shared/button",
+                    <%= render C::StyledButton.new(
                         text: "Repository",
                         link: track_repo_votes_path(position: index + 1),
                         link_target: "_blank",
                         method: :post,
                         icon: "git.svg",
-                        onclick: "event.stopPropagation()" %>
+                        onclick: "event.stopPropagation()") %>
                   <% end %>
 
                   <%= render "shared/report", id: index == 0 ? 'new-tutorial-vote-report' : nil, suspect: ship_event, already_reported: @reported_ship_event_ids&.include?(ship_event.id) %>
@@ -236,7 +236,7 @@
       </div>
 
       <div class="mx-2 sm:mx-auto mt-8 sm:mt-12 max-w-220" id="new-tutorial-vote-decision">
-        <%= render layout: "shared/container" do %>
+        <%= render C::Container.new do %>
           <div class="p-0 sm:p-2">
             <%= render "form", vote: @vote %>
           </div>

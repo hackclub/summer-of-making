@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 class C::Link < C::ClickableBase
-  prop :target, String | Symbol
+  prop :target, _Union(String, Symbol)
 
   private
 

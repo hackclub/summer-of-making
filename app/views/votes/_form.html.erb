@@ -80,10 +80,10 @@
   </div>
 
   <div class="flex justify-center items-center w-full">
-    <%= render "shared/button",
+    <%= render C::StyledButton.new(
         text: "Submit Vote",
         type: :submit,
-        classes: "opacity-75 cursor-not-allowed pointer-events-none",
-        data: { form_target: "submitButton" } %>
+        css_classes: "opacity-75 cursor-not-allowed pointer-events-none",
+        data: { form_target: "submitButton" }) %>
   </div>
 <% end %>

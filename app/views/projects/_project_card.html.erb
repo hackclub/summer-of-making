@@ -1,4 +1,4 @@
-<%= render "shared/card", padding: "[0px]", classes: "shadow-lg overflow-hidden mb-4 md:mb-8" do %>
+<%= render C::Card.new(padding: "[0px]", css_classes: "shadow-lg overflow-hidden mb-4 md:mb-8") do %>
   <div class="h-48 md:h-64 overflow-hidden relative group" id="ba">
     <% project_image = @project.banner.presence || @project.devlogs.find { |u| u.file.attached? && u.file.image? }&.file&.then { |f| url_for(f) } || "https://hc-cdn.hel1.your-objectstorage.com/s/v3/41e9de19cfa4e099cf25410ac38542776693b54e_t.png" %>
     <div class="w-full h-full flex items-center justify-center absolute inset-0">
@@ -186,15 +186,15 @@
 
     <div class="flex flex-col md:flex-row space-y-4 md:space-y-0 md:space-x-4">
       <% if @project.demo_link.present? %>
-        <%= render "shared/button", text: "Demo", link: @project.demo_link, link_target: "_blank", icon: "world.svg", fill_width: true %>
+        <%= render C::StyledButton.new(text: "Demo", link: @project.demo_link, link_target: "_blank", icon: "world.svg", fill_width: true) %>
       <% end %>
 
       <% if @project.repo_link.present? %>
-        <%= render "shared/button", text: "Repository", link: @project.repo_link, link_target: "_blank", icon: "repo.svg", fill_width: true %>
+        <%= render C::StyledButton.new(text: "Repository", link: @project.repo_link, link_target: "_blank", icon: "repo.svg", fill_width: true) %>
       <% end %>
 
       <% if @project.readme_link.present? %>
-        <%= render "shared/button", text: "Readme", data: { controller: "modal", action: "click->modal#open", modal_id: @project.id, modal_type: "readme"}, icon: "document.svg", fill_width: true %>
+        <%= render C::StyledButton.new(text: "Readme", data: { controller: "modal", action: "click->modal#open", modal_id: @project.id, modal_type: "readme"}, icon: "document.svg", fill_width: true) %>
       <% end %>
     </div>
 
@@ -369,7 +369,7 @@
 
 <!-- Ship Modal -->
 <div id="ship-modal-<%= @project.id %>" data-controller="ship" class="hidden fixed inset-0 z-50 bg-black/30 flex items-center justify-center p-2 md:p-4" data-ship-target="modal" data-action="click->ship#closeBackground">
-  <%= render "shared/card", classes: "max-w-2xl max-h-[90vh]" do %>
+  <%= render C::Card.new(css_classes: "max-w-2xl max-h-[90vh]") do %>
     <div class="p-3 md:p-4 border-b border-saddle-taupe border-opacity-30 flex-shrink-0">
       <div class="flex justify-between items-center">
         <h3 class="text-lg md:text-2xl">Ship Your Project</h3>
@@ -404,18 +404,18 @@
 
       <div class="mt-6 flex justify-center space-x-4">
         <%=
-          render "shared/button",
+          render C::StyledButton.new(
             text: "Not Yet",
             data: { action: "ship#close" },
             icon: "back_circle.svg",
-            kind: :secondary
+            kind: :secondary)
         %>
 
         <%=
-          render "shared/button",
+          render C::StyledButton.new(
             text: "Next",
             data: { ship_target: "nextButton1", action: "ship#next1" },
-            icon: "check_circle.svg"
+            icon: "check_circle.svg")
         %>
       </div>
     </div>
@@ -457,19 +457,19 @@
 
       <div class="mt-6 flex justify-center space-x-4">
         <%=
-          render "shared/button",
+          render C::StyledButton.new(
             text: "Go Back",
             data: { ship_target: "backButton1", action: "ship#back1" },
             icon: "back_circle.svg",
-            kind: :secondary
+            kind: :secondary)
         %>
 
         <%=
-          render "shared/button",
+          render C::StyledButton.new(
             text: all_requirements_met ? "Next: Check Links" : "Complete Requirements First",
             data: { ship_target: "nextButton2", action: "ship#next2" },
             icon: "check_circle.svg",
-            disabled: not all_requirements_met
+            disabled: not all_requirements_met)
         %>
       </div>
     </div>
@@ -561,19 +561,19 @@
       <%= form_with(model: @project, url: project_ship_path(@project), method: :post, data: { ship_target: "form", action: "submit->ship#submit" }) do |form| %>
         <div class="mt-6 flex justify-center space-x-4">
           <%=
-            render "shared/button",
+            render C::StyledButton.new(
               text: "Go Back",
               data: { ship_target: "backButton2", action: "ship#back2" },
               icon: "back_circle.svg",
-              kind: :secondary
+              kind: :secondary)
           %>
 
           <%=
-            render "shared/button",
+            render C::StyledButton.new(
               text: "Ship It!",
               data: { ship_target: "submitButton" },
               icon: "ship.svg",
-              disabled: true
+              disabled: true)
           %>
         </div>
       <% end %>

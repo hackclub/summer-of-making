@@ -3,7 +3,7 @@
     title: "Vote",
     subtitle: "Vote on others' projects to get payouts!" %>
 
-  <%= render "shared/card", classes: "text-lg text-center", padding: "lg" do %>
+  <%= render C::Card.new(css_classes: "text-lg text-center", padding: "lg") do %>
     <% if defined?(Flipper) && Flipper.enabled?(:lock_voting, current_user) %>
       <p class="mb-4">You've been submitting too many low-quality votes.</p>
       <p>Please take a break and review the guidelines before voting again.</p>

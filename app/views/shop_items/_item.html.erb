@@ -17,7 +17,7 @@
 <div id="<%= minimal ? "featured-item-#{item.id}" : "item-#{item.id}" %>">
 <% if minimal %>
   <div class="cursor-pointer transition-transform hover:scale-105" data-item-id="<%= item.id %>">
-    <%= render "shared/card", classes: "h-full", padding: "sm" do %>
+    <%= render C::Card.new(css_classes: "h-full", padding: "sm") do %>
       <div class="flex flex-col h-full relative">
         <% if item.on_sale? %>
           <div class="absolute top-0 left-0 z-10 sale-ribbon text-white text-xs font-bold px-1 py-0.5">
@@ -74,7 +74,7 @@
     <% end %>
   </div>
 <% else %>
-<%= render "shared/card", classes: "h-full #{"col-span-full" if item.is_free?}" do %>
+<%= render C::Card.new(css_classes: "h-full #{"col-span-full" if item.is_free?}") do %>
   <div class="flex flex-col relative flex-1">
     <% if item.on_sale? %>
       <div class="absolute top-0 left-0 z-10 sale-ribbon text-white text-xs font-bold px-2 py-1">
@@ -148,11 +148,11 @@
       <% if current_user %>
         <div class="">
           <% if already_ordered %>
-            <%= render "shared/button",
+            <%= render C::StyledButton.new(
                 text: "Already Ordered",
                 kind: :buy,
                 fill_width: true,
-                disabled: true %>
+                disabled: true) %>
           <% else %>
             <% user_balance = @current_balance %>
             <% button_text = if out_of_stock
@@ -175,12 +175,12 @@
                               "#{render_shells(regional_price - user_balance)} more shells needed"
                             end %>
             <%= form_with url: order_shop_item_path(item), method: :get, data: { turbo: false }, local: true, class: "w-full" do |form| %>
-              <%= render "shared/button",
+              <%= render C::StyledButton.new(
                   text: button_text,
                   kind: :buy,
                   fill_width: true,
                   disabled: disabled,
-                  type: :submit %>
+                  type: :submit) %>
             <% end %>
           <% end %>
         </div>

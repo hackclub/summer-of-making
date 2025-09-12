@@ -66,7 +66,7 @@
   <div class="max-w-6xl mx-auto">
     <div class="hidden flex flex-col md:flex-row items-center gap-4 md:gap-10 mb-24 md:mb-36">
       <div class="md:w-1/2 w-full mb-4 md:mb-0 px-2 md:px-0 rotate-0 md:-rotate-2">
-        <%= render "shared/container" do %>
+        <%= render C::Container.new do %>
           <div class="p-3 md:p-5 relative">
             <p class="font-['Fredoka',sans-serif] font-normal text-lg md:text-xl mb-4">
               Atlantis! Once lost, now found—and soon to be <span class="italic">filled</span> with teenage hackers. Build great things, make new friends, and earn sicknasty prizes on an island continent where high schoolers create the world they want to live in.
@@ -106,7 +106,7 @@
 
       <div class="relative mb-8 md:mb-16 flex flex-col items-center">
         <div class="relative flex flex-col md:flex-row gap-4 md:gap-8 mx-auto justify-center items-center md:items-stretch">
-          <%= render "shared/card", classes: 'h-full max-w-96 sm:max-w-lg md:max-w-80 lg:max-w-96 animate-wave' do %>
+          <%= render C::Card.new(css_classes: 'h-full max-w-96 sm:max-w-lg md:max-w-80 lg:max-w-96 animate-wave') do %>
             <div class="p-4 md:p-5 relative text-center">
               <h3 class="text-xl md:text-2xl font-bold mb-3 md:mb-4 text-[#3a2f25] font-['DynaPuff',sans-serif]">Build Stuff</h3>
               <p class="font-['Fredoka',sans-serif] font-normal text-base md:text-lg text-[#3a2f25]">
@@ -115,7 +115,7 @@
             </div>
           <% end %>
 
-          <%= render "shared/card", classes: 'h-full max-w-96 sm:max-w-lg md:max-w-80 lg:max-w-96 animate-wave-offset' do %>
+          <%= render C::Card.new(css_classes: 'h-full max-w-96 sm:max-w-lg md:max-w-80 lg:max-w-96 animate-wave-offset') do %>
             <div class="p-4 md:p-5 relative text-center">
               <h3 class="text-xl md:text-2xl font-bold mb-3 md:mb-4 text-[#3a2f25] font-['DynaPuff',sans-serif]">Get Stuff</h3>
               <p class="font-['Fredoka',sans-serif] font-normal text-base md:text-lg text-[#3a2f25]">
@@ -168,7 +168,7 @@
 
   <%# prize section %>
   <div class="max-w-9xl mx-auto mb-12 md:mt-25 md:px-0 rotate-0 md:-rotate-2">
-    <%= render "shared/container", classes: 'mx-auto max-w-7xl w-full relative' do %>
+    <%= render C::Container.new(css_classes: 'mx-auto max-w-7xl w-full relative') do %>
       <div class="relative">
         <div class="parchment-texture"></div>
 
@@ -259,7 +259,7 @@
 
     <div class="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-6 lg:gap-8 max-w-6xl mx-auto px-2">
       <div class="transform hover:scale-105 transition-all duration-300 animate-float spc" style="animation-delay: 0.2s;">
-        <%= render "shared/card" do %>
+        <%= render C::Card.new do %>
           <div class="p-1 md:p-2 lg:p-3 text-center relative">
             <div class="text-2xl md:text-3xl lg:text-4xl mb-1 md:mb-2">💾</div>
             <div class="text-xl md:text-2xl lg:text-3xl font-bold text-som-orange font-['DynaPuff',sans-serif] mb-1 spn" data-social-proof-target="counter">343</div>
@@ -270,7 +270,7 @@
 
       <!-- Stat Card 2 -->
       <div class="transform hover:scale-105 transition-all duration-300 animate-float spc" style="animation-delay: 0.4s;">
-        <%= render "shared/card" do %>
+        <%= render C::Card.new do %>
           <div class="p-1 md:p-2 lg:p-3 text-center relative">
             <div class="text-2xl md:text-3xl lg:text-4xl mb-1 md:mb-2">🤖</div>
             <div class="text-xl md:text-2xl lg:text-3xl font-bold text-som-orange font-['DynaPuff',sans-serif] mb-1 spn" data-social-proof-target="counter">$2,910</div>
@@ -281,7 +281,7 @@
 
       <!-- Stat Card 3 -->
       <div class="transform hover:scale-105 transition-all duration-300 animate-float spc" style="animation-delay: 0.6s;">
-        <%= render "shared/card" do %>
+        <%= render C::Card.new do %>
           <div class="p-1 md:p-2 lg:p-3 text-center relative">
             <div class="text-2xl md:text-3xl lg:text-4xl mb-1 md:mb-2">☁️</div>
             <div class="text-xl md:text-2xl lg:text-3xl font-bold text-som-orange font-['DynaPuff',sans-serif] mb-1 spn" data-social-proof-target="counter">$2,170</div>
@@ -292,7 +292,7 @@
 
       <!-- Stat Card 4 -->
       <div class="transform hover:scale-105 transition-all duration-300 animate-float spc" style="animation-delay: 0.8s;">
-        <%= render "shared/card" do %>
+        <%= render C::Card.new do %>
           <div class="p-1 md:p-2 lg:p-3 text-center relative">
             <div class="text-2xl md:text-3xl lg:text-4xl mb-1 md:mb-2">🌐</div>
             <div class="text-xl md:text-2xl lg:text-3xl font-bold text-som-orange font-['DynaPuff',sans-serif] mb-1 spn" data-social-proof-target="counter">367</div>
@@ -303,7 +303,7 @@
 
       <!-- Stat Card 5 -->
       <div class="transform hover:scale-105 transition-all duration-300 animate-float spc" style="animation-delay: 1.0s;">
-        <%= render "shared/card" do %>
+        <%= render C::Card.new do %>
           <div class="p-1 md:p-2 lg:p-3 text-center relative">
             <div class="text-2xl md:text-3xl lg:text-4xl mb-1 md:mb-2">💰</div>
             <div class="text-xl md:text-2xl lg:text-3xl font-bold text-som-orange font-['DynaPuff',sans-serif] mb-1 spn" data-social-proof-target="counter">$9,260</div>
@@ -314,7 +314,7 @@
 
       <!-- Stat Card 6 -->
       <div class="transform hover:scale-105 transition-all duration-300 animate-float spc" style="animation-delay: 1.2s;">
-        <%= render "shared/card" do %>
+        <%= render C::Card.new do %>
           <div class="p-1 md:p-2 lg:p-3 text-center relative">
             <div class="text-2xl md:text-3xl lg:text-4xl mb-1 md:mb-2">🥧</div>
             <div class="text-xl md:text-2xl lg:text-3xl font-bold text-som-orange font-['DynaPuff',sans-serif] mb-1 spn" data-social-proof-target="counter">846</div>
@@ -325,7 +325,7 @@
 
       <!-- Stat Card 7 -->
       <div class="transform hover:scale-105 transition-all duration-300 animate-float spc" style="animation-delay: 1.4s;">
-        <%= render "shared/card" do %>
+        <%= render C::Card.new do %>
           <div class="p-1 md:p-2 lg:p-3 text-center relative">
             <div class="text-2xl md:text-3xl lg:text-4xl mb-1 md:mb-2">🔧</div>
             <div class="text-xl md:text-2xl lg:text-3xl font-bold text-som-orange font-['DynaPuff',sans-serif] mb-1 spn" data-social-proof-target="counter">223</div>
@@ -335,7 +335,7 @@
       </div>
 
       <div class="transform hover:scale-105 transition-all duration-300 animate-float spc" style="animation-delay: 1.6s;">
-        <%= render "shared/card" do %>
+        <%= render C::Card.new do %>
           <div class="p-1 md:p-2 lg:p-3 text-center relative">
             <div class="text-2xl md:text-3xl lg:text-4xl mb-1 md:mb-2">🦈</div>
             <div class="text-xl md:text-2xl lg:text-3xl font-bold text-som-orange font-['DynaPuff',sans-serif] mb-1 spn" data-social-proof-target="counter">194</div>
@@ -472,7 +472,7 @@
 
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-8 justify-center items-stretch justify-items-center mx-auto max-w-6xl px-2">
       <div class="transition-all duration-300 hover:-translate-y-1 h-full">
-        <%= render "shared/card", classes: 'faq-con h-full' do %>
+        <%= render C::Card.new(css_classes: 'faq-con h-full') do %>
           <div class="p-1 md:p-3 relative">
             <h3 class="font-['DynaPuff'] font-bold text-lg md:text-xl text-[#8B4513] mb-2 md:mb-3 z-10">Who is eligible?</h3>
             <p class="font-['Fredoka'] font-normal text-base md:text-lg text-[#3a2f25] z-10">
@@ -484,7 +484,7 @@
       </div>
 
       <div class="transition-all duration-300 hover:-translate-y-1 h-full">
-        <%= render "shared/card", classes: 'faq-con h-full' do %>
+        <%= render C::Card.new(css_classes: 'faq-con h-full') do %>
           <div class="p-1 md:p-3 relative">
             <h3 class="font-['DynaPuff'] font-bold text-lg md:text-xl text-[#8B4513] mb-2 md:mb-3 z-10">How much does it cost?</h3>
             <p class="font-['Fredoka'] font-normal text-base md:text-lg text-[#3a2f25] z-10">
@@ -495,7 +495,7 @@
       </div>
 
       <div class="transition-all duration-300 hover:-translate-y-1 h-full">
-        <%= render "shared/card", classes: 'faq-con h-full' do %>
+        <%= render C::Card.new(css_classes: 'faq-con h-full') do %>
           <div class="p-1 md:p-3 relative">
             <h3 class="font-['DynaPuff'] font-bold text-lg md:text-xl text-[#8B4513] mb-2 md:mb-3 z-10">What types of projects count?</h3>
             <p class="font-['Fredoka'] font-normal text-base md:text-lg text-[#3a2f25] z-10">You can build anything you want! It can be a website, a game, an app, or even a cool hardware project. The only requirement is that you share your progress and log your hours.</p>
@@ -504,7 +504,7 @@
       </div>
 
       <div class="transition-all duration-300 hover:-translate-y-1 h-full">
-        <%= render "shared/card", classes: 'faq-con h-full' do %>
+        <%= render C::Card.new(css_classes: 'faq-con h-full') do %>
           <div class="p-1 md:p-3 relative">
             <h3 class="font-['DynaPuff'] font-bold text-lg md:text-xl text-[#8B4513] mb-2 md:mb-3 z-10">How many projects can I build?</h3>
             <p class="font-['Fredoka'] font-normal text-base md:text-lg text-[#3a2f25] z-10">There's no limit! The more you build, the more prizes you can earn. Each project you log counts, so get creative!</p>
@@ -513,7 +513,7 @@
       </div>
 
       <div class="transition-all duration-300 hover:-translate-y-1 h-full">
-        <%= render "shared/card", classes: 'faq-con h-full' do %>
+        <%= render C::Card.new(css_classes: 'faq-con h-full') do %>
           <div class="p-1 md:p-3 relative">
             <h3 class="font-['DynaPuff'] font-bold text-lg md:text-xl text-[#8B4513] mb-2 md:mb-3 z-10">How can I trust this is real?</h3>
             <p class="font-['Fredoka'] font-normal text-base md:text-lg text-[#3a2f25] z-10">
@@ -524,7 +524,7 @@
       </div>
 
       <div class="transition-all duration-300 hover:-translate-y-1 h-full">
-        <%= render "shared/card", classes: 'faq-con h-full' do %>
+        <%= render C::Card.new(css_classes: 'faq-con h-full') do %>
           <div class="p-1 md:p-3 relative">
             <h3 class="font-['DynaPuff'] font-bold text-lg md:text-xl text-[#8B4513] mb-2 md:mb-3 z-10">Is Hack Club really a non-profit?</h3>
             <p class="font-['Fredoka'] font-normal text-base md:text-lg text-[#3a2f25] z-10">
@@ -537,7 +537,7 @@
       </div>
 
       <div class="transition-all duration-300 hover:-translate-y-1 block lg:hidden">
-        <%= render "shared/card", classes: 'faq-con h-full' do %>
+        <%= render C::Card.new(css_classes: 'faq-con h-full') do %>
           <div class="p-1 md:p-3 relative">
             <h3 class="font-['DynaPuff'] font-bold text-lg md:text-xl text-[#8B4513] mb-2 md:mb-3 z-10">Where does the money come from?</h3>
             <p class="font-['Fredoka'] font-normal text-base md:text-lg text-[#3a2f25] z-10">This event is in partnership with <a href="https://github.com" target="_blank" class="text-[#8B4513] underline hover:text-[#a8956b] transition-colors font-semibold">GitHub</a>, who is generously funding us. We have also received generous donations from others like Elon Musk, Tobi Lutke, Michael Dell, and the The Libermans. You can learn more in our <a href="https://hackclub.com/philanthropy/">Philanthropy</a> page.</p>
@@ -546,7 +546,7 @@
       </div>
 
       <div class="transition-all duration-300 hover:-translate-y-1 block lg:hidden">
-        <%= render "shared/card", classes: 'faq-con h-full' do %>
+        <%= render C::Card.new(css_classes: 'faq-con h-full') do %>
           <div class="p-1 md:p-3 relative">
           <h3 class="font-['DynaPuff'] font-bold text-lg md:text-xl text-[#8B4513] mb-2 md:mb-3 z-10">I need help!</h3>
           <p class="font-['Fredoka'] font-normal text-base md:text-lg text-[#3a2f25] z-10">
@@ -560,7 +560,7 @@
 
       <div class="hidden lg:flex w-full gap-8 justify-center items-stretch col-span-3">
         <div class="transition-all duration-300 hover:-translate-y-1 flex-1 max-w-md min-w-[22rem] flex flex-col">
-          <%= render "shared/card", classes: 'faq-con h-full flex flex-col' do %>
+          <%= render C::Card.new(css_classes: 'faq-con h-full flex flex-col') do %>
             <div class="p-1 md:p-3 relative flex flex-col h-full">
               <h3 class="font-['DynaPuff'] font-bold text-lg md:text-xl text-[#8B4513] mb-2 md:mb-3 z-10">Where does the money come from?</h3>
               <p class="font-['Fredoka'] font-normal text-base md:text-lg text-[#3a2f25] z-10 flex-grow">
@@ -570,7 +570,7 @@
           <% end %>
         </div>
         <div class="transition-all duration-300 hover:-translate-y-1 flex-1 max-w-md min-w-[22rem] flex flex-col">
-          <%= render "shared/card", classes: 'faq-con h-full flex flex-col' do %>
+          <%= render C::Card.new(css_classes: 'faq-con h-full flex flex-col') do %>
             <div class="p-1 md:p-3 relative flex flex-col h-full">
               <h3 class="font-['DynaPuff'] font-bold text-lg md:text-xl text-[#8B4513] mb-2 md:mb-3 z-10">I need help!</h3>
               <p class="font-['Fredoka'] font-normal text-base md:text-lg text-[#3a2f25] z-10 flex-grow">
@@ -602,7 +602,7 @@
   <div class="absolute inset-0" style="background: url('/smiles.png') center/cover no-repeat; mask: linear-gradient(to bottom, transparent 0%, rgba(0,0,0,0.3) 40%, rgba(0,0,0,0.8) 80%, rgba(0,0,0,1) 100%); -webkit-mask: linear-gradient(to bottom, transparent 0%, rgba(0,0,0,0.3) 40%, rgba(0,0,0,0.8) 80%, rgba(0,0,0,1) 100%);"></div>
   <div class="max-w-6xl mx-auto text-center relative z-10 pt-12 md:pt-16 pb-6 md:pb-8 px-2 md:px-4 sm:px-8 lg:py-24">
     <h4 class="text-xl md:text-2xl font-bold mb-4 md:mb-6 lg:mb-8 text-[#3a2f25] font-['DynaPuff',sans-serif]">About Hack Club</h4>
-    <%= render "shared/container", classes: 'p-3 md:p-4 mb-48' do %>
+    <%= render C::Container.new(css_classes: 'p-3 md:p-4 mb-48') do %>
       <div class="relative">
         <p class="font-['Fredoka',sans-serif] font-normal text-sm md:text-base lg:text-lg max-w-5xl mx-auto">
           <a href="https://hackclub.com/" target="_blank" class="text-[#592f31] underline hover:text-[#8B4513] transition-colors font-semibold">Hack Club</a> is a nonprofit supporting a global network of over 60,000 teenagers. We believe the best way to learn is by building, so we provide community, resources, and funding to help teens create. We've run programs like

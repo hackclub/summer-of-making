@@ -1,4 +1,4 @@
-<%= render "shared/card", padding: "lg" do %>
+<%= render C::Card.new(padding: "lg") do %>
   <% if ENV['DEVLOGS_STATUS'] == 'locked' %>
     <div class="text-center">
       <div class="flex justify-center items-center">
@@ -108,11 +108,11 @@
         <%= f.hidden_field :project_id, value: @project.id, data: { form_target: "projectId" } %>
         <div class="flex justify-end space-x-4 pt-6">
           <%=
-            render "shared/button",
+            render C::StyledButton.new(
               data: { form_target: "submitButton" },
               icon: "quill.svg",
               text: "Create Devlog",
-              classes: current_user.devlogs.empty? && current_user.projects.count == 1 ? "animate-bounce" : ""
+              css_classes: current_user.devlogs.empty? && current_user.projects.count == 1 ? "animate-bounce" : "")
           %>
         </div>
       </div>

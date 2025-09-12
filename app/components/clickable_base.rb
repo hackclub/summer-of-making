@@ -4,12 +4,12 @@ class C::ClickableBase < C::Base
   extend Literal::Properties
 
   prop :text, String
-  prop :css_class, String | NilClass, default: nil
-  prop :icon, String | NilClass, default: nil
+  prop :css_class, _String?
+  prop :icon, _String?
   prop :highlight, _Boolean, default: false
   prop :content_attr, Hash, default: -> { {} }
   prop :text_attr, Hash, default: -> { {} }
-  prop :icon_size, String | NilClass, default: nil
+  prop :icon_size, _String?
   prop :underline_attr, Hash, default: -> { {} }
   prop :large, _Boolean, default: false
   prop :hop, _Boolean, default: false

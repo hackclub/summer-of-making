@@ -15,7 +15,7 @@
   show_animation = false
 %>
 
-<%= render layout: "shared/card" do %>
+<%= render C::Card.new do %>
   <div class="ml-4 z-10 <%= context == 'explore' || context == 'project' ? '' : '' %> <%= container_classes %> <%= 'cursor-pointer' if show_project_navigation %>"
        id="<%= dom_id(devlog) %>"
        data-controller="modal devlog-card"

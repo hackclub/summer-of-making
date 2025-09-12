@@ -16,7 +16,7 @@
   </div>
 
   <% if current_user.is_banned? %>
-    <%= render "shared/card", classes: "bg-red-50/80 border-red-400 mb-8" do %>
+    <%= render C::Card.new(css_classes: "bg-red-50/80 border-red-400 mb-8") do %>
       <div class="flex items-start gap-3">
         <div class="flex-shrink-0">
           <div class="w-10 h-10 bg-red-500 rounded-lg flex items-center justify-center">
@@ -36,7 +36,7 @@
   <!-- Todo list -->
   <% if current_user.tutorial_completed? %>
     <div class="mb-8">
-      <%= render "shared/card" do %>
+      <%= render C::Card.new do %>
         <div class="text-som-dark flex flex-col xl:flex-row space-y-5 xl:space-y-0">
           <div>
             <div class="flex items-start justify-between mb-2 flex-col">
@@ -147,7 +147,7 @@
   <!-- Hackatime Dashboard Section -->
   <% if current_user.tutorial_completed? && @account_status[:hackatime_setup] %>
     <div class="mb-8 color-forest">
-      <%= render "shared/card", data: { controller: "hackatime-dashboard" } do %>
+      <%= render C::Card.new(data: { controller: "hackatime-dashboard" }) do %>
         <div class="text-som-dark">
           <div class="flex items-center gap-3 mb-4">
             <div class="flex-shrink-0">
@@ -243,7 +243,7 @@
 
       <div class="space-y-4">
         <!-- Step 1: Hackatime -->
-        <%= render "shared/card", data: { step: "hackatime", controller: "hackatime-status", hackatime_status_tutorial_active_value: !current_user.tutorial_completed? } do %>
+        <%= render C::Card.new(data: { step: "hackatime", controller: "hackatime-status", hackatime_status_tutorial_active_value: !current_user.tutorial_completed? }) do %>
           <div class="flex items-start gap-4 mb-2">
             <div class="flex-shrink-0">
               <% if @account_status[:hackatime_projects] %>
@@ -311,7 +311,7 @@
         <% end %>
 
         <!-- Step 2: Order free stickers -->
-        <%= render "shared/card" do %>
+        <%= render C::Card.new do %>
           <div class="flex items-start gap-4 mb-2">
             <div class="flex-shrink-0">
               <% if current_user.shop_orders.joins(:shop_item).where(shop_items: { type: "ShopItem::FreeStickers" }).exists? %>
@@ -344,7 +344,7 @@
 
         <!-- Step 3: Identity Verification -->
         <% if current_verification_status != :not_linked %>
-          <%= render "shared/card" do %>
+          <%= render C::Card.new do %>
             <div class="flex items-start gap-4 mb-2">
               <div class="flex-shrink-0">
                 <% if current_verification_status == :verified %>
@@ -396,7 +396,7 @@
         <h2 class="text-xl mb-4">Announcements</h2>
         <div class="space-y-4">
           <% @announcements.each do |announcement| %>
-            <%= render "shared/card" do %>
+            <%= render C::Card.new do %>
               <div class="flex items-start justify-between">
                 <div class="flex-1">
                   <div class="flex items-center mb-2">
@@ -464,7 +464,7 @@
           <% end %>
 
           <% if current_verification_status != :verified %>
-            <%= render "shared/card" do %>
+            <%= render C::Card.new do %>
               <div class="flex items-center justify-between">
                 <div>
                   <h3>Identity Verification</h3>

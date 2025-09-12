@@ -1,4 +1,4 @@
-<%= render layout: "shared/container", locals: { no_padding: true, attr: { class: "transform hover:scale-[1.02] 2xl:hover:scale-[1.05] hover:shadow-lg transition-transform duration-300" } } do %>
+<%= render C::Container.new(no_padding: true, attr: { class: "transform hover:scale-[1.02] 2xl:hover:scale-[1.05] hover:shadow-lg transition-transform duration-300" }) do %>
     <div class="flex flex-col h-full gap-3">
       <% project_image = project.banner.attached? ? url_for(project.banner) : "https://hc-cdn.hel1.your-objectstorage.com/s/v3/42eb885e3ebc20bd5e94782b7b4bcb31bcc956d3_i.png" %>
       <%= link_to project_path(project) do %>

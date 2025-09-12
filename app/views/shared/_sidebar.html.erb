@@ -2,7 +2,7 @@
   user_is_banned = current_user.is_banned?
   tab_unlocked = tab_unlocked?(:explore)
 %>
-<%= render layout: "shared/container", locals: {
+<%= render C::Container.new(
   full_height: true,
   attr: {
     class: "p-4 z-20 relative",
@@ -10,7 +10,7 @@
       action: "mouseover->sidebar#handleMouseEnter mouseleave->sidebar#handleMouseExit"
     }
   }
-} do %>
+) do %>
   <div
     class="flex flex-col transition-all duration-300 text-som-dark h-full w-[220px] justify-between relative"
     data-sidebar-target="sidebar">
@@ -25,7 +25,7 @@
     <nav class="flex items-center text-justify text-3xl 2xl:text-4xl">
       <ul class="space-y-1 w-full transition-transform duration-150" data-sidebar-target="links">
         <li class="flex justify-start">
-          <%= C::Link.new(
+          <%= render C::Link.new(
             target: campfire_path,
             text: "Campfire",
             icon: "campfire",
@@ -41,7 +41,7 @@
         </li>
 
         <li class="flex justify-start">
-          <%= C::Link.new(
+          <%= render C::Link.new(
             target: explore_path,
             text: "Explore",
             icon: (user_is_banned || !tab_unlocked) ? "lock" : "compass",
@@ -58,7 +58,7 @@
         </li>
 
         <li class="flex justify-start">
-          <%= C::Link.new(
+          <%= render C::Link.new(
             target: my_projects_path,
             text: "Projects",
             icon: (user_is_banned || !tab_unlocked) ? "lock" : "user",
@@ -78,7 +78,7 @@
         </li>
 
         <li class="flex justify-start" id="new-tutorial-vote">
-          <%= C::Link.new(
+          <%= render C::Link.new(
             target: new_vote_path,
             text: "Vote",
             icon: (user_is_banned || !tab_unlocked) ? "lock" : "vote",
@@ -95,7 +95,7 @@
         </li>
 
         <li class="flex justify-start">
-          <%= C::Link.new(
+          <%= render C::Link.new(
             target: shop_path,
             text: "Shop",
             icon: user_is_banned ? "lock" : "shop",
@@ -112,7 +112,7 @@
         </li>
         <% if current_user&.verified_check? %>
         <li class="flex justify-start">
-            <%= C::Link.new(
+            <%= render C::Link.new(
               target: gork_path,
               text: "gork",
               icon: "ai",
@@ -130,7 +130,7 @@
         <% end %>
 
         <li class="flex justify-start">
-          <%= C::Link.new(
+          <%= render C::Link.new(
             target: map_path,
             text: "Map",
             icon: tab_unlocked?(:map) ? "map" : "lock",
@@ -147,7 +147,7 @@
         </li>
 
         <li class="flex justify-start">
-          <%= C::Link.new(
+          <%= render C::Link.new(
             target: stt_path,
             text: SecretThirdThing.tab_title,
             icon: SecretThirdThing.tab_icon,
@@ -164,7 +164,7 @@
 
         <% if current_user&.is_admin? || current_user&.fraud_team_member? %>
           <li class="flex justify-start border-2 border-dashed border-orange-500 bg-orange-500/10" style="margin-right: 10px; border-radius: 10px;">
-            <%= C::Link.new(
+            <%= render C::Link.new(
               target: admin_root_path,
               text: "Admin",
               icon: "edit",
@@ -180,7 +180,7 @@
         <% end %>
         <% if current_user&.ship_certifier? %>
           <li class="flex justify-start border-2 border-dashed border-orange-500 bg-orange-500/10" style="margin-right: 10px; border-radius: 10px;">
-            <%= C::Link.new(
+            <%= render C::Link.new(
               target: admin_ship_certifications_path,
               text: "Ship Certs",
               icon: "edit",
@@ -246,7 +246,7 @@
               </span>
             </div>
           </div>
-          <%= C::ButtonTo.new(
+          <%= render C::ButtonTo.new(
             text: "Log out",
             icon: "exit",
             method: :delete,

@@ -9,7 +9,7 @@
     - padding: Padding size (sm, md, lg) - defaults to md
     - hover: Enable hover effect (true/false) - defaults to false
     - shadow: Shadow size (sm, md, lg) - defaults to md
-    - classes: Additional classes to apply to the card
+    - css_classes: Additional classes to apply to the card
 %>
 
 <%
