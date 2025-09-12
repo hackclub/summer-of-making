@@ -227,11 +227,11 @@ class ShopOrder < ApplicationRecord
   end
 
   def check_user_balance
-    return unless shop_item&.ticket_cost&.positive? && quantity.present?
+    return unless frozen_item_price&.positive? && quantity.present?
 
-    total_cost = shop_item.ticket_cost * quantity
-    if user&.balance&.< total_cost
-      shortage = total_cost - (user.balance || 0)
+    total_cost_for_validation = frozen_item_price * quantity
+    if user&.balance&.< total_cost_for_validation
+      shortage = total_cost_for_validation - (user.balance || 0)
       errors.add(:base, "Insufficient balance. You need #{shortage} more tickets.")
     end
   end
