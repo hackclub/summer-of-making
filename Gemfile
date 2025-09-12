@@ -174,3 +174,7 @@ gem "jb", "~> 0.8.2"
 gem "rbtrace", "~> 0.5.2"
 
 gem "autotuner", "~> 1.0"
+
+gem "phlex-rails", "~> 2.3"
+
+gem "literal", "~> 1.8"
