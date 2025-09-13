@@ -51,7 +51,7 @@
       <%= f.file_field :image, class: "form-input" %>
       <% if sticker.image.attached? && sticker.persisted? %>
         <div class="mt-2">
-          <%= image_tag sticker.image.variant(:thumb), width: 100 %>
+          <%= image_tag sticker.image %>
         </div>
       <% end %>
     </div>
@@ -62,7 +62,7 @@
       <span class="text-sm opacity-70">Used for "today" preview</span>
       <% if sticker.silhouette_image.attached? && sticker.persisted? %>
         <div class="mt-2">
-          <%= image_tag sticker.silhouette_image.variant(:thumb), width: 100 %>
+          <%= image_tag sticker.image %>
         </div>
       <% end %>
     </div>
