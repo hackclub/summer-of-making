@@ -48,10 +48,35 @@ module AdventOfStickers
 
       return unless target_sticker
 
-      UserAdventSticker.create_with(earned_on: today, devlog_id: devlog.id).find_or_create_by(
+      award = UserAdventSticker.create_with(earned_on: today, devlog_id: devlog.id).find_or_create_by(
         user_id: user.id,
         shop_item_id: target_sticker.id
       )
+
+      if award.previously_new_record?
+        image_url = target_sticker.image.url
+
+        # DM user
+        if user.slack_id.present?
+          header = {
+            type: "section",
+            text: { type: "mrkdwn", text: "You just earned today’s Advent sticker: *#{target_sticker.name}*! :yay:" }
+          }
+          blocks = image_url.present? ? [ header, { type: "image", image_url: image_url, alt_text: target_sticker.name } ] : [ header ]
+          SendSlackDmJob.perform_later(user.slack_id, nil, blocks: blocks)
+        end
+
+        # Channel announce
+        channel_id = "C015M4L9AHW"
+        if channel_id.present?
+          header = {
+            type: "section",
+            text: { type: "mrkdwn", text: "#{user.display_name} just unlocked today’s sticker: *#{target_sticker.name}*! :partyparrot:" }
+          }
+          blocks = image_url.present? ? [ header, { type: "image", image_url: image_url, alt_text: target_sticker.name } ] : [ header ]
+          SendSlackDmJob.perform_later(channel_id, nil, blocks: blocks)
+        end
+      end
     rescue => e
       Rails.logger.error("Advent Awarder error for devlog #{devlog.id}: #{e.message}")
       Honeybadger.notify(e, context: { devlog_id: devlog.id, user_id: user&.id })
