@@ -75,7 +75,7 @@ class ShopItem::AdventSticker < ShopItem
   end
 
   def prevent_delete_if_awarded
-    if user_advent_stickers.exists?
+    if UserAdventSticker.exists?(shop_item_id: id)
       errors.add(:base, "Cannot delete an Advent sticker that has been awarded")
       throw :abort
     end

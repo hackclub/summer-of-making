@@ -176,10 +176,16 @@ class DevlogsController < ApplicationController
 
   def set_devlog
     if @project
-      @devlog = @project.devlogs.find(params[:id])
+      @devlog = @project.devlogs
+                         .with_attached_file
+                         .includes(user_advent_sticker: { shop_item: [ { image_attachment: :blob }, { silhouette_image_attachment: :blob } ] })
+                         .find(params[:id])
     else
-      @devlog = Devlog.find(params[:id])
-      @project = @devlog.project
+      @devlog = Devlog
+                  .with_attached_file
+                  .includes(user_advent_sticker: { shop_item: [ { image_attachment: :blob }, { silhouette_image_attachment: :blob } ] })
+                  .find(params[:id])
+       @project = @devlog.project
     end
   end
 
