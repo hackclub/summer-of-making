@@ -7,7 +7,7 @@
     </div>
 
     <div class="relative z-10 md:grid md:grid-cols-3 gap-4">
-      <% advent_cards_for_user(current_user).each do |card| %>
+      <% (@advent_cards || []).each do |card| %>
         <%= render "campfire/advent_card", card: card %>
       <% end %>
     </div>
