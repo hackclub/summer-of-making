@@ -11,7 +11,7 @@ class DailyAdventStickerUnlockAnnounceJob < ApplicationJob
     return if stickers.blank?
 
     names = stickers.pluck(:name).join(", ")
-    text = "Today’s Advent sticker#{'s' if stickers.size > 1} unlocked: #{names}!"
+    text = "Today’s Stickerlode sticker#{'s' if stickers.size > 1} unlocked: #{names}!"
 
     SendSlackDmJob.perform_later(channel_id, text)
   end
