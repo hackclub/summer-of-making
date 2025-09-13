@@ -64,7 +64,7 @@ class C::StyledButton < C::Base
   def render_button_content
     div(class: CONTENT_WRAPPER_CLASSES) do
       render_icon if @icon
-      span(class: TEXT_WRAPPER_CLASSES) { @text }
+      span(class: TEXT_WRAPPER_CLASSES) { raw safe @text } # i trust you. sanitize whatever gets passed in here.
     end
   end
 
