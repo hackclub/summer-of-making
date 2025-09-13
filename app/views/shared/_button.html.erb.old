@@ -11,7 +11,7 @@
 #    - type: A button type to pass into 'button_tag'. Defaults to ':button'.
 #    - fill_width: If 'true', the button will fill the entire width of its container.
 #    - disabled: If 'true', the button will be disabled.
-#    - classes: Additional classes to add to the button.
+#    - css_classes: Additional classes to add to the button.
 %>
 
 <% raise "shared/button requires 'text' as a local" unless local_assigns[:text] %>
@@ -45,6 +45,7 @@
         <% end %>
         <span class="flex items-center gap-1"><%= raw local_assigns[:text] %></span> <%# erb_lint:disable ErbSafety %>
     </div>
+
 <% end %>
 
 <% if local_assigns[:link] %>

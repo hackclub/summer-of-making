@@ -2,7 +2,7 @@
   user_is_banned = current_user.is_banned?
   tab_unlocked = tab_unlocked?(:explore)
 %>
-<%= render layout: "shared/container", locals: {
+<%= render C::Container.new(
   full_height: true,
   attr: {
     class: "p-4 z-20 relative",
@@ -10,7 +10,7 @@
       action: "mouseover->sidebar#handleMouseEnter mouseleave->sidebar#handleMouseExit"
     }
   }
-} do %>
+) do %>
   <div
     class="flex flex-col transition-all duration-300 text-som-dark h-full w-[220px] justify-between relative"
     data-sidebar-target="sidebar">
@@ -25,7 +25,7 @@
     <nav class="flex items-center text-justify text-3xl 2xl:text-4xl">
       <ul class="space-y-1 w-full transition-transform duration-150" data-sidebar-target="links">
         <li class="flex justify-start">
-          <%= render partial: "shared/link", locals: {
+          <%= render C::Link.new(
             target: campfire_path,
             text: "Campfire",
             icon: "campfire",
@@ -37,11 +37,11 @@
               class: "text-3xl"
             },
             underline_attr: { data: { sidebar_target: "underline" } }
-          } %>
+          ) %>
         </li>
 
         <li class="flex justify-start">
-          <%= render partial: "shared/link", locals: {
+          <%= render C::Link.new(
             target: explore_path,
             text: "Explore",
             icon: (user_is_banned || !tab_unlocked) ? "lock" : "compass",
@@ -53,12 +53,12 @@
               class: "text-3xl"
             },
             underline_attr: { data: { sidebar_target: "underline" } },
-            class: (user_is_banned || !tab_unlocked) ? "opacity-50 cursor-not-allowed" : "cursor-pointer"
-          } %>
+            css_class: (user_is_banned || !tab_unlocked) ? "opacity-50 cursor-not-allowed" : "cursor-pointer"
+          ) %>
         </li>
 
         <li class="flex justify-start">
-          <%= render partial: "shared/link", locals: {
+          <%= render C::Link.new(
             target: my_projects_path,
             text: "Projects",
             icon: (user_is_banned || !tab_unlocked) ? "lock" : "user",
@@ -70,15 +70,15 @@
               class: "text-3xl"
             },
             underline_attr: { data: { sidebar_target: "underline" } },
-            class: "#{(user_is_banned || !tab_unlocked) ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}
+            css_class: "#{(user_is_banned || !tab_unlocked) ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}
               #{'animate-get-my-attention' if (current_user.tutorial_completed? && !(current_page?(my_projects_path) ||
               (controller_name == 'projects' && action_name == 'show')) &&
               current_user.needs_projects_attention?)}"
-          } %>
+          ) %>
         </li>
 
         <li class="flex justify-start" id="new-tutorial-vote">
-          <%= render partial: "shared/link", locals: {
+          <%= render C::Link.new(
             target: new_vote_path,
             text: "Vote",
             icon: (user_is_banned || !tab_unlocked) ? "lock" : "vote",
@@ -90,12 +90,12 @@
               class: "text-3xl"
             },
             underline_attr: { data: { sidebar_target: "underline" } },
-            class: (user_is_banned || !tab_unlocked) ? "opacity-50 cursor-not-allowed" : "cursor-pointer"
-          } %>
+            css_class: (user_is_banned || !tab_unlocked) ? "opacity-50 cursor-not-allowed" : "cursor-pointer"
+          ) %>
         </li>
 
         <li class="flex justify-start">
-          <%= render partial: "shared/link", locals: {
+          <%= render C::Link.new(
             target: shop_path,
             text: "Shop",
             icon: user_is_banned ? "lock" : "shop",
@@ -107,12 +107,12 @@
               class: "text-3xl"
             },
             underline_attr: { data: { sidebar_target: "underline" } },
-            class: user_is_banned ? "opacity-50 cursor-not-allowed" : "cursor-pointer"
-          } %>
+            css_class: user_is_banned ? "opacity-50 cursor-not-allowed" : "cursor-pointer"
+          ) %>
         </li>
         <% if current_user&.verified_check? %>
         <li class="flex justify-start">
-            <%= render partial: "shared/link", locals: {
+            <%= render C::Link.new(
               target: gork_path,
               text: "gork",
               icon: "ai",
@@ -125,12 +125,12 @@
                 style: "font-family: serif"
               },
               underline_attr: { data: { sidebar_target: "underline" } }
-            } %>
+            ) %>
         </li>
         <% end %>
 
         <li class="flex justify-start">
-          <%= render partial: "shared/link", locals: {
+          <%= render C::Link.new(
             target: map_path,
             text: "Map",
             icon: tab_unlocked?(:map) ? "map" : "lock",
@@ -142,12 +142,12 @@
               class: "text-3xl"
             },
             underline_attr: { data: { sidebar_target: "underline" } },
-            class: tab_unlocked?(:map) ? "" : "opacity-50 cursor-not-allowed"
-          } %>
+            css_class: tab_unlocked?(:map) ? "" : "opacity-50 cursor-not-allowed"
+          ) %>
         </li>
 
         <li class="flex justify-start">
-          <%= render partial: "shared/link", locals: {
+          <%= render C::Link.new(
             target: stt_path,
             text: SecretThirdThing.tab_title,
             icon: SecretThirdThing.tab_icon,
@@ -159,12 +159,12 @@
               class: "text-3xl"
             },
             underline_attr: { data: { sidebar_target: "underline" } },
-          } %>
+          ) %>
         </li>
 
         <% if current_user&.is_admin? || current_user&.fraud_team_member? %>
           <li class="flex justify-start border-2 border-dashed border-orange-500 bg-orange-500/10" style="margin-right: 10px; border-radius: 10px;">
-            <%= render partial: "shared/link", locals: {
+            <%= render C::Link.new(
               target: admin_root_path,
               text: "Admin",
               icon: "edit",
@@ -175,12 +175,12 @@
           class: "text-3xl"
               },
               underline_attr: { data: { sidebar_target: "underline" } }
-            } %>
+            ) %>
           </li>
         <% end %>
         <% if current_user&.ship_certifier? %>
           <li class="flex justify-start border-2 border-dashed border-orange-500 bg-orange-500/10" style="margin-right: 10px; border-radius: 10px;">
-            <%= render partial: "shared/link", locals: {
+            <%= render C::Link.new(
               target: admin_ship_certifications_path,
               text: "Ship Certs",
               icon: "edit",
@@ -191,7 +191,7 @@
           class: "text-3xl"
               },
               underline_attr: { data: { sidebar_target: "underline" } }
-            } %>
+            ) %>
           </li>
         <% end %>
       </ul>
@@ -246,18 +246,19 @@
               </span>
             </div>
           </div>
-          <%= render "shared/link",
+          <%= render C::ButtonTo.new(
             text: "Log out",
             icon: "exit",
             method: :delete,
             target: logout_path,
             animate_push: true,
             icon_size: "6",
-            class: "cursor-pointer",
+            css_class: "cursor-pointer",
             text_attr: {
               data: { sidebar_target: "collapseFade" },
               class: "text-xl"
-            } %>
+            }
+          ) %>
         </div>
       </div>
     </div>

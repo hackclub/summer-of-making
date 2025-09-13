@@ -33,7 +33,6 @@ gem "solid_cache"
 gem "solid_queue"
 
 # Serverside analytics
-gem "ahoy_matey"
 # gem "ahoy_captain", git: "https://github.com/johnmcdowall/ahoy_captain.git", branch: "fix_importmaps"
 gem "geocoder"
 
@@ -174,3 +173,7 @@ gem "jb", "~> 0.8.2"
 gem "rbtrace", "~> 0.5.2"
 
 gem "autotuner", "~> 1.0"
+
+gem "phlex-rails", "~> 2.3"
+
+gem "literal", "~> 1.8"

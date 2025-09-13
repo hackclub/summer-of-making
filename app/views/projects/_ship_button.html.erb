@@ -1,6 +1,6 @@
 <% if !project.is_shipped %>
   <% if policy(project).can_see_certification_details? && project.latest_ship_certification&.rejected? %>
-    <%= render "shared/button",
+    <%= render C::StyledButton.new(
         text: "Ship It!",
         kind: "primary",
         icon: "ship.svg",
@@ -9,10 +9,10 @@
           action: "click->modal#open",
           modal_id: "#{project.id}",
           modal_type: "certification"
-        } %>
+        }) %>
   <% else %>
     <% if !Flipper.enabled?(:new_onboarding, current_user) || current_user&.tutorial_progress&.new_tutorial_step_completed?(:ship) %>
-      <%= render "shared/button",
+      <%= render C::StyledButton.new(
           text: "Ship It!",
           kind: "primary",
           icon: "ship.svg",
@@ -21,21 +21,21 @@
             action: "modal#open",
             modal_id: "#{project.id}",
             modal_type: "is_shipped"
-          } %>
+          }) %>
     <% else %>
-      <%= render "shared/button",
+      <%= render C::StyledButton.new(
           text: "Ship It!",
           kind: "primary",
           icon: "ship.svg",
           data: {
             action: "new-tutorial#startShipScene",
-          } %>
+          }) %>
     <% end %>
   <% end %>
 <% else %>
-  <%= render "shared/button",
+  <%= render C::StyledButton.new(
       text: "Shipped!",
       kind: "primary",
       icon: "ship.svg",
-      disabled: true %>
+      disabled: true) %>
 <% end %>

@@ -1,5 +1,5 @@
 <% unless %i[not_linked, eligible].include?(current_verification_status) %>
-  <%= render "shared/card", classes: "max-w-xl mx-auto my-8 text-[#3a2f25]", padding: "sm", shadow: "lg" do %>
+  <%= render C::Card.new(css_classes: "max-w-xl mx-auto my-8 text-[#3a2f25]", padding: "sm", shadow: "lg") do %>
     <% case current_verification_status %>
       <% when :not_linked %>
         <p class="text-xs sm:text-sm md:text-base text-[#3a2f25]">

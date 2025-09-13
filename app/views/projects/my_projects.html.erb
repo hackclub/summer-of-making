@@ -59,17 +59,17 @@
       <% end %>
 
       <div class="bg-[#F3ECD8] rounded-2xl border-4 border-[#E4DCC6] transform hover:scale-[1.02] transition-transform duration-300 flex flex-col h-full items-center justify-center p-6">
-        <%= render "shared/button",
+        <%= render C::StyledButton.new(
             text: "Create Project",
             type: "primary",
             icon: "plus.svg",
             data: {
               action: "click->modal#open",
               modal_type: "create-project"
-            } %>
+            }) %>
       </div>
     <% else %>
-      <%= render "shared/card", classes: "col-span-full flex flex-col items-center", padding: "lg" do %>
+      <%= render C::Card.new(css_classes: "col-span-full flex flex-col items-center", padding: "lg") do %>
         <div class="flex justify-center items-center">
           <%= image_tag 'orpheustimer.png', class: 'w-32 h-32 sm:w-48 sm:h-48 2xl:w-64 2xl:h-64 transform scale-x-[-1] mb-4 sm:mb-6' %>
         </div>
@@ -92,7 +92,7 @@
         <% end %>
 
         <div class="flex justify-center w-full">
-          <%= render "shared/button",
+          <%= render C::StyledButton.new(
               text: "Create Your Project",
               type: "primary",
               icon: "plus.svg",
@@ -101,7 +101,7 @@
                 action: "click->modal#open",
                 modal_type: "create-project"
               },
-              classes: "mx-auto animate-bounce #{'animate-bounce' if current_user.projects.empty?}" %>
+              css_classes: "mx-auto animate-bounce #{'animate-bounce' if current_user.projects.empty?}") %>
         </div>
       <% end %>
     <% end %>

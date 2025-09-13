@@ -124,4 +124,7 @@ class ApplicationController < ActionController::Base
       user_id: current_user&.id
     }
   end
+
+  # no error :p
+  def ahoy = (@ahoy ||= Class.new { def track(*) end }.new)
 end

@@ -25,17 +25,17 @@ debug: false
 
 # Enable Honeybadger Insights
 insights:
-  enabled: true
+  enabled: false
 
-rails:
-  insights:
-    events: true
-    metrics: true
-puma:
-  insights:
-    events: true
-    metrics: true
-autotuner:
-  insights:
-    events: true
-    metrics: true
+# rails:
+#   insights:
+#     events: true
+#     metrics: true
+# puma:
+#   insights:
+#     events: true
+#     metrics: true
+# autotuner:
+#   insights:
+#     events: true
+#     metrics: true

@@ -8,7 +8,7 @@
   <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-8 lg:items-start">
     <!-- Profile Info Sidebar -->
     <div class="lg:col-span-1 space-y-6">
-      <%= render "shared/card" do %>
+      <%= render C::Card.new do %>
         <div class="space-y-6">
           <!-- Profile Header -->
           <div class="text-center profile-header">
@@ -25,7 +25,7 @@
             </h1>
 
             <% if @user == current_user %>
-              <%= render "shared/button", text: "Edit your profile", link: edit_user_profile_path(@user), icon: "edit.svg" %>
+              <%= render C::StyledButton.new(text: "Edit your profile", link: edit_user_profile_path(@user), icon: "edit.svg") %>
             <% else %>
             <% admin_tool("inline-block ml-2") do %>
                <%= link_to "edit their profile.", edit_user_profile_path(@user), class: "inline-flex items-center px-3 py-2 border border-gray-300 shadow-sm text-sm leading-4 rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500" %>
@@ -130,7 +130,7 @@
 
       <!-- Badges -->
       <% if @user_badges.any? %>
-        <%= render "shared/card" do %>
+        <%= render C::Card.new do %>
           <div class="space-y-4">
             <div class="flex items-center justify-between">
               <h3 class="text-lg font-semibold text-gray-800">Badges</h3>
@@ -146,7 +146,7 @@
 
       <!-- Projects List -->
       <% if @all_projects.any? %>
-        <%= render "shared/card" do %>
+        <%= render C::Card.new do %>
           <div class="space-y-4">
             <div class="flex items-center justify-between">
               <h3 class="text-lg font-semibold text-gray-800">Projects</h3>
@@ -206,7 +206,7 @@
                <% @activities.each do |activity| %>
                  <% if activity[:type] == :project %>
                    <% project = activity[:item] %>
-                   <%= render "shared/card" do %>
+                   <%= render C::Card.new do %>
                      <div class="ml-4">
                        <div class="flex items-center justify-between mb-2 sm:mb-3">
                          <div class="flex items-center">
@@ -282,7 +282,7 @@
                  <% elsif activity[:type] == :shipwright_advice %>
                    <% advice = activity[:item] %>
                    <% reviewer = advice.ship_certification.reviewer %>
-                   <%= render "shared/card" do %>
+                   <%= render C::Card.new do %>
                      <div class="ml-4">
                        <div class="flex items-center justify-between mb-2 sm:mb-3">
                          <div class="flex items-center">
@@ -346,7 +346,7 @@
                    <% end %>
                  <% elsif activity[:type] == :user_joined %>
                    <% user = activity[:item] %>
-                   <%= render "shared/card" do %>
+                   <%= render C::Card.new do %>
                      <div class="ml-4">
                        <div class="flex items-center justify-between mb-2 sm:mb-3">
                          <div class="flex items-center">
@@ -395,7 +395,7 @@
         <% else %>
           <!-- Empty State -->
           <div class="flex-1 flex items-center justify-center">
-            <%= render "shared/card" do %>
+            <%= render C::Card.new do %>
               <div class="text-center py-12">
                 <div class="text-gray-400 text-6xl mb-4">📝</div>
                 <h3 class="text-lg text-gray-900 mb-2">No activity yet</h3>

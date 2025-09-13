@@ -26,12 +26,12 @@
   <div class="flex flex-col sm:flex-row items-center justify-between gap-4 mb-6">
     <div class="flex flex-col sm:flex-row items-center gap-4">
       <% if current_user&.shop_orders&.any? %>
-        <%= render "shared/button",
+        <%= render C::StyledButton.new(
           text: "View My Orders",
           link: shop_orders_path,
           kind: :primary,
           fill_width: false,
-          icon: nil %>
+          icon: nil) %>
       <% end %>
 
       <% if @regionalization_enabled %>
@@ -96,7 +96,7 @@
     <div id="how-it-works" class="mt-15">
       <div class="relative mb-8 md:mb-16 flex flex-col items-center">
         <div class="relative flex flex-col md:flex-row gap-4 md:gap-8 mx-auto justify-center items-center md:items-stretch">
-          <%= render "shared/card", classes: 'h-full max-w-96 sm:max-w-lg md:max-w-80 lg:max-w-96 animate-wave' do %>
+          <%= render C::Card.new(css_classes: 'h-full max-w-96 sm:max-w-lg md:max-w-80 lg:max-w-96 animate-wave') do %>
             <div class="p-4 md:p-5 relative text-center">
               <h3 class="text-xl md:text-2xl font-bold mb-3 md:mb-4 text-[#3a2f25] font-['DynaPuff',sans-serif]">Build
                 Stuff</h3>
@@ -115,7 +115,7 @@
             </div>
           <% end %>
 
-          <%= render "shared/card", classes: 'h-full max-w-96 sm:max-w-lg md:max-w-80 lg:max-w-96 animate-wave-offset' do %>
+          <%= render C::Card.new(css_classes: 'h-full max-w-96 sm:max-w-lg md:max-w-80 lg:max-w-96 animate-wave-offset') do %>
             <div class="p-4 md:p-5 relative text-center">
               <h3 class="text-xl md:text-2xl font-bold mb-3 md:mb-4 text-[#3a2f25] font-['DynaPuff',sans-serif]">Get
                 Stuff</h3>
@@ -159,7 +159,7 @@
       <p class="text-sm text-[#666] font-['National Park',sans-serif]">options? we got em</p>
     </div>
     <% if @shop_items.empty? || (Flipper.enabled?(:enable_shop_balloons, current_user) && @shop_items.count == 1 && @shop_items.first.is_a?(ShopItem::SinkeningBalloons) && (!current_user&.sinkening_participation? || @ordered_once_item_ids&.include?(@shop_items.first.id))) %>
-      <%= render "shared/card", classes: 'max-w-md mx-auto' do %>
+      <%= render C::Card.new(css_classes: 'max-w-md mx-auto') do %>
         <div class="text-lg font-semibold text-[#3a2f25] font-['DynaPuff',sans-serif] mb-1">
           <% if @regionalization_enabled %>
             🚫 No items available in <%= Shop::Regionalizable.region_name(@selected_region) %>
@@ -203,7 +203,7 @@
       <!-- Badge Items Section -->
       <% if @badge_items.any? %>
         <div class="mb-6">
-          <%= render "shared/card", classes: 'max-w-5xl mx-auto mb-4', padding: 'md' do %>
+          <%= render C::Card.new(css_classes: 'max-w-5xl mx-auto mb-4', padding: 'md') do %>
             <div class="text-center">
               <h2 class="text-2xl font-bold text-[#3a2f25] font-['DynaPuff',sans-serif] mb-1">🏆 Badge Collection</h2>
               <p class="text-base text-[#666] font-['National Park',sans-serif]">buy glory! buy fame! buy power.</p>
