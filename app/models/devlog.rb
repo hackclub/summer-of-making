@@ -46,6 +46,7 @@ class Devlog < ApplicationRecord
   has_many :likes, as: :likeable, dependent: :destroy
   has_one_attached :file
   has_one :ysws_review_approval, class_name: "YswsReview::DevlogApproval", dependent: :destroy
+  has_one :user_advent_sticker
 
   # even tho nora says to not use default_scope, imma use it here and create uh unexpected behavior!
   default_scope { where(deleted_at: nil) }
@@ -59,6 +60,8 @@ class Devlog < ApplicationRecord
   validate :only_formatting_changes, on: :update
 
   validate :updates_not_locked, on: :create
+  validate :prevent_soft_delete_when_sticker_present, on: :update
+  before_destroy :prevent_hard_delete_when_sticker_present
 
   after_commit :notify_followers_and_stakers, on: :create
   after_commit :recalculate_devlogs_if_new_key_used, on: :create
@@ -66,18 +69,19 @@ class Devlog < ApplicationRecord
   after_update_commit :recalculate_project_devlogs, if: :saved_change_to_deleted_at?
 
   after_commit :bust_user_projects_devlogs_cache
+  after_commit :maybe_award_advent_sticker, on: :create
 
   scope :for_explore_feed, -> {
     joins(:project).where(projects: { is_deleted: false })
       .with_attached_file
-      .includes(:project, :user)
+      .includes(:project, :user, user_advent_sticker: { shop_item: [ { image_attachment: :blob }, { silhouette_image_attachment: :blob } ] })
       .order(created_at: :desc)
   }
 
   scope :for_user_following, ->(user_id) {
     joins(project: :project_follows)
       .with_attached_file
-      .includes(:project, :user)
+      .includes(:project, :user, user_advent_sticker: { shop_item: [ { image_attachment: :blob }, { silhouette_image_attachment: :blob } ] })
       .where(project_follows: { user_id: user_id }, projects: { is_deleted: false })
       .order(created_at: :desc)
   }
@@ -264,6 +268,10 @@ class Devlog < ApplicationRecord
     NotifyProjectDevlogJob.perform_later(id)
   end
 
+  def maybe_award_advent_sticker
+    AdventOfStickers::Awarder.award_for_devlog(self)
+  end
+
   def recalculate_project_devlogs
     return unless project_id
     RecalculateProjectDevlogTimesJob.perform_later(project_id)
@@ -290,5 +298,17 @@ class Devlog < ApplicationRecord
 
     # immeditately perform so we don't have 0 0 time
     RecalculateProjectDevlogTimesJob.perform_now(project_id)
+  end
+
+  def prevent_soft_delete_when_sticker_present
+    return unless will_save_change_to_deleted_at?
+    errors.add(:base, "Devlog with earned sticker cannot be deleted") if user_advent_sticker.present?
+  end
+
+  def prevent_hard_delete_when_sticker_present
+    if user_advent_sticker.present?
+      errors.add(:base, "Devlog with earned sticker cannot be deleted")
+      throw :abort
+    end
   end
 end

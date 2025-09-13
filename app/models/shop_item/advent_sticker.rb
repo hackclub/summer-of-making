@@ -57,6 +57,7 @@ class ShopItem::AdventSticker < ShopItem
   has_one_attached :silhouette_image
 
   validates :unlock_on, presence: true
+  before_destroy :prevent_delete_if_awarded
 
   before_validation :set_ticket_cost_to_zero, on: :create
 
@@ -71,5 +72,12 @@ class ShopItem::AdventSticker < ShopItem
 
   def set_ticket_cost_to_zero
     self.ticket_cost = 0
+  end
+
+  def prevent_delete_if_awarded
+    if user_advent_stickers.exists?
+      errors.add(:base, "Cannot delete an Advent sticker that has been awarded")
+      throw :abort
+    end
   end
 end

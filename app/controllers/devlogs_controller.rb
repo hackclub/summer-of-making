@@ -113,6 +113,15 @@ class DevlogsController < ApplicationController
       return
     end
 
+    if @devlog.user_advent_sticker
+      if @devlog.project
+        redirect_to @devlog.project, alert: "This devlog has an earned sticker and cannot be deleted."
+      else
+        redirect_to campfire_path, alert: "This devlog has an earned sticker and cannot be deleted."
+      end
+      return
+    end
+
     if @devlog.covered_by_ship_event?
       if @devlog.project
         redirect_to @devlog.project, alert: "This devlog is covered by a ship event and cannot be deleted."

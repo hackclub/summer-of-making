@@ -36,8 +36,11 @@ class Admin::AdventStickersController < Admin::ApplicationController
 
   def destroy
     return redirect_to admin_root_path, alert: "Feature disabled." unless Flipper.enabled?(:advent_of_stickers, current_user)
-    @advent_sticker.destroy!
-    redirect_to admin_advent_stickers_path, notice: "Deleted Advent sticker."
+    if @advent_sticker.destroy
+      redirect_to admin_advent_stickers_path, notice: "Deleted Advent sticker."
+    else
+      redirect_to admin_advent_stickers_path, alert: (@advent_sticker.errors.full_messages.first || "Sticker could not be deleted")
+    end
   end
 
   private

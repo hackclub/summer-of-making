@@ -16,7 +16,7 @@
 %>
 
 <%= render layout: "shared/card" do %>
-  <div class="ml-4 z-10 <%= context == 'explore' || context == 'project' ? '' : '' %> <%= container_classes %> <%= 'cursor-pointer' if show_project_navigation %>"
+  <div class="ml-4 z-10 <%= context == 'explore' || context == 'project' ? '' : '' %> <%= container_classes %> <%= 'cursor-pointer' if show_project_navigation %> relative"
        id="<%= dom_id(devlog) %>"
        data-controller="modal devlog-card"
        data-devlog-card-project-path-value="<%= project_path(devlog.project) if show_project_navigation && devlog.project %>"
@@ -25,6 +25,17 @@
        data-action="<%= 'click->devlog-card#navigateToProject' if show_project_navigation %>"
        data-viewable-type="Devlog"
        data-viewable-id="<%= devlog.id %>">
+
+    <% if devlog.user_advent_sticker&.shop_item&.image&.attached? || devlog.user_advent_sticker&.shop_item&.silhouette_image&.attached? %>
+      <div class="absolute -top-3 -right-5 sm:top-0 sm:right-0 w-12 h-12 sm:w-16 sm:h-16 lg:w-32 lg:h-32 drop-shadow-md rotate-[-5deg]">
+        <% sticker = devlog.user_advent_sticker.shop_item %>
+        <% if sticker.image.attached? %>
+          <%= image_tag sticker.image, alt: "Earned sticker", class: "w-full h-full object-contain" %>
+        <% elsif sticker.silhouette_image.attached? %>
+          <%= image_tag sticker.silhouette_image, alt: "Earned sticker", class: "w-full h-full object-contain" %>
+        <% end %>
+      </div>
+    <% end %>
 
     <div class="flex items-center justify-between mb-2 sm:mb-3">
       <div class="flex items-center">
