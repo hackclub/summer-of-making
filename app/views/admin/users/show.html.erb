@@ -205,7 +205,7 @@
             <% @user.projects.order(created_at: :desc).each do |project| %>
             <li style="margin-bottom: 0.5em;">
               <strong>
-              <%= link_to "#{project.title} (#{project.id})", "https://summer.hackclub.com/projects/#{project.id}", target: "_blank", style: "color: var(--color-primary);" %>
+              <%= link_to "#{project.title} (#{project.id})", admin_project_path(project), target: "_blank", style: "color: var(--color-primary);" %>
               </strong>
               (<%= project.certification_type || "No certification type" %>)
               - created: <%= project.created_at.strftime("%m/%d/%Y") %>

@@ -473,7 +473,7 @@ Rails.application.routes.draw do
       end
       resources :special_access_users, only: [ :index ]
       resources :shop_items
-      resources :projects, only: [] do
+      resources :projects, only: [ :show ] do
         member do
           delete :destroy
           patch :restore
