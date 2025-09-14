@@ -27,7 +27,7 @@
        data-viewable-id="<%= devlog.id %>">
 
     <% if devlog.user_advent_sticker&.shop_item&.image&.attached? || devlog.user_advent_sticker&.shop_item&.silhouette_image&.attached? %>
-      <a href="https://hackclub.slack.com/archives/C090B3T9R9R/p1757785046930549" target="_blank" rel="noopener" class="absolute -top-3 -right-5 sm:top-0 sm:right-0 w-12 h-12 sm:w-16 sm:h-16 lg:w-32 lg:h-32 drop-shadow-md rotate-[-5deg]">
+      <a href="https://hackclub.slack.com/archives/C090B3T9R9R/p1757785046930549" target="_blank" rel="noopener" class="absolute -top-6 -right-8 sm:-top-3 sm:-right-3 w-12 h-12 sm:w-16 sm:h-16 lg:w-32 lg:h-32 drop-shadow-md rotate-[-5deg]">
         <% sticker = devlog.user_advent_sticker.shop_item %>
         <% if sticker.image.attached? %>
           <%= image_tag sticker.image, alt: "Earned sticker", class: "w-full h-full object-contain" %>
