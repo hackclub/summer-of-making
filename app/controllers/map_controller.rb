@@ -1,6 +1,9 @@
 class MapController < ApplicationController
   before_action :authenticate_user!
-  before_action :check_identity_verification
+  # OLD CODE: identity verification check that blocked access
+  # before_action :check_identity_verification
+  include MapHelper
+
 
   def index
     @projects_on_map = Cache::MapPointsJob.perform_now
@@ -12,11 +15,17 @@ class MapController < ApplicationController
     end
   end
 
-  private
+  # OLD CODE: identity verification method that blocked access
+  # def check_identity_verification
+  #   return if current_user&.identity_vault_id.present? && current_verification_status != :ineligible
+  #
+  #   redirect_to campfire_path, alert: "Please verify your identity to access this page."
+  # end
 
+  # --- START temporarily disabled identity verification ---
   def check_identity_verification
-    return if current_user&.identity_vault_id.present? && current_verification_status != :ineligible
-
-    redirect_to campfire_path, alert: "Please verify your identity to access this page."
+    # Temporarily allow all users to access the map
+    return
   end
+  # --- END temporarily disabled identity verification ---
 end

@@ -9,7 +9,8 @@ class ProjectsController < ApplicationController
   before_action :check_if_shipped, only: %i[edit update]
   before_action :authorize_user, only: [ :destroy ]
   before_action :require_hackatime, only: [ :create ]
-  before_action :check_identity_verification, except: %i[show]
+  # OLD CODE: identity verification check that blocked access
+  # before_action :check_identity_verification, except: %i[show]
   skip_before_action :authenticate_user!, only: %i[show]
 
   def show
@@ -481,11 +482,21 @@ class ProjectsController < ApplicationController
   end
   helper_method :ysws_type_options
 
-  def check_identity_verification
-    return if current_user&.identity_vault_id.present? && current_verification_status != :ineligible
+  private
 
-    redirect_to campfire_path, alert: "Please verify your identity to access this page."
+  # OLD CODE: identity verification method that blocked access
+  # def check_identity_verification
+  #   return if current_user&.identity_vault_id.present? && current_verification_status != :ineligible
+  #
+  #   redirect_to campfire_path, alert: "Please verify your identity to access this page."
+  # end
+
+  # --- START temporarily disabled identity verification ---
+  def check_identity_verification
+    # Temporarily allow all users to access projects
+    return
   end
+  # --- END temporarily disabled identity verification ---
 
   def require_hackatime
     return if current_user&.has_hackatime?

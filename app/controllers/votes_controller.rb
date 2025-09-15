@@ -2,7 +2,8 @@
 
 class VotesController < ApplicationController
   before_action :authenticate_user!
-  before_action :check_identity_verification
+  # OLD CODE: identity verification check that blocked access
+  # before_action :check_identity_verification
   before_action :ensure_voting_not_paused, only: %i[new create]
   before_action :set_projects, only: %i[new]
   before_action :set_tracking, only: %i[track_demo track_repo]
@@ -239,11 +240,19 @@ class VotesController < ApplicationController
   end
 
 
-  def check_identity_verification
-    return if current_user&.identity_vault_id.present? && current_verification_status != :ineligible
+  # OLD CODE: identity verification method that blocked access
+  # def check_identity_verification
+  #   return if current_user&.identity_vault_id.present? && current_verification_status != :ineligible
+  #
+  #   redirect_to campfire_path, alert: "Please verify your identity to access this page."
+  # end
 
-    redirect_to campfire_path, alert: "Please verify your identity to access this page."
+  # --- START temporarily disabled identity verification ---
+  def check_identity_verification
+    # Temporarily allow all users to access voting
+    return
   end
+  # --- END temporarily disabled identity verification ---
 
   def set_projects
     @vote_queue = current_user.user_vote_queue || current_user.build_user_vote_queue.tap(&:save!)
