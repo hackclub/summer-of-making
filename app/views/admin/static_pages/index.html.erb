@@ -28,6 +28,7 @@
   <%= render partial: "tool", locals: { path: admin_caches_path, label: "Global Caches" } if @admin_signed_in %>
   <%= render partial: "tool", locals: { path: admin_sinkening_path(SinkeningSetting.current), label: "The Sinkening" } if @admin_signed_in %>
   <%= render partial: "tool", locals: { path: admin_readme_certifications_path, label: "README certs", count: ReadmeCertification.pending.size } if @admin_signed_in %>
+  <%= render partial: "tool", locals: { path: admin_advent_stickers_path, label: "Advent Stickers" } if @admin_signed_in %>
 </div>
 <hr>
 

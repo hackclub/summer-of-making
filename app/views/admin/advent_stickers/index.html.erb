@@ -6,20 +6,36 @@
   <table class="table w-full mt-4">
     <thead>
       <tr>
+        <th class="text-left">Preview</th>
         <th class="text-left">Name</th>
         <th class="text-left">Unlock On</th>
         <th class="text-left">Type</th>
         <th class="text-left">Enabled</th>
+        <th class="text-left">Acquired</th>
         <th></th>
       </tr>
     </thead>
     <tbody>
       <% @advent_stickers.each do |sticker| %>
-        <tr>
-          <td><%= sticker.name %></td>
+        <% is_today = sticker.unlock_on == Date.current %>
+        <tr <%= 'style="border-left: 4px solid #ffc107;"'.html_safe if is_today %>>
+          <td style="width: 60px;">
+            <% if sticker.image.attached? %>
+              <%= image_tag sticker.image, style: "width: 50px; height: 50px; object-fit: cover; border-radius: 4px;" %>
+            <% else %>
+              <span style="color: #dc3545; font-weight: bold; font-size: 12px;">MISSING</span>
+            <% end %>
+          </td>
+          <td>
+            <%= sticker.name %>
+            <% if is_today %>
+              <span style="color: #ffc107; font-weight: bold; margin-left: 8px;">📅 TODAY</span>
+            <% end %>
+          </td>
           <td><%= sticker.unlock_on %></td>
           <td><%= sticker.special? ? "Special" : "Regular" %></td>
           <td><%= sticker.enabled? ? "yes" : "no" %></td>
+          <td><%= @acquisition_counts[sticker.id] || 0 %> people</td>
           <td class="text-right space-x-2">
             <%= link_to "Edit", edit_admin_advent_sticker_path(sticker), class: "abtn small" %>
             <%= button_to "Delete", admin_advent_sticker_path(sticker), method: :delete, data: { confirm: "Sure?" }, class: "abtn small" %>

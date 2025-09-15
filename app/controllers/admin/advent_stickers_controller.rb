@@ -2,17 +2,15 @@ class Admin::AdventStickersController < Admin::ApplicationController
   before_action :set_advent_sticker, only: %i[ edit update destroy ]
 
   def index
-    return redirect_to admin_root_path, alert: "Feature disabled." unless Flipper.enabled?(:advent_of_stickers, current_user)
-    @advent_stickers = ShopItem::AdventSticker.order(:unlock_on)
+    @advent_stickers = ShopItem::AdventSticker.includes(:image_attachment).order(:unlock_on)
+    @acquisition_counts = UserAdventSticker.group(:shop_item_id).count
   end
 
   def new
-    return redirect_to admin_root_path, alert: "Feature disabled." unless Flipper.enabled?(:advent_of_stickers, current_user)
     @advent_sticker = ShopItem::AdventSticker.new(campfire_only: true, enabled: true)
   end
 
   def create
-    return redirect_to admin_root_path, alert: "Feature disabled." unless Flipper.enabled?(:advent_of_stickers, current_user)
     @advent_sticker = ShopItem::AdventSticker.new(advent_params)
     if @advent_sticker.save
       redirect_to admin_advent_stickers_path, notice: "Created Advent sticker."
@@ -22,11 +20,9 @@ class Admin::AdventStickersController < Admin::ApplicationController
   end
 
   def edit
-    redirect_to admin_root_path, alert: "Feature disabled." unless Flipper.enabled?(:advent_of_stickers, current_user)
   end
 
   def update
-    return redirect_to admin_root_path, alert: "Feature disabled." unless Flipper.enabled?(:advent_of_stickers, current_user)
     if @advent_sticker.update(advent_params)
       redirect_to admin_advent_stickers_path, notice: "Updated Advent sticker."
     else
@@ -35,7 +31,6 @@ class Admin::AdventStickersController < Admin::ApplicationController
   end
 
   def destroy
-    return redirect_to admin_root_path, alert: "Feature disabled." unless Flipper.enabled?(:advent_of_stickers, current_user)
     if @advent_sticker.destroy
       redirect_to admin_advent_stickers_path, notice: "Deleted Advent sticker."
     else
