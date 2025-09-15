@@ -248,9 +248,9 @@ ActiveRecord::Schema[8.0].define(version: 2025_09_13_210400) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.integer "last_hackatime_time"
-    t.integer "seconds_coded"
     t.integer "likes_count", default: 0, null: false
     t.integer "comments_count", default: 0, null: false
+    t.integer "seconds_coded"
     t.datetime "hackatime_pulled_at"
     t.integer "views_count", default: 0, null: false
     t.integer "duration_seconds", default: 0, null: false
@@ -259,7 +259,6 @@ ActiveRecord::Schema[8.0].define(version: 2025_09_13_210400) do
     t.boolean "for_sinkening", default: false, null: false
     t.datetime "deleted_at"
     t.index ["deleted_at"], name: "index_devlogs_on_deleted_at"
-    t.index ["project_id", "created_at"], name: "index_devlogs_on_project_id_and_created_at"
     t.index ["project_id"], name: "index_devlogs_on_project_id"
     t.index ["user_id"], name: "index_devlogs_on_user_id"
     t.index ["views_count"], name: "index_devlogs_on_views_count"
@@ -308,7 +307,6 @@ ActiveRecord::Schema[8.0].define(version: 2025_09_13_210400) do
     t.text "resolved_message"
     t.index ["category"], name: "index_fraud_reports_on_category"
     t.index ["resolved_by_id"], name: "index_fraud_reports_on_resolved_by_id"
-    t.index ["suspect_type", "suspect_id", "resolved_at"], name: "index_fraud_reports_on_suspect_and_resolution"
     t.index ["user_id", "suspect_type", "suspect_id"], name: "index_fraud_reports_on_user_and_suspect", unique: true
     t.index ["user_id"], name: "index_fraud_reports_on_user_id"
   end
@@ -413,9 +411,7 @@ ActiveRecord::Schema[8.0].define(version: 2025_09_13_210400) do
     t.integer "followers_count", default: 0, null: false
     t.index ["followers_count"], name: "index_projects_on_followers_count"
     t.index ["is_shipped"], name: "index_projects_on_is_shipped"
-    t.index ["rating"], name: "index_projects_on_rating"
     t.index ["ship_events_count"], name: "index_projects_on_ship_events_count"
-    t.index ["user_id", "is_deleted"], name: "index_projects_on_user_id_and_is_deleted"
     t.index ["user_id"], name: "index_projects_on_user_id"
     t.index ["views_count"], name: "index_projects_on_views_count"
     t.index ["x", "y"], name: "index_projects_on_x_and_y"
@@ -475,7 +471,6 @@ ActiveRecord::Schema[8.0].define(version: 2025_09_13_210400) do
     t.datetime "updated_at", null: false
     t.boolean "for_sinkening", default: false, null: false
     t.boolean "excluded_from_pool", default: false, null: false
-    t.index ["project_id", "created_at", "excluded_from_pool"], name: "index_ship_events_on_project_created_excluded"
     t.index ["project_id"], name: "index_ship_events_on_project_id"
   end
 
@@ -972,7 +967,6 @@ ActiveRecord::Schema[8.0].define(version: 2025_09_13_210400) do
     t.index ["ship_event_2_id"], name: "index_votes_on_ship_event_2_id"
     t.index ["status"], name: "index_votes_on_status"
     t.index ["user_id", "ship_event_1_id", "ship_event_2_id"], name: "index_votes_on_user_and_ship_events", unique: true
-    t.index ["user_id", "status"], name: "index_votes_on_user_id_and_status"
     t.index ["user_id"], name: "index_votes_on_user_id"
   end
 
