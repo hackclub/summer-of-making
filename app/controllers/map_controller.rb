@@ -1,8 +1,6 @@
 class MapController < ApplicationController
   before_action :authenticate_user!
   before_action :check_identity_verification
-  include MapHelper
-
 
   def index
     @projects_on_map = Cache::MapPointsJob.perform_now
@@ -13,6 +11,8 @@ class MapController < ApplicationController
       format.json { render json: { projects: @projects_on_map } }
     end
   end
+
+  private
 
   def check_identity_verification
     return if current_user&.identity_vault_id.present? && current_verification_status != :ineligible

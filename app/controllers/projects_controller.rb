@@ -481,8 +481,6 @@ class ProjectsController < ApplicationController
   end
   helper_method :ysws_type_options
 
-  private
-
   def check_identity_verification
     return if current_user&.identity_vault_id.present? && current_verification_status != :ineligible
 
