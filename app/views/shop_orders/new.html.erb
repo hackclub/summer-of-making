@@ -310,7 +310,7 @@
 
   </script>
 
-<% if current_user.ship_events.where('ship_events.created_at > ?', 24.hours.ago).any? %>
+<% if current_user.ship_events.where('ship_events.created_at > ?', Time.zone.parse('2025-09-15 11:00:00 EDT')).any? %>
 <script>
     // Brainrot mode
     const returnShopButton = document.getElementById('backToShopButton');

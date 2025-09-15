@@ -62,43 +62,23 @@ module ApplicationHelper
   end
 
   def tab_unlocked?(tab)
-    # OLD CODE: original locking logic based on identity verification
-    # unlocked = current_user.identity_vault_id.present? && current_verification_status != :ineligible
-    # case tab
-    # when :campfire
-    #   true
-    # when :explore
-    #   unlocked
-    # when :my_projects
-    #   unlocked
-    # when :vote
-    #   unlocked
-    # when :map
-    #   unlocked
-    # when :shop
-    #   true
-    # else
-    #   raise ArgumentError, "Unknown tab variant: #{tab}"
-    # end
-
-    # --- START temporarily unlocked tabs ---
+    unlocked = current_user.identity_vault_id.present? && current_verification_status != :ineligible
     case tab
     when :campfire
       true
     when :explore
-      true  # temporarily unlocked
+      unlocked
     when :my_projects
-      true  # temporarily unlocked
+      unlocked
     when :vote
-      true  # temporarily unlocked
+      unlocked
     when :map
-      true  # temporarily unlocked
+      unlocked
     when :shop
       true
     else
       raise ArgumentError, "Unknown tab variant: #{tab}"
     end
-    # --- END temporarily unlocked tabs ---
   end
 
   def admin_user_visit(user)

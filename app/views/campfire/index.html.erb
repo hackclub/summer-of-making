@@ -533,7 +533,7 @@
 
 
 
-  <% if current_user.ship_events.where('ship_events.created_at > ?', 24.hours.ago).any? %>
+  <% if current_user.ship_events.where('ship_events.created_at > ?', Time.zone.parse('2025-09-15 11:00:00 EDT')).any? %>
   <div class="hidden md:block fixed top-6 right-8 z-50 bg-[rgb(240,216,188)] text-orange-950 px-3 py-2 rounded-sm shadow-lg text-lg"><p><b>Brainrot Mode Active</b></p></div>
   <!-- Subway Surfers Popup Video - TS is part of my brainrot :) -->
   <div id="subway-popup" class="fixed bottom-4 right-4 z-50 hidden">
