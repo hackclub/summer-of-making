@@ -10,6 +10,9 @@ class ViewTrackingController < ApplicationController
   }.freeze
 
   def create
+    # TEMP
+    return render json: { success: true }
+
     viewable_type = params[:viewable_type]
     viewable_id = params[:viewable_id]
 

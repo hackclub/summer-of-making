@@ -10,16 +10,23 @@ module ApplicationHelper
     )
   end
 
-  def format_seconds(seconds)
+  def format_seconds(seconds, include_days: false)
     # 3660 => "1h 1m"
     # 3600 => "1h"
     # 60 => "1m"
+    # 0 => "0h 0m"
+
+    # 86400, include_days: true => "1d 0h 0m"
+
     return "0h 0m" if seconds.nil? || seconds.zero?
 
+    days = seconds / 86_400 if include_days
     hours = seconds / 3600
+    hours = hours % 24 if include_days
     minutes = (seconds % 3600) / 60
 
     result = []
+    result << "#{days}d" if include_days && days.positive?
     result << "#{hours}h" if hours.positive?
     result << "#{minutes}m" if minutes.positive?
     result.join(" ")
@@ -77,6 +84,12 @@ module ApplicationHelper
   def admin_user_visit(user)
     admin_tool("", "span") do
       render "shared/user_twiddles", user:
+    end
+  end
+
+  def admin_project_visit(project)
+    admin_tool("", "span") do
+      render "shared/project_twiddles", project:
     end
   end
 

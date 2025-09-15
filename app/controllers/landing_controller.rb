@@ -12,7 +12,7 @@ class LandingController < ApplicationController
     # end.sample(5)
 
     if user_signed_in?
-      redirect_to campfire_path
+      redirect_to explore_path
       # if current_user.tutorial_progress.completed_at.nil?
       #   redirect_to campfire_path
       # else
@@ -21,9 +21,7 @@ class LandingController < ApplicationController
     else
       ahoy.track "tutorial_step_landing_first_visit"
 
-      @prizes = ShopItem.includes(image_attachment: { blob: :variant_records })
-                        .shown_in_carousel
-                        .order(:ticket_cost)
+      @prizes = Cache::CarouselPrizesJob.perform_now
     end
   end
 

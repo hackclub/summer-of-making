@@ -5,7 +5,9 @@
 # Table name: shop_items
 #
 #  id                                :bigint           not null, primary key
+#  advent_announced                  :boolean          default(FALSE), not null
 #  agh_contents                      :jsonb
+#  campfire_only                     :boolean          default(TRUE), not null
 #  description                       :string
 #  enabled                           :boolean
 #  enabled_au                        :boolean          default(FALSE)
@@ -31,12 +33,15 @@
 #  price_offset_us                   :decimal(6, 2)    default(0.0)
 #  price_offset_xx                   :decimal(6, 2)    default(0.0)
 #  requires_black_market             :boolean
+#  sale_percentage                   :integer
 #  show_in_carousel                  :boolean
 #  site_action                       :integer
+#  special                           :boolean          default(FALSE), not null
 #  stock                             :integer
 #  ticket_cost                       :decimal(6, 2)
 #  type                              :string
 #  under_the_fold_description        :text
+#  unlock_on                         :date
 #  usd_cost                          :decimal(6, 2)
 #  created_at                        :datetime         not null
 #  updated_at                        :datetime         not null
@@ -46,6 +51,7 @@
 #  idx_shop_items_enabled_black_market_price  (enabled,requires_black_market,ticket_cost)
 #  idx_shop_items_regional_enabled            (enabled,enabled_us,enabled_eu,enabled_in,enabled_ca,enabled_au,enabled_xx)
 #  idx_shop_items_type_enabled                (type,enabled)
+#  index_shop_items_on_unlock_on              (unlock_on)
 #
 class ShopItem < ApplicationRecord
   has_paper_trail # this should NOT be necessary, but can't have shit in detroit
@@ -93,6 +99,10 @@ class ShopItem < ApplicationRecord
     self.ticket_cost.zero?
   end
 
+  def on_sale?
+    sale_percentage.present? && sale_percentage > 0
+  end
+
   def average_hours_estimated
     return 0 unless ticket_cost.present?
     ticket_cost / (Rails.configuration.game_constants.tickets_per_dollar * Rails.configuration.game_constants.dollars_per_mean_hour)
@@ -118,6 +128,7 @@ class ShopItem < ApplicationRecord
   end
 
   after_save :clear_cache
+  after_update_commit :clear_carousel_cache_if_image_changed
 
   def clear_cache
     if requires_black_market?
@@ -125,5 +136,12 @@ class ShopItem < ApplicationRecord
     else
       Rails.cache.delete("all_shop_items_with_variants_v2")
     end
+    Rails.cache.delete(Cache::CarouselPrizesJob::CACHE_KEY) if saved_change_to_show_in_carousel? || saved_change_to_name? || saved_change_to_ticket_cost?
+  end
+
+  private
+
+  def clear_carousel_cache_if_image_changed
+    Rails.cache.delete(Cache::CarouselPrizesJob::CACHE_KEY) if image.attached? && show_in_carousel?
   end
 end

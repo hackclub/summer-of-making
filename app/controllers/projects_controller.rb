@@ -5,87 +5,16 @@ class ProjectsController < ApplicationController
   include ViewTrackable
   skip_before_action :verify_authenticity_token, only: [ :check_link ]
   before_action :set_project,
-                only: %i[show edit update follow unfollow ship stake_stonks unstake_stonks destroy update_coordinates unplace_coordinates request_recertification]
+                only: %i[show edit update stake_stonks unstake_stonks destroy update_coordinates unplace_coordinates]
   before_action :check_if_shipped, only: %i[edit update]
   before_action :authorize_user, only: [ :destroy ]
   before_action :require_hackatime, only: [ :create ]
   before_action :check_identity_verification, except: %i[show]
   skip_before_action :authenticate_user!, only: %i[show]
 
-  def index
-    sort_order = params[:sort] == "oldest" ? :asc : :desc
-    if params[:tab] == "gallery"
-      # Optimize gallery with pagination and DB-level ordering
-      projects_query = Project.includes(:user, devlogs: [ :file_attachment ])
-                              .joins("LEFT JOIN devlogs ON devlogs.project_id = projects.id")
-                              .where(is_deleted: false)
-                              .group("projects.id")
-                              .order(Arel.sql("COUNT(devlogs.id) DESC, projects.created_at #{sort_order == :asc ? 'ASC' : 'DESC'}"))
-
-      begin
-        @pagy, @projects = pagy(projects_query, items: 12)
-      rescue Pagy::OverflowError
-        redirect_to projects_path(tab: "gallery", sort: params[:sort]) and return
-      end
-    elsif params[:tab] == "following"
-      @followed_projects = current_user.followed_projects.includes(:user)
-      @recent_devlogs = Devlog.joins(:project)
-                              .joins("INNER JOIN project_follows ON project_follows.project_id = projects.id")
-                              .includes(:project, :file_attachment, :user, comments: :user)
-                              .where(project_follows: { user_id: current_user.id })
-                              .where(projects: { is_deleted: false })
-                              .order(created_at: :desc)
-
-      begin
-        @pagy, @recent_devlogs = pagy(@recent_devlogs, items: 8)
-      rescue Pagy::OverflowError
-        redirect_to projects_path(tab: "following") and return
-      end
-    elsif params[:tab] == "stonked"
-      @stonked_projects = current_user.staked_projects.includes(:user)
-      @recent_devlogs = Devlog.joins(:project)
-                              .joins("INNER JOIN stonks ON stonks.project_id = projects.id")
-                              .includes(:project, :file_attachment, :user, comments: :user)
-                              .where(stonks: { user_id: current_user.id })
-                              .where(projects: { is_deleted: false })
-                              .order(created_at: :desc)
-
-      begin
-        @pagy, @recent_devlogs = pagy(@recent_devlogs, items: 8)
-      rescue Pagy::OverflowError
-        redirect_to projects_path(tab: "stonked") and return
-      end
-    else
-      # Optimize main devlogs query
-      devlogs_query = Devlog.joins(:project)
-                            .includes(:project, :file_attachment, :user, comments: :user)
-                            .where(projects: { is_deleted: false })
-                            .order(created_at: :desc)
-
-      begin
-        @pagy, @recent_devlogs = pagy(devlogs_query, items: 8)
-      rescue Pagy::OverflowError
-        redirect_to projects_path and return
-      end
-
-      # we can just load stuff for the gallery here too!!
-      projects_query = Project.includes(:banner_attachment, :user, devlogs: [ :file_attachment ])
-                              .joins("LEFT JOIN devlogs ON devlogs.project_id = projects.id")
-                              .where(is_deleted: false)
-                              .group("projects.id")
-                              .order(Arel.sql("COUNT(devlogs.id) DESC, projects.created_at #{sort_order == :asc ? 'ASC' : 'DESC'}"))
-
-      begin
-        @gallery_pagy, @projects = pagy(projects_query, items: 12)
-      rescue Pagy::OverflowError
-        @gallery_pagy, @projects = pagy(projects_query, items: 12, page: 1)
-      end
-    end
-  end
-
   def show
     authorize @project, :show?
-    track_view(@project)
+    # track_view(@project)
 
     if current_user
       current_user.user_badges.load
@@ -197,126 +126,6 @@ class ProjectsController < ApplicationController
       { ship_events: :payouts },
       { devlogs: :file_attachment }
     ).order(created_at: :desc)
-  end
-
-  # Gotta say I love turbo frames and turbo streams and flashes in general
-  def follow
-    if current_user == @project.user
-      respond_to do |format|
-        format.html do
-          redirect_to request.referer || projects_path, alert: "You cannot follow your own project"
-        end
-        format.turbo_stream do
-          flash.now[:alert] = "You cannot follow your own project"
-          render turbo_stream: turbo_stream.update("flash-container", partial: "shared/flash")
-        end
-      end
-      return
-    end
-
-    @project_follow = current_user.project_follows.build(project: @project)
-
-    respond_to do |format|
-      if @project_follow.save
-        message = "Well, would you look at that! 💅 You've got a brand new follower on your project: *#{@project.title}*! :ultrafastparrot:"
-        SendSlackDmJob.perform_later(@project.user.slack_id, message) if @project.user.slack_id.present?
-
-        format.html do
-          redirect_to request.referer || projects_path, notice: "You are now following this project!"
-        end
-        format.turbo_stream do
-          flash.now[:notice] = "You are now following this project!"
-          render turbo_stream: [
-            turbo_stream.update("flash-container", partial: "shared/flash"),
-            turbo_stream.replace(dom_id(@project, :follow_button),
-                                 partial: "projects/follow_button",
-                                 locals: { project: @project, following: true })
-          ]
-        end
-      else
-        error_message = @project_follow.errors.full_messages.join(", ")
-        format.html do
-          redirect_to request.referer || projects_path, alert: "Could not follow project: #{error_message}"
-        end
-        format.turbo_stream do
-          flash.now[:alert] = "Could not follow project: #{error_message}"
-          render turbo_stream: [
-            turbo_stream.update("flash-container", partial: "shared/flash"),
-            turbo_stream.replace(dom_id(@project, :follow_button),
-                                 partial: "projects/follow_button",
-                                 locals: { project: @project, following: false })
-          ]
-        end
-      end
-    end
-  end
-
-  def unfollow
-    @project_follow = current_user.project_follows.find_by(project: @project)
-
-    respond_to do |format|
-      if @project_follow&.destroy
-        format.html do
-          redirect_to request.referer || projects_path, notice: "You have unfollowed this project."
-        end
-        format.turbo_stream do
-          flash.now[:notice] = "You have unfollowed this project."
-          render turbo_stream: [
-            turbo_stream.update("flash-container", partial: "shared/flash"),
-            turbo_stream.replace(dom_id(@project, :follow_button),
-                                 partial: "projects/follow_button",
-                                 locals: { project: @project, following: false })
-          ]
-        end
-      else
-        format.html { redirect_to request.referer || projects_path, alert: "Could not unfollow project." }
-        format.turbo_stream do
-          flash.now[:alert] = "Could not unfollow project."
-          render turbo_stream: [
-            turbo_stream.update("flash-container", partial: "shared/flash"),
-            turbo_stream.replace(dom_id(@project, :follow_button),
-                                 partial: "projects/follow_button",
-                                 locals: { project: @project, following: true })
-          ]
-        end
-      end
-    end
-  end
-
-  def ship
-    unless current_user == @project.user
-      respond_to do |format|
-        format.html { redirect_to project_path(@project), alert: "You can only ship your own project." }
-        format.turbo_stream do
-          flash.now[:alert] = "You can only ship your own project."
-          render turbo_stream: turbo_stream.update("flash-container", partial: "shared/flash")
-        end
-      end
-      return
-    end
-
-    # Verify all requirements are met
-    errors = @project.shipping_errors
-
-    if errors.any?
-      redirect_to project_path(@project), alert: "Cannot ship project: #{errors.join(' ')}"
-      return
-    end
-
-    if ShipEvent.create(project: @project, for_sinkening: Flipper.enabled?(:sinkening, current_user))
-      if Flipper.enabled?(:sinkening, current_user)
-        @project.update!(is_sinkening_ship: true)
-      end
-
-      is_first_ship = current_user.projects.joins(:ship_events).count == 1
-      ahoy.track "tutorial_step_first_project_shipped", user_id: current_user.id, project_id: @project.id, is_first_ship: is_first_ship
-      redirect_to project_path(@project), notice: "Your project has been shipped!"
-
-      message = "Congratulations on shipping your project! Now thy project shall fight for blood :ultrafastparrot:"
-      SendSlackDmJob.perform_later(@project.user.slack_id, message) if @project.user.slack_id.present?
-    else
-      redirect_to project_path(@project), alert: "Could not ship project."
-    end
   end
 
   def request_recertification
@@ -614,49 +423,6 @@ class ProjectsController < ApplicationController
     end
   end
 
-  def render_readme
-    @project = Project.find(params[:id])
-    authorize @project, :show?
-
-    if @project.readme_link.blank?
-      return render json: { error: "No README link found" }, status: :unprocessable_entity
-    end
-
-    require "net/http"
-    require "uri"
-    require "redcarpet"
-
-    begin
-      uri = URI.parse(@project.readme_link)
-
-      unless %w[http https].include?(uri.scheme&.downcase)
-        return render json: { error: "Invalid URL scheme" }, status: :unprocessable_entity
-      end
-
-      response = nil
-      Net::HTTP.start(uri.host, uri.port, use_ssl: uri.scheme == "https", open_timeout: 5, read_timeout: 10) do |http|
-        request = Net::HTTP::Get.new(uri)
-        request["User-Agent"] = "HackClub-SummerOfMaking"
-        response = http.request(request)
-      end
-
-      if response.is_a?(Net::HTTPSuccess)
-        renderer = Redcarpet::Render::HTML.new(filter_html: true, no_images: false, no_styles: true)
-        markdown = Redcarpet::Markdown.new(renderer)
-        @readme_content = markdown.render(response.body)
-        render json: { html: @readme_content }
-      else
-        render json: { error: "Failed to fetch README: Status #{response.code}" }, status: :unprocessable_entity
-      end
-    rescue URI::InvalidURIError
-      render json: { error: "Invalid README URL" }, status: :unprocessable_entity
-    rescue Net::OpenTimeout, Net::ReadTimeout
-      render json: { error: "Request timed out" }, status: :unprocessable_entity
-    rescue StandardError => e
-      render json: { error: "Failed to fetch README: #{e.message}" }, status: :unprocessable_entity
-    end
-end
-
   # Admin methods
   # def recover
   #     deleted_project = Project.with_deleted.find_by(id: params[:id])
@@ -731,8 +497,6 @@ end
   end
   helper_method :ysws_type_options
 
-  private
-
   def check_identity_verification
     return if current_user&.identity_vault_id.present? && current_verification_status != :ineligible
 
@@ -751,14 +515,11 @@ end
         user: [ :user_hackatime_data, :user_badges ],
         devlogs: [
           { user: :user_badges },
-          { comments: :user },
+          { comments: { user: :user_badges } },
           { file_attachment: :blob }
         ],
         ship_events: [
           :payouts
-        ],
-        stonks: [
-          :user
         ],
         followers: :projects
       },

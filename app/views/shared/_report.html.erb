@@ -7,14 +7,14 @@
   <% already_reported = @reported_ship_event_ids.include?(suspect.id) %>
 <% end %>
 <% if current_user && already_reported %>
-  <%= render "shared/button",
+  <%= render C::StyledButton.new(
       text: "Already Reported",
       icon: "flag.svg",
-      classes: "opacity-75 cursor-not-allowed pointer-events-none",
+      css_classes: "opacity-75 cursor-not-allowed pointer-events-none",
       title: "You have already reported this #{suspect.class.name.downcase}",
-      id: button_id %>
+      id: button_id) %>
 <% else %>
-  <%= render "shared/button",
+  <%= render C::StyledButton.new(
       text: "Report",
       icon: "flag.svg",
       id: button_id,
@@ -23,7 +23,7 @@
         action: "click->modal#open",
         modal_id: "#{suspect.class.name.downcase}-#{suspect.id}",
         modal_type: "report"
-      } %>
+      }) %>
 
 <%
   modal_title = if suspect.respond_to?(:title) && suspect.title.present?

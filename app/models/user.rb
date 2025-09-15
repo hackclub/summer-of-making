@@ -6,9 +6,12 @@
 #
 #  id                                   :bigint           not null, primary key
 #  avatar                               :string
+#  badges                               :string           default([]), is an Array
+#  devlogs_count                        :integer          default(0), not null
 #  display_name                         :string
 #  email                                :string
 #  first_name                           :string
+#  fraud_team_member                    :boolean          default(FALSE), not null
 #  freeze_shop_activity                 :boolean          default(FALSE)
 #  has_black_market                     :boolean
 #  has_clicked_completed_tutorial_modal :boolean          default(FALSE), not null
@@ -19,18 +22,26 @@
 #  internal_notes                       :text
 #  is_admin                             :boolean          default(FALSE), not null
 #  is_banned                            :boolean          default(FALSE)
-#  fraud_team_member                    :boolean          default(FALSE), not null
 #  last_name                            :string
 #  permissions                          :text             default([])
+#  projects_count                       :integer          default(0), not null
 #  shenanigans_state                    :jsonb
+#  ship_events_count                    :integer          default(0), not null
 #  synced_at                            :datetime
 #  timezone                             :string
 #  tutorial_video_seen                  :boolean          default(FALSE), not null
+#  votes_count                          :integer          default(0), not null
 #  ysws_verified                        :boolean          default(FALSE)
 #  created_at                           :datetime         not null
 #  updated_at                           :datetime         not null
 #  identity_vault_id                    :string
 #  slack_id                             :string
+#
+# Indexes
+#
+#  index_users_on_projects_count     (projects_count)
+#  index_users_on_ship_events_count  (ship_events_count)
+#  index_users_on_votes_count        (votes_count)
 #
 class User < ApplicationRecord
   has_paper_trail
@@ -54,6 +65,7 @@ class User < ApplicationRecord
   has_many :shop_card_grants
   has_many :user_badges, dependent: :destroy
   has_many :comments
+  has_many :likes
 
   accepts_nested_attributes_for :user_profile
   has_many :hackatime_projects
@@ -652,23 +664,17 @@ class User < ApplicationRecord
     Rails.logger.info("user #{id} (#{slack_id}) is back")
   end
 
+  def badges = super.map(&:to_sym)
   # Badge methods
-  def badges
-    Badge.earned_by(self)
-  end
+  def hydrated_badges = Badge.earned_by(self)
 
-  def has_badge?(badge_key)
-    # we're preload this in shop items controller
-    if association(:user_badges).loaded?
-      user_badges.any? { |ub| ub.badge_key.to_s == badge_key.to_s }
-    else
-      user_badges.exists?(badge_key: badge_key)
-    end
-  end
+  def has_badge?(badge_key) = badges.include?(badge_key)
 
   def award_badges!(backfill: false)
     Badge.award_badges_for(self, backfill: backfill)
   end
+
+  def update_cached_badges! = update! badges: user_badges.order(id: :asc).pluck(:badge_key).uniq
 
   def award_badges_async!(trigger_event = nil, backfill: false)
     AwardBadgesJob.perform_later(id, trigger_event, backfill)

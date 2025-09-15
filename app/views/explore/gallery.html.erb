@@ -1,0 +1,26 @@
+<div>
+  <%= render "explore/nav" %>
+
+  <div class="px-4 md:px-8 max-w-8xl mx-auto">
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4 gap-6 lg:gap-8 2xl:gap-10" id="projects-grid">
+      <% if @projects&.any? %>
+        <% @projects.each do |project| %>
+          <%= render "projects/project_preview", project: project %>
+        <% end %>
+      <% end %>
+    </div>
+
+    <div id="load-more-projects">
+      <% if @pagy&.next %>
+        <%= turbo_frame_tag "load-more-projects",
+          src: explore_gallery_path(page: @pagy.next, format: :turbo_stream),
+          loading: "lazy",
+          class: "block" do %>
+          <div class="flex flex-col items-center justify-center py-6">
+            <%= image_tag 'compassloading.gif', class: 'w-8 h-8 sm:w-16 sm:h-16 lg:w-24 lg:h-24' %>
+          </div>
+        <% end %>
+      <% end %>
+    </div>
+  </div>
+</div>

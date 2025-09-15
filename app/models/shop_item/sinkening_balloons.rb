@@ -3,7 +3,9 @@
 # Table name: shop_items
 #
 #  id                                :bigint           not null, primary key
+#  advent_announced                  :boolean          default(FALSE), not null
 #  agh_contents                      :jsonb
+#  campfire_only                     :boolean          default(TRUE), not null
 #  description                       :string
 #  enabled                           :boolean
 #  enabled_au                        :boolean          default(FALSE)
@@ -29,12 +31,15 @@
 #  price_offset_us                   :decimal(6, 2)    default(0.0)
 #  price_offset_xx                   :decimal(6, 2)    default(0.0)
 #  requires_black_market             :boolean
+#  sale_percentage                   :integer
 #  show_in_carousel                  :boolean
 #  site_action                       :integer
+#  special                           :boolean          default(FALSE), not null
 #  stock                             :integer
 #  ticket_cost                       :decimal(6, 2)
 #  type                              :string
 #  under_the_fold_description        :text
+#  unlock_on                         :date
 #  usd_cost                          :decimal(6, 2)
 #  created_at                        :datetime         not null
 #  updated_at                        :datetime         not null
@@ -44,6 +49,7 @@
 #  idx_shop_items_enabled_black_market_price  (enabled,requires_black_market,ticket_cost)
 #  idx_shop_items_regional_enabled            (enabled,enabled_us,enabled_eu,enabled_in,enabled_ca,enabled_au,enabled_xx)
 #  idx_shop_items_type_enabled                (type,enabled)
+#  index_shop_items_on_unlock_on              (unlock_on)
 #
 class ShopItem::SinkeningBalloons < ShopItem
   # QUEUE_ID = "som-sinkening-ballons"

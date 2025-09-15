@@ -1,0 +1,9 @@
+<%= turbo_frame_tag "readme-content-#{@project.id}" do %>
+  <% if @error_message %>
+    <p class="text-vintage-red text-center py-8"><%= @error_message %></p>
+  <% else %>
+    <div class="markdown-content max-w-none">
+      <%= @readme_content %>
+    </div>
+  <% end %>
+<% end %>

@@ -10,6 +10,7 @@
 #  demo_link              :string
 #  description            :text
 #  devlogs_count          :integer          default(0), not null
+#  followers_count        :integer          default(0), not null
 #  hackatime_project_keys :string           default([]), is an Array
 #  is_deleted             :boolean          default(FALSE)
 #  is_shipped             :boolean          default(FALSE)
@@ -18,6 +19,7 @@
 #  rating                 :integer
 #  readme_link            :string
 #  repo_link              :string
+#  ship_events_count      :integer          default(0), not null
 #  title                  :string
 #  used_ai                :boolean
 #  views_count            :integer          default(0), not null
@@ -31,12 +33,12 @@
 #
 # Indexes
 #
-#  index_projects_on_is_shipped              (is_shipped)
-#  index_projects_on_rating                  (rating)
-#  index_projects_on_user_id                 (user_id)
-#  index_projects_on_user_id_and_is_deleted  (user_id,is_deleted)
-#  index_projects_on_views_count             (views_count)
-#  index_projects_on_x_and_y                 (x,y)
+#  index_projects_on_followers_count    (followers_count)
+#  index_projects_on_is_shipped         (is_shipped)
+#  index_projects_on_ship_events_count  (ship_events_count)
+#  index_projects_on_user_id            (user_id)
+#  index_projects_on_views_count        (views_count)
+#  index_projects_on_x_and_y            (x,y)
 #
 # Foreign Keys
 #
@@ -47,9 +49,9 @@ class Project < ApplicationRecord
 
   include PublicActivity::Model
 
-  belongs_to :user
-  has_many :devlogs
-  has_many :project_follows
+  belongs_to :user, counter_cache: true
+  has_many :devlogs, counter_cache: :devlogs_count
+  has_many :project_follows, counter_cache: :followers_count
   has_many :followers, through: :project_follows, source: :user
   has_many :stonks
   has_many :stakers, through: :stonks, source: :user
@@ -86,6 +88,7 @@ class Project < ApplicationRecord
 
   has_many :timer_sessions
   after_commit :bust_user_projects_devlogs_cache
+  after_update :invalidate_map_cache_if_added_to_map
 
   coordinate_min = 0
   coordinate_max = 100
@@ -144,6 +147,12 @@ class Project < ApplicationRecord
       .where(ship_certifications: { judgement: "approved" })
       .where(ysws_type: nil)
       .where(is_deleted: false)
+  }
+
+  scope :for_gallery, -> {
+    includes(:user)
+      .with_attached_banner
+      .order(devlogs_count: :desc, created_at: :desc)
   }
 
   has_one :ysws_review_submission, class_name: "YswsReview::Submission", dependent: :destroy
@@ -224,6 +233,10 @@ class Project < ApplicationRecord
   before_save :filter_hackatime_keys
 
   before_save :remove_duplicate_hackatime_keys
+
+  def title_with_id
+    "#{title} (\##{id})"
+  end
 
   def total_votes
     vote_changes.count
@@ -687,6 +700,15 @@ class Project < ApplicationRecord
 
   def bust_user_projects_devlogs_cache
     Rails.cache.delete(User.project_devlog_cache_key(user_id)) if user_id
+  end
+
+  def invalidate_map_cache_if_added_to_map
+    # Invalidate cache if project was added to map (x,y went from nil to values)
+    if (saved_change_to_x? && x_before_last_save.nil? && x.present?) ||
+       (saved_change_to_y? && y_before_last_save.nil? && y.present?)
+      Rails.cache.delete(Cache::MapPointsJob::CACHE_KEY)
+      Cache::MapPointsJob.perform_later
+    end
   end
 
   def link_check

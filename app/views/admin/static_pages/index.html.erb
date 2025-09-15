@@ -1,65 +1,37 @@
-<% allowed_fraud_team_buttons = [
-  { label: "All Orders", path: admin_shop_orders_path },
-  { label: "Pending Acceptance", path: pending_admin_shop_orders_path, count: ShopOrder.without_item_type("ShopItem::FreeStickers").where(aasm_state: :pending).count },
-  { label: "Manual Fulfillment", path: awaiting_fulfillment_admin_shop_orders_path, count: ShopOrder.manually_fulfilled.without_item_type("ShopItem::FreeStickers").where(aasm_state: :awaiting_periodical_fulfillment).count },
-  { label: "Users", path: admin_users_path },
-  { label: "Low-quality Dashboard", path: admin_low_quality_dashboard_index_path },
-  { label: "Reports Dashboard", path: "/admin/fraud_reports" },
-  { label: "Blazer", path: admin_blazer_path }
-] %>
+
 <h1 style="font-size: 2rem;">admin dashboard!</h1>
 <p style="color: var(--color-muted);">you look great today :-)</p>
+
+<h1 style="margin-top: 1.5em; font-size: 1.5rem;">Tasks</h1>
 <div class="agrid" style="max-width: 700px; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1.2em;">
-  <% if current_user.admin_or_fraud_team_member? %>
-    <% if current_user.fraud_team_member? && !current_user.is_admin? %>
-      <% allowed_fraud_team_buttons.each do |btn| %>
-        <% if btn[:count] %>
-          <%= link_to btn[:path], class: 'abtn secondary' do %>
-            <%= btn[:label] %> <span class="pill"><%= btn[:count] %></span>
-          <% end %>
-        <% else %>
-          <%= link_to btn[:label], btn[:path], class: 'abtn secondary' %>
-        <% end %>
-      <% end %>
-    <% else %>
-      <%= link_to "All Orders", admin_shop_orders_path, class: 'abtn secondary' %>
-      <%= link_to pending_admin_shop_orders_path, class: 'abtn secondary' do %>
-        Pending Acceptance <span class="pill"><%= ShopOrder.without_item_type("ShopItem::FreeStickers").where(aasm_state: :pending).count %></span>
-      <% end %>
-      <%= link_to awaiting_fulfillment_admin_shop_orders_path, class: 'abtn secondary' do %>
-        Manual Fulfillment <span class="pill"><%= ShopOrder.manually_fulfilled.without_item_type("ShopItem::FreeStickers").where(aasm_state: :awaiting_periodical_fulfillment).count %></span>
-      <% end %>
-      <%= link_to "stuff go out the door meter", admin_fulfillment_dashboard_index_path, class: 'abtn secondary' %>
-      <%= link_to "Shop Items", admin_shop_items_path, class: 'abtn secondary' %>
-      <%= link_to admin_users_path, class: 'abtn secondary' do %>
-        Users
-      <% end %>
-      <%= link_to admin_special_access_users_path, class: 'abtn secondary' do %>
-        Special Access Users
-      <% end %>
-      <%= link_to "view counters", "/admin/view_analytics", class: 'abtn secondary' %>
-      <%= link_to "Blazer", admin_blazer_path, class: 'abtn secondary' %>
-      <%= link_to "Flipper", "/admin/flipper", class: 'abtn secondary' %>
-      <%= link_to "Job Queue", admin_mission_control_jobs_path, class: 'abtn secondary' %>
-      <%= link_to "Ahoy Captain Analytics", admin_ahoy_captain_path, class: 'abtn secondary' %>
-      <%= link_to admin_ship_certifications_path, class: 'abtn secondary' do %>
-        Ship certs <span class="pill"><%= ShipCertification.pending.size %></span>
-      <% end %>
-      <%= link_to admin_readme_certifications_path, class: 'abtn secondary' do %>
-        README certs <span class="pill"><%= ReadmeCertification.pending.size %></span>
-      <% end %>
-      <%= link_to "voting dashboard", "/admin/voting_dashboard", class: 'abtn secondary' %>
-      <%= link_to "payouts dashboard", "/admin/payouts_dashboard", class: 'abtn secondary' %>
-      <%= link_to "low-quality dashboard", admin_low_quality_dashboard_index_path, class: 'abtn secondary' %>
-      <%= link_to "reports dashboard", "/admin/fraud_reports", class: 'abtn secondary' %>
-      <%= link_to "global caches", admin_caches_path, class: 'abtn secondary' %>
-      <%= link_to admin_ysws_reviews_path, class: 'abtn secondary' do %>
-          YSWS reviews <span class="pill"><%= Project.ysws_review_eligible.where.not(id: Project.joins(devlogs: :ysws_review_approval).pluck(:id)).count %></span>
-        <% end %>
-      <%= link_to "the sinkening", admin_sinkening_path(SinkeningSetting.current), class: 'abtn secondary' %>
-    <% end %>
-  <% end %>
+  <%= render partial: "tool", locals: { path: admin_fulfillment_dashboard_index_path, label: "Open Fulfillments", count: ShopOrder.without_item_type("ShopItem::FreeStickers").where(aasm_state: "awaiting_periodical_fulfillment").count } %>
+  <%= render partial: "tool", locals: { path: pending_admin_shop_orders_path, label: "Fraud check", count: ShopOrder.without_item_type("ShopItem::FreeStickers").where(aasm_state: :pending).count } %>
+  <%= render partial: "tool", locals: { path: admin_ship_certifications_path, label: "Ship Certifications", count: ShipCertification.pending.size } %>
+  <%= render partial: "tool", locals: { path: admin_ysws_reviews_path, label: "YSWS Reviews", count: Project.ysws_review_eligible.where.not(id: Project.ysws_review_eligible.joins(devlogs: :ysws_review_approval).select(:id)).count } if @admin_signed_in %>
+  <%= render partial: "tool", locals: { path: "https://app.slack.com/client/T0266FRGM/D092Q3PQB7X", label: "Slack help"} %>
 </div>
+<hr>
+
+<h1 style="margin-top: 1.5em; font-size: 1.5rem;">Dashboards</h1>
+<div class="agrid" style="max-width: 700px; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1.2em;">
+  <%= render partial: "tool", locals: { path: admin_shop_items_path, label: "Shop Items" } if @admin_signed_in %>
+  <%= render partial: "tool", locals: { path: admin_users_path, label: "Users" } if @admin_signed_in %>
+  <%= render partial: "tool", locals: { path: admin_special_access_users_path, label: "Special Access Users" } if @admin_signed_in %>
+  <%= render partial: "tool", locals: { path: admin_view_analytics_path, label: "View Counters" } if @admin_signed_in %>
+  <%= render partial: "tool", locals: { path: admin_blazer_path, label: "Blazer" } if @admin_signed_in %>
+  <%= render partial: "tool", locals: { path: "/admin/flipper", label: "Flipper" } if @admin_signed_in %>
+  <%= render partial: "tool", locals: { path: admin_mission_control_jobs_path, label: "Job Queue" } if @admin_signed_in %>
+  <%= render partial: "tool", locals: { path: "/admin/voting_dashboard", label: "Voting Dashboard" } %>
+  <%= render partial: "tool", locals: { path: "/admin/payouts_dashboard", label: "Payouts Dashboard" } %>
+  <%= render partial: "tool", locals: { path: admin_low_quality_dashboard_index_path, label: "Low-quality Dashboard" } %>
+  <%= render partial: "tool", locals: { path: "/admin/fraud_reports", label: "Reports Dashboard" } %>
+  <%= render partial: "tool", locals: { path: admin_caches_path, label: "Global Caches" } if @admin_signed_in %>
+  <%= render partial: "tool", locals: { path: admin_sinkening_path(SinkeningSetting.current), label: "The Sinkening" } if @admin_signed_in %>
+  <%= render partial: "tool", locals: { path: admin_readme_certifications_path, label: "README certs", count: ReadmeCertification.pending.size } if @admin_signed_in %>
+  <%= render partial: "tool", locals: { path: admin_advent_stickers_path, label: "Advent Stickers" } if @admin_signed_in %>
+</div>
+<hr>
+
 <div style="margin-top: 0.5em;">
   <%= link_to "← escape hatch", root_path, class: 'aout' %>
 </div>

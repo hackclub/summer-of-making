@@ -245,14 +245,17 @@ Rails.application.routes.draw do
   # Dashboard
   # get "dashboard", to: "dashboard#index"
 
-  get "explore", to: "projects#index"
+  get "explore", to: "explore#index", as: :explore
+  get "explore/following", to: "explore#following", as: :explore_following
+  get "explore/gallery", to: "explore#gallery", as: :explore_gallery
+
   get "my_projects", to: "projects#my_projects"
   post "check_link", to: "projects#check_link"
   get "check_github_readme", to: "projects#check_github_readme"
   get "campfire", to: "campfire#index"
   get "campfire/hackatime_status", to: "campfire#hackatime_status"
+
   get "/map", to: "map#index", as: :map
-  get "/map/points", to: "map#points", as: :map_points
 
   # Global timer session check - must be before projects resource
   get "timer_sessions/active", to: "timer_sessions#global_active"
@@ -264,22 +267,30 @@ Rails.application.routes.draw do
         get :active
       end
     end
+
+    # Projects::FollowsController
+    post "follow", to: "projects/follows#create", as: :follow
+    delete "unfollow", to: "projects/follows#destroy", as: :unfollow
+
+    # Projects::ReadmesController
+    get "readme", to: "projects/readmes#show", as: :readme
+
+    # Projects::RecertificationsController
+    resource :recertification, only: [ :create ], controller: "projects/recertifications"
+
+    # Projects::ShipsController
+    resource :ship, only: [ :create ], controller: "projects/ships"
+
     member do
-      post :follow
-      delete :unfollow
-      patch :ship
-      post :request_recertification
       post :stake_stonks
       delete :unstake_stonks
       patch :update_coordinates
       delete :unplace_coordinates
-      get :render_readme
       # patch :recover
       get "devlog/:devlog_id", action: :show, as: :devlog
     end
   end
 
-  get "devlogs", to: "devlogs#index"
   resources :votes, only: [ :new, :create ] do
     collection do
       get :locked
@@ -390,7 +401,6 @@ Rails.application.routes.draw do
     end
 
     constraints FraudTeamConstraint do
-      mount Blazer::Engine, at: "blazer"
       get "/", to: "static_pages#index", as: :root
       resources :fraud_reports, only: [ :index, :show ] do
         member do
@@ -401,6 +411,8 @@ Rails.application.routes.draw do
         end
       end
       resources :fulfillment_dashboard, only: [ :index ]
+      resources :voting_dashboard, only: [ :index ]
+      resources :payouts_dashboard, only: [ :index ]
       resources :shop_orders do
         collection do
           get :pending
@@ -438,16 +450,28 @@ Rails.application.routes.draw do
           post :flip
         end
       end
+      resources :projects, only: [ :show ] do
+        member do
+          delete :destroy
+          patch :restore
+          post :magic_is_happening
+        end
+      end
+      resources :votes, only: [] do
+        member do
+          delete :invalidate
+          patch :uninvalidate
+        end
+      end
     end
 
     constraints AdminConstraint do
       mount MissionControl::Jobs::Engine, at: "jobs"
-      mount AhoyCaptain::Engine, at: "ahoy_captain"
+      # mount AhoyCaptain::Engine, at: "ahoy_captain"
+      mount Blazer::Engine, at: "blazer"
       mount Flipper::UI.app(Flipper), at: "flipper"
       # mount_avo
       resources :view_analytics, only: [ :index ]
-      resources :voting_dashboard, only: [ :index ]
-      resources :payouts_dashboard, only: [ :index ]
       resources :ship_reviewer_payout_requests, only: [ :index, :show ] do
         member do
           patch :approve
@@ -462,13 +486,6 @@ Rails.application.routes.draw do
       end
       resources :special_access_users, only: [ :index ]
       resources :shop_items
-      resources :projects, only: [] do
-        member do
-          delete :destroy
-          patch :restore
-          post :magic_is_happening
-        end
-      end
       resources :shop_card_grants, only: [ :index, :show ]
       resources :caches, path: "cache", only: [ :index ] do
         member do
@@ -476,6 +493,7 @@ Rails.application.routes.draw do
         end
       end
       resources :sinkenings, only: [ :show, :update ], path: "sinkening"
+      resources :advent_stickers, only: [ :index, :new, :create, :edit, :update, :destroy ]
     end
   end
 

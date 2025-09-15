@@ -18,12 +18,17 @@ class ShopItemsController < ApplicationController
   all_shop_items = Rails.cache.fetch("all_shop_items_with_variants_v2", expires_in: 10.minutes) do
   ShopItem.enabled.with_attached_image.not_black_market
   .includes(image_attachment: { blob: { variant_records: :image_attachment } })
-  .order(ticket_cost: :asc)
-            .to_a
+  .to_a
+    end
+
+    all_shop_items.sort_by! do |item|
+      @regionalization_enabled && @selected_region ? item.price_for_region(@selected_region) : item.price_for_region("XX")
     end
 
     # Filter in memory
     filtered_items = all_shop_items.dup
+    # exlcude advent stickers from shop because they're not purchasable
+    filtered_items.reject! { |i| i.is_a?(ShopItem::AdventSticker) }
 
   # Filter by region availability (include XX items in all regions) - only if regionalization is enabled
   if @regionalization_enabled && @selected_region
@@ -94,8 +99,13 @@ class ShopItemsController < ApplicationController
     all_shop_items = Rails.cache.fetch("all_black_market_shop_items_with_variants", expires_in: 2.minutes) do
       ShopItem.enabled.with_attached_image.black_market
         .includes(image_attachment: { blob: { variant_records: :image_attachment } })
-        .order(ticket_cost: :asc)
         .to_a
+    end
+
+    all_shop_items.sort_by! do |item|
+      @regionalization_enabled && @selected_region ?
+        item.price_for_region(@selected_region) :
+        item.price_for_region("XX")
     end
 
     filtered_items = all_shop_items.dup
@@ -217,7 +227,7 @@ class ShopItemsController < ApplicationController
                     actual_irl_fr_cost cost hacker_score
                     requires_black_market hcb_merchant_lock
                     hcb_category_lock hcb_keyword_lock agh_contents
-                    image]
+                    image sale_percentage]
     )
   end
 end

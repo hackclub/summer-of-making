@@ -10,11 +10,11 @@
 #     schedule: at 5am every day
 
 production:
-  # hourly_hackatime_refresh:
-  #   class: UserHackatimeDataRefreshJob
-  #   queue: literally_whenever
-  #   schedule: every hour
-  #   description: "Refresh Hackatime stats for all users with Hackatime enabled + DM people"
+  hourly_hackatime_refresh:
+    class: UserHackatimeDataRefreshJob
+    queue: literally_whenever
+    schedule: every hour
+    description: "Refresh Hackatime stats for all users with Hackatime enabled + DM people"
 
   # generate_stonk_reports:
   #   class: GenerateStonkReportJob
@@ -121,3 +121,17 @@ production:
     schedule: every minute
     concurrency: 1
     description: "Sync GitHub language stats for projects under review"
+
+  cache_map_points:
+    class: Cache::MapPointsJob
+    schedule: every 30 minutes
+    args: [ { force: true } ]
+
+  cache_carousel_prizes:
+    class: Cache::CarouselPrizesJob
+    schedule: every 1 hour
+    args: [ { force: true } ]
+
+  update_badge_counter_caches:
+    class: User::UpdateBadgeCounterCachesJob
+    schedule: at 4am every day

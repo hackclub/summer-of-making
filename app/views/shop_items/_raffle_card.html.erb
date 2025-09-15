@@ -1,4 +1,4 @@
-<%= render "shared/card", classes: "" do %>
+<%= render C::Card.new(css_classes: "") do %>
   <div class="flex-grow flex flex-col justify-between min-h-0 relative">
     <button onclick="document.cookie = 'dismissed_raffle_v3=true; path=/; max-age=31536000'; this.closest('.card-with-gradient').style.display='none';" class="absolute top-2 left-2 text-lg font-bold">×</button>
     <div class="absolute top-2 right-2 text-lg font-bold whitespace-nowrap flex items-center">
@@ -16,12 +16,12 @@
     </div>
     <%= image_tag 'raffle.png', class: "rounded-lg w-full h-auto object-scale-down aspect-square max-h-48 mb-4" %>
     <div class="mt-auto pt-4">
-      <%= render "shared/button",
+      <%= render C::StyledButton.new(
           text: "Sign me up!",
           link: "https://hcb.hackclub.com/from/summer-of-making-shop/Ml3HeJ",
           link_target: "_blank",
           kind: :buy,
-          fill_width: true %>
+          fill_width: true) %>
     </div>
   </div>
 <% end %>

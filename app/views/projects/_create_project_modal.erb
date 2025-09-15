@@ -1,5 +1,5 @@
 <div id="create-project-modal" data-controller="modal" class="hidden fixed inset-0 z-50 overflow-auto bg-black/30 flex items-center justify-center p-2 md:p-4">
-  <%= render "shared/card" do %>
+  <%= render C::Card.new do %>
     <div class="p-3 md:p-6 border-b border-saddle-taupe border-opacity-30">
       <div class="flex justify-between items-center">
         <h3 class="text-lg md:text-2xl">Create New Project</h3>
@@ -277,12 +277,12 @@
         </div>
 
         <div class="flex flex-row justify-end space-x-2 md:space-x-3 mt-3 md:mt-4">
-          <%= render "shared/button", text: "Cancel", type: :button, data: { action: "click->modal#close click->project-form#resetForm" }, kind: :secondary %>
+          <%= render C::StyledButton.new(text: "Cancel", type: :button, data: { action: "click->modal#close click->project-form#resetForm" }, kind: :secondary) %>
           <div data-project-form-target="nextButton">
-            <%= render "shared/button", text: "Next", type: :button, data: { action: "click->project-form#showRules" }, kind: :primary %>
+            <%= render C::StyledButton.new(text: "Next", type: :button, data: { action: "click->project-form#showRules" }, kind: :primary) %>
           </div>
           <div data-project-form-target="submitButton" class="hidden">
-            <%= render "shared/button", text: "Create Project", type: :button, data: { project_form_target: "createButton", action: "click->project-form#submitProject" }, kind: :primary %>
+            <%= render C::StyledButton.new(text: "Create Project", type: :button, data: { project_form_target: "createButton", action: "click->project-form#submitProject" }, kind: :primary) %>
           </div>
         </div>
       <% end %>
