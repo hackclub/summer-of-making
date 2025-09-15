@@ -25,10 +25,11 @@
 #
 # Indexes
 #
-#  index_devlogs_on_deleted_at   (deleted_at)
-#  index_devlogs_on_project_id   (project_id)
-#  index_devlogs_on_user_id      (user_id)
-#  index_devlogs_on_views_count  (views_count)
+#  index_devlogs_on_deleted_at                 (deleted_at)
+#  index_devlogs_on_project_id                 (project_id)
+#  index_devlogs_on_project_id_and_created_at  (project_id,created_at)
+#  index_devlogs_on_user_id                    (user_id)
+#  index_devlogs_on_views_count                (views_count)
 #
 # Foreign Keys
 #

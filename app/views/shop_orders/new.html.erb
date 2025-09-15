@@ -4,7 +4,7 @@
   <!-- Back to shop link -->
   <%= link_to shop_path, class: "inline-flex items-center text-saddle-taupe hover:text-darker-taupe mb-6 transition-colors duration-200" do %>
     <%= inline_svg "arrow-left.svg", class: "h-5 w-5 mr-2" if defined?(inline_svg) %>
-    <span class="text-lg">← Back to Shop</span>
+    <span class="text-lg" id="backToShopButton">← Back to Shop</span>
   <% end %>
 
   <div class="bg-soft-bone card-pixel p-6 md:p-8">
@@ -308,6 +308,17 @@
         }
     });
 
+  </script>
+
+<% if current_user.ship_events.where('ship_events.created_at > ?', 24.hours.ago).any? %>
+<script>
+    // Brainrot mode
+    const returnShopButton = document.getElementById('backToShopButton');
+    returnShopButton.addEventListener('click', function() {
+        const vineboom = new Audio('/brainrot/vine-boom.mp3');
+        vineboom.play();
+    });
+    // outro song on hover of purchase button if user has ship event in last 24 hours
     const submitButton = document.getElementById('purchase-button');
     let hoverSoundPlayed = false;
 
@@ -332,3 +343,4 @@
     }
 
 </script>
+<% end %>
