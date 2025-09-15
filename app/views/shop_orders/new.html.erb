@@ -296,7 +296,6 @@
                     }
                 }
             }
-
             console.log('Adding event listeners to quantity input');
             quantityInput.addEventListener('input', updateCostPreview);
             quantityInput.addEventListener('change', updateCostPreview);
@@ -308,4 +307,28 @@
             console.log('Missing required elements - quantity update will not work');
         }
     });
+
+    const submitButton = document.getElementById('purchase-button');
+    let hoverSoundPlayed = false;
+
+    function enablesubmit() {
+        submitButton.disabled = false;
+        submitButton.classList.remove('cursor-not-allowed');
+        submitButton.classList.add('cursor-pointer');
+        }
+
+    if (submitButton) {
+        submitButton.addEventListener('mouseenter', function(e) {
+            if (submitButton.value === 'Complete Purchase' && !hoverSoundPlayed) {
+                submitButton.disabled = true;
+                submitButton.classList.remove('cursor-pointer');
+                submitButton.classList.add('cursor-not-allowed');
+                const outroSong = new Audio('/brainrot/outro-song.mp3');
+                outroSong.play();
+                hoverSoundPlayed = true;
+                setTimeout(enablesubmit, 15000); 
+            }
+        });
+    }
+
 </script>
