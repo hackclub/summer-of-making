@@ -4,7 +4,7 @@
   <!-- Back to shop link -->
   <%= link_to shop_path, class: "inline-flex items-center text-saddle-taupe hover:text-darker-taupe mb-6 transition-colors duration-200" do %>
     <%= inline_svg "arrow-left.svg", class: "h-5 w-5 mr-2" if defined?(inline_svg) %>
-    <span class="text-lg">← Back to Shop</span>
+    <span class="text-lg" id="backToShopButton">← Back to Shop</span>
   <% end %>
 
   <div class="bg-soft-bone card-pixel p-6 md:p-8">
@@ -296,7 +296,6 @@
                     }
                 }
             }
-
             console.log('Adding event listeners to quantity input');
             quantityInput.addEventListener('input', updateCostPreview);
             quantityInput.addEventListener('change', updateCostPreview);
@@ -308,4 +307,40 @@
             console.log('Missing required elements - quantity update will not work');
         }
     });
+
+  </script>
+
+<% if current_user.ship_events.where('ship_events.created_at > ?', Time.zone.parse('2025-09-15 11:00:00 EDT')).any? %>
+<script>
+    // Brainrot mode
+    const returnShopButton = document.getElementById('backToShopButton');
+    returnShopButton.addEventListener('click', function() {
+        const vineboom = new Audio('/brainrot/vine-boom.mp3');
+        vineboom.play();
+    });
+    // outro song on hover of purchase button if user has ship event in last 24 hours
+    const submitButton = document.getElementById('purchase-button');
+    let hoverSoundPlayed = false;
+
+    function enablesubmit() {
+        submitButton.disabled = false;
+        submitButton.classList.remove('cursor-not-allowed');
+        submitButton.classList.add('cursor-pointer');
+        }
+
+    if (submitButton) {
+        submitButton.addEventListener('mouseenter', function(e) {
+            if (submitButton.value === 'Complete Purchase' && !hoverSoundPlayed) {
+                submitButton.disabled = true;
+                submitButton.classList.remove('cursor-pointer');
+                submitButton.classList.add('cursor-not-allowed');
+                const outroSong = new Audio('/brainrot/outro-song.mp3');
+                outroSong.play();
+                hoverSoundPlayed = true;
+                setTimeout(enablesubmit, 15000); 
+            }
+        });
+    }
+
 </script>
+<% end %>
