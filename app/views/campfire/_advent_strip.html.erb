@@ -1,29 +1,12 @@
 <div class="mb-6">
   <div class="bg-[#2C2318] rounded-lg p-4 relative overflow-hidden">
-    <div class="relative z-10 mb-3 flex justify-between items-start">
+    <div class="relative z-10 mb-3">
       <h3 class="text-3xl font-black text-[#F4E4C1] font-pagaki tracking-wider font-mono">
         <%= link_to "STICKERLODE", "https://hackclub.slack.com/archives/C090B3T9R9R/p1757785046930549" %>
       </h3>
-      <% if params[:show_all_old_stickers] != "true" %>
-        <%= link_to "Show All", campfire_path(show_all_old_stickers: "true"), 
-            class: "text-sm text-[#F4E4C1] bg-[#8B7355] hover:bg-[#6B5B47] px-3 py-1 rounded-full font-mono font-bold tracking-wider uppercase" %>
-      <% else %>
-        <%= link_to "Show Recent", campfire_path, 
-            class: "text-sm text-[#F4E4C1] bg-[#8B7355] hover:bg-[#6B5B47] px-3 py-1 rounded-full font-mono font-bold tracking-wider uppercase" %>
-      <% end %>
     </div>
 
-    <% card_count = (@advent_cards || []).size %>
-    <% grid_class = case card_count
-                     when 0..3
-                       "md:grid-cols-3"
-                     when 4..6
-                       "md:grid-cols-3 lg:grid-cols-6"
-                     else
-                       "md:grid-cols-4 lg:grid-cols-6 xl:grid-cols-8"
-                     end %>
-    
-    <div class="relative z-10 grid grid-cols-1 sm:grid-cols-2 <%= grid_class %> gap-4 stickerlode-grid">
+    <div class="relative z-10 md:grid md:grid-cols-3 gap-4">
       <% (@advent_cards || []).each do |card| %>
         <%= render "campfire/advent_card", card: card %>
       <% end %>
