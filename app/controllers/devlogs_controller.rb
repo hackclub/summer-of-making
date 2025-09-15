@@ -11,7 +11,7 @@ class DevlogsController < ApplicationController
   before_action :authenticate_api_key, only: [ :api_create ]
   skip_before_action :verify_authenticity_token, only: [ :api_create ]
   def show
-    track_view(@devlog)
+    # track_view(@devlog)
   end
 
   def index
@@ -113,6 +113,15 @@ class DevlogsController < ApplicationController
       return
     end
 
+    if @devlog.user_advent_sticker
+      if @devlog.project
+        redirect_to @devlog.project, alert: "This devlog has an earned sticker and cannot be deleted."
+      else
+        redirect_to campfire_path, alert: "This devlog has an earned sticker and cannot be deleted."
+      end
+      return
+    end
+
     if @devlog.covered_by_ship_event?
       if @devlog.project
         redirect_to @devlog.project, alert: "This devlog is covered by a ship event and cannot be deleted."
@@ -167,10 +176,16 @@ class DevlogsController < ApplicationController
 
   def set_devlog
     if @project
-      @devlog = @project.devlogs.find(params[:id])
+      @devlog = @project.devlogs
+                         .with_attached_file
+                         .includes(user_advent_sticker: { shop_item: [ { image_attachment: :blob }, { silhouette_image_attachment: :blob } ] })
+                         .find(params[:id])
     else
-      @devlog = Devlog.find(params[:id])
-      @project = @devlog.project
+      @devlog = Devlog
+                  .with_attached_file
+                  .includes(user_advent_sticker: { shop_item: [ { image_attachment: :blob }, { silhouette_image_attachment: :blob } ] })
+                  .find(params[:id])
+       @project = @devlog.project
     end
   end
 

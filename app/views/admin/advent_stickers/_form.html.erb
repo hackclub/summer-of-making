@@ -1,0 +1,74 @@
+<%= form_with model: sticker, url: sticker.persisted? ? admin_advent_sticker_path(sticker) : admin_advent_stickers_path, local: true do |f| %>
+  <% if sticker.errors.any? %>
+    <div class="alert alert-danger mb-4">
+      <ul>
+        <% sticker.errors.full_messages.each do |m| %>
+          <li><%= m %></li>
+        <% end %>
+      </ul>
+    </div>
+  <% end %>
+
+  <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+    <div>
+      <label class="form-label">Type</label>
+      <input type="text" value="ShopItem::AdventSticker" disabled class="form-input">
+    </div>
+
+    <div>
+      <%= f.label :name, class: "form-label" %>
+      <%= f.text_field :name, class: "form-input" %>
+    </div>
+
+    <div class="md:col-span-2">
+      <%= f.label :description, class: "form-label" %>
+      <%= f.text_area :description, rows: 3, class: "form-textarea" %>
+    </div>
+
+    <div>
+      <%= f.label :unlock_on, class: "form-label" %>
+      <%= f.date_field :unlock_on, class: "form-input" %>
+    </div>
+
+    <div>
+      <%= f.label :special, class: "form-label" %>
+      <%= f.check_box :special %>
+      <span class="text-sm opacity-70">Special = 4h sticker</span>
+    </div>
+
+    <div>
+      <%= f.label :enabled, class: "form-label" %>
+      <%= f.check_box :enabled %>
+    </div>
+
+    <div>
+      <%= f.label :campfire_only, class: "form-label" %>
+      <%= f.check_box :campfire_only %>
+    </div>
+
+    <div>
+      <%= f.label :image, "Main Image", class: "form-label" %>
+      <%= f.file_field :image, class: "form-input" %>
+      <% if sticker.image.attached? && sticker.persisted? %>
+        <div class="mt-2">
+          <%= image_tag sticker.image %>
+        </div>
+      <% end %>
+    </div>
+
+    <div>
+      <%= f.label :silhouette_image, "Silhouette Image", class: "form-label" %>
+      <%= f.file_field :silhouette_image, class: "form-input" %>
+      <span class="text-sm opacity-70">Used for "today" preview</span>
+      <% if sticker.silhouette_image.attached? && sticker.persisted? %>
+        <div class="mt-2">
+          <%= image_tag sticker.image %>
+        </div>
+      <% end %>
+    </div>
+  </div>
+
+  <div class="mt-4">
+    <%= f.submit class: "abtn" %>
+  </div>
+<% end %>

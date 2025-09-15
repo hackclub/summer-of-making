@@ -32,6 +32,75 @@ class CampfireController < ApplicationController
     @tutorials = get_tutorials
     @tutorial_progress = get_tutorial_progress
 
+    # Stickerlode
+    if Flipper.enabled?(:advent_of_stickers, @user)
+      today = Date.current
+      first_advent_day = ShopItem::AdventSticker.minimum(:unlock_on)
+      @advent_cards = []
+      if first_advent_day
+        advent_day = (today - first_advent_day).to_i + 1
+
+        if params[:show_all_old_stickers] == "true"
+          # Show all released stickers up to tomorrow (no future stickers beyond tomorrow)
+          max_date = today + 1
+          preloaded = ShopItem::AdventSticker
+            .enabled
+            .where("unlock_on <= ?", max_date)
+            .order(:unlock_on)
+            .with_attached_image
+            .with_attached_silhouette_image
+            .index_by(&:unlock_on)
+
+          @advent_cards = []
+          preloaded.each do |date, sticker|
+            if date < today
+              @advent_cards << { sticker: sticker, label: date.strftime("%b %-d"), state: :past, date: date }
+            elsif date == today
+              @advent_cards << { sticker: sticker, label: "Today", state: :today, date: date }
+            elsif date == today + 1
+              @advent_cards << { sticker: sticker, label: "Tomorrow", state: :upcoming, date: date }
+            end
+          end
+        else
+          # Original logic: show only yesterday/today/tomorrow
+          dates = advent_day == 1 ? [ today, today + 1, today + 2 ] : [ today - 1, today, today + 1 ]
+          preloaded = ShopItem::AdventSticker
+            .where(unlock_on: dates)
+            .with_attached_image
+            .with_attached_silhouette_image
+            .index_by(&:unlock_on)
+
+          @advent_cards = if advent_day == 1
+            [
+              { sticker: preloaded[today], label: "Today", state: :today, date: today },
+              { sticker: preloaded[today + 1], label: "Tomorrow", state: :upcoming, date: today + 1 },
+              { sticker: preloaded[today + 2], label: (today + 2).strftime("%b %-d"), state: :upcoming, date: today + 2 }
+            ]
+          else
+            [
+              { sticker: preloaded[today - 1], label: "Yesterday", state: :past, date: today - 1 },
+              { sticker: preloaded[today], label: "Today", state: :today, date: today },
+              { sticker: preloaded[today + 1], label: "Tomorrow", state: :upcoming, date: today + 1 }
+            ]
+          end
+        end
+
+        begin
+          seconds_left = Time.use_zone("America/New_York") do
+            now = Time.zone.now
+            (now.end_of_day - now).to_i
+          end
+          seconds_left = [ seconds_left, 0 ].max
+          hours = seconds_left / 3600
+          minutes = (seconds_left % 3600) / 60
+          time_left_text = "#{hours}h #{minutes}m left (EST)"
+          @advent_cards.each { |c| c[:time_left_text] = time_left_text if c[:state] == :today }
+        rescue => e
+          Rails.logger.warn("Failed to compute EST time left: #{e.message}")
+        end
+      end
+    end
+
     # Hackatime dashboard data
     if @account_status[:hackatime_setup] && @user.user_hackatime_data.present?
       begin

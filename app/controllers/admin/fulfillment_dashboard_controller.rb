@@ -7,79 +7,85 @@ module Admin
     skip_before_action :authenticate_admin!
 
     def index
-      @t = params[:fulfillment_type] || "all"
-      @p, @o = pagy(f(@t))
-      g
+      @fulfillment_type = params[:fulfillment_type] || "all"
+      @pagy, @orders = pagy(filtered_orders(@fulfillment_type))
+      generate_statistics
     end
 
     private
 
-    def f(t)
-      s = ShopOrder.includes(:user, :shop_item)
-                   .where(aasm_state: [ "pending", "awaiting_periodical_fulfillment" ])
-                   .where.not(shop_items: { type: "ShopItem::FreeStickers" })
-                   .order(:awaiting_periodical_fulfillment_at, :created_at)
-
-      case t
-      when "hq_mail"
-        s.joins(:shop_item).where(shop_items: { type: "ShopItem::HQMailItem" })
-      when "third_party"
-        s.joins(:shop_item).where(shop_items: { type: "ShopItem::ThirdPartyPhysical" })
-      when "sinkening"
-        s.joins(:shop_item).where(shop_items: { type: "ShopItem::SinkeningBalloons" })
-      when "warehouse"
-        s.joins(:shop_item).where(shop_items: { type: [ "ShopItem::WarehouseItem", "ShopItem::PileOfStickersItem" ] })
-      else # "all"
-        s
-      end
-    end
-
-    def g
-      b = ShopOrder.joins(:shop_item).where(aasm_state: [ "pending", "awaiting_periodical_fulfillment" ]).where.not(shop_items: { type: "ShopItem::FreeStickers" })
-
-      @s = {}
-
-      @s[:hq_mail] = gt(b.where(shop_items: { type: "ShopItem::HQMailItem" }))
-      @s[:third_party] = gt(b.where(shop_items: { type: "ShopItem::ThirdPartyPhysical" }))
-      @s[:sinkening] = gt(b.where(shop_items: { type: "ShopItem::SinkeningBalloons" }))
-      @s[:warehouse] = gt(b.where(shop_items: { type: [ "ShopItem::WarehouseItem", "ShopItem::PileOfStickersItem" ] }))
-
-      @s[:all] = gt(b)
-    end
-
-    def gt(s)
-      p = s.where(aasm_state: "pending")
-      a = s.where(aasm_state: "awaiting_periodical_fulfillment")
-
+    def fulfillment_type_filters
       {
-        pc: p.count,
-        ac: a.count,
-        aho: c(p, :created_at),
-        ahf: c(a, :awaiting_periodical_fulfillment_at)
+        "hq_mail" => "ShopItem::HQMailItem",
+        "third_party" => "ShopItem::ThirdPartyPhysical",
+        "sinkening" => "ShopItem::SinkeningBalloons",
+        "warehouse" => [ "ShopItem::WarehouseItem", "ShopItem::PileOfStickersItem" ]
       }
     end
 
-    def c(o, f)
-      return 0 if o.empty?
+    def base_fulfillment_scope(include_associations: false)
+      scope = ShopOrder.where(aasm_state: [ "pending", "awaiting_periodical_fulfillment" ])
+                       .where.not(shop_items: { type: "ShopItem::FreeStickers" })
+                       .joins(:shop_item)
 
-      n = Time.current
-      t = o.sum { |r| n - r.send(f) }
-      (t / o.count).to_i
+      if include_associations
+        scope = scope.includes(:user, :shop_item)
+                     .order(:awaiting_periodical_fulfillment_at, :created_at)
+      end
+
+      scope
     end
+
+    def filtered_orders(fulfillment_type)
+      base_scope = base_fulfillment_scope(include_associations: true)
+
+      if fulfillment_type == "all" || !fulfillment_type_filters.key?(fulfillment_type)
+        base_scope
+      else
+        shop_item_types = fulfillment_type_filters[fulfillment_type]
+        base_scope.where(shop_items: { type: shop_item_types })
+      end
+    end
+
+    def generate_statistics
+      base_orders = base_fulfillment_scope
+
+      @stats = {}
+
+      fulfillment_type_filters.each do |type, shop_item_types|
+        @stats[type.to_sym] = generate_type_stats(base_orders.where(shop_items: { type: shop_item_types }))
+      end
+
+      @stats[:all] = generate_type_stats(base_orders)
+    end
+
+    def generate_type_stats(scope)
+      results = scope.group(:aasm_state)
+                     .select(
+                       :aasm_state,
+                       "COUNT(*) as count",
+                       "AVG(EXTRACT(EPOCH FROM (NOW() - shop_orders.created_at))) as avg_hours_since_order",
+                       "AVG(EXTRACT(EPOCH FROM (NOW() - shop_orders.awaiting_periodical_fulfillment_at))) as avg_hours_since_fulfillment"
+                     )
+                     .map { |r| [ r.aasm_state, r ] }.to_h
+
+      pending = results["pending"]
+      awaiting = results["awaiting_periodical_fulfillment"]
+
+      {
+        pc: pending&.count || 0,
+        ac: awaiting&.count || 0,
+        aho: pending&.avg_hours_since_order&.to_i || 0,
+        ahf: awaiting&.avg_hours_since_fulfillment&.to_i || 0
+      }
+    end
+
+
 
     def ensure_authorized_user
       unless current_user&.is_admin? || current_user&.fraud_team_member?
         redirect_to root_path, alert: "whomp whomp"
       end
     end
-
-    def d(s)
-      return "--:--:--" unless s
-      h = s / 3600
-      m = (s % 3600) / 60
-      sec = s % 60
-      sprintf("%02d:%02d:%02d", h, m, sec)
-    end
-    helper_method :d
   end
 end

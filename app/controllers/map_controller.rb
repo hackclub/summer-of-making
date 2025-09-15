@@ -4,13 +4,15 @@ class MapController < ApplicationController
   # before_action :check_identity_verification
   include MapHelper
 
-  def index
-    @projects_on_map = project_map_data(map_projects_query).to_json
-    @placeable_projects = current_user.projects.joins(:ship_events).not_on_map.distinct.order(created_at: :desc)
-  end
 
-  def points
-    render json: { projects: project_map_data(map_projects_query) }
+  def index
+    @projects_on_map = Cache::MapPointsJob.perform_now
+    @placeable_projects = current_user.projects.joins(:ship_events).not_on_map.distinct.order(created_at: :desc)
+
+    respond_to do |format|
+      format.html { @projects_on_map = @projects_on_map.to_json }
+      format.json { render json: { projects: @projects_on_map } }
+    end
   end
 
   # OLD CODE: identity verification method that blocked access

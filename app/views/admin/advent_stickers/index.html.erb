@@ -1,0 +1,31 @@
+<div class="asec" style="padding: 1.5em;">
+  <div class="flex items-center justify-between">
+    <h2 class="font-bold text-2xl">Advent Stickers</h2>
+    <%= link_to "New", new_admin_advent_sticker_path, class: "abtn" %>
+  </div>
+  <table class="table w-full mt-4">
+    <thead>
+      <tr>
+        <th class="text-left">Name</th>
+        <th class="text-left">Unlock On</th>
+        <th class="text-left">Type</th>
+        <th class="text-left">Enabled</th>
+        <th></th>
+      </tr>
+    </thead>
+    <tbody>
+      <% @advent_stickers.each do |sticker| %>
+        <tr>
+          <td><%= sticker.name %></td>
+          <td><%= sticker.unlock_on %></td>
+          <td><%= sticker.special? ? "Special" : "Regular" %></td>
+          <td><%= sticker.enabled? ? "yes" : "no" %></td>
+          <td class="text-right space-x-2">
+            <%= link_to "Edit", edit_admin_advent_sticker_path(sticker), class: "abtn small" %>
+            <%= button_to "Delete", admin_advent_sticker_path(sticker), method: :delete, data: { confirm: "Sure?" }, class: "abtn small" %>
+          </td>
+        </tr>
+      <% end %>
+    </tbody>
+  </table>
+</div>

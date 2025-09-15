@@ -33,10 +33,13 @@ module Journey
     # These settings can be overridden in specific environments using the files
     # in config/environments, which are processed later.
     #
-    # config.time_zone = "Central Time (US & Canada)"
+    config.time_zone = "Eastern Time (US & Canada)"
     # config.eager_load_paths << Rails.root.join("app/models/shop_item")
     # config.autoload_paths << Rails.root.join("app/models/shop_item")
+    config.autoload_paths << Rails.root.join("app/presenters")
     config.after_initialize { eager_load! }
+
+    config.active_storage.urls_expire_in = 1.hour
 
     # bring in game constants from yaml
     config.game_constants = config_for(:game_constants)

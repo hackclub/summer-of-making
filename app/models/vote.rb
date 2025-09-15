@@ -38,7 +38,6 @@
 #  index_votes_on_status                (status)
 #  index_votes_on_user_and_ship_events  (user_id,ship_event_1_id,ship_event_2_id) UNIQUE
 #  index_votes_on_user_id               (user_id)
-#  index_votes_on_user_id_and_status    (user_id,status)
 #
 # Foreign Keys
 #
@@ -50,7 +49,7 @@
 #  fk_rails_...  (user_id => users.id)
 #
 class Vote < ApplicationRecord
-  belongs_to :user
+  belongs_to :user, counter_cache: true
   belongs_to :project_1, class_name: "Project", optional: true
   belongs_to :project_2, class_name: "Project", optional: true
   belongs_to :ship_event_1, class_name: "ShipEvent"
@@ -120,6 +119,24 @@ class Vote < ApplicationRecord
     [ ship_event_1.project, ship_event_2.project ]
   end
 
+  def mark_invalid!(reason, marked_by_user)
+    update!(
+      status: "invalid",
+      invalid_reason: reason,
+      marked_invalid_at: Time.current,
+      marked_invalid_by: marked_by_user
+    )
+  end
+
+  def mark_uninvalid!
+    update!(
+      status: "active",
+      invalid_reason: nil,
+      marked_invalid_at: nil,
+      marked_invalid_by: nil,
+    )
+  end
+
   private
 
   def no_whitesp_my_friend
@@ -135,15 +152,6 @@ class Vote < ApplicationRecord
     if ship_event_1_id && ship_event_2_id && ship_event_1_id > ship_event_2_id
       self.ship_event_1_id, self.ship_event_2_id = ship_event_2_id, ship_event_1_id
     end
-  end
-
-  def mark_invalid!(reason, marked_by_user)
-    update!(
-      status: "invalid",
-      invalid_reason: reason,
-      marked_invalid_at: Time.current,
-      marked_invalid_by: marked_by_user
-    )
   end
 
   def process_vote_results

@@ -11,8 +11,7 @@
 #
 # Indexes
 #
-#  index_ship_events_on_project_created_excluded  (project_id,created_at,excluded_from_pool)
-#  index_ship_events_on_project_id                (project_id)
+#  index_ship_events_on_project_id  (project_id)
 #
 # Foreign Keys
 #
@@ -22,7 +21,7 @@ class ShipEvent < ApplicationRecord
   include AirtableSyncable
   include Balloonable
 
-  belongs_to :project
+  belongs_to :project, counter_cache: true
   has_one :user, through: :project
   has_one :ship_event_feedback
   has_many :payouts, as: :payable

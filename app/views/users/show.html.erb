@@ -1,4 +1,4 @@
-<% if @user.user_profile&.custom_css.present? && @user.has_badge?(:graphic_design_is_my_passion) && !current_user&.has_badge?(:sunglasses) %>
+<% if @user.user_profile&.custom_css.present? && @user.has_badge?(:graphic_design_is_my_passion) && !current_user_has_badge?(:sunglasses) %>
   <style>
     <%= sanitize_css(@user.user_profile.custom_css).html_safe %>
   </style>
@@ -8,7 +8,7 @@
   <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-8 lg:items-start">
     <!-- Profile Info Sidebar -->
     <div class="lg:col-span-1 space-y-6">
-      <%= render "shared/card" do %>
+      <%= render C::Card.new do %>
         <div class="space-y-6">
           <!-- Profile Header -->
           <div class="text-center profile-header">
@@ -25,7 +25,7 @@
             </h1>
 
             <% if @user == current_user %>
-              <%= render "shared/button", text: "Edit your profile", link: edit_user_profile_path(@user), icon: "edit.svg" %>
+              <%= render C::StyledButton.new(text: "Edit your profile", link: edit_user_profile_path(@user), icon: "edit.svg") %>
             <% else %>
             <% admin_tool("inline-block ml-2") do %>
                <%= link_to "edit their profile.", edit_user_profile_path(@user), class: "inline-flex items-center px-3 py-2 border border-gray-300 shadow-sm text-sm leading-4 rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500" %>
@@ -57,22 +57,22 @@
 
             <div class="grid grid-cols-2 gap-4">
               <div class="text-center profile-stat">
-                <div class="text-xl font-bold text-blue-600"><%= @user.projects.count %></div>
+                <div class="text-xl font-bold text-blue-600"><%= @stats[:projects_count] %></div>
                 <div class="text-xs">Projects</div>
               </div>
 
               <div class="text-center profile-stat">
-                <div class="text-xl font-bold text-green-600"><%= @user.devlogs.count %></div>
+                <div class="text-xl font-bold text-green-600"><%= @stats[:devlogs_count] %></div>
                 <div class="text-xs">Devlogs</div>
               </div>
 
               <div class="text-center profile-stat">
-                <div class="text-xl font-bold text-purple-600"><%= @user.votes.active.count %></div>
+                <div class="text-xl font-bold text-purple-600"><%= @stats[:votes_count] %></div>
                 <div class="text-xs">Votes</div>
               </div>
 
               <div class="text-center profile-stat">
-                <div class="text-xl font-bold text-orange-600"><%= @user.projects.joins(:ship_events).count %></div>
+                <div class="text-xl font-bold text-orange-600"><%= @stats[:ships_count] %></div>
                 <div class="text-xs">Ships</div>
               </div>
             </div>
@@ -111,7 +111,7 @@
             <p class="text-sm"><%= @user.created_at.strftime("%B %d, %Y") %></p>
           </div>
 
-          <% if current_user&.has_badge?(:pocket_watcher) %>
+          <% if current_user_has_badge?(:pocket_watcher) %>
             <div class="flex items-center space-x-2 border-2 border-yellow-300 bg-yellow-50/50 rounded-md p-2">
               <%= image_tag "pocket_watcher.png", class: "w-10 h-10 inline-block" %>
               <% unless @user.has_badge?(:offshore_bank_account) %>
@@ -122,19 +122,19 @@
             </div>
           <% end %>
 
-          <% if @user.user_profile&.custom_css.present? && @user.has_badge?(:graphic_design_is_my_passion) && current_user&.has_badge?(:sunglasses) %>
+          <% if @user.user_profile&.custom_css.present? && @user.has_badge?(:graphic_design_is_my_passion) && current_user_has_badge?(:sunglasses) %>
           <b> This user has custom CSS, but you're spared from it by your sunglasses.</b>
           <% end %>
         </div>
       <% end %>
 
       <!-- Badges -->
-      <% if @user.badges.any? %>
-        <%= render "shared/card" do %>
+      <% if @user_badges.any? %>
+        <%= render C::Card.new do %>
           <div class="space-y-4">
             <div class="flex items-center justify-between">
               <h3 class="text-lg font-semibold text-gray-800">Badges</h3>
-              <span class="text-sm text-gray-500"><%= @user.badges.count %></span>
+              <span class="text-sm text-gray-500"><%= @user_badges.count %></span>
             </div>
 
             <div class="flex flex-wrap gap-3 justify-center">
@@ -146,7 +146,7 @@
 
       <!-- Projects List -->
       <% if @all_projects.any? %>
-        <%= render "shared/card" do %>
+        <%= render C::Card.new do %>
           <div class="space-y-4">
             <div class="flex items-center justify-between">
               <h3 class="text-lg font-semibold text-gray-800">Projects</h3>
@@ -173,13 +173,13 @@
                           <%= project.title %>
                         </a>
                       </h4>
-                      <% if project.ship_events.any? %>
+                      <% if @project_shipped_status[project.id] %>
                         <span class="text-xs px-2 py-1 bg-green-100 text-green-800 rounded-full">Shipped</span>
                       <% end %>
                     </div>
 
                     <div class="flex items-center space-x-2 mt-1 text-xs text-gray-500">
-                      <span><%= pluralize(project.devlogs.count, 'devlog') %></span>
+                      <span><%= pluralize(@project_devlog_counts[project.id], 'devlog') %></span>
                       <span>•</span>
                       <span><%= time_ago_in_words(project.created_at) %> ago</span>
                     </div>
@@ -206,7 +206,7 @@
                <% @activities.each do |activity| %>
                  <% if activity[:type] == :project %>
                    <% project = activity[:item] %>
-                   <%= render "shared/card" do %>
+                   <%= render C::Card.new do %>
                      <div class="ml-4">
                        <div class="flex items-center justify-between mb-2 sm:mb-3">
                          <div class="flex items-center">
@@ -259,16 +259,17 @@
                        <% end %>
 
                        <div class="flex items-center space-x-4 mt-3 text-sm text-som-detail">
-                         <span><%= pluralize(project.devlogs.count, 'devlog') %></span>
-                         <span><%= pluralize(project.followers.count, 'follower') %></span>
-                         <% if project.ship_events.any? %>
-                           <span class="text-green-600">Shipped</span>
-                         <% end %>
+                       <span><%= pluralize(@project_devlog_counts[project.id], 'devlog') %></span>
+                       <span><%= pluralize(@project_follower_counts[project.id], 'follower') %></span>
+                       <% if @project_shipped_status[project.id] %>
+                       <span class="text-green-600">Shipped</span>
+                       <% end %>
                        </div>
                      </div>
                    <% end %>
                  <% elsif activity[:type] == :devlog %>
                    <% devlog = activity[:item] %>
+                   <% liked = defined?(@liked_devlog_ids) ? @liked_devlog_ids.include?(devlog.id) : nil %>
                    <%= render "devlogs/devlog_card",
                      devlog: devlog,
                      context: 'activity',
@@ -276,11 +277,12 @@
                      show_project_link: true,
                      show_likes: user_signed_in?,
                      show_comment_modal: user_signed_in?,
-                     show_stonks: false %>
+                     show_stonks: false,
+                     liked: %>
                  <% elsif activity[:type] == :shipwright_advice %>
                    <% advice = activity[:item] %>
                    <% reviewer = advice.ship_certification.reviewer %>
-                   <%= render "shared/card" do %>
+                   <%= render C::Card.new do %>
                      <div class="ml-4">
                        <div class="flex items-center justify-between mb-2 sm:mb-3">
                          <div class="flex items-center">
@@ -344,7 +346,7 @@
                    <% end %>
                  <% elsif activity[:type] == :user_joined %>
                    <% user = activity[:item] %>
-                   <%= render "shared/card" do %>
+                   <%= render C::Card.new do %>
                      <div class="ml-4">
                        <div class="flex items-center justify-between mb-2 sm:mb-3">
                          <div class="flex items-center">
@@ -393,7 +395,7 @@
         <% else %>
           <!-- Empty State -->
           <div class="flex-1 flex items-center justify-center">
-            <%= render "shared/card" do %>
+            <%= render C::Card.new do %>
               <div class="text-center py-12">
                 <div class="text-gray-400 text-6xl mb-4">📝</div>
                 <h3 class="text-lg text-gray-900 mb-2">No activity yet</h3>

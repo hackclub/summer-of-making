@@ -249,7 +249,7 @@
             console.log('All elements found, setting up updateCostPreview');
             function updateCostPreview() {
                 console.log('updateCostPreview called');
-                const quantity = parseInt(quantityInput.value) || 1;
+                const quantity = Math.max(parseInt(quantityInput.value) || 1, 1);
                 const totalCost = itemPrice * quantity;
                 const canAfford = userBalance >= totalCost;
 

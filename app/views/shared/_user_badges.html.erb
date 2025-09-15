@@ -2,7 +2,7 @@
 <% if user.badges.any? %>
   <div class="flex flex-wrap gap-2 items-center">
     <% user.badges.each do |badge| %>
-      <%= render "shared/badge", badge: badge %>
+      <%= render "shared/badge", badge: Badge.find(badge) %>
     <% end %>
   </div>
 <% end %>

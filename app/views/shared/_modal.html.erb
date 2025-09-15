@@ -4,9 +4,9 @@
 %>
 
 <div id="<%= id %>" data-controller="modal" class="m hidden fixed inset-0 z-50 overflow-auto bg-black/30 flex items-center justify-center p-2 md:p-4">
-  <%= render "shared/card",
-      classes: "c w-full #{max_width} mx-2 md:mx-auto relative max-h-[85vh] flex flex-col #{classes} transform transition-all duration-300 ease-out scale-95 opacity-0 translate-y-4",
-      padding: "0" do %>
+  <%= render C::Card.new(
+      css_classes: "c w-full #{max_width} mx-2 md:mx-auto relative max-h-[85vh] flex flex-col #{classes} transform transition-all duration-300 ease-out scale-95 opacity-0 translate-y-4",
+      padding: "0") do %>
     <div class="p-4 md:p-5 flex-shrink-0">
       <div class="flex justify-between items-center">
         <h3 class="text-lg md:text-2xl leading-snug"><%= title %></h3>

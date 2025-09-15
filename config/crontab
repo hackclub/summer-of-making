@@ -1,0 +1,10 @@
+# Memory leak debugging cron jobs
+# Check memory usage every 5 minutes
+*/5 * * * * cd /rails && bundle exec rake memory:check >> /tmp/memory-debug.log 2>&1
+
+# Daily cleanup of old heap dumps (keep only last 7 days)
+0 2 * * * find /tmp -name "heapdump-*.json" -mtime +7 -delete >> /tmp/cleanup.log 2>&1
+0 2 * * * find /tmp -name "memory-leak-dumps-*.zip" -mtime +7 -delete >> /tmp/cleanup.log 2>&1
+
+# Log rotation for memory debug logs
+0 3 * * * [ -f /tmp/memory-debug.log ] && tail -1000 /tmp/memory-debug.log > /tmp/memory-debug.log.tmp && mv /tmp/memory-debug.log.tmp /tmp/memory-debug.log
