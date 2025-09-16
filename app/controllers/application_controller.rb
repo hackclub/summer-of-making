@@ -132,14 +132,14 @@ class ApplicationController < ActionController::Base
   def brainrot_mode_active?
     return false unless current_user
     return false unless Flipper.enabled?(:brainrot_mode, current_user)
-    
+
     session[:brainrot_active] == true
   end
-  
+
   def activate_brainrot_mode!
     session[:brainrot_active] = true
   end
-  
+
   def deactivate_brainrot_mode!
     session[:brainrot_active] = false
   end
