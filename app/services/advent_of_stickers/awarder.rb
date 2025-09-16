@@ -67,11 +67,11 @@ module AdventOfStickers
         end
 
         # Channel announce
-        channel_id = "C015M4L9AHW"
-        if channel_id.present?
-          text = "#{user.display_name} just unlocked today’s sticker: #{target_sticker.name}! :partyparrot:"
-          SendSlackDmJob.perform_later(channel_id, text)
-        end
+     #   channel_id = "C015M4L9AHW"
+     #   if channel_id.present?
+      #    text = "#{user.display_name} just unlocked today’s sticker: #{target_sticker.name}! :partyparrot:"
+       #   SendSlackDmJob.perform_later(channel_id, text)
+  #      end
       end
     rescue => e
       Rails.logger.error("Advent Awarder error for devlog #{devlog.id}: #{e.message}")
