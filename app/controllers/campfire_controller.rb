@@ -6,11 +6,11 @@ class CampfireController < ApplicationController
   def index
     @user = current_user
 
-    if params[:tutorial_completed] == "true" && @user.tutorial_progress.completed?
+    if params[:tutorial_completed] == "true" && @user.tutorial_completed?
       @user.update!(has_clicked_completed_tutorial_modal: true)
     end
 
-    if params[:mark_video_seen] == "true" && @user.tutorial_progress.completed?
+    if params[:mark_video_seen] == "true" && @user.tutorial_completed?
       @user.update!(tutorial_video_seen: true)
       if request.xhr?
         render json: { success: true }
@@ -31,6 +31,50 @@ class CampfireController < ApplicationController
     @announcements = get_announcements
     @tutorials = get_tutorials
     @tutorial_progress = get_tutorial_progress
+
+    # Stickerlode
+    if Flipper.enabled?(:advent_of_stickers, @user)
+      today = Date.current
+      first_advent_day = ShopItem::AdventSticker.minimum(:unlock_on)
+      @advent_cards = []
+      if first_advent_day
+        advent_day = (today - first_advent_day).to_i + 1
+        dates = advent_day == 1 ? [ today, today + 1, today + 2 ] : [ today - 1, today, today + 1 ]
+        preloaded = ShopItem::AdventSticker
+          .where(unlock_on: dates)
+          .with_attached_image
+          .with_attached_silhouette_image
+          .index_by(&:unlock_on)
+
+        @advent_cards = if advent_day == 1
+          [
+            { sticker: preloaded[today], label: "Today", state: :today, date: today },
+            { sticker: preloaded[today + 1], label: "Tomorrow", state: :upcoming, date: today + 1 },
+            { sticker: preloaded[today + 2], label: (today + 2).strftime("%b %-d"), state: :upcoming, date: today + 2 }
+          ]
+        else
+          [
+            { sticker: preloaded[today - 1], label: "Yesterday", state: :past, date: today - 1 },
+            { sticker: preloaded[today], label: "Today", state: :today, date: today },
+            { sticker: preloaded[today + 1], label: "Tomorrow", state: :upcoming, date: today + 1 }
+          ]
+        end
+
+        begin
+          seconds_left = Time.use_zone("America/New_York") do
+            now = Time.zone.now
+            (now.end_of_day - now).to_i
+          end
+          seconds_left = [ seconds_left, 0 ].max
+          hours = seconds_left / 3600
+          minutes = (seconds_left % 3600) / 60
+          time_left_text = "#{hours}h #{minutes}m left (EST)"
+          @advent_cards.each { |c| c[:time_left_text] = time_left_text if c[:state] == :today }
+        rescue => e
+          Rails.logger.warn("Failed to compute EST time left: #{e.message}")
+        end
+      end
+    end
 
     # Hackatime dashboard data
     if @account_status[:hackatime_setup] && @user.user_hackatime_data.present?
@@ -104,13 +148,13 @@ class CampfireController < ApplicationController
   private
 
   def check_and_mark_tutorial_completion
-    return if current_user.tutorial_progress.completed?
+    return if current_user.tutorial_completed?
 
     if @account_status[:hackatime_setup] && !current_user.tutorial_progress.step_completed?("hackatime_connected")
       current_user.tutorial_progress.complete_step!("hackatime_connected")
     end
 
-    if current_user.identity_vault_id.present? && current_user.verification_status != :ineligible && !current_user.tutorial_progress.step_completed?("identity_verified")
+    if current_user.identity_vault_id.present? && current_verification_status != :ineligible && !current_user.tutorial_progress.step_completed?("identity_verified")
       current_user.tutorial_progress.complete_step!("identity_verified")
     end
 

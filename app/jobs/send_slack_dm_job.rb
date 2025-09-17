@@ -3,21 +3,26 @@
 class SendSlackDmJob < ApplicationJob
   queue_as :latency_5m
 
-  def perform(user_id, message)
+  def perform(recipient_id, message = nil, blocks: nil)
     client = Slack::Web::Client.new(token: ENV.fetch("SLACK_BOT_TOKEN", nil))
 
-    channel_id = Rails.cache.fetch("slack_channel_id_#{user_id}", expires_in: 1.hour) do
-      response = client.conversations_open(users: user_id)
-      response.channel.id
+    recipient = recipient_id.to_s
+    if recipient.start_with?("C", "G", "D")
+      channel_id = recipient
+    else
+      channel_id = Rails.cache.fetch("slack_channel_id_#{recipient}", expires_in: 1.hour) do
+        response = client.conversations_open(users: recipient)
+        response.channel.id
+      end
     end
 
-    client.chat_postMessage(
-      channel: channel_id,
-      text: message,
-      as_user: true
-    )
+    params = { channel: channel_id, as_user: true }
+    params[:text] = message if message.present?
+    params[:blocks] = blocks if blocks.present?
+
+    client.chat_postMessage(**params)
   rescue Slack::Web::Api::Errors::SlackError => e
     Rails.logger.error("Failed to send Slack DM: #{e.message}")
-    Honeybadger.notify(e, context: { user_id: user_id, message: message })
+    Honeybadger.notify(e, context: { recipient_id: recipient_id, message: message, blocks: blocks })
   end
 end

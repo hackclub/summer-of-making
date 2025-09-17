@@ -1,6 +1,6 @@
 <% if project.can_request_recertification? %>
   <div class="mt-3">
-    <%= button_to request_recertification_project_path(project),
+    <%= button_to project_recertification_path(project),
         class: "som-button-primary px-4 py-2 text-sm",
         data: { confirm: "Request re-certification? Make sure you've fixed the issues mentioned in the feedback." } do %>
       Request Re-certification

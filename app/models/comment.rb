@@ -23,6 +23,8 @@
 #  fk_rails_...  (user_id => users.id)
 #
 class Comment < ApplicationRecord
+  include ActionView::Helpers::SanitizeHelper
+
   belongs_to :user
   belongs_to :devlog, counter_cache: true
 
@@ -33,6 +35,17 @@ class Comment < ApplicationRecord
 
   def display_content
     content.to_s
+  end
+
+  def formatted_content
+    return content unless rich_content.present?
+
+    data = JSON.parse(rich_content) rescue {}
+    if data["content"].present?
+      sanitize(data["content"], tags: %w[p br strong em a code pre blockquote ul ol li], attributes: %w[href])
+    else
+      content
+    end
   end
 
   private

@@ -9,10 +9,14 @@ class Shop::ReapFreeStickersOrdersJob < ApplicationJob
                .where.not(frozen_address: nil)
 
     orders.each do |order|
-      order.shop_item.fulfill!(order)
-    rescue StandardError => e
-      Honeybadger.notify(e)
-      next
+      Honeybadger.context({ free_stickers_order: order.id }) do
+        begin
+          order.shop_item.fulfill!(order)
+        rescue StandardError => e
+          Honeybadger.notify(e)
+          next
+        end
+      end
     end
   end
 end

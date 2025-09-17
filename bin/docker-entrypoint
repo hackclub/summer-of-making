@@ -10,7 +10,17 @@ fi
 if [ "${@: -2:1}" == "./bin/rails" ] && [ "${@: -1:1}" == "server" ]; then
   ./bin/rails db:prepare
   
-  ./bin/rails solid_queue:start &
+  # Start memory leak debugging if enabled
+  if [ "${MEMORY_DEBUG_ENABLED}" = "true" ]; then
+    echo "[MLD] Starting memory leak debugging with anacron..."
+    
+    # Create anacron spool directory for this user
+    mkdir -p /tmp/anacron-spool
+    
+    # Start anacron in background with custom config
+    anacron -s -t /rails/config/anacrontab -S /tmp/anacron-spool -d > /tmp/anacron.log 2>&1 &
+    echo "[MLD] Anacron started in background for memory monitoring"
+  fi
 fi
 
 exec "${@}"

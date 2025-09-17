@@ -262,6 +262,10 @@ textarea.som-horizontal-input[placeholder=" "] {
   }
 }
 
+.som-button-rounded {
+  padding: .5em 1em;
+}
+
 .som-button-primary {
   --bg-color: #FFE8CD;
   --bg-disabled-color: #b8a795;
@@ -338,4 +342,57 @@ textarea.som-horizontal-input[placeholder=" "] {
   &.checked {
     background: var(--color-som-dark);
   }
+}
+
+/* Stickerlode 9-slice container */
+.stickerlode-container {
+  padding: 1.5rem;
+  position: relative;
+  
+  background:
+    /* Corners */
+    url("stickerlode-container/image_tl.png") top left no-repeat,
+    url("stickerlode-container/image_tr.png") top right no-repeat,
+    url("stickerlode-container/image_bl.png") bottom left no-repeat,
+    url("stickerlode-container/image_br.png") bottom right no-repeat,
+    /* Edges */
+    url("stickerlode-container/image_tm.png") top center repeat-x,
+    url("stickerlode-container/image_bm.png") bottom center repeat-x,
+    url("stickerlode-container/image_ml.png") center left repeat-y,
+    url("stickerlode-container/image_mr.png") center right repeat-y,
+    /* Center fill */
+    url("stickerlode-container/image_mm.png") center repeat;
+
+  background-size:
+    auto auto, auto auto, auto auto, auto auto, /* corners - natural size */
+    auto auto, auto auto, auto auto, auto auto, /* edges - stretch appropriately */
+    auto auto; /* center - repeat */
+}
+
+/* Advent card hover effect */
+.advent-card-flippable .advent-card-front {
+  transition: opacity 0.3s ease;
+}
+
+.advent-card-flippable .advent-card-back {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  padding: 1.5rem;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.advent-card-flippable:hover .advent-card-front {
+  opacity: 0;
+}
+
+.advent-card-flippable:hover .advent-card-back {
+  opacity: 1;
 }

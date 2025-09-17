@@ -1,0 +1,29 @@
+<% target_id = local_assigns.fetch(:target_id, "projects-grid") %>
+
+<% if projects&.any? %>
+  <% projects.each do |project| %>
+    <%= turbo_stream.append target_id do %>
+      <%= render "projects/project_preview", project: project %>
+    <% end %>
+  <% end %>
+<% end %>
+
+<%= turbo_stream.replace "load-more-projects" do %>
+  <% if pagy&.next %>
+    <%= turbo_frame_tag "load-more-projects",
+      src: next_path,
+      loading: "lazy",
+      class: "block" do %>
+      <div class="flex flex-col items-center justify-center py-6">
+        <%= image_tag 'compassloading.gif', class: 'w-8 h-8 sm:w-16 sm:h-16 lg:w-24 lg:h-24' %>
+      </div>
+    <% end %>
+  <% else %>
+    <div id="load-more-projects" class="flex justify-center py-6">
+      <div class="text-sm sm:text-base">
+        All projects loaded!
+      </div>
+    </div>
+  <% end %>
+<% end %>
+

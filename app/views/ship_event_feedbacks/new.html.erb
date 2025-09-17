@@ -4,7 +4,7 @@
 
 <%= link_to "Go to #{@feedback.ship_event.project.title}", project_path(@feedback.ship_event.project) %>
 
-<%= render "shared/card" do %>
+<%= render C::Card.new do %>
   <%= form_with model: @feedback, class: "flex flex-col" do |f| %>
     <%= f.label :comment %>
     <%= f.text_area :comment %>

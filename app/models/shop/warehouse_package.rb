@@ -30,6 +30,7 @@ class Shop::WarehousePackage < ApplicationRecord
   validates :theseus_package_id, uniqueness: true, allow_nil: true
 
   def send_to_theseus!
+    Honeybadger.context(warehouse_package_id: id, shop_orders: shop_orders.pluck(:id)) do
     address_params = {
       first_name: frozen_address["first_name"],
       last_name: frozen_address["last_name"],
@@ -60,7 +61,17 @@ class Shop::WarehousePackage < ApplicationRecord
         tags: [ "summer-of-making", "som-warehouse-prize" ],
         recipient_email: user.email,
         user_facing_title: "Summer of Making – #{headline.join ', '}",
-        idempotency_key: idempotency_key
+        idempotency_key:,
+        metadata: {
+          som_user: user.id,
+          orders: shop_orders.map do |order|
+            {
+              id: order.id,
+              item_name: order.shop_item.name,
+              quantity: order.quantity
+            }
+          end
+        }
       })
       ap response
       update!(theseus_package_id: response.dig("warehouse_order", "id"))
@@ -107,8 +118,9 @@ class Shop::WarehousePackage < ApplicationRecord
       Rails.logger.error "Bad request sending warehouse package #{id} to Theseus: #{e.message}"
       raise
     rescue => e
-      Rails.logger.error "Failed to send warehouse package #{id} to Theseus: #{e.message}"
-      raise
+        Rails.logger.error "Failed to send warehouse package #{id} to Theseus: #{e.message}"
+        raise
+      end
     end
   end
 end

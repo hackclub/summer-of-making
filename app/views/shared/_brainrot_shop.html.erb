@@ -1,0 +1,48 @@
+<% if brainrot_mode_active? %>
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    // Brainrot mode for shop
+    const returnShopButton = document.getElementById('backToShopButton');
+    const submitButton = document.getElementById('purchase-button');
+    let hoverSoundPlayed = false;
+
+    // Vine boom sound for back to shop button
+    if (returnShopButton) {
+      returnShopButton.addEventListener('click', function() {
+        const vineboom = new Audio(asset_path("vine-boom.mp3"));
+        vineboom.play().catch(function(error) {
+          console.error("Error playing vine boom:", error);
+        });
+      });
+    }
+
+    function enableSubmit() {
+      if (submitButton) {
+        submitButton.disabled = false;
+        submitButton.classList.remove('cursor-not-allowed');
+        submitButton.classList.add('cursor-pointer');
+      }
+    }
+
+    // Outro song on hover of purchase button
+    if (submitButton) {
+      submitButton.addEventListener('mouseenter', function(e) {
+        if (submitButton.value === 'Complete Purchase' && !hoverSoundPlayed) {
+          submitButton.disabled = true;
+          submitButton.classList.remove('cursor-pointer');
+          submitButton.classList.add('cursor-not-allowed');
+
+          const outroSong = new Audio(asset_path("outro-song.mp3"));
+          outroSong.play().catch(function(error) {
+            console.error("Error playing outro song:", error);
+            enableSubmit(); // Enable button if audio fails
+          });
+          
+          hoverSoundPlayed = true;
+          setTimeout(enableSubmit, 15000); 
+        }
+      });
+    }
+  });
+</script>
+<% end %>

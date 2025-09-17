@@ -1,6 +1,7 @@
 module Admin
   class ApplicationController < ActionController::Base
     include PublicActivity::StoreController
+    include Pundit::Authorization
 
     before_action :authenticate_admin!
     rescue_from StandardError, with: :handle_error if Rails.env.production?

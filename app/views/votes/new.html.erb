@@ -1,11 +1,12 @@
 <% content_for :head do %>
   <%= preload_link_tag asset_path("allhailasc.mp3"), as: :audio %>
   <%= preload_link_tag asset_path("the_stash.mp3"), as: :audio %>
+  <%= preload_link_tag asset_path("compassloading.gif"), as: :image %>
 
   <% if @projects.present? && @ship_events.present? %>
     <% @projects.each_with_index do |project, index| %>
       <% ship_event = @ship_events[index] %>
-      <% ship_devlogs = project.devlogs.where("created_at < ?", ship_event.created_at) %>
+      <% ship_devlogs = @ship_devlogs_by_project_id[project.id] || [] %>
 
       <!-- Preload project banners -->
       <%= preload_link_tag url_for(project.banner), as: :image %>
@@ -31,7 +32,7 @@
   <% end %>
 <% end %>
 
-<div class="container mx-auto px-0 sm:px-4 py-4 md:py-8">
+<div class="container mx-auto px-0 sm:px-4 py-4 md:py-8" id="new-tutorial-vote-container">
   <%= render "shared/page_title",
       title: "Vote",
       subtitle: "Vote on others' projects! #{Vote.count} votes have been submitted so far!" %>
@@ -59,7 +60,7 @@
             <li>Peek at the demo/repo and skim the devlogs to make an informed pick.</li>
           </ul>
           <div class="pt-2">
-            <%= render "shared/button", text: "Okay, I’ll improve it", classes: "w-full", data: { action: "click->modal#close" } %>
+            <%= render C::StyledButton.new(text: "Okay, I’ll improve it", css_classes: "w-full", data: { action: "click->modal#close" }) %>
           </div>
         </div>
       </div>
@@ -96,9 +97,39 @@
       document.addEventListener('turbo:render', initializeVoteRejectedModal);
     </script>
   <% end %>
-  <% more_votes_required = current_user.remaining_votes_to_ship %>
-  <% if more_votes_required > 0 %>
-    <p class="text-center text-nice-blue text-lg mb-6">You need <%= pluralize(more_votes_required, "more vote") %> since your last ship to release your shells.</p>
+  <% progress = current_user.votes_since_last_ship_count %>
+  <% remaining = current_user.remaining_votes_to_ship %>
+  <% total_active = Vote.active.where(user_id: current_user.id).count %>
+  <% ships = current_user.ship_events.count %>
+  <% available = [ [ progress, total_active - (ships * 20) ].max, 0 ].max %>
+  <% display_done = [ available, 20 ].min %>
+  <% percent = ((display_done.to_f / 20) * 100).round %>
+  <% credits = current_user.ship_credits %>
+  <% if remaining == 0 %>
+    <div class="bg-[#F6DBBA] rounded-2xl p-3 md:p-4 mb-6 text-center">
+      <% extra_rollover = [ available - 20, 0 ].max %>
+      <div class="flex items-center justify-center gap-2 mb-1">
+        <%= inline_svg "icons/ship.svg", class: "w-5 h-5 text-forest" %>
+        <p class="text-forest text-base md:text-lg font-medium">You're ready to ship!</p>
+      </div>
+      <p class="text-som-detail text-xs md:text-sm"><%= pluralize(extra_rollover, 'extra vote') %> will roll over to your next ship.</p>
+    </div>
+  <% elsif remaining > 0 %>
+    <div class=" bg-[#F6DBBA] rounded-2xl p-3 md:p-4 mb-6">
+      <div class="text-center mb-2">
+        <div class="flex items-center justify-center gap-2">
+          <%= inline_svg "icons/ship.svg", class: "w-5 h-5 text-forest" %>
+          <p class="text-som-dark text-base md:text-lg font-medium">You need <%= pluralize(remaining, "more vote") %> to ship</p>
+        </div>
+        <p class="text-som-detail text-xs md:text-sm mt-1">Each ship needs 20 votes; extra votes count toward your next ship.</p>
+      </div>
+      <div class="mx-auto max-w-md">
+        <div class="h-3 bg-white/60 rounded-full border border-[#E4DCC6] overflow-hidden">
+          <div class="h-full bg-forest transition-all duration-300" style="width: <%= percent %>%"></div>
+        </div>
+        <p class="mt-1 text-center text-som-detail text-xs md:text-sm"><%= display_done %>/20 votes</p>
+      </div>
+    </div>
   <% end %>
 
   <% if @projects.size < 2 %>
@@ -114,8 +145,8 @@
       <div class="grid grid-cols-1 lg:grid-cols-2 gap-0 sm:gap-16 mobile-divide-dashed">
         <% @projects.each_with_index do |project, index| %>
           <% ship_event = @ship_events[index] %>
-          <% ship_devlogs = project.devlogs.where("created_at < ?", ship_event.created_at).order(created_at: :asc) %>
-          <% ship_time_seconds = ship_devlogs.sum(:duration_seconds) %>
+          <% ship_devlogs = (@ship_devlogs_by_project_id[project.id] || []) %>
+          <% ship_time_seconds = @ship_time_seconds_by_project_id[project.id] || 0 %>
           <div class="px-4 py-8 sm:py-4 bg-[#F6DBBA] sm:rounded-xl" data-project-index="<%= index %>">
             <div class="space-y-6 sm:space-y-8">
               <div class="flex items-start gap-3 sm:gap-4">
@@ -140,10 +171,11 @@
                     <span>•</span>
                     <span class="text-gray-800"><%= format_seconds(ship_time_seconds) %></span>
                     <% admin_tool do %>
+                      <%= render "shared/project_twiddles", project: project %>
                       <span>•</span>
                       <span>Ship Date: <span class="text-black"><%= ship_event.created_at.strftime("%b %d") %></span></span>
                       <span>•</span>
-                      <span>Paid: <span class="text-black"><%= ship_event.payouts.exists? ? "Yes" : "No" %></span></span>
+                      <span>Paid: <span class="text-black"><%= @paid_ship_event_ids&.include?(ship_event.id) ? "Yes" : "No" %></span></span>
                       <span>•</span>
                       <span>Ship Event ID: <span class="text-black"><%= ship_event.id %></span></span>
                       <span>•</span>
@@ -164,29 +196,30 @@
               <div class="space-y-4 sm:space-y-6">
                 <div class="grid grid-cols-1 sm:flex sm:flex-wrap justify-center gap-3 sm:gap-4">
                   <% if project.demo_link.present? %>
-                    <%= render "shared/button",
+                    <%= render C::StyledButton.new(
                         text: "Demo",
                         link: track_demo_votes_path(position: index + 1),
                         link_target: "_blank",
                         method: :post,
                         icon: "world.svg",
-                        onclick: "event.stopPropagation()" %>
+                        onclick: "event.stopPropagation()",
+                        id: index == 0 ? 'new-tutorial-vote-demo' : nil) %>
                   <% end %>
                   <% if project.repo_link.present? %>
-                    <%= render "shared/button",
+                    <%= render C::StyledButton.new(
                         text: "Repository",
                         link: track_repo_votes_path(position: index + 1),
                         link_target: "_blank",
                         method: :post,
                         icon: "git.svg",
-                        onclick: "event.stopPropagation()" %>
+                        onclick: "event.stopPropagation()") %>
                   <% end %>
 
-                  <%= render "projects/report_button", project: project %>
+                  <%= render "shared/report", id: index == 0 ? 'new-tutorial-vote-report' : nil, suspect: ship_event, already_reported: @reported_ship_event_ids&.include?(ship_event.id) %>
                 </div>
               </div>
 
-              <div class="space-y-4 sm:space-y-8">
+              <div class="space-y-4 sm:space-y-8" id="<%= index == 0 ? 'new-tutorial-vote-devlogs' : nil %>">
                 <% ship_devlogs.each do |devlog| %>
                   <%= render "devlogs/devlog_card",
                       devlog: devlog,
@@ -203,8 +236,8 @@
         <% end %>
       </div>
 
-      <div class="mx-2 sm:mx-auto mt-8 sm:mt-12 max-w-220">
-        <%= render layout: "shared/container" do %>
+      <div class="mx-2 sm:mx-auto mt-8 sm:mt-12 max-w-220" id="new-tutorial-vote-decision">
+        <%= render C::Container.new do %>
           <div class="p-0 sm:p-2">
             <%= render "form", vote: @vote %>
           </div>
@@ -212,6 +245,31 @@
       </div>
     </div>
   <% end %>
+</div>
+
+<div id="vote-loading-overlay" class="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
+  <div class="bg-[#F6DBBA] rounded-2xl px-8 py-5 flex flex-col items-center gap-3 shadow-lg">
+    <%= image_tag "compassloading.gif", alt: "Loading", class: "w-14 h-14 md:w-20 md:h-20 lg:w-28 lg:h-28 2xl:w-36 2xl:h-36" %>
+    <p class="text-som-dark text-sm lg:text-base 2xl:text-lg">Loading…</p>
+  </div>
+  <script>
+    (function() {
+      var overlay = document.getElementById('vote-loading-overlay');
+      if (!overlay) return;
+
+      function hideOverlay() {
+        if (!overlay) return;
+        overlay.classList.add('hidden');
+      }
+
+      window.addEventListener('load', hideOverlay);
+      document.addEventListener('turbo:render', hideOverlay);
+      document.addEventListener('turbo:load', hideOverlay);
+
+      // auto-hide after 45 in case smth is fucked up, lol
+      setTimeout(hideOverlay, 45000);
+    })();
+  </script>
 </div>
 
 <div id="journey-music" data-turbo-permanent data-controller="music" class="fixed -bottom-28 sm:-bottom-32 -right-12 max-sm:mb-[140px]">

@@ -9,23 +9,28 @@
 
 # Make sure RUBY_VERSION matches the Ruby version in .ruby-version
 ARG RUBY_VERSION=3.4.3
-FROM docker.io/library/ruby:$RUBY_VERSION-slim
+FROM docker.io/library/ruby:$RUBY_VERSION 
+# ^ temporary: no more -slim, gimme my frickin tools!
 
 # Rails app lives here
 WORKDIR /rails
 
 # Install all packages (base + build dependencies)
 RUN apt-get update -qq && \
-    apt-get install --no-install-recommends -y \
+    DEBIAN_FRONTEND=noninteractive apt-get install --no-install-recommends -y \
+        tzdata \
         curl libjemalloc2 libvips postgresql-client wget ffmpeg imagemagick \
-        build-essential git libpq-dev libyaml-dev pkg-config && \
+        build-essential git libpq-dev libyaml-dev pkg-config anacron procps zip && \
     rm -rf /var/lib/apt/lists /var/cache/apt/archives
+
+RUN ln -snf /usr/share/zoneinfo/America/New_York /etc/localtime && echo America/New_York > /etc/timezone
 
 # Set production environment
 ENV RAILS_ENV="production" \
     BUNDLE_PATH="/usr/local/bundle" \
     RAILS_SERVE_STATIC_FILES="true" \
-    RAILS_LOG_TO_STDOUT="true"
+    RAILS_LOG_TO_STDOUT="true" \
+    TZ="America/New_York"
 
 # Install application gems
 COPY Gemfile Gemfile.lock ./
@@ -49,6 +54,9 @@ RUN groupadd --system --gid 1000 rails && \
     useradd rails --uid 1000 --gid 1000 --create-home --shell /bin/bash && \
     chown -R rails:rails db log storage tmp
 USER 1000:1000
+
+ENV LD_PRELOAD="libjemalloc.so.2" \
+    MALLOC_CONF="dirty_decay_ms:1000,narenas:2,background_thread:true"
 
 # Entrypoint prepares the database.
 ENTRYPOINT ["/rails/bin/docker-entrypoint"]

@@ -4,7 +4,7 @@
 
 <div class="space-y-6">
   <% @projects.each do |project| %>
-    <%= render "shared/card" do %>
+    <%= render C::Card.new do %>
       <div class="mb-4">
         <h2 class="text-xl font-semibold"><%= project.title %></h2>
         <p class="text-gray-600 mt-1"><%= project.description %></p>

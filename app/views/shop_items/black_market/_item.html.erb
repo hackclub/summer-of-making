@@ -1,10 +1,28 @@
-<% if current_user %>
-  <% ineligible = current_verification_status == :ineligible %>
-  <% out_of_stock = item.out_of_stock? %>
-  <% regional_price = (@regionalization_enabled && @selected_region) ? item.price_for_region(@selected_region) : item.ticket_cost %>
-  <% disabled = ineligible || (!current_user.ysws_verified? && !item.is_a?(ShopItem::FreeStickers)) || (current_user.balance < regional_price) || out_of_stock %>
+<%# Use pre-computed data if available, fallback to old logic for compatibility %>
+<% if defined?(item_data) && item_data %>
+  <% regional_price = item_data[:regional_price] %>
+  <% out_of_stock = item_data[:out_of_stock] %>
+  <% remaining = item_data[:remaining_stock] %>
+  <% already_ordered = item_data[:already_ordered] %>
+  <% if current_user %>
+    <% ineligible = @current_verification_status == :ineligible %>
+    <% disabled = ineligible || (!@current_user_ysws_verified && !item.is_a?(ShopItem::FreeStickers)) || (@current_balance < regional_price) || out_of_stock %>
+  <% end %>
 <% else %>
-  <% regional_price = (@regionalization_enabled && @selected_region) ? item.price_for_region(@selected_region) : item.ticket_cost %>
+  <%# Fallback to old logic for compatibility %>
+  <% if current_user %>
+    <% ineligible = current_verification_status == :ineligible %>
+    <% out_of_stock = item.out_of_stock? %>
+    <% regional_price = (@regionalization_enabled && @selected_region) ? item.price_for_region(@selected_region) : item.ticket_cost %>
+    <% disabled = ineligible || (!current_user.ysws_verified? && !item.is_a?(ShopItem::FreeStickers)) || (current_user.balance < regional_price) || out_of_stock %>
+    <% remaining = item.remaining_stock %>
+    <% already_ordered = item.one_per_person_ever? && current_user.shop_orders.joins(:shop_item).where(shop_item: item).exists? %>
+  <% else %>
+    <% regional_price = (@regionalization_enabled && @selected_region) ? item.price_for_region(@selected_region) : item.ticket_cost %>
+    <% out_of_stock = item.out_of_stock? %>
+    <% remaining = item.remaining_stock %>
+    <% already_ordered = false %>
+  <% end %>
 <% end %>
 <div class="shop-item-row" data-item-price="<%= regional_price %>" data-item-id="<%= item.id %>">
   <div class="shop-item-image">
@@ -19,7 +37,6 @@
     <div class="shop-item-description">
       <%= raw item.description %> <%# erb_lint:disable ErbSafety %>
       <% if item.limited? %>
-        <% remaining = item.remaining_stock %>
         <% if remaining && remaining > 0 %>
           <span class="shop-item-remaining">
             <%= remaining %> left
@@ -33,11 +50,6 @@
     </div>
     <div class="shop-item-actions">
       <% if current_user %>
-        <% ineligible = current_verification_status == :ineligible %>
-        <% out_of_stock = item.out_of_stock? %>
-        <% regional_price = (@regionalization_enabled && @selected_region) ? item.price_for_region(@selected_region) : item.ticket_cost %>
-        <% disabled = ineligible || (!current_user.ysws_verified? && !item.is_a?(ShopItem::FreeStickers)) || (current_user.balance < regional_price) || out_of_stock %>
-        <% already_ordered = item.one_per_person_ever? && current_user.shop_orders.joins(:shop_item).where(shop_item: item).exists? %>
         <% if already_ordered %>
           <%= button_to "Already Ordered", "#", method: :get, disabled: true, class: "shop-item-btn disabled" %>
         <% else %>
@@ -46,9 +58,9 @@
               <span>Out of Stock</span>
             <% elsif ineligible %>
               <span>Not for you!</span>
-            <% elsif !current_user.ysws_verified? && !item.is_a?(ShopItem::FreeStickers) %>
+            <% elsif !(defined?(item_data) && item_data ? @current_user_ysws_verified : current_user.ysws_verified?) && !item.is_a?(ShopItem::FreeStickers) %>
               <span>You need your ID verified for this</span>
-            <% elsif current_user.balance >= regional_price %>
+            <% elsif (defined?(item_data) && item_data ? @current_balance : current_user.balance) >= regional_price %>
               <span>
                 <% if regional_price == 0 %>
                   Acquire!
@@ -67,7 +79,7 @@
                   <source srcset="/shell.webp" type="image/webp">
                   <img src="/shell.png" width="15px" style="vertical-align:text-top" alt="shell" loading="lazy">
                 </picture>
-                <span><%= (regional_price - current_user.balance).ceil %> needed</span>
+                <span><%= (regional_price - (defined?(item_data) && item_data ? @current_balance : current_user.balance)).ceil %> needed</span>
               </span>
             <% end %>
           <% end %>

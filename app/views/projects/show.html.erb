@@ -130,8 +130,59 @@
             <div class="grow-1">
               <% if item.is_a? Devlog %>
                 <%= render "devlogs/devlog", devlog: item %>
+              <% elsif item.is_a? ShipwrightAdvice %>
+                <% reviewer = item.ship_certification.reviewer %>
+                <%= render C::Card.new(padding: "lg", css_classes: "bg-blue-50 border-blue-200") do %>
+                  <div class="z-10">
+                    <div class="flex items-center justify-between mb-3">
+                      <div class="flex items-center">
+                        <% if reviewer&.avatar.present? %>
+                          <a href="<%= user_path(reviewer) %>" class="flex-shrink-0">
+                            <img src="<%= reviewer.avatar %>" alt="<%= reviewer.display_name %>" class="w-10 h-10 rounded-full mr-3 hover:ring-2 hover:ring-blue-300 transition-all cursor-pointer" loading="lazy">
+                          </a>
+                        <% else %>
+                          <div class="w-10 h-10 rounded-full mr-3 bg-blue-100 flex items-center justify-center flex-shrink-0">
+                            <span class="text-blue-600 text-lg">💡</span>
+                          </div>
+                        <% end %>
+                        <div>
+                          <p class="font-extrabold text-base sm:text-lg 2xl:text-xl mb-1 flex items-center gap-2 text-blue-800">
+                            Shipwright Feedback
+                          </p>
+                          <p class="text-som-detail text-xs sm:text-sm 2xl:text-base">
+                            <% if reviewer %>
+                              from <%= reviewer.display_name %>
+                            <% else %>
+                              from Shipwright
+                            <% end %>
+                            • <%= time_ago_in_words(item.created_at) %> ago
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="mb-4">
+                      <p class="text-gray-800 text-base sm:text-lg 2xl:text-xl leading-relaxed">
+                        <%= simple_format(item.description) %>
+                      </p>
+                      <% if item.completed? %>
+                        <div class="mt-4 p-3 bg-green-50 border border-green-200 rounded-lg">
+                          <p class="text-green-800 font-medium mb-2 flex items-center gap-2">
+                            <span>✓</span>
+                            <span>You addressed this feedback!</span>
+                          </p>
+                        </div>
+                      <% elsif item.pending? %>
+                        <div class="mt-4 p-3 bg-amber-50 border border-amber-200 rounded-lg">
+                          <p class="text-amber-800 text-sm">
+                            This is expert advice from your shipwright, click <%= reviewer.display_name %>'s avatar to check out their projects
+                          </p>
+                        </div>
+                      <% end %>
+                    </div>
+                  </div>
+                <% end %>
               <% elsif item.is_a? ShipEvent %>
-                <%= render layout: "shared/card", locals: { padding: "lg", classes: (item.for_sinkening ? '-rotate-1' : '') } do %>
+                <%= render C::Card.new(padding: "lg", css_classes: (item.for_sinkening ? '-rotate-1' : '')) do %>
                   <div class="z-10">
                     <div class="relative">
                       <% admin_tool do %>
@@ -173,7 +224,7 @@
                         <% if current_user && current_user == item.user && ship_data[:escrow_count].to_i.positive? %>
                           <% remaining = current_user.remaining_votes_to_ship %>
                           <% if remaining > 0 %>
-                            <p class="">You need <%= pluralize(remaining, 'more vote') %> since your last ship to release your shells. <a href="<%= new_vote_path %>" class="underline text-blue-700 hover:text-blue-800">Start voting</a>.</p>
+                            <p class="">You need <%= pluralize(remaining, 'more vote') %> since your last ship to release your shells. <span data-action="click->modal#startVoting" data-vote-path="<%= new_vote_path %>" class="underline text-blue-700 hover:text-blue-800 cursor-pointer">Start voting</span>.</p>
                           <% end %>
                         <% end %>
                       </div>
@@ -280,3 +331,5 @@
     <%= inline_svg "check.svg", class: "h-4 w-4 text-forest inline" %>
   </div>
 </div>
+
+<%= render "projects/readme_viewer_modal", project: @project, url: @project.readme_link %>

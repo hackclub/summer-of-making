@@ -1,4 +1,4 @@
-<%= render "shared/button",
+<%= render C::StyledButton.new(
     text: "Delete",
     kind: :danger,
     icon: "delete.svg",
@@ -7,7 +7,7 @@
       action: "click->modal#open",
       modal_id: project.id,
       modal_type: "delete"
-    } %>
+    }) %>
 
 <%= render "shared/modal", id: "delete-modal-#{project.id}", title: "Delete #{project.title}?" do %>
   <div class="text-center mb-8">
@@ -15,16 +15,16 @@
   </div>
 
   <div class="mt-6 flex justify-center space-x-4">
-    <%= render "shared/button",
+    <%= render C::StyledButton.new(
         text: "Cancel",
         kind: :primary,
-        data: { action: "click->modal#close" } %>
+        data: { action: "click->modal#close" }) %>
 
     <%= form_with model: @project, url: project_path(@project), method: :delete, local: true, class: "inline-block" do |form| %>
-      <%= render "shared/button",
+      <%= render C::StyledButton.new(
           text: "Delete Project",
           kind: :danger,
-          type: :submit %>
+          type: :submit ) %>
     <% end %>
   </div>
 <% end %>

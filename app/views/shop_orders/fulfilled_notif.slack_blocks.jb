@@ -1,0 +1,52 @@
+blocks do
+  header "🎉 Order Fulfilled!"
+
+  img_url = @shop_order.shop_item.image.attached? ? @shop_order.shop_item.image.url : nil rescue nil
+
+  section(
+    "*#{@shop_order.shop_item.name}* - #{pluralize(@shop_order.quantity, "item")} has been marked as fulfilled!",
+    accessory: (img_url.present? ? image_element(img_url, @shop_order.shop_item.name) : nil),
+    markdown: true,
+  )
+
+  divider
+
+  section "Order Details:",
+    fields: [
+      mrkdwn_text("*Item:* #{@shop_order.shop_item.name}"),
+      mrkdwn_text("*Quantity:* #{@shop_order.quantity}"),
+      mrkdwn_text("*Total Cost:* #{number_with_delimiter(@shop_order.total_cost)} shells"),
+      mrkdwn_text("*Order placed:* #{time_ago_in_words(@shop_order.created_at)} ago")
+    ]
+
+  if @shop_order.external_ref.present?
+    tracking_text = "*Tracking:* "
+    if @shop_order.shop_card_grant.present? && @shop_order.shop_card_grant.hcb_url.present?
+      # HCB Grant - link to HCB URL
+      tracking_text += "<#{@shop_order.shop_card_grant.hcb_url}|View your grant on HCB>"
+    elsif (@shop_order.shop_item.is_a?(ShopItem::FreeStickers) || @shop_order.shop_item.is_a?(ShopItem::LetterMail)) && @shop_order.external_ref.start_with?("ltr!")
+      # Letter tracking - link to Theseus letter page
+      letter_url = "https://mail.hackclub.com/#{@shop_order.external_ref}"
+      tracking_text += "<#{letter_url}|Track your letter>"
+    elsif @shop_order.warehouse_package&.theseus_package_id.present?
+      # Warehouse package - link to Theseus package tracking
+      package_url = "https://mail.hackclub.com/packages/#{@shop_order.warehouse_package.theseus_package_id}"
+      tracking_text += "<#{package_url}|Track your package>"
+    else
+      # Generic tracking reference
+      tracking_text += "`#{@shop_order.external_ref}`"
+    end
+    simple_section tracking_text
+  end
+
+  if @shop_order.fulfilled_by.present?
+    context [
+      mrkdwn_text("Fulfilled by: *#{@shop_order.fulfilled_by}*"),
+      mrkdwn_text("Thank you for *making* your *summer* count! ✨")
+    ]
+  else
+    context [
+      mrkdwn_text("Thank you for *making* your *summer* count! ✨")
+    ]
+  end
+end

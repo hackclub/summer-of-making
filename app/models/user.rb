@@ -6,9 +6,12 @@
 #
 #  id                                   :bigint           not null, primary key
 #  avatar                               :string
+#  badges                               :string           default([]), is an Array
+#  devlogs_count                        :integer          default(0), not null
 #  display_name                         :string
 #  email                                :string
 #  first_name                           :string
+#  fraud_team_member                    :boolean          default(FALSE), not null
 #  freeze_shop_activity                 :boolean          default(FALSE)
 #  has_black_market                     :boolean
 #  has_clicked_completed_tutorial_modal :boolean          default(FALSE), not null
@@ -19,18 +22,26 @@
 #  internal_notes                       :text
 #  is_admin                             :boolean          default(FALSE), not null
 #  is_banned                            :boolean          default(FALSE)
-#  fraud_team_member                    :boolean          default(FALSE), not null
 #  last_name                            :string
 #  permissions                          :text             default([])
+#  projects_count                       :integer          default(0), not null
 #  shenanigans_state                    :jsonb
+#  ship_events_count                    :integer          default(0), not null
 #  synced_at                            :datetime
 #  timezone                             :string
 #  tutorial_video_seen                  :boolean          default(FALSE), not null
+#  votes_count                          :integer          default(0), not null
 #  ysws_verified                        :boolean          default(FALSE)
 #  created_at                           :datetime         not null
 #  updated_at                           :datetime         not null
 #  identity_vault_id                    :string
 #  slack_id                             :string
+#
+# Indexes
+#
+#  index_users_on_projects_count     (projects_count)
+#  index_users_on_ship_events_count  (ship_events_count)
+#  index_users_on_votes_count        (votes_count)
 #
 class User < ApplicationRecord
   has_paper_trail
@@ -54,6 +65,7 @@ class User < ApplicationRecord
   has_many :shop_card_grants
   has_many :user_badges, dependent: :destroy
   has_many :comments
+  has_many :likes
 
   accepts_nested_attributes_for :user_profile
   has_many :hackatime_projects
@@ -339,7 +351,6 @@ class User < ApplicationRecord
 
       url = "https://hackatime.hackclub.com/api/v1/users/#{slack_id}/stats?features=projects&start_date=#{start_date}&test_param=true"
       url += "&end_date=#{end_date}" if end_date.present?
-
       Faraday.get(url, nil, { "RACK_ATTACK_BYPASS" => ENV["HACKATIME_BYPASS_KEYS"] }.compact)
     end
   end
@@ -352,14 +363,7 @@ class User < ApplicationRecord
     projects = result.dig("data", "projects")
     has_hackatime_account = result.dig("data", "status") == "ok"
 
-    trust_value = result.dig("trust_factor", "trust_value")
-    should_ban = trust_value == 1
-
-    if should_ban && !is_banned
-      ban_user!("hackatime_ban")
-    elsif !should_ban && is_banned
-      unban_user!
-    end
+    ban_user!("hackatime_ban") if result.dig("trust_factor", "trust_value") == 1 && !is_banned
 
     if projects.empty?
       update!(has_hackatime_account:)
@@ -507,7 +511,9 @@ class User < ApplicationRecord
   end
 
   def remaining_votes_to_ship
-    [ 20 - votes_since_last_ship_count, 0 ].max
+    return 0 if can_ship_by_votes?
+    available = [ [ votes_since_last_ship_count, votes.active.count - (ship_events.count * 20) ].max, 0 ].max
+    [ 20 - available, 0 ].max
   end
 
   def release_escrowed_payouts_if_eligible!
@@ -516,6 +522,18 @@ class User < ApplicationRecord
 
     updated = payouts.where(escrowed: true).update_all(escrowed: false)
     updated > 0
+  end
+
+  # Roll Over Votes
+  def ship_credits
+    t = (votes.active.count / 20)
+    credits = t - ship_events.count
+    [ credits, 0 ].max
+  end
+
+  def can_ship_by_votes?
+    return true if ship_events.count == 0
+    ship_credits > 0 || votes_since_last_ship_count >= 20
   end
 
   # Avo backtraces
@@ -597,7 +615,7 @@ class User < ApplicationRecord
 
     # rapid identify theft
     if Rails.env.development? && ENV["BYPASS_IDV"] == "true"
-      notify_xyz_on_verified
+      notify_xyz_on_verified unless ysws_verified?
       update(ysws_verified: true) unless ysws_verified?
       return :verified
     end
@@ -611,7 +629,7 @@ class User < ApplicationRecord
       :needs_resubmission
     when "verified"
       if idv_data[:ysws_eligible]
-        notify_xyz_on_verified
+        notify_xyz_on_verified unless ysws_verified?
         update(ysws_verified: true) unless ysws_verified?
         :verified
       else
@@ -646,23 +664,17 @@ class User < ApplicationRecord
     Rails.logger.info("user #{id} (#{slack_id}) is back")
   end
 
+  def badges = super.map(&:to_sym)
   # Badge methods
-  def badges
-    Badge.earned_by(self)
-  end
+  def hydrated_badges = Badge.earned_by(self)
 
-  def has_badge?(badge_key)
-    # we're preload this in shop items controller
-    if association(:user_badges).loaded?
-      user_badges.any? { |ub| ub.badge_key.to_s == badge_key.to_s }
-    else
-      user_badges.exists?(badge_key: badge_key)
-    end
-  end
+  def has_badge?(badge_key) = badges.include?(badge_key)
 
   def award_badges!(backfill: false)
     Badge.award_badges_for(self, backfill: backfill)
   end
+
+  def update_cached_badges! = update! badges: user_badges.order(id: :asc).pluck(:badge_key).uniq
 
   def award_badges_async!(trigger_event = nil, backfill: false)
     AwardBadgesJob.perform_later(id, trigger_event, backfill)
@@ -679,6 +691,39 @@ class User < ApplicationRecord
 
   def completed_todo?
     devlogs.any? && projects.any? && votes.any? && shop_orders.joins(:shop_item).where.not(shop_items: { type: "ShopItem::FreeStickers" }).any?
+  end
+
+  def self.project_devlog_cache_key(user_id)
+    "user:#{user_id}:proj_devlog_stats:v1"
+  end
+
+  def project_and_devlog_counts
+    Rails.cache.fetch(self.class.project_devlog_cache_key(id), expires_in: 2.hours) do
+      {
+        projects_count: Project.where(user_id: id).count,
+        devlogs_count: Devlog.where(user_id: id).count
+      }
+    end
+  end
+
+  def needs_projects_attention?
+    counts = project_and_devlog_counts
+    counts[:projects_count] == 0 || (counts[:projects_count] == 1 && counts[:devlogs_count] == 0)
+  end
+
+  def sinkening_participation?
+    devlogs.exists?(for_sinkening: true) || ship_events.exists?(for_sinkening: true)
+  end
+
+  def self.tutorial_completed_cache_key(user_id)
+    "user:#{user_id}:tutorial_completed:v1"
+  end
+
+  def tutorial_completed?
+    Rails.cache.fetch(self.class.tutorial_completed_cache_key(id), expires_in: 6.hour) do # kinda don't need to check it that much. either people go through it or js leave.
+      completed_at = TutorialProgress.where(user_id: id).limit(1).pluck(:completed_at).first
+      completed_at.present?
+    end
   end
 
   private

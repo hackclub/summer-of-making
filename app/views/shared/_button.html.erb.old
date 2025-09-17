@@ -1,0 +1,67 @@
+<%#
+#  Parameters:
+#    - text: The content of the button.
+#    - icon: An optional icon to put alongside the text content.
+#    - link: If specified, instead of a button, an <a> tag with link_to
+#            will be generated, with the target being this parameter.
+#    - link_target: If 'link' is specified, this will be used as the 'target'
+#                   attribute on the resulting <a> tag.
+#    - data: Data attributes to set on either the button or link element.
+#    - kind: May be one of: [:primary, :secondary]. Determines the color scheme.
+#    - type: A button type to pass into 'button_tag'. Defaults to ':button'.
+#    - fill_width: If 'true', the button will fill the entire width of its container.
+#    - disabled: If 'true', the button will be disabled.
+#    - css_classes: Additional classes to add to the button.
+%>
+
+<% raise "shared/button requires 'text' as a local" unless local_assigns[:text] %>
+
+<% link_target = local_assigns.fetch(:link_target, "") %>
+<% fill_width  = local_assigns.fetch(:fill_width, false) %>
+<% disabled    = local_assigns.fetch(:disabled, false) %>
+<% method      = local_assigns[:method] %>
+<% onclick     = local_assigns[:onclick] %>
+<% id          = local_assigns[:id] %>
+
+<%
+    button_type = local_assigns.fetch(:type, :button)
+    kind = local_assigns.fetch(:kind, :primary)
+
+    button_base_class = case kind
+        when :primary then "som-button-primary"
+        when :secondary then "som-button-secondary"
+        when :danger then "som-button-danger"
+        when :buy then "som-button-buy"
+        else "som-button-primary"
+    end
+
+    button_class = "#{button_base_class} #{'w-full' if fill_width} #{'disabled' if disabled} #{local_assigns[:classes]}".strip
+%>
+
+<% button_content = capture do %>
+    <div class="flex items-center justify-center gap-2">
+        <% if local_assigns[:icon] %>
+            <%= inline_svg("icons/#{local_assigns[:icon]}", class: "w-4 h-4") %>
+        <% end %>
+        <span class="flex items-center gap-1"><%= raw local_assigns[:text] %></span> <%# erb_lint:disable ErbSafety %>
+    </div>
+
+<% end %>
+
+<% if local_assigns[:link] %>
+    <% if method&.to_s&.downcase == 'post' %>
+        <%= form_with url: local_assigns[:link], method: :post, html: { target: link_target, class: "inline" } do %>
+            <%= button_tag :submit, class: button_class, data: local_assigns[:data], disabled: disabled, onclick: onclick, id: id do %>
+                <%= button_content %>
+            <% end %>
+        <% end %>
+    <% else %>
+        <%= link_to local_assigns[:link], class: button_class, data: local_assigns[:data], target: link_target, onclick: onclick, id: id do %>
+            <%= button_content %>
+        <% end %>
+    <% end %>
+<% else %>
+    <%= button_tag button_type, class: button_class, data: local_assigns[:data], disabled: disabled, onclick: onclick, id: id do %>
+        <%= button_content %>
+    <% end %>
+<% end %>

@@ -1,7 +1,7 @@
 <% if !project.is_shipped %>
-  <%= render "shared/button",
+  <%= render C::StyledButton.new(
       text: "Edit",
       kind: "primary",
       icon: "edit.svg",
-      link: edit_project_path(project) %>
+      link: edit_project_path(project)) %>
 <% end %>

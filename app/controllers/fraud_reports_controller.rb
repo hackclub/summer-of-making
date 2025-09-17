@@ -9,6 +9,16 @@ class FraudReportsController < ApplicationController
       **fraud_report_params
     )
 
+    # must be in the current voting pair
+    if fraud_report.suspect_type == "ShipEvent"
+      current_pair = current_user.user_vote_queue&.current_pair || []
+      unless current_pair.include?(fraud_report.suspect_id)
+        flash[:alert] = "Invalid report target."
+        redirect_to request.referer || root_path
+        return
+      end
+    end
+
     unless valid_report(fraud_report)
       flash[:alert] = "nice try silly!"
       redirect_to request.referer || root_path
@@ -16,13 +26,53 @@ class FraudReportsController < ApplicationController
     end
 
     if fraud_report.save
-      flash[:notice] = "Thank you for reporting this. We'll investigate."
+      advanced = false
+      # so we have kinds of report to triage and suspect_type where it's either Project or ShipEvent. ShipEvent is the suspect in voting page. Project is elsewhere.
+      kind = params[:report_kind]
+      case kind
+      when "ai_undeclared"
+        fraud_report.update_column(:reason, "AI_UNDECLARED: #{fraud_report.reason.to_s.strip}")
+      when "low_quality"
+        fraud_report.update_column(:reason, "LOW_QUALITY: #{fraud_report.reason.to_s.strip}")
+      when "demo_does_not_work"
+        fraud_report.update_column(:reason, "DEMO_DOES_NOT_WORK: #{fraud_report.reason.to_s.strip}")
+      else # other
+        fraud_report.update_column(:reason, "OTHER: #{fraud_report.reason.to_s.strip}")
+      end
+
+      fraud_report.update_column(:category, kind.to_s)
+
+      # only dm the first time and auto-exclude after 3 low-quality reports
+      if fraud_report.reason.to_s.start_with?("LOW_QUALITY:")
+        c = FraudReport.unresolved.where(suspect_type: fraud_report.suspect_type, suspect_id: fraud_report.suspect_id).count
+        if c >= 3 && fraud_report.suspect_type == "ShipEvent"
+          ShipEvent.where(id: fraud_report.suspect_id).update_all(excluded_from_pool: true)
+          msg = <<~EOT
+          Heads up — your ship has been excluded from voting due to multiple low-quality reports.
+          Thanks for building! Our shipwrights will review and follow up if needed. No action is required right now.
+          EOT
+          ship_event = ShipEvent.find_by(id: fraud_report.suspect_id)
+          SendSlackDmJob.perform_later(ship_event.user.slack_id, msg) if ship_event&.user&.slack_id.present?
+        end
+      end
+
+      # advance the vote queue if this report was filed from the voting page
+      if fraud_report.suspect_type == "ShipEvent"
+        current_pair = current_user.user_vote_queue&.current_pair || []
+        if current_pair.include?(fraud_report.suspect_id)
+          current_user.advance_vote_queue!
+          advanced = true
+        end
+      end
+
+      base_msg = "Thank you – your report has been received and will be reviewed promptly."
+      flash[:notice] = advanced ? "#{base_msg} We’ve moved you to the next matchup." : base_msg
       redirect_to request.referer || root_path
     else
       if fraud_report.errors[:user_id].any?
-        flash[:alert] = "You have already reported this project."
+        flash[:notice] = "Thanks – you already filed a report for this. We won’t duplicate it."
       else
-        flash[:alert] = "Unable to submit report. Please try again."
+        flash[:alert] = "We couldn’t submit your report. Please try again."
       end
       redirect_to request.referer || root_path
     end
@@ -36,11 +86,16 @@ class FraudReportsController < ApplicationController
   private
 
   def fraud_report_params
-    params.require(:fraud_report).permit(:suspect_type, :suspect_id, :reason)
+    raw = params.require(:fraud_report).permit(:subject_type, :subject_id, :suspect_type, :suspect_id, :reason)
+    type = raw[:subject_type].presence || raw[:suspect_type]
+    id = raw[:subject_id].presence || raw[:suspect_id]
+    { suspect_type: type, suspect_id: id, reason: raw[:reason] }
   end
 
+
   def valid_report(fraud_report)
-    reason = fraud_report.reason
+    reason = fraud_report.reason.to_s
+    kind = params[:report_kind]
 
     return false if reason.blank? || reason.length < 20
     return false if reason.length > 1000

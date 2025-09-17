@@ -7,6 +7,7 @@
 #  id                              :bigint           not null, primary key
 #  attachment                      :string
 #  comments_count                  :integer          default(0), not null
+#  deleted_at                      :datetime
 #  duration_seconds                :integer          default(0), not null
 #  for_sinkening                   :boolean          default(FALSE), not null
 #  hackatime_projects_key_snapshot :jsonb            not null
@@ -24,6 +25,7 @@
 #
 # Indexes
 #
+#  index_devlogs_on_deleted_at   (deleted_at)
 #  index_devlogs_on_project_id   (project_id)
 #  index_devlogs_on_user_id      (user_id)
 #  index_devlogs_on_views_count  (views_count)

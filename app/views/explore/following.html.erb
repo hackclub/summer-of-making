@@ -1,0 +1,32 @@
+<div data-controller="modal">
+  <%= render "explore/nav" %>
+
+  <div class="px-4 md:px-8 max-w-6xl mx-auto">
+    <div class="space-y-4 sm:space-y-6" id="devlogs-list" data-controller="view-tracker">
+      <% @recent_devlogs&.each do |devlog| %>
+        <%= render "devlogs/devlog_card",
+          devlog: devlog,
+          context: 'explore',
+          show_project_title: true,
+          show_project_navigation: true,
+          show_likes: true,
+          show_project_link: true,
+          show_comment_modal: true,
+          show_stonks: false %>
+      <% end %>
+    </div>
+
+    <div id="load-more-devlogs">
+      <% if @pagy&.next %>
+        <%= turbo_frame_tag "load-more-devlogs",
+          src: explore_following_path(page: @pagy.next, format: :turbo_stream),
+          loading: "lazy",
+          class: "block" do %>
+          <div class="flex flex-col items-center justify-center">
+            <%= image_tag 'compassloading.gif', class: 'w-8 h-8 sm:w-16 sm:h-16 lg:w-24 lg:h-24' %>
+          </div>
+        <% end %>
+      <% end %>
+    </div>
+  </div>
+</div>

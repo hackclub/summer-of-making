@@ -1,0 +1,73 @@
+<%#
+  A flexible card component with common features:
+
+  Parameters:
+    - title: Optional card title
+    - subtitle: Optional card subtitle
+    - image: Optional image URL
+    - footer: Optional footer content
+    - padding: Padding size (sm, md, lg) - defaults to md
+    - hover: Enable hover effect (true/false) - defaults to false
+    - shadow: Shadow size (sm, md, lg) - defaults to md
+    - css_classes: Additional classes to apply to the card
+%>
+
+<%
+  padding = local_assigns.fetch(:padding, 'md')
+  hover = local_assigns.fetch(:hover, false)
+  shadow = local_assigns.fetch(:shadow, 'md')
+  classes = local_assigns.fetch(:classes, '')
+%>
+
+<%
+  padding_class = case padding
+                  when 'sm' then 'p-3'
+                  when 'lg' then 'p-6'
+                  else 'p-4'
+                  end
+
+  shadow_class = case shadow
+                 when 'sm' then 'shadow-sm'
+                 when 'lg' then 'shadow-lg'
+                 else 'shadow-md'
+                 end
+
+  hover_class = hover ? 'transition-transform hover:-translate-y-1' : ''
+
+  base_class = [
+    'rounded-md border-2 border-[rgba(124,74,51,0.1)]',
+    'bg-[radial-gradient(circle_at_50%_50%,_#F6DBBA,_#E6D4BE)]',
+    'flex flex-col'
+  ].join(' ')
+
+  final_classes = [base_class, padding_class, shadow_class, hover_class, classes].compact.join(' ').strip
+%>
+
+<div class="<%= final_classes %>" data-padding="<%= padding %>" data-hover="<%= hover %>" data-shadow="<%= shadow %>">
+  <% if local_assigns[:image].present? %>
+    <div class="relative w-full h-48 mb-4">
+      <%= image_tag image, class: "w-full h-full object-cover rounded-t-md" %>
+    </div>
+  <% end %>
+
+  <% if local_assigns[:title].present? || local_assigns[:subtitle].present? %>
+    <div class="mb-4">
+      <% if local_assigns[:title].present? %>
+        <h3 class="text-xl font-semibold"><%= title %></h3>
+      <% end %>
+
+      <% if local_assigns[:subtitle].present? %>
+      <% end %>
+    </div>
+  <% end %>
+
+  <div class="flex-1 flex flex-col">
+    <%= yield %>
+  </div>
+
+  <% if local_assigns[:footer].present? %>
+    <div class="mt-4 pt-4 border-t border-gray-200">
+      <%= footer %>
+    </div>
+  <% end %>
+</div>
