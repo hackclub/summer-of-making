@@ -221,6 +221,7 @@ Rails.application.routes.draw do
   # Authentication routes
   get "/auth/slack", to: "sessions#new"
   get "/auth/slack/callback", to: "sessions#create", as: :slack_callback
+  post "/auth/email", to: "sessions#send_magic_link"
   get "/auth/failure", to: "sessions#failure"
   delete "/logout", to: "sessions#destroy", as: :logout
   delete "/stop_impersonating", to: "sessions#stop_impersonating", as: :stop_impersonating

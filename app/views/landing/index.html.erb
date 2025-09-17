@@ -2,7 +2,7 @@
 <%= stylesheet_link_tag "parchment", "data-turbo-track": "reload" %>
 <%= stylesheet_link_tag "faq_container", "data-turbo-track": "reload" %>
 
-<div class="relative w-full mb-[10vh]">
+<div class="relative w-full mb-[10vh]" data-controller="email-auth">
   <%= inline_svg "parchment.svg" %>
 
   <div class="relative w-full min-h-[100dvh]">
@@ -12,12 +12,13 @@
       </div>
 
       <div class="absolute top-4 right-4 z-20">
-        <a href="<%= Rails.env.development? ? dev_auto_login_path : '/auth/slack' %>" class="marble-button py-2 px-4 text-base md:text-lg flex items-center justify-center gap-2 transition-all" data-turbo-prefetch="false">
+        <button class="marble-button py-2 px-4 text-base md:text-lg flex items-center justify-center gap-2 transition-all" 
+                data-action="click->email-auth#show">
           <span class="flex items-center">
             <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mr-2" viewBox="0 0 24 24"><path fill="currentColor" d="M13 21q-.425 0-.712-.288T12 20t.288-.712T13 19h6V5h-6q-.425 0-.712-.288T12 4t.288-.712T13 3h6q.825 0 1.413.588T21 5v14q0 .825-.587 1.413T19 21zm-1.825-8H4q-.425 0-.712-.288T3 12t.288-.712T4 11h7.175L9.3 9.125q-.275-.275-.275-.675t.275-.7t.7-.313t.725.288L14.3 11.3q.3.3.3.7t-.3.7l-3.575 3.575q-.3.3-.712.288T9.3 16.25q-.275-.3-.262-.712t.287-.688z" /></svg>
             <span class="flex items-center h-6">Sign In!</span>
           </span>
-        </a>
+        </button>
       </div>
 
       <div class="relative z-15 flex items-center min-h-[100dvh]">
@@ -631,6 +632,8 @@
 
   <div class="absolute inset-0 pointer-events-none" aria-hidden="true"></div>
 </div>
+
+<%= render "shared/email_auth_modal" %>
 
 <%= render "signup_wizard_modal" %>
 
