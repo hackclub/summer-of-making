@@ -22,4 +22,12 @@ class BrainrotController < ApplicationController
       sounds_count: sounds.length
     }
   end
+
+  private
+
+  def check_brainrot_feature_enabled
+    return if Flipper.enabled?(:brainrot_mode, current_user)
+
+    render json: { error: "Brainrot mode is not enabled" }, status: :forbidden
+  end
 end
