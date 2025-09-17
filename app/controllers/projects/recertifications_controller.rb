@@ -4,7 +4,9 @@ class Projects::RecertificationsController < ApplicationController
   def create
     authorize @project, :request_recertification?
 
-    if @project.request_recertification!
+    instructions = params[:recertification_instructions]
+
+    if @project.request_recertification!(instructions)
       redirect_to project_path(@project), notice: "Re-certification requested! Your project will be reviewed again."
     else
       redirect_to project_path(@project), alert: "Cannot request re-certification for this project."

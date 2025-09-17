@@ -364,7 +364,7 @@
                   ></textarea>
                 </div>
                 <% if @project.can_request_recertification? %>
-                  <%= form_with url: request_recertification_project_path(@project), method: :post, local: true, id: "recertification-instructions-form-#{@project.id}" do |f| %>
+                  <%= form_with url: project_recertification_path(@project), method: :post, local: true, id: "recertification-instructions-form-#{@project.id}" do |f| %>
                     <%= f.text_area :recertification_instructions, id: "recertification-instructions-#{@project.id}", style: "display:none;" %>
                   <% end %>
                   <%= render "projects/recertification_button", project: @project %>
