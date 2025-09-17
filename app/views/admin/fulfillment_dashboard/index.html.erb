@@ -1,0 +1,219 @@
+<style>
+  .fulfillment-card {
+    transition: all 0.2s ease;
+  }
+
+  .fulfillment-card:hover {
+    transform: translateY(-2px);
+  }
+</style>
+
+<h1 style="color: var(--color-primary);margin-top: 0;">going out the door:</h1>
+<div style="margin-bottom: 2em; padding: 1em; background: var(--color-darker); border-radius: 8px;">
+  <div>
+    <strong style="color: var(--color-text); display: block; margin-bottom: 0.5em;font-size: 1.2em;">
+      are ya winning son?
+    </strong>
+    <div style="display: grid; grid-template-columns: repeat(5, 1fr); gap: 1em;">
+      <%= link_to admin_fulfillment_dashboard_index_path(fulfillment_type: :all), style: "text-decoration: none; color: inherit;" do %>
+        <div class="fulfillment-card" style="background: var(--color-dark); padding: 1em; border-radius: 6px; border-left: 4px solid #6366f1; cursor: pointer; <%= @fulfillment_type == 'all' ? 'box-shadow: 0 0 0 2px #6366f1;' : '' %>">
+          <div style="font-size: 0.9em; color: var(--color-muted); margin-bottom: 0.5em; font-weight: bold;">all</div>
+        <div style="margin-bottom: 0.5em;">
+          <span class="pill pill-yellow">pending: <%= @stats[:all][:pc] %></span>
+        </div>
+        <div style="margin-bottom: 0.5em;">
+          <span class="pill pill-blue">awaiting: <%= @stats[:all][:ac] %></span>
+        </div>
+        <div style="font-size: 0.8em; color: var(--color-text); margin-bottom: 0.2em;">avg waiting fd</div>
+        <div style="font-family: monospace; font-weight: bold; color: <%= @stats[:all][:aho] && @stats[:all][:aho] > 172800 ? '#ff6b6b' : 'white' %>;">
+          <%= format_seconds(@stats[:all][:aho], include_days: true) %>
+        </div>
+        <div style="font-size: 0.8em; color: var(--color-text); margin-bottom: 0.2em;">avg avg awaiting fulfill check</div>
+        <div style="font-family: monospace; font-weight: bold; color: <%= @stats[:all][:ahf] && @stats[:all][:ahf] > 172800 ? '#ff6b6b' : 'white' %>;">
+          <%= format_seconds(@stats[:all][:ahf], include_days: true) %>
+        </div>
+        </div>
+      <% end %>
+
+      <%= link_to admin_fulfillment_dashboard_index_path(fulfillment_type: :hq_mail), style: "text-decoration: none; color: inherit;" do %>
+        <div class="fulfillment-card" style="background: var(--color-dark); padding: 1em; border-radius: 6px; border-left: 4px solid #10b981; cursor: pointer; <%= @fulfillment_type == 'hq_mail' ? 'box-shadow: 0 0 0 2px #10b981;' : '' %>">
+          <div style="font-size: 0.9em; color: var(--color-muted); margin-bottom: 0.5em; font-weight: bold;">hq stuff</div>
+        <div style="margin-bottom: 0.5em;">
+          <span class="pill pill-yellow">pending: <%= @stats[:hq_mail][:pc] %></span>
+        </div>
+        <div style="margin-bottom: 0.5em;">
+          <span class="pill pill-blue">awaiting: <%= @stats[:hq_mail][:ac] %></span>
+        </div>
+        <div style="font-size: 0.8em; color: var(--color-text); margin-bottom: 0.2em;">avg waiting fd</div>
+        <div style="font-family: monospace; font-weight: bold; color: <%= @stats[:hq_mail][:aho] && @stats[:hq_mail][:aho] > 172800 ? '#ff6b6b' : 'white' %>;">
+          <%= format_seconds(@stats[:hq_mail][:aho], include_days: true) %>
+        </div>
+        <div style="font-size: 0.8em; color: var(--color-text); margin-bottom: 0.2em;">avg avg awaiting fulfill check</div>
+        <div style="font-family: monospace; font-weight: bold; color: <%= @stats[:hq_mail][:ahf] && @stats[:hq_mail][:ahf] > 172800 ? '#ff6b6b' : 'white' %>;">
+          <%= format_seconds(@stats[:hq_mail][:ahf], include_days: true) %>
+        </div>
+        </div>
+      <% end %>
+
+      <!-- Third Party Column -->
+      <%= link_to admin_fulfillment_dashboard_index_path(fulfillment_type: :third_party), style: "text-decoration: none; color: inherit;" do %>
+        <div class="fulfillment-card" style="background: var(--color-dark); padding: 1em; border-radius: 6px; border-left: 4px solid #f59e0b; cursor: pointer; <%= @fulfillment_type == 'third_party' ? 'box-shadow: 0 0 0 2px #f59e0b;' : '' %>">
+          <div style="font-size: 0.9em; color: var(--color-muted); margin-bottom: 0.5em; font-weight: bold;">rowan & co stuff</div>
+        <div style="margin-bottom: 0.5em;">
+          <span class="pill pill-yellow">pending: <%= @stats[:third_party][:pc] %></span>
+        </div>
+        <div style="margin-bottom: 0.5em;">
+          <span class="pill pill-blue">awaiting: <%= @stats[:third_party][:ac] %></span>
+        </div>
+        <div style="font-size: 0.8em; color: var(--color-text); margin-bottom: 0.2em;">avg waiting fd</div>
+        <div style="font-family: monospace; font-weight: bold; color: <%= @stats[:third_party][:aho] && @stats[:third_party][:aho] > 172800 ? '#ff6b6b' : 'white' %>;">
+          <%= format_seconds(@stats[:third_party][:aho], include_days: true) %>
+        </div>
+        <div style="font-size: 0.8em; color: var(--color-text); margin-bottom: 0.2em;">avg avg awaiting fulfill check</div>
+        <div style="font-family: monospace; font-weight: bold; color: <%= @stats[:third_party][:ahf] && @stats[:third_party][:ahf] > 172800 ? '#ff6b6b' : 'white' %>;">
+          <%= format_seconds(@stats[:third_party][:ahf], include_days: true) %>
+        </div>
+        </div>
+      <% end %>
+
+      <%= link_to admin_fulfillment_dashboard_index_path(fulfillment_type: :sinkening), style: "text-decoration: none; color: inherit;" do %>
+        <div class="fulfillment-card" style="background: var(--color-dark); padding: 1em; border-radius: 6px; border-left: 4px solid #8b5cf6; cursor: pointer; <%= @fulfillment_type == 'sinkening' ? 'box-shadow: 0 0 0 2px #8b5cf6;' : '' %>">
+          <div style="font-size: 0.9em; color: var(--color-muted); margin-bottom: 0.5em; font-weight: bold;">sinkening</div>
+        <div style="margin-bottom: 0.5em;">
+          <span class="pill pill-yellow">pending: <%= @stats[:sinkening][:pc] %></span>
+        </div>
+        <div style="margin-bottom: 0.5em;">
+          <span class="pill pill-blue">awaiting: <%= @stats[:sinkening][:ac] %></span>
+        </div>
+        <div style="font-size: 0.8em; color: var(--color-text); margin-bottom: 0.2em;">avg waiting fd</div>
+        <div style="font-family: monospace; font-weight: bold; color: <%= @stats[:sinkening][:aho] && @stats[:sinkening][:aho] > 172800 ? '#ff6b6b' : 'white' %>;">
+          <%= format_seconds(@stats[:sinkening][:aho], include_days: true) %>
+        </div>
+        <div style="font-size: 0.8em; color: var(--color-text); margin-bottom: 0.2em;">avg avg awaiting fulfill check</div>
+        <div style="font-family: monospace; font-weight: bold; color: <%= @stats[:sinkening][:ahf] && @stats[:sinkening][:ahf] > 172800 ? '#ff6b6b' : 'white' %>;">
+          <%= format_seconds(@stats[:sinkening][:ahf], include_days: true) %>
+        </div>
+        </div>
+      <% end %>
+
+      <%= link_to admin_fulfillment_dashboard_index_path(fulfillment_type: :warehouse), style: "text-decoration: none; color: inherit;" do %>
+        <div class="fulfillment-card" style="background: var(--color-dark); padding: 1em; border-radius: 6px; border-left: 4px solid #ef4444; cursor: pointer; <%= @fulfillment_type == 'warehouse' ? 'box-shadow: 0 0 0 2px #ef4444;' : '' %>">
+          <div style="font-size: 0.9em; color: var(--color-muted); margin-bottom: 0.5em; font-weight: bold;">warehouse</div>
+        <div style="margin-bottom: 0.5em;">
+          <span class="pill pill-yellow">pending: <%= @stats[:warehouse][:pc] %></span>
+        </div>
+        <div style="margin-bottom: 0.5em;">
+          <span class="pill pill-blue">awaiting: <%= @stats[:warehouse][:ac] %></span>
+        </div>
+        <div style="font-size: 0.8em; color: var(--color-text); margin-bottom: 0.2em;">avg waiting fd</div>
+        <div style="font-family: monospace; font-weight: bold; color: <%= @stats[:warehouse][:aho] && @stats[:warehouse][:aho] > 172800 ? '#ff6b6b' : 'white' %>;">
+          <%= format_seconds(@stats[:warehouse][:aho], include_days: true) %>
+        </div>
+        <div style="font-size: 0.8em; color: var(--color-text); margin-bottom: 0.2em;">avg avg awaiting fulfill check</div>
+        <div style="font-family: monospace; font-weight: bold; color: <%= @stats[:warehouse][:ahf] && @stats[:warehouse][:ahf] > 172800 ? '#ff6b6b' : 'white' %>;">
+          <%= format_seconds(@stats[:warehouse][:ahf], include_days: true) %>
+        </div>
+        </div>
+      <% end %>
+    </div>
+  </div>
+</div>
+
+<table class="atable">
+  <thead>
+    <tr>
+      <th>id</th>
+      <th>who</th>
+      <th>what</th>
+      <th>paid</th>
+      <th>qty</th>
+      <th>now</th>
+      <th>hangtime</th>
+      <th>addr</th>
+      <th>created</th>
+      <th>exec</th>
+    </tr>
+  </thead>
+  <tbody>
+    <% @orders.each do |order| %>
+      <% address = order.frozen_address || {} %>
+      <% hours_since_order = (Time.current - order.created_at).to_i %>
+      <% hours_since_fulfillment = order.awaiting_periodical_fulfillment_at ? (Time.current - order.awaiting_periodical_fulfillment_at).to_i : nil %>
+      <tr>
+        <td>
+          <%= order.id %>
+        </td>
+        <td>
+          <%= link_to order.user.display_name || "Unknown", admin_user_path(order.user) %><br>
+          <small style="color: var(--color-muted);"><%= order.user.email %></small>
+        </td>
+        <td>
+          <%= order.shop_item.name %><br>
+          <small style="color: var(--color-muted);"><%= order.shop_item.type&.demodulize %></small>
+        </td>
+        <td>
+          <% if order.frozen_item_price.zero? %>
+            <small style="color: var(--color-muted);">free</small>
+          <% else %>
+            <%= number_with_precision(order.frozen_item_price, precision: 0) %>
+          <% end %>
+        </td>
+        <td>
+          x<%= order.quantity %>
+        </td>
+        <td>
+          <% case order.aasm_state %>
+          <% when 'pending' %>
+            <span class="pill pill-yellow">pending</span>
+          <% when 'awaiting_periodical_fulfillment' %>
+            <span class="pill pill-blue">awaiting fulfillment</span>
+          <% else %>
+            <span class="pill"><%= order.aasm_state.humanize %></span>
+          <% end %>
+        </td>
+        <td>
+          <div style="font-size: 0.8em;">
+            <div style="color: var(--color-text); margin-bottom: 0.2em;">total:</div>
+            <div style="font-family: monospace; font-weight: bold; color: <%= hours_since_order > 172800 ? '#ff6b6b' : 'white' %>; margin-bottom: 0.3em;">
+              <%= format_seconds(hours_since_order, include_days: true) %>
+            </div>
+            <% if hours_since_fulfillment %>
+              <div style="color: var(--color-text); margin-bottom: 0.2em;">since approved:</div>
+              <div style="font-family: monospace; font-weight: bold; color: <%= hours_since_fulfillment > 172800 ? '#ff6b6b' : 'white' %>;">
+                <%= format_seconds(hours_since_fulfillment, include_days: true) %>
+              </div>
+            <% end %>
+          </div>
+        </td>
+        <td>
+          <% if address.present? %>
+            <%= address["first_name"] %> <%= address["last_name"] %><br>
+            <small style="color: var(--color-muted);">
+              <%= address["city"] %>, <%= address["state"] %><br>
+              <%= address["country"] %><br>
+              <% if address["phone_number"].present? %>
+                <%= address["phone_number"] %>
+              <% end %>
+            </small>
+          <% else %>
+            <em style="color: var(--color-muted);">nuthing...</em>
+          <% end %>
+        </td>
+        <td>
+          <%= order.created_at.strftime("%m/%d/%y") %><br>
+          <small style="color: var(--color-muted);"><%= order.created_at.strftime("%l:%M %p") %></small>
+        </td>
+        <td>
+          <%= link_to "manage order", admin_shop_order_path(order), class: 'abtn secondary', style: 'padding: 0.3em 0.8em; font-size: 0.95em;' %>
+        </td>
+      </tr>
+    <% end %>
+  </tbody>
+</table>
+
+<% if @pagy %>
+  <%== pagy_nav(@pagy) %> <br>
+  <%== pagy_info(@pagy) %> <br>
+<% end %>
+
+<%= link_to "← back", admin_root_path %>

@@ -1,0 +1,112 @@
+<body class="adash" style="background: var(--color-background); color: var(--color-text); min-height: 100vh; padding: 2rem;">
+<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
+  <h1>Ship Reviewer Payout Requests</h1>
+  <%= link_to "← Back to Ship Certifications", admin_ship_certifications_path, class: "pill pill-gray", style: "text-decoration: none; padding: 0.5rem 1rem;" %>
+</div>
+<% if @pending_requests.any? %>
+  <div style="background: var(--color-card); padding: 1.5rem; border-radius: 8px; margin-bottom: 2rem;">
+    <h2 style="color: #FFB347;">Pending Requests</h2>
+    <table style="width: 100%; margin-top: 1rem;">
+      <thead>
+        <tr style="border-bottom: 2px solid var(--color-border);">
+          <th style="text-align: left; padding: 0.75rem;">Reviewer</th>
+          <th style="text-align: right; padding: 0.75rem;">Amount</th>
+          <th style="text-align: center; padding: 0.75rem;">Decisions</th>
+          <th style="text-align: center; padding: 0.75rem;">Requested</th>
+          <th style="text-align: center; padding: 0.75rem;">Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% @pending_requests.each do |request| %>
+          <tr style="border-bottom: 1px solid var(--color-border);">
+            <td style="padding: 0.75rem;">
+              <strong><%= request.reviewer.display_name || request.reviewer.email %></strong>
+            </td>
+            <td style="text-align: right; padding: 0.75rem;">
+              <span class="pill pill-green"><%= request.amount %> shells</span>
+            </td>
+            <td style="text-align: center; padding: 0.75rem;">
+              <span class="pill pill-dark"><%= request.decisions_count %></span>
+            </td>
+            <td style="text-align: center; padding: 0.75rem;">
+              <%= time_ago_in_words(request.requested_at) %> ago
+            </td>
+            <td style="text-align: center; padding: 0.75rem;">
+              <div style="display: flex; gap: 0.5rem; justify-content: center;">
+                <%= button_to "Approve", approve_admin_ship_reviewer_payout_request_path(request),
+                    method: :patch,
+                    class: "pill pill-green",
+                    style: "border: none; padding: 0.3rem 0.8rem; cursor: pointer;",
+                    confirm: "Approve payout of #{request.amount} shells to #{request.reviewer.display_name || request.reviewer.email}?" %>
+                <%= button_to "Reject", reject_admin_ship_reviewer_payout_request_path(request),
+                    method: :patch,
+                    class: "pill pill-red",
+                    style: "border: none; padding: 0.3rem 0.8rem; cursor: pointer;",
+                    confirm: "Reject this payout request?" %>
+              </div>
+            </td>
+          </tr>
+        <% end %>
+      </tbody>
+    </table>
+  </div>
+<% else %>
+  <div style="background: var(--color-card); padding: 1.5rem; border-radius: 8px; margin-bottom: 2rem; text-align: center;">
+    <h3>No Pending Requests</h3>
+    <p style="color: var(--color-text-muted);">All caught up! No payout requests awaiting approval.</p>
+  </div>
+<% end %>
+<div style="background: var(--color-card); padding: 1.5rem; border-radius: 8px;">
+  <h2>Recent Requests</h2>
+  <% if @recent_requests.any? %>
+    <table style="width: 100%; margin-top: 1rem;">
+      <thead>
+        <tr style="border-bottom: 2px solid var(--color-border);">
+          <th style="text-align: left; padding: 0.75rem;">Reviewer</th>
+          <th style="text-align: right; padding: 0.75rem;">Amount</th>
+          <th style="text-align: center; padding: 0.75rem;">Status</th>
+          <th style="text-align: center; padding: 0.75rem;">Requested</th>
+          <th style="text-align: center; padding: 0.75rem;">Processed By</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% @recent_requests.each do |request| %>
+          <tr style="border-bottom: 1px solid var(--color-border);">
+            <td style="padding: 0.75rem;">
+              <strong><%= request.reviewer.display_name || request.reviewer.email %></strong>
+            </td>
+            <td style="text-align: right; padding: 0.75rem;">
+              <%= request.amount %> shells
+            </td>
+            <td style="text-align: center; padding: 0.75rem;">
+              <span class="pill pill-<%= case request.status
+                when 'approved' then 'green'
+                when 'rejected' then 'red'
+                else 'yellow'
+              end %>">
+                <%= request.status.capitalize %>
+              </span>
+            </td>
+            <td style="text-align: center; padding: 0.75rem;">
+              <%= time_ago_in_words(request.requested_at) %> ago
+            </td>
+            <td style="text-align: center; padding: 0.75rem;">
+              <% if request.approved_by %>
+                <%= request.approved_by.display_name || request.approved_by.email %>
+                <br>
+                <small style="color: var(--color-text-muted);">
+                  <%= time_ago_in_words(request.approved_at) %> ago
+                </small>
+              <% else %>
+                <span style="color: var(--color-text-muted);">-</span>
+              <% end %>
+            </td>
+          </tr>
+        <% end %>
+      </tbody>
+    </table>
+  <% else %>
+    <p style="text-align: center; color: var(--color-text-muted); margin-top: 1rem;">No requests yet.</p>
+  <% end %>
+</div>
+</body>

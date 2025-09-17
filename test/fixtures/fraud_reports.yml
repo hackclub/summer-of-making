@@ -4,22 +4,30 @@
 #
 # Table name: fraud_reports
 #
-#  id           :bigint           not null, primary key
-#  reason       :string
-#  resolved     :boolean          default(FALSE), not null
-#  suspect_type :string
-#  created_at   :datetime         not null
-#  updated_at   :datetime         not null
-#  suspect_id   :bigint
-#  user_id      :bigint           not null
+#  id               :bigint           not null, primary key
+#  category         :string
+#  reason           :string
+#  resolved         :boolean          default(FALSE), not null
+#  resolved_at      :datetime
+#  resolved_message :text
+#  resolved_outcome :string
+#  suspect_type     :string
+#  created_at       :datetime         not null
+#  updated_at       :datetime         not null
+#  resolved_by_id   :bigint
+#  suspect_id       :bigint
+#  user_id          :bigint           not null
 #
 # Indexes
 #
+#  index_fraud_reports_on_category          (category)
+#  index_fraud_reports_on_resolved_by_id    (resolved_by_id)
 #  index_fraud_reports_on_user_and_suspect  (user_id,suspect_type,suspect_id) UNIQUE
 #  index_fraud_reports_on_user_id           (user_id)
 #
 # Foreign Keys
 #
+#  fk_rails_...  (resolved_by_id => users.id)
 #  fk_rails_...  (user_id => users.id)
 #
 one:

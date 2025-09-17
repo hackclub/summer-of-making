@@ -12,4 +12,12 @@ class ShopOrderPolicy < ApplicationPolicy
   def index?
     user.present?
   end
+
+  def edit?
+    user&.is_admin?
+  end
+
+  def update?
+    edit?
+  end
 end

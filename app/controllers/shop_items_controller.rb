@@ -18,12 +18,17 @@ class ShopItemsController < ApplicationController
   all_shop_items = Rails.cache.fetch("all_shop_items_with_variants_v2", expires_in: 10.minutes) do
   ShopItem.enabled.with_attached_image.not_black_market
   .includes(image_attachment: { blob: { variant_records: :image_attachment } })
-  .order(ticket_cost: :asc)
-            .to_a
+  .to_a
+    end
+
+    all_shop_items.sort_by! do |item|
+      @regionalization_enabled && @selected_region ? item.price_for_region(@selected_region) : item.price_for_region("XX")
     end
 
     # Filter in memory
     filtered_items = all_shop_items.dup
+    # exlcude advent stickers from shop because they're not purchasable
+    filtered_items.reject! { |i| i.is_a?(ShopItem::AdventSticker) }
 
   # Filter by region availability (include XX items in all regions) - only if regionalization is enabled
   if @regionalization_enabled && @selected_region
@@ -73,6 +78,16 @@ class ShopItemsController < ApplicationController
 
     # Keep original @shop_items for compatibility with any existing logic
     @shop_items = filtered_items
+
+    # Prepare optimized item data and verification status for views
+    if current_user
+      @current_verification_status = current_verification_status
+      @current_user_ysws_verified = current_user.ysws_verified?
+    end
+
+    # Pre-compute item data for optimized rendering
+    prepare_item_data_for(@regular_items)
+    prepare_item_data_for(@badge_items)
   end
 
   def black_market
@@ -84,8 +99,13 @@ class ShopItemsController < ApplicationController
     all_shop_items = Rails.cache.fetch("all_black_market_shop_items_with_variants", expires_in: 2.minutes) do
       ShopItem.enabled.with_attached_image.black_market
         .includes(image_attachment: { blob: { variant_records: :image_attachment } })
-        .order(ticket_cost: :asc)
         .to_a
+    end
+
+    all_shop_items.sort_by! do |item|
+      @regionalization_enabled && @selected_region ?
+        item.price_for_region(@selected_region) :
+        item.price_for_region("XX")
     end
 
     filtered_items = all_shop_items.dup
@@ -181,13 +201,33 @@ class ShopItemsController < ApplicationController
     current_user&.refresh_identity_vault_data!
   end
 
+  private
+
+  def prepare_item_data_for(items)
+    items.each do |item|
+      regional_price = (@regionalization_enabled && @selected_region) ? item.price_for_region(@selected_region) : item.ticket_cost
+      remaining = (item.limited? && item.stock.present?) ? (item.stock - (@ordered_quantity_by_item_id[item.id].to_i)) : nil
+      out_of_stock = item.limited? && remaining && remaining <= 0
+      already_ordered = item.one_per_person_ever? && @ordered_once_item_ids&.include?(item.id)
+
+      item.define_singleton_method(:item_data) do
+        {
+          regional_price: regional_price,
+          remaining_stock: remaining,
+          out_of_stock: out_of_stock,
+          already_ordered: already_ordered
+        }
+      end
+    end
+  end
+
   def shop_item_params
     params.expect(
       shop_item: %i[type name description internal_description
                     actual_irl_fr_cost cost hacker_score
                     requires_black_market hcb_merchant_lock
                     hcb_category_lock hcb_keyword_lock agh_contents
-                    image]
+                    image sale_percentage]
     )
   end
 end

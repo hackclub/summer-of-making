@@ -30,7 +30,7 @@
       "check_name": "LinkToHref",
       "message": "Potentially unsafe model attribute in `link_to` href",
       "file": "app/views/admin/ysws_reviews/show.html.erb",
-      "line": 35,
+      "line": 34,
       "link": "https://brakemanscanner.org/docs/warning_types/link_to_href",
       "code": "link_to(\"\\u{1F680} Demo\", Project.find(params[:id]).demo_link, :class => \"pill pill-blue\", :style => \"text-decoration: none; padding: 0.5rem 1rem;\", :target => \"_blank\", :rel => \"noopener\")",
       "render_path": [
@@ -51,6 +51,74 @@
         "template": "admin/ysws_reviews/show"
       },
       "user_input": "Project.find(params[:id]).demo_link",
+      "confidence": "Weak",
+      "cwe_id": [
+        79
+      ],
+      "note": ""
+    },
+    {
+      "warning_type": "Cross-Site Scripting",
+      "warning_code": 4,
+      "fingerprint": "5024970aab5c41523c65e0860afc966d9115b9686159bceed18f7bf6d7469c9a",
+      "check_name": "LinkToHref",
+      "message": "Potentially unsafe model attribute in `link_to` href",
+      "file": "app/views/admin/projects/show.html.erb",
+      "line": 24,
+      "link": "https://brakemanscanner.org/docs/warning_types/link_to_href",
+      "code": "link_to(\"Readme\", Project.with_deleted.find(params[:id]).readme_link, :target => \"_blank\")",
+      "render_path": [
+        {
+          "type": "controller",
+          "class": "Admin::ProjectsController",
+          "method": "show",
+          "line": 8,
+          "file": "app/controllers/admin/projects_controller.rb",
+          "rendered": {
+            "name": "admin/projects/show",
+            "file": "app/views/admin/projects/show.html.erb"
+          }
+        }
+      ],
+      "location": {
+        "type": "template",
+        "template": "admin/projects/show"
+      },
+      "user_input": "Project.with_deleted.find(params[:id]).readme_link",
+      "confidence": "Weak",
+      "cwe_id": [
+        79
+      ],
+      "note": ""
+    },
+    {
+      "warning_type": "Cross-Site Scripting",
+      "warning_code": 4,
+      "fingerprint": "5ae533c15eaa6c2e1a828bea2fdcc5e47cabb52c84c4fa5f61fce45fd3d7e649",
+      "check_name": "LinkToHref",
+      "message": "Potentially unsafe model attribute in `link_to` href",
+      "file": "app/views/admin/projects/show.html.erb",
+      "line": 16,
+      "link": "https://brakemanscanner.org/docs/warning_types/link_to_href",
+      "code": "link_to(\"Demo\", Project.with_deleted.find(params[:id]).demo_link, :target => \"_blank\")",
+      "render_path": [
+        {
+          "type": "controller",
+          "class": "Admin::ProjectsController",
+          "method": "show",
+          "line": 8,
+          "file": "app/controllers/admin/projects_controller.rb",
+          "rendered": {
+            "name": "admin/projects/show",
+            "file": "app/views/admin/projects/show.html.erb"
+          }
+        }
+      ],
+      "location": {
+        "type": "template",
+        "template": "admin/projects/show"
+      },
+      "user_input": "Project.with_deleted.find(params[:id]).demo_link",
       "confidence": "Weak",
       "cwe_id": [
         79
@@ -87,7 +155,7 @@
       "check_name": "LinkToHref",
       "message": "Potentially unsafe model attribute in `link_to` href",
       "file": "app/views/admin/ysws_reviews/show.html.erb",
-      "line": 29,
+      "line": 28,
       "link": "https://brakemanscanner.org/docs/warning_types/link_to_href",
       "code": "link_to(\"\\u{1F4C1} Repository\", Project.find(params[:id]).repo_link, :class => \"pill pill-gray\", :style => \"text-decoration: none; padding: 0.5rem 1rem;\", :target => \"_blank\", :rel => \"noopener\")",
       "render_path": [
@@ -108,6 +176,40 @@
         "template": "admin/ysws_reviews/show"
       },
       "user_input": "Project.find(params[:id]).repo_link",
+      "confidence": "Weak",
+      "cwe_id": [
+        79
+      ],
+      "note": ""
+    },
+    {
+      "warning_type": "Cross-Site Scripting",
+      "warning_code": 4,
+      "fingerprint": "ea0e2310e397bbc7c6e16b36afb5185e95bddcd691ceeebd66b9aece14d512a9",
+      "check_name": "LinkToHref",
+      "message": "Potentially unsafe model attribute in `link_to` href",
+      "file": "app/views/admin/projects/show.html.erb",
+      "line": 20,
+      "link": "https://brakemanscanner.org/docs/warning_types/link_to_href",
+      "code": "link_to(\"Repo\", Project.with_deleted.find(params[:id]).repo_link, :target => \"_blank\")",
+      "render_path": [
+        {
+          "type": "controller",
+          "class": "Admin::ProjectsController",
+          "method": "show",
+          "line": 8,
+          "file": "app/controllers/admin/projects_controller.rb",
+          "rendered": {
+            "name": "admin/projects/show",
+            "file": "app/views/admin/projects/show.html.erb"
+          }
+        }
+      ],
+      "location": {
+        "type": "template",
+        "template": "admin/projects/show"
+      },
+      "user_input": "Project.with_deleted.find(params[:id]).repo_link",
       "confidence": "Weak",
       "cwe_id": [
         79

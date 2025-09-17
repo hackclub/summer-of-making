@@ -177,6 +177,24 @@ class AdminConstraint
   end
 end
 
+class ShipCertifierConstraint
+  def self.matches?(request)
+    return false unless request.session[:user_id]
+
+    user = User.find_by(id: request.session[:user_id])
+    user&.admin_or_ship_certifier?
+  end
+end
+
+class FraudTeamConstraint
+  def self.matches?(request)
+    return false unless request.session[:user_id]
+
+    user = User.find_by(id: request.session[:user_id])
+    user&.is_admin? || user&.fraud_team_member?
+  end
+end
+
 Rails.application.routes.draw do
   # Temporary flash testing routes (remove after testing)
   if Rails.env.development?
@@ -206,7 +224,7 @@ Rails.application.routes.draw do
   get "/auth/failure", to: "sessions#failure"
   delete "/logout", to: "sessions#destroy", as: :logout
   delete "/stop_impersonating", to: "sessions#stop_impersonating", as: :stop_impersonating
-  
+
   # Development auto-login (only available in development)
   if Rails.env.development?
     get "/auth/dev_login", to: "sessions#auto_login_dev", as: :dev_auto_login
@@ -219,19 +237,29 @@ Rails.application.routes.draw do
   get "users/identity_vault_callback", to: "users#identity_vault_callback", as: :identity_vault_callback
   get "users/link_identity_vault", to: "users#link_identity_vault", as: :link_identity_vault
 
+  # Brainrot mode API endpoints
+  get "brainrot/status", to: "brainrot#status"
+  get "brainrot/random_sound", to: "brainrot#random_sound"
+
+  # Tutorial
+  get "tutorial/todo_modal", to: "tutorials#todo_modal"
+
   get "users/hackatime_auth_redirect", to: "users#hackatime_auth_redirect", as: :hackatime_auth_redirect
 
   # Dashboard
   # get "dashboard", to: "dashboard#index"
 
-  get "explore", to: "projects#index"
+  get "explore", to: "explore#index", as: :explore
+  get "explore/following", to: "explore#following", as: :explore_following
+  get "explore/gallery", to: "explore#gallery", as: :explore_gallery
+
   get "my_projects", to: "projects#my_projects"
   post "check_link", to: "projects#check_link"
   get "check_github_readme", to: "projects#check_github_readme"
   get "campfire", to: "campfire#index"
   get "campfire/hackatime_status", to: "campfire#hackatime_status"
+
   get "/map", to: "map#index", as: :map
-  get "/map/points", to: "map#points", as: :map_points
 
   # Global timer session check - must be before projects resource
   get "timer_sessions/active", to: "timer_sessions#global_active"
@@ -243,11 +271,21 @@ Rails.application.routes.draw do
         get :active
       end
     end
+
+    # Projects::FollowsController
+    post "follow", to: "projects/follows#create", as: :follow
+    delete "unfollow", to: "projects/follows#destroy", as: :unfollow
+
+    # Projects::ReadmesController
+    get "readme", to: "projects/readmes#show", as: :readme
+
+    # Projects::RecertificationsController
+    resource :recertification, only: [ :create ], controller: "projects/recertifications"
+
+    # Projects::ShipsController
+    resource :ship, only: [ :create ], controller: "projects/ships"
+
     member do
-      post :follow
-      delete :unfollow
-      patch :ship
-      post :request_recertification
       post :stake_stonks
       delete :unstake_stonks
       patch :update_coordinates
@@ -257,7 +295,6 @@ Rails.application.routes.draw do
     end
   end
 
-  get "devlogs", to: "devlogs#index"
   resources :votes, only: [ :new, :create ] do
     collection do
       get :locked
@@ -277,7 +314,7 @@ Rails.application.routes.draw do
         post :buy, to: "shop_orders#create", as: :checkout
       end
     end
-    resources :shop_orders, path: :orders, except: %i[edit update new]
+    resources :shop_orders, path: :orders, except: %i[new]
   end
 
   resources :users, only: [ :show ] do
@@ -306,8 +343,10 @@ Rails.application.routes.draw do
 
   post "tutorial/complete_step", to: "tutorial_progress#complete_step"
   post "tutorial/complete_soft_tutorial_step", to: "tutorial_progress#complete_soft_step", as: :complete_soft_tutorial_step
+  post "tutorial/complete_new_tutorial_step", to: "tutorial_progress#complete_new_step", as: :complete_new_tutorial_step
 
   get "/payouts", to: "payouts#index"
+  resources :ship_reviewer_payout_requests, only: [ :create, :index ]
 
   # API routes
   namespace :api do
@@ -348,83 +387,118 @@ Rails.application.routes.draw do
   post "track_view", to: "view_tracking#create"
 
   get "/gork", to: "static_pages#gork"
+  get "/s", to: "static_pages#s", as: :stt
 
-  namespace :admin, constraint: AdminConstraint do
-    mount MissionControl::Jobs::Engine, at: "jobs"
-    mount AhoyCaptain::Engine, at: "ahoy_captain"
-    mount Blazer::Engine, at: "blazer"
-    mount Flipper::UI.app(Flipper), at: "flipper"
-    # mount_avo
-    get "/", to: "static_pages#index", as: :root
-    resources :view_analytics, only: [ :index ]
-    resources :voting_dashboard, only: [ :index ]
-    resources :payouts_dashboard, only: [ :index ]
-    resources :fraud_reports, only: [ :index, :show ] do
-      member do
-        get :resolve
-        get :unresolve
-        patch :resolve
-        patch :unresolve
+  namespace :admin do
+    constraints ShipCertifierConstraint do
+      resources :ship_certifications, only: [ :index, :edit, :update ] do
+        collection do
+          get :logs
+        end
+      end
+      resources :low_quality_dashboard, only: [ :index ] do
+        collection do
+          post :mark_low_quality
+          post :mark_ok
+        end
       end
     end
-    resources :ship_certifications, only: [ :index, :edit, :update ] do
-      collection do
-        get :logs
+
+    constraints FraudTeamConstraint do
+      get "/", to: "static_pages#index", as: :root
+      resources :fraud_reports, only: [ :index, :show ] do
+        member do
+          get :resolve
+          get :unresolve
+          patch :resolve
+          patch :unresolve
+        end
+      end
+      resources :fulfillment_dashboard, only: [ :index ]
+      resources :voting_dashboard, only: [ :index ]
+      resources :payouts_dashboard, only: [ :index ]
+      resources :shop_orders do
+        collection do
+          get :pending
+          get :awaiting_fulfillment
+        end
+        member do
+          post :internal_notes
+          post :approve
+          post :reject
+          post :place_on_hold
+          post :take_off_hold
+          post :mark_fulfilled
+          post :convert_to_preauth
+        end
+      end
+      resources :users, only: [ :index, :show ] do
+        member do
+          post :internal_notes
+          post :create_payout
+          post :nuke_idv_data
+          post :cancel_card_grants
+          post :freeze
+          post :defrost
+          post :grant_ship_certifier
+          post :revoke_ship_certifier
+          post :give_black_market
+          post :take_away_black_market
+          post :ban_user
+          post :unban_user
+          post :impersonate
+          post :set_hackatime_trust_factor
+          post :refresh_hackatime
+          post :grant_fraud_reviewer
+          post :revoke_fraud_reviewer
+          post :flip
+        end
+      end
+      resources :projects, only: [ :show ] do
+        member do
+          delete :destroy
+          patch :restore
+          post :magic_is_happening
+        end
+      end
+      resources :votes, only: [] do
+        member do
+          delete :invalidate
+          patch :uninvalidate
+        end
       end
     end
-    resources :readme_certifications, only: [ :index, :edit, :update ]
-    resources :ysws_reviews, only: [ :index, :show, :update ]
-    resources :users, only: [ :index, :show ] do
-      member do
-        post :internal_notes
-        post :create_payout
-        post :nuke_idv_data
-        post :cancel_card_grants
-        post :freeze
-        post :defrost
-        post :grant_ship_certifier
-        post :revoke_ship_certifier
-        post :give_black_market
-        post :take_away_black_market
-        post :ban_user
-        post :unban_user
-        post :impersonate
-        post :set_hackatime_trust_factor
-        post :refresh_hackatime
-        post :grant_fraud_reviewer
-        post :revoke_fraud_reviewer
-        post :flip
+
+    constraints AdminConstraint do
+      mount MissionControl::Jobs::Engine, at: "jobs"
+      # mount AhoyCaptain::Engine, at: "ahoy_captain"
+      mount Blazer::Engine, at: "blazer"
+      mount Flipper::UI.app(Flipper), at: "flipper"
+      # mount_avo
+      resources :view_analytics, only: [ :index ]
+      resources :ship_reviewer_payout_requests, only: [ :index, :show ] do
+        member do
+          patch :approve
+          patch :reject
+        end
       end
+      resources :readme_certifications, only: [ :index, :edit, :update ]
+      resources :ysws_reviews, only: [ :index, :show, :update ] do
+        member do
+          patch :return_to_certifier
+        end
+      end
+      resources :special_access_users, only: [ :index ]
+      resources :shop_items
+      resources :shop_card_grants, only: [ :index, :show ]
+      resources :caches, path: "cache", only: [ :index ] do
+        member do
+          delete :zap
+        end
+      end
+      resources :sinkenings, only: [ :show, :update ], path: "sinkening"
+      resources :advent_stickers, only: [ :index, :new, :create, :edit, :update, :destroy ]
     end
-    resources :special_access_users, only: [ :index ]
-    resources :shop_items
-    resources :projects, only: [] do
-      member do
-        delete :destroy
-        patch :restore
-      end
-    end
-    resources :shop_orders do
-      collection do
-        get :pending
-        get :awaiting_fulfillment
-      end
-      member do
-        post :internal_notes
-        post :approve
-        post :reject
-        post :place_on_hold
-        post :take_off_hold
-        post :mark_fulfilled
-      end
-    end
-    resources :shop_card_grants, only: [ :index, :show ]
-    resources :caches, path: "cache", only: [ :index ] do
-      member do
-        delete :zap
-      end
-    end
-    resources :sinkenings, only: [ :show, :update ], path: "sinkening"
   end
 
   get "leaderboard", to: "leaderboard#index"

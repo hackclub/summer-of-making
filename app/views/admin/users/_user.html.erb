@@ -1,5 +1,7 @@
 <b>Display name:</b> <%= link_to user.display_name, admin_user_path(user) %> <br>
 <b>Name: </b> <%= user.first_name %> <%= user.last_name %><br>
+<b>Email: </b> <%= mail_to user.email %><br>
+<b>Slack: </b> <%= user.slack_id %><br>
 <b>Verified: </b> <%= !!user.ysws_verified %> <br>
 <b>Blue Badge: </b> <%= user.blue_check? ? "yes" : "no" %><br>
 <b>Gold Badge: </b> <%= user.gold_check? ? "yes" : "no" %><br>

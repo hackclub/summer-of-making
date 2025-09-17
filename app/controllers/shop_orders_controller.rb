@@ -46,6 +46,14 @@ class ShopOrdersController < ApplicationController
       return
     end
 
+    # Check to make sure sinkening balloons can only be ordered if user is participating
+    if !Flipper.enabled?(:enable_shop_balloons, current_user)
+      if @item.is_a?(ShopItem::SinkeningBalloons) && !current_user.sinkening_participation?
+        redirect_to shop_path, alert: "Hey! You're not supposed to be here."
+        return
+      end
+    end
+
     render :new_black_market, layout: "black_market" if @item.requires_black_market?
   end
 
@@ -56,6 +64,11 @@ class ShopOrdersController < ApplicationController
     @selected_region = @regionalization_enabled ? determine_user_region : nil
     @regional_price = @regionalization_enabled ? @item.price_for_region(@selected_region) : @item.ticket_cost
     @order.frozen_item_price = @regional_price
+
+    if params[:quantity].blank? || !params[:quantity].match?(/\A\d+\z/) || params[:quantity].to_i <= 0
+      flash[:alert] = "stop playing with me"
+      redirect_to new_shop_order_path(id: @item.id) and return
+    end
 
     # Use selected address from IDV data if provided, fallback to user's address
     if params[:shipping_address_id].present?

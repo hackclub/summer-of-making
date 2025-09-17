@@ -1,4 +1,5 @@
 <body class="adash" style="background: var(--color-background); color: var(--color-text); min-height: 100vh; padding: 2rem;">
+<link rel="stylesheet" href="https://kujitegemea.github.io/language-colors/language-colors.css">
 
 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
   <h1>YSWS Reviews
@@ -12,7 +13,6 @@
     </span>
   </h1>
 </div>
-
 <div style="display: flex; gap: 2rem; margin-bottom: 2rem;">
   <div style="background: var(--color-card); padding: 1rem; border-radius: 8px; flex: 1;">
     <h3>Review Stats</h3>
@@ -21,19 +21,56 @@
     <p><strong>Total Eligible:</strong> <span class="pill pill-dark"><%= @total_all %></span></p>
   </div>
 </div>
+<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+  <div style="display: flex; gap: 1rem;">
+    <%= link_to "Pending", admin_ysws_reviews_path(filter: "pending", sort_by: @sort_by, lang_filter: params[:lang_filter]),
+        class: "pill #{'pill-yellow' if @filter == 'pending'} #{'pill-gray' unless @filter == 'pending'}",
+        style: "text-decoration: none; padding: 0.5rem 1rem;" %>
+    <%= link_to "Reviewed", admin_ysws_reviews_path(filter: "reviewed", sort_by: @sort_by, lang_filter: params[:lang_filter]),
+        class: "pill #{'pill-green' if @filter == 'reviewed'} #{'pill-gray' unless @filter == 'reviewed'}",
+        style: "text-decoration: none; padding: 0.5rem 1rem;" %>
+    <%= link_to "All", admin_ysws_reviews_path(filter: "all", sort_by: @sort_by, lang_filter: params[:lang_filter]),
+        class: "pill #{'pill-dark' if @filter == 'all'} #{'pill-gray' unless @filter == 'all'}",
+        style: "text-decoration: none; padding: 0.5rem 1rem;" %>
+  </div>
 
-<div style="display: flex; gap: 1rem; margin-bottom: 2rem;">
-  <%= link_to "Pending", admin_ysws_reviews_path(filter: "pending"),
-      class: "pill #{'pill-yellow' if @filter == 'pending'} #{'pill-gray' unless @filter == 'pending'}",
-      style: "text-decoration: none; padding: 0.5rem 1rem;" %>
-  <%= link_to "Reviewed", admin_ysws_reviews_path(filter: "reviewed"),
-      class: "pill #{'pill-green' if @filter == 'reviewed'} #{'pill-gray' unless @filter == 'reviewed'}",
-      style: "text-decoration: none; padding: 0.5rem 1rem;" %>
-  <%= link_to "All", admin_ysws_reviews_path(filter: "all"),
-      class: "pill #{'pill-dark' if @filter == 'all'} #{'pill-gray' unless @filter == 'all'}",
-      style: "text-decoration: none; padding: 0.5rem 1rem;" %>
+  <div style="display: flex; align-items: center; gap: 0.5rem;">
+    <label for="sort-dropdown" style="font-size: 0.9em; color: var(--color-text-muted);">Sort by:</label>
+    <select id="sort-dropdown"
+            onchange="window.location.href = <%= admin_ysws_reviews_path(filter: @filter, lang_filter: params[:lang_filter]).to_json %> + '&sort_by=' + this.value"
+            style="padding: 0.25rem 0.5rem; border: 1px solid var(--color-border); border-radius: 4px; background: var(--color-card); color: var(--color-text); font-size: 0.9em;">
+      <option value="elo_desc" <%= 'selected' if @sort_by == 'elo_desc' %>>ELO Score (High to Low)</option>
+      <option value="elo_asc" <%= 'selected' if @sort_by == 'elo_asc' %>>ELO Score (Low to High)</option>
+      <option value="created_desc" <%= 'selected' if @sort_by == 'created_desc' %>>Created Date (Newest First)</option>
+      <option value="created_asc" <%= 'selected' if @sort_by == 'created_asc' %>>Created Date (Oldest First)</option>
+      <option value="random" <%= 'selected' if @sort_by == 'random' %>>Random</option>
+    </select>
+  </div>
 </div>
 
+<!-- Language Filter -->
+<div style="background: var(--color-card); padding: 1rem; border-radius: 8px; margin-bottom: 1rem;">
+  <form method="get" style="display: flex; align-items: center; gap: 1rem;">
+    <label for="language-filter" style="font-size: 0.9em; color: var(--color-text-muted); white-space: nowrap;">Language Filter:</label>
+    <input type="hidden" name="filter" value="<%= @filter %>">
+    <input type="hidden" name="sort_by" value="<%= @sort_by %>">
+    <input type="text"
+           name="lang_filter"
+           id="language-filter"
+           value="<%= params[:lang_filter] %>"
+           placeholder="e.g. html -css javascript"
+           style="flex: 1; padding: 0.5rem; border: 1px solid var(--color-border); border-radius: 4px; background: var(--color-background); color: var(--color-text); font-size: 0.9em;">
+    <button type="submit"
+            style="padding: 0.5rem 1rem; background: var(--color-primary); color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 0.85em;">
+      Filter
+    </button>
+    <%= link_to "Clear", admin_ysws_reviews_path(filter: @filter, sort_by: @sort_by),
+        style: "padding: 0.5rem 1rem; background: var(--color-danger); color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 0.85em; text-decoration: none; display: inline-block;" %>
+  </form>
+  <div style="margin-top: 0.5rem; font-size: 0.8em; color: var(--color-text-muted);">
+    Use  "-" for excluded languages. Example: "html javascript -css" shows projects with HTML and JavaScript but without CSS.
+  </div>
+</div>
 <div style="background: var(--color-card); border-radius: 8px; overflow: hidden;">
   <% if @projects.any? %>
     <% @projects.each_with_index do |project, index| %>
@@ -49,8 +86,44 @@
             </p>
             <div style="display: flex; gap: 1rem; font-size: 0.9em;">
               <span><strong>ELO:</strong> <%= @latest_vote_changes[project.id]&.elo_after || "N/A" %></span>
+              <span><strong>Time Coded:</strong> <%= format_seconds(project.total_seconds_coded) %></span>
               <span><strong>Created:</strong> <%= project.created_at.strftime("%b %d, %Y") %></span>
             </div>
+            <% if project.project_language&.synced? %>
+              <div style="margin-top: 0.5rem; font-size: 0.85em;">
+                <strong>Languages:</strong>
+                <% project.project_language.language_percentages.sort_by { |lang, pct| -pct }.first(3).each_with_index do |(language, percentage), index| %>
+                  <%
+                    current_terms = (params[:lang_filter] || "").split(' ').reject(&:blank?)
+                    lang_normalized = language.downcase
+
+                    # For adding language: remove existing entries and add positive
+                    add_terms = current_terms.reject { |term| term.gsub(/^[-+]/, '').downcase == lang_normalized }
+                    add_terms << lang_normalized
+                    add_filter = add_terms.join(' ')
+
+                    # For removing language: remove existing entries and add negative
+                    remove_terms = current_terms.reject { |term| term.gsub(/^[-+]/, '').downcase == lang_normalized }
+                    remove_terms << "-#{lang_normalized}"
+                    remove_filter = remove_terms.join(' ')
+                  %>
+                  <span class="pill language-pill <%= "bg-color-#{language.gsub(/[^A-Za-z0-9]/, '_').downcase}" %>"
+                        style="font-size: 0.7em; margin-left: 0.25rem; color: white; text-shadow: 0px 0px 3px rgba(0,0,0,1); position: relative; display: inline-flex; align-items: center; gap: 0.25rem;">
+                    <%= language %> (<%= percentage %>%)
+                    <%= link_to "+", admin_ysws_reviews_path(filter: @filter, sort_by: @sort_by, lang_filter: add_filter),
+                        title: "Include #{language}",
+                        style: "color: white; text-decoration: none; font-size: 0.8em; padding: 0 0.2rem; opacity: 0.7; line-height: 1;",
+                        onmouseover: "this.style.opacity='1'; this.style.transform='scale(1.1)'",
+                        onmouseout: "this.style.opacity='0.7'; this.style.transform='scale(1)'" %>
+                    <%= link_to "-", admin_ysws_reviews_path(filter: @filter, sort_by: @sort_by, lang_filter: remove_filter),
+                        title: "Exclude #{language}",
+                        style: "color: white; text-decoration: none; font-size: 0.8em; padding: 0 0.2rem; opacity: 0.7; line-height: 1;",
+                        onmouseover: "this.style.opacity='1'; this.style.transform='scale(1.1)'",
+                        onmouseout: "this.style.opacity='0.7'; this.style.transform='scale(1)'" %>
+                  </span>
+                <% end %>
+              </div>
+            <% end %>
           </div>
           <div>
             <%= link_to "Review", admin_ysws_review_path(project),
@@ -65,5 +138,4 @@
     </div>
   <% end %>
 </div>
-
 </body>

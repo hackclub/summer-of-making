@@ -7,6 +7,7 @@ module ViewTrackable
 
   def track_view(viewable)
     return unless viewable
+    return if request.user_agent.starts_with?("node")
 
     ViewTrackingService.track_view(
       viewable,

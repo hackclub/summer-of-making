@@ -1,59 +1,26 @@
-<%#
-  Parameters:
-    - project: the project to render. Required.
-    - show_author: if false, the author is not shown. Defaults to true.
-%>
-
-<% show_author = local_assigns.fetch(:show_author, true) %>
-
-<% cache_unless(current_user&.is_admin? || impersonating?, [project, project.user, project.devlogs.maximum(:updated_at), current_user&.id, show_author]) do %>
-  <%= link_to project_path(project) do %>
-    <%=
-      render layout: "shared/container", locals: {
-        no_padding: true,
-        attr: {
-          class: "transform hover:scale-[1.02] transition-transform duration-300"
-        }
-      } do
-    %>
-
-      <div class="flex flex-col h-full gap-3">
-        <% project_image = project.banner.attached? ? url_for(project.banner) : (project.devlogs.find { |u| u.file.attached? && u.file.image? }&.file&.then { |f| url_for(f) } || "https://hc-cdn.hel1.your-objectstorage.com/s/v3/42eb885e3ebc20bd5e94782b7b4bcb31bcc956d3_i.png") %>
-        <div class="h-36 md:h-48">
+<%= render C::Container.new(no_padding: true, attr: { class: "transform hover:scale-[1.02] 2xl:hover:scale-[1.05] hover:shadow-lg transition-transform duration-300" }) do %>
+    <div class="flex flex-col h-full gap-3">
+      <% project_image = project.banner.attached? ? url_for(project.banner) : "https://hc-cdn.hel1.your-objectstorage.com/s/v3/42eb885e3ebc20bd5e94782b7b4bcb31bcc956d3_i.png" %>
+      <%= link_to project_path(project) do %>
+        <div class="h-40 md:h-52 2xl:h-60">
           <img src="<%= project_image %>" alt="<%= project.title %>" class="w-full h-full object-cover" loading="lazy">
         </div>
-
-        <div class="flex flex-col flex-grow py-2 px-4">
-
-          <div class="flex items-center justify-between">
-            <h2 class="text-xl md:text-2xl 2xl:text-3xl line-clamp-1"><%= project.title %></h2>
-            <% if user_signed_in? && current_user != project.user %>
-              <div>
-                <%= render "projects/follow_button", project: project %>
-              </div>
-            <% end %>
+      <% end %>
+      <div class="flex flex-col flex-grow py-2 px-4">
+        <div class="flex items-start justify-between gap-2">
+          <div class="min-w-0">
+            <h2 class="text-2xl md:text-2xl 2xl:text-3xl line-clamp-1 mb-0.5"><%= link_to project.title, project_path(project), class: "hover:underline" %></h2>
+            <p class="text-xs md:text-sm text-som-detail">
+              by <%= link_to project.user.display_name, user_path(project.user), class: "hover:underline" %>
+              • <%= time_ago_in_words(project.created_at) %> ago
+              • <%= project.devlogs_count %> devlogs
+            </p>
           </div>
-
-          <p class="mb-2 line-clamp-3 text-sm md:text-base 2xl:text-lg text-som-detail break-words overflow-wrap-anywhere">
-            <% if show_author %>
-              <%= "by #{project.user.display_name}  •  " %>
-              <% if current_user&.is_admin? %>
-                <% if project.user.has_black_market? %>
-                  <button style="display: inline; all: revert" class="btn" disabled>B☑</button>
-                <% else %>
-                  <%= button_to "+B", give_black_market_admin_user_path(project.user), form_class: "inline", style: "all: revert" %>
-                <% end %>
-              <% end %>
-            <% end %>
-            <%= project.devlogs_count || project.devlogs.count %> devlogs  •  <%= format_seconds(project.total_seconds_coded) %>
-          </p>
-
-          <p class="line-clamp-3 text-sm md:text-base 2xl:text-lg overflow-hidden mb-4">
-            <%= project.description %>
-          </p>
+          <% if user_signed_in? && current_user != project.user %>
+            <%= render "projects/follow_button", project: project, following: (defined?(@followed_project_ids) ? @followed_project_ids&.include?(project.id) : nil), variant: :icon %>
+          <% end %>
         </div>
+        <p class="line-clamp-3 text-sm md:text-base 2xl:text-lg overflow-hidden mt-1 min-h-[63px] md:min-h-[72px] 2xl:min-h-[81px]"><%= project.description %></p>
       </div>
-
-    <% end %>
-  <% end %>
+    </div>
 <% end %>

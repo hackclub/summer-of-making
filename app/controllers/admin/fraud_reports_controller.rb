@@ -18,7 +18,7 @@ module Admin
     end
 
     def resolve
-      @fraud_report.resolve!
+      @fraud_report.resolve!(user: current_user)
       redirect_to admin_fraud_report_path(@fraud_report), notice: "Fraud report marked as resolved."
     end
 

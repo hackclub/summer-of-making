@@ -25,6 +25,10 @@
 #
 # Indexes
 #
+#  idx_shop_orders_item_state_qty             (shop_item_id,aasm_state,quantity)
+#  idx_shop_orders_stock_calc                 (shop_item_id,aasm_state)
+#  idx_shop_orders_user_item_state            (user_id,shop_item_id,aasm_state)
+#  idx_shop_orders_user_item_unique           (user_id,shop_item_id)
 #  index_shop_orders_on_shop_card_grant_id    (shop_card_grant_id)
 #  index_shop_orders_on_shop_item_id          (shop_item_id)
 #  index_shop_orders_on_user_id               (user_id)
@@ -53,13 +57,14 @@ class ShopOrder < ApplicationRecord
   belongs_to :shop_card_grant, optional: true
   belongs_to :warehouse_package, class_name: "Shop::WarehousePackage", optional: true
 
-  validates :quantity, presence: true, numericality: { greater_than: 0 }, on: :create
+  validates :quantity, presence: true, numericality: { only_integer: true, greater_than: 0 }, on: :create
   validate :check_one_per_person_ever_limit, on: :create
   validate :check_max_quantity_limit, on: :create
   validate :check_black_market_access, on: :create
   validate :check_user_balance, on: :create
   validate :check_regional_availability, on: :create
   validate :check_badge, on: :create
+  validate :check_sinkening_participation, on: :create
   after_create :create_negative_payout
   before_create :set_initial_state_for_free_stickers
 
@@ -115,6 +120,9 @@ class ShopOrder < ApplicationRecord
         self.external_ref = external_ref
         self.fulfillment_cost = fulfillment_cost
         self.fulfilled_by = fulfilled_by
+      end
+      after do
+        Shop::SendOrderFulfilledDmJob.perform_later(self)
       end
     end
 
@@ -219,11 +227,11 @@ class ShopOrder < ApplicationRecord
   end
 
   def check_user_balance
-    return unless shop_item&.ticket_cost&.positive? && quantity.present?
+    return unless frozen_item_price&.positive? && quantity.present?
 
-    total_cost = shop_item.ticket_cost * quantity
-    if user&.balance&.< total_cost
-      shortage = total_cost - (user.balance || 0)
+    total_cost_for_validation = frozen_item_price * quantity
+    if user&.balance&.< total_cost_for_validation
+      shortage = total_cost_for_validation - (user.balance || 0)
       errors.add(:base, "Insufficient balance. You need #{shortage} more tickets.")
     end
   end
@@ -239,6 +247,14 @@ class ShopOrder < ApplicationRecord
     # Allow items enabled for the address region OR for XX (Rest of World)
     unless shop_item.enabled_in_region?(address_region) || shop_item.enabled_in_region?("XX")
       errors.add(:base, "This item is not available for shipping to #{address_country}.")
+    end
+  end
+
+  def check_sinkening_participation
+    return unless shop_item.is_a?(ShopItem::SinkeningBalloons)
+
+    unless Flipper.enabled?(:enable_shop_balloons, user) && user.sinkening_participation?
+      errors.add(:base, "You are not eligible to order Sinkening Balloons.")
     end
   end
 

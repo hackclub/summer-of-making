@@ -9,6 +9,7 @@ require "cgi"
 #  id                              :bigint           not null, primary key
 #  attachment                      :string
 #  comments_count                  :integer          default(0), not null
+#  deleted_at                      :datetime
 #  duration_seconds                :integer          default(0), not null
 #  for_sinkening                   :boolean          default(FALSE), not null
 #  hackatime_projects_key_snapshot :jsonb            not null
@@ -26,6 +27,7 @@ require "cgi"
 #
 # Indexes
 #
+#  index_devlogs_on_deleted_at   (deleted_at)
 #  index_devlogs_on_project_id   (project_id)
 #  index_devlogs_on_user_id      (user_id)
 #  index_devlogs_on_views_count  (views_count)
@@ -37,13 +39,19 @@ require "cgi"
 #
 class Devlog < ApplicationRecord
   include Balloonable
-  belongs_to :user
+  belongs_to :user, counter_cache: true
   belongs_to :project, counter_cache: { active: false }
   has_many :comments, -> { order(created_at: :desc) }, dependent: :destroy
   has_many :timer_sessions, dependent: :nullify
   has_many :likes, as: :likeable, dependent: :destroy
   has_one_attached :file
   has_one :ysws_review_approval, class_name: "YswsReview::DevlogApproval", dependent: :destroy
+  has_one :user_advent_sticker
+
+  # even tho nora says to not use default_scope, imma use it here and create uh unexpected behavior!
+  default_scope { where(deleted_at: nil) }
+
+  scope :with_deleted, -> { unscope(where: :deleted_at) }
 
   validates :text, presence: true
   validate :file_must_be_attached, on: %i[ create ]
@@ -52,10 +60,31 @@ class Devlog < ApplicationRecord
   validate :only_formatting_changes, on: :update
 
   validate :updates_not_locked, on: :create
+  validate :prevent_soft_delete_when_sticker_present, on: :update
+  before_destroy :prevent_hard_delete_when_sticker_present
 
   after_commit :notify_followers_and_stakers, on: :create
   after_commit :recalculate_devlogs_if_new_key_used, on: :create
   after_destroy_commit :recalculate_project_devlogs
+  after_update_commit :recalculate_project_devlogs, if: :saved_change_to_deleted_at?
+
+  after_commit :bust_user_projects_devlogs_cache
+  after_commit :maybe_award_advent_sticker, on: :create
+
+  scope :for_explore_feed, -> {
+    joins(:project).where(projects: { is_deleted: false })
+      .with_attached_file
+      .includes(:project, :user, user_advent_sticker: { shop_item: [ { image_attachment: :blob }, { silhouette_image_attachment: :blob } ] })
+      .order(created_at: :desc)
+  }
+
+  scope :for_user_following, ->(user_id) {
+    joins(project: :project_follows)
+      .with_attached_file
+      .includes(:project, :user, user_advent_sticker: { shop_item: [ { image_attachment: :blob }, { silhouette_image_attachment: :blob } ] })
+      .where(project_follows: { user_id: user_id }, projects: { is_deleted: false })
+      .order(created_at: :desc)
+  }
 
   def formatted_text
     ApplicationController.helpers.markdown(text)
@@ -67,8 +96,13 @@ class Devlog < ApplicationRecord
     likes.exists?(user: user)
   end
 
-  # ie. Project.first.devlogs.capped_duration_seconds
-  scope :capped_duration_seconds, -> { where.not(duration_seconds: nil).sum("LEAST(duration_seconds, #{10.hours.to_i})") }
+    # ie. Project.first.devlogs.capped_duration_seconds
+    scope :capped_duration_seconds, -> {
+    where.not(duration_seconds: nil)
+      .sum(
+        "CASE WHEN created_at >= '2025-07-19 00:00:00' THEN LEAST(duration_seconds, 36000) ELSE duration_seconds END"
+      )
+    }
 
   def recalculate_seconds_coded
     # find the created_at of the devlog directly before this one
@@ -172,6 +206,35 @@ class Devlog < ApplicationRecord
     end
   end
 
+  # uh, dawg no deletion if covered by a ship
+
+  def covered_by_ship_event?
+    return false unless project
+
+    next_ship = project.ship_events.where("created_at > ?", created_at).order(:created_at).first
+    return false unless next_ship
+
+    prev_ship = project.ship_events.where("created_at < ?", next_ship.created_at).order(:created_at).last
+
+    if prev_ship
+      created_at > prev_ship.created_at && created_at < next_ship.created_at
+    else
+      created_at < next_ship.created_at
+    end
+  end
+
+  def soft_delete!
+    return if deleted_at.present?
+
+    transaction do
+      update!(deleted_at: Time.current)
+      if project_id
+        # keep counter cache in sync for soft-deleted devlogs
+        Project.with_deleted.where(id: project_id).update_all("devlogs_count = GREATEST(devlogs_count - 1, 0)")
+      end
+    end
+  end
+
   private
 
   def file_must_be_attached
@@ -198,16 +261,24 @@ class Devlog < ApplicationRecord
   def strip_formatting(text)
     return "" if text.nil?
 
-    text.gsub(/[\s\n\r\t\*\_\#\~\`\>\<\-\+\.\,\;\:\!\?\(\)\[\]\{\}]/i, "").downcase
+    text.gsub(/[\s\n\r\t\*\_\#\~\`\>\<\-\+\.\,\;\:\!\?\(\)\[\]\{\}\\]/i, "").downcase
   end
 
   def notify_followers_and_stakers
     NotifyProjectDevlogJob.perform_later(id)
   end
 
+  def maybe_award_advent_sticker
+    AdventOfStickers::Awarder.award_for_devlog(self)
+  end
+
   def recalculate_project_devlogs
     return unless project_id
     RecalculateProjectDevlogTimesJob.perform_later(project_id)
+  end
+
+  def bust_user_projects_devlogs_cache
+    Rails.cache.delete(User.project_devlog_cache_key(user_id)) if user_id
   end
 
   def recalculate_devlogs_if_new_key_used
@@ -227,5 +298,17 @@ class Devlog < ApplicationRecord
 
     # immeditately perform so we don't have 0 0 time
     RecalculateProjectDevlogTimesJob.perform_now(project_id)
+  end
+
+  def prevent_soft_delete_when_sticker_present
+    return unless will_save_change_to_deleted_at?
+    errors.add(:base, "Devlog with earned sticker cannot be deleted") if user_advent_sticker.present?
+  end
+
+  def prevent_hard_delete_when_sticker_present
+    if user_advent_sticker.present?
+      errors.add(:base, "Devlog with earned sticker cannot be deleted")
+      throw :abort
+    end
   end
 end

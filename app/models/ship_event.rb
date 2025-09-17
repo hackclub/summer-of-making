@@ -2,11 +2,12 @@
 #
 # Table name: ship_events
 #
-#  id            :bigint           not null, primary key
-#  for_sinkening :boolean          default(FALSE), not null
-#  created_at    :datetime         not null
-#  updated_at    :datetime         not null
-#  project_id    :bigint           not null
+#  id                 :bigint           not null, primary key
+#  excluded_from_pool :boolean          default(FALSE), not null
+#  for_sinkening      :boolean          default(FALSE), not null
+#  created_at         :datetime         not null
+#  updated_at         :datetime         not null
+#  project_id         :bigint           not null
 #
 # Indexes
 #
@@ -20,13 +21,15 @@ class ShipEvent < ApplicationRecord
   include AirtableSyncable
   include Balloonable
 
-  belongs_to :project
+  belongs_to :project, counter_cache: true
   has_one :user, through: :project
   has_one :ship_event_feedback
   has_many :payouts, as: :payable
+  attribute :excluded_from_pool, :boolean, default: false
 
   after_create :maybe_create_ship_certification
   after_create :award_user_badges
+  after_create_commit :mark_new_tutorial_ship_steps
 
   def self.airtable_table_name
     "_ship_events"
@@ -85,5 +88,11 @@ class ShipEvent < ApplicationRecord
 
   def award_user_badges
     user.award_badges_async!("ship_event_created")
+  end
+
+  def mark_new_tutorial_ship_steps
+    tp = user.tutorial_progress || TutorialProgress.create!(user: user)
+    tp.complete_new_tutorial_step!("ship")
+    tp.complete_new_tutorial_step!("shipped")
   end
 end

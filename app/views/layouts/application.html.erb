@@ -19,6 +19,7 @@
     <%= stylesheet_link_tag "application", "data-turbo-track": "reload" %>
     <%= stylesheet_link_tag "pixelart" %>
     <%= stylesheet_link_tag "som" %>
+    <%= stylesheet_link_tag "markdown" %>
     <%= stylesheet_link_tag "tooltips" %>
     <%= stylesheet_link_tag "balloons", "data-turbo-track": "reload" %>
     <%= stylesheet_link_tag "tutorial", "data-turbo-track": "reload" %>
@@ -49,7 +50,7 @@
     <meta name="twitter:title" content="Hack Club Summer of Making">
     <meta name="twitter:description" content="Build stuff, Get stuff, Repeat! Win awesome prizes for building personal coding projects, from June 16 - September 30, 2025">
     <meta name="twitter:image" content="<%= asset_url('social_card.png') %>">
-    <% if current_user&.has_badge?(:spider) %>
+    <% if current_user_has_badge?(:spider) %>
     <%= javascript_include_tag "vendor/bug" %>
       <script>
           new SpiderController({
@@ -64,6 +65,9 @@
   </head>
 
   <body class="min-h-[100dvh] font-national-park font-bold text-som-dark <%= user_signed_in? ? 'overflow-hidden' : '' %>">
+    <!-- Brainrot mode (shows on all pages when active) -->
+    <%= render 'shared/brainrot' %>
+    
     <!-- Hidden balloon SVG template for JavaScript balloons -->
     <div id="balloon-template" style="display: none;">
       <%= inline_svg "balloon.svg", width: "60", height: "80" %>
@@ -73,21 +77,24 @@
       <%# render "shared/stonk_tickler_marquee" %>
     <%# end %>
 
-    <div class="sinkening-container">
+  <div class="sinkening-container" data-controller="new-tutorial" data-new-tutorial-display-name-value="<%= h(current_user&.display_name) %>" data-new-tutorial-hackatime-condition-value="<%= h(current_user&.has_hackatime_account?) %>" data-new-tutorial-current-path-value="<%= h(request.path) %>" data-new-tutorial-new-tutorial-progress-value="<%= h((current_user&.tutorial_progress&.new_tutorial_progress || {}).to_json) %>" data-new-tutorial-new-onboarding-enabled-value="<%= h(Flipper.enabled?(:new_onboarding, current_user)) %>">
       <% if user_signed_in? %>
-        <% if current_user.tutorial_progress.completed? && !mobile_device? %>
+
+        <%= render "new_tutorial/tutorial" %>
+
+        <% if current_user.tutorial_completed? && !mobile_device? %>
           <div data-controller="todo">
             <button
               data-todo-target="todoButton"
               id="todo-button"
               data-action="click->todo#toggleAndComplete"
-              class="bg-[#523A52] hover:bg-[#856185] fixed hidden top-auto bottom-8 right-6 z-50 w-16 h-16 rounded-full md:flex items-center justify-center transition-all duration-200 hover:scale-110 text-white cursor-pointer drop-shadow-md sinkening-todo"
+              class="bg-[#bcb0bc] hover:bg-[#856185] fixed hidden top-auto bottom-8 right-6 z-50 w-16 h-16 rounded-full md:flex items-center justify-center transition-all duration-200 hover:scale-110 text-white cursor-pointer drop-shadow-md sinkening-todo"
               title="Show todo for this page">
               <%= inline_svg "icons/clipboard.svg", class: "size-8" %>
             </button>
-            <!-- Todo Modal -->
-            <%= render "tutorial/todo_modal" %>
-            <% if !current_page?(campfire_path) && !current_user.tutorial_progress.soft_step_completed?("todo") && current_user.tutorial_progress.completed? && current_user.projects.empty? %>
+            <!-- Todo Modal, but lazy loaded! -->
+            <div data-todo-target="modal" data-fetch-url="<%= tutorial_todo_modal_path %>" data-loading-img="<%= asset_path('compassloading.gif') %>" class="fixed bottom-4 right-4 w-96 rounded-lg shadow-2xl border border-[#7c4a331a] z-50 transform translate-x-full transition-transform duration-300 ease-in-out" style="display: none;"></div>
+            <% if !current_page?(campfire_path) && !current_user.tutorial_progress.soft_step_completed?("todo") && current_user.tutorial_completed? && current_user.projects.empty? %>
               <div class="absolute inset-0 z-40 text-white cursor-pointer bg-black/75" data-todo-target="overlay" data-action="click->todo#completeAndHideOverlay">
                 <div class="absolute bottom-24 right-24">
                   <p class="pb-4 pr-8 text-3xl">Check your todo list here!</p>

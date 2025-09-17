@@ -1,0 +1,37 @@
+<% target_id = local_assigns.fetch(:target_id, "devlogs-list") %>
+
+<% if devlogs&.any? %>
+  <% devlogs.each do |devlog| %>
+    <%= turbo_stream.append target_id do %>
+      <%= render "devlogs/devlog_card",
+        devlog: devlog,
+        context: 'explore',
+        show_project_title: true,
+        show_project_navigation: true,
+        show_likes: true,
+        show_project_link: true,
+        show_comment_modal: true,
+        show_stonks: false %>
+    <% end %>
+  <% end %>
+<% end %>
+
+<%= turbo_stream.replace "load-more-devlogs" do %>
+  <% if pagy&.next %>
+    <%= turbo_frame_tag "load-more-devlogs",
+      src: next_path,
+      loading: "lazy",
+      class: "block" do %>
+      <div class="flex flex-col items-center justify-center">
+        <%= image_tag 'compassloading.gif', class: 'w-8 h-8 sm:w-16 sm:h-16 lg:w-24 lg:h-24' %>
+      </div>
+    <% end %>
+  <% else %>
+    <div id="load-more-devlogs" class="flex justify-center py-6">
+      <div class="text-sm sm:text-base">
+        No more devlogs to load... Phew you are quite the doomscroller! Drink water!!
+      </div>
+    </div>
+  <% end %>
+<% end %>
+

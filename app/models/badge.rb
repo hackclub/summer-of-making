@@ -122,6 +122,13 @@ class Badge
       icon: "🚫",
       color: "border-red-500 bg-red-500/10",
       criteria: ->(user) { false }
+    },
+    bought_black_market_access_award: {
+      name: %("bought black market access" award),
+      flavor_text: "you cheated not only the game, but yourself.",
+      icon: "black_market_poser.png",
+      color: "border-blue-500 bg-yellow-300/20",
+      criteria: ->(user) { user.shop_orders.joins(:shop_item).where(shop_item: { type: "ShopItem::SiteActionItem", site_action: 7 }).exists? }
     }
   }.freeze
 

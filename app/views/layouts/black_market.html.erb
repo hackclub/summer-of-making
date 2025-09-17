@@ -5,7 +5,7 @@
     <%= javascript_importmap_tags %>
     <link rel="icon" href="/favicon.png" type="image/png">
     <script src="https://unpkg.com/htmx.org@2.0.4" integrity="sha384-HGfztofotfshcF7+8n44JQL2oJmowVChPTg48S+jvZoztPfvwD79OC/LTtG6dMp+" crossorigin="anonymous"></script>
-    <% unless current_user&.has_badge?(:preferred_customer) %>
+    <% unless current_user_has_badge?(:preferred_customer) %>
     <script>
       document.addEventListener('DOMContentLoaded', function() {
         // make them wait a bit nora!
@@ -21,7 +21,7 @@
     <% end %>
   </head>
   <body>
-  <% unless current_user&.has_badge?(:preferred_customer) %>
+  <% unless current_user_has_badge?(:preferred_customer) %>
     <div class="loader">
       <div class="inner">
       <div class="l">
