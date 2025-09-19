@@ -128,22 +128,6 @@ class ProjectsController < ApplicationController
     ).order(created_at: :desc)
   end
 
-  def request_recertification
-    unless current_user == @project.user
-      redirect_to project_path(@project), alert: "You can only request re-certification for your own project."
-      return
-    end
-
-    # Save the instructions (for the review team) if provided 
-    instructions = params[:recertification_instructions]
-
-    if @project.request_recertification!(instructions)
-      redirect_to project_path(@project), notice: "Re-certification requested! Your project will be reviewed again."
-    else
-      redirect_to project_path(@project), alert: "Cannot request re-certification for this project."
-    end
-  end
-
   # Some AI generated code to check if a link is a valid repo or readme link
   def check_link
     url = params[:url]&.strip&.gsub(/\A"|"\z/, "")

@@ -448,7 +448,6 @@ ActiveRecord::Schema[8.0].define(version: 2025_09_16_171231) do
     t.text "notes"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-    t.text "recertification_instructions"
     t.text "ysws_feedback_reasons"
     t.bigint "ysws_returned_by_id"
     t.datetime "ysws_returned_at"

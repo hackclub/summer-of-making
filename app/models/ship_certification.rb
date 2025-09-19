@@ -2,17 +2,16 @@
 #
 # Table name: ship_certifications
 #
-#  id                           :bigint           not null, primary key
-#  judgement                    :integer          default("pending"), not null
-#  notes                        :text
-#  recertification_instructions :text
-#  ysws_feedback_reasons        :text
-#  ysws_returned_at             :datetime
-#  created_at                   :datetime         not null
-#  updated_at                   :datetime         not null
-#  project_id                   :bigint           not null
-#  reviewer_id                  :bigint
-#  ysws_returned_by_id          :bigint
+#  id                    :bigint           not null, primary key
+#  judgement             :integer          default("pending"), not null
+#  notes                 :text
+#  ysws_feedback_reasons :text
+#  ysws_returned_at      :datetime
+#  created_at            :datetime         not null
+#  updated_at            :datetime         not null
+#  project_id            :bigint           not null
+#  reviewer_id           :bigint
+#  ysws_returned_by_id   :bigint
 #
 # Indexes
 #
