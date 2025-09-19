@@ -39,10 +39,10 @@
   <% end %>
 </div>
 
-<%# if @ship_certification.recertification_instructions.present? %>
-  <%# <div style="color: var(--color-muted); font-size: 1em; font-weight: 600;">Special instructions from the project author:</div> %>
-  <%# <div class="special-instructions"><%= simple_format(@ship_certification.recertification_instructions) %></div> %>
-<%# end %>
+<% if @ship_certification.try(:recertification_instructions)&.present? %>
+  <div style="color: var(--color-muted); font-size: 1em; font-weight: 600;">Special instructions from the project author:</div>
+  <div class="special-instructions"><%= simple_format(@ship_certification.recertification_instructions) %></div>
+<% end %>
 
 <div class="edit-ship-cert-form">
   <%= render 'form', ship_certification: @ship_certification, current_user: current_user %>
