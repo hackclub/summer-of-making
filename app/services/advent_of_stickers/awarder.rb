@@ -67,7 +67,7 @@ module AdventOfStickers
         end
 
         # Channel announce
-        channel_id = "C015M4L9AHW"
+        channel_id = "C09FEFYGH9R"
         if channel_id.present?
           text = "#{user.display_name} just unlocked today’s sticker: #{target_sticker.name}! :partyparrot:"
           SendSlackDmJob.perform_later(channel_id, text)
