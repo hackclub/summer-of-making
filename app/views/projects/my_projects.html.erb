@@ -42,7 +42,14 @@
                   <% total_shells = project.ship_events.sum { |se| se.payouts.where(escrowed: false).sum(:amount) } %>
                   <p class="text-gray-400">You earned <%= pluralize(latest_shells.to_i, "shells") %> on the latest ship and <%= pluralize(total_shells.to_i, "shells") %> total!</p>
                 <% elsif ship_certified && !latest_ship_has_payouts %>
-                    <p class="text-red-400">Your latest ship is being voted on. Hang tight - you'll get your payout soon!</p>
+                  <% remaining = current_user.remaining_votes_to_ship %>
+                  <% if remaining > 0 %>
+                    <p class="text-red-400">Your latest payout is on hold — you need <%= pluralize(remaining, 'more vote') %> since your last ship to release your shells. <a href="<%= new_vote_path %>" class="underline text-blue-700 hover:text-blue-800">Start voting</a>.</p>
+                  <% else %>
+                   <% current_votes = latest_ship_event.vote_count %>
+                   <% votes_needed = latest_ship_event.votes_needed_for_payout %>
+                    <p class="text-red-400">Your latest ship has received <%= current_votes %> out of 18 needed and needs <%= votes_needed %> more for payout. Hang tight!</p>
+                  <% end %>
                 <% elsif project.certification_status == "rejected" %>
                   <% if project.can_request_recertification? %>
                     <p class="text-red-400">Changes are needed. Fix issues and request re-certification!</p>
@@ -57,6 +64,7 @@
           </div>
         <% end %>
       <% end %>
+
 
       <div class="bg-[#F3ECD8] rounded-2xl border-4 border-[#E4DCC6] transform hover:scale-[1.02] transition-transform duration-300 flex flex-col h-full items-center justify-center p-6">
         <%= render C::StyledButton.new(
