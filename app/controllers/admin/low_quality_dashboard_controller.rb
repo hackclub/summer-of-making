@@ -93,6 +93,24 @@ module Admin
       redirect_to admin_low_quality_dashboard_index_path, notice: "Marked OK and cleared reports."
     end
 
+    def message_repeat_offender
+      user = User.find(params[:user_id])
+      message = params[:message]
+
+      if message.blank?
+        redirect_to admin_low_quality_dashboard_index_path, alert: "Message content is required."
+        return
+      end
+
+      if user.slack_id.present?
+        formatted_message = "Hi #{user.display_name || 'there'}! This is a message from the Shipwright team:\n\n#{message}\n\nKeep building amazing things!"
+        SendSlackDmJob.perform_later(user.slack_id, formatted_message)
+        redirect_to admin_low_quality_dashboard_index_path, notice: "Message sent to #{user.display_name}."
+      else
+        redirect_to admin_low_quality_dashboard_index_path, alert: "User doesn't have a Slack ID configured."
+      end
+    end
+
     private
 
     def calculate_analytics_data
