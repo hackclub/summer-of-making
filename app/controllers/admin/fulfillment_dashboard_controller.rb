@@ -12,6 +12,11 @@ module Admin
       generate_statistics
     end
 
+    def send_letter_mail
+      Shop::ProcessLetterMailOrdersJob.perform_later
+      redirect_to "https://mail.hackclub.com/back_office/letter/queues/som-fulfillment#letters", allow_other_host: "mail.hackclub.com"
+    end
+
     private
 
     def fulfillment_type_filters
