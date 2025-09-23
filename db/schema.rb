@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_09_23_210259) do
+ActiveRecord::Schema[8.0].define(version: 2025_09_23_213146) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -410,6 +410,7 @@ ActiveRecord::Schema[8.0].define(version: 2025_09_23_210259) do
     t.integer "ship_events_count", default: 0, null: false
     t.integer "followers_count", default: 0, null: false
     t.bigint "magic_reporter_id"
+    t.string "magic_letter_id"
     t.index ["followers_count"], name: "index_projects_on_followers_count"
     t.index ["is_shipped"], name: "index_projects_on_is_shipped"
     t.index ["magic_reporter_id"], name: "index_projects_on_magic_reporter_id"

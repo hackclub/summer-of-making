@@ -29,6 +29,7 @@
 #  ysws_type              :string
 #  created_at             :datetime         not null
 #  updated_at             :datetime         not null
+#  magic_letter_id        :string
 #  magic_reporter_id      :bigint
 #  user_id                :bigint           not null
 #
@@ -105,6 +106,7 @@ class Project < ApplicationRecord
   scope :shipped, -> { where(is_shipped: true) }
   scope :not_on_map, -> { where(x: nil, y: nil) }
   scope :magical, -> { where.not(magicked_at: nil) }
+  scope :pending_magic_letter, -> { magical.where(magic_letter_id: nil) }
 
   def shipped_once?
     ship_events.any?
@@ -609,6 +611,7 @@ class Project < ApplicationRecord
     return if magicked?
 
     Project::PostToMagicJob.perform_later(self)
+    create_magic_letter!
     update!(magicked_at: Time.current, magic_reporter: by_user)
   end
 
@@ -732,4 +735,6 @@ class Project < ApplicationRecord
       end
     end
   end
+
+  def create_magic_letter! = Project::MagicHappeningLetterJob.perform_later(self)
 end

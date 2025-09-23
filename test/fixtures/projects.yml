@@ -29,6 +29,7 @@
 #  ysws_type              :string
 #  created_at             :datetime         not null
 #  updated_at             :datetime         not null
+#  magic_letter_id        :string
 #  magic_reporter_id      :bigint
 #  user_id                :bigint           not null
 #
