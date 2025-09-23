@@ -42,7 +42,7 @@ module Admin
     end
 
     def magic_is_happening
-      @project.magic_happening!
+      @project.magic_happening!(current_user)
       flash[:success] = "posted!!"
       redirect_back(fallback_location: admin_project_path(@project))
     end

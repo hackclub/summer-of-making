@@ -29,12 +29,14 @@
 #  ysws_type              :string
 #  created_at             :datetime         not null
 #  updated_at             :datetime         not null
+#  magic_reporter_id      :bigint
 #  user_id                :bigint           not null
 #
 # Indexes
 #
 #  index_projects_on_followers_count    (followers_count)
 #  index_projects_on_is_shipped         (is_shipped)
+#  index_projects_on_magic_reporter_id  (magic_reporter_id)
 #  index_projects_on_ship_events_count  (ship_events_count)
 #  index_projects_on_user_id            (user_id)
 #  index_projects_on_views_count        (views_count)
@@ -42,6 +44,7 @@
 #
 # Foreign Keys
 #
+#  fk_rails_...  (magic_reporter_id => users.id) ON DELETE => nullify
 #  fk_rails_...  (user_id => users.id)
 #
 class Project < ApplicationRecord
@@ -58,6 +61,7 @@ class Project < ApplicationRecord
   has_many :ship_events
   has_one :stonk_tickler
   has_one_attached :banner
+  belongs_to :magic_reporter, optional: true, class_name: "User"
 
   include AirtableSyncable
 
@@ -100,6 +104,7 @@ class Project < ApplicationRecord
   scope :on_map, -> { where.not(x: nil, y: nil) }
   scope :shipped, -> { where(is_shipped: true) }
   scope :not_on_map, -> { where(x: nil, y: nil) }
+  scope :magical, -> { where.not(magicked_at: nil) }
 
   def shipped_once?
     ship_events.any?
@@ -600,11 +605,11 @@ class Project < ApplicationRecord
 
   def magicked? = magicked_at.present?
 
-  def magic_happening!
+  def magic_happening!(by_user)
     return if magicked?
 
     Project::PostToMagicJob.perform_later(self)
-    update!(magicked_at: Time.current)
+    update!(magicked_at: Time.current, magic_reporter: by_user)
   end
 
   private
