@@ -96,6 +96,7 @@
           <tr>
             <th style="text-align: left;">User</th>
             <th style="text-align: right;">Report Count</th>
+            <th style="text-align: center;">Actions</th>
           </tr>
         </thead>
         <tbody>
@@ -109,6 +110,29 @@
               </td>
               <td style="text-align: right;">
                 <span class="pill pill-red"><%= offender_data[:report_count] %></span>
+              </td>
+              <td style="text-align: center;">
+                <% if offender_data[:user]&.slack_id.present? %>
+                  <details style="position: relative;">
+                    <summary style="color: #E4DCC6; cursor: pointer; font-size: 13px; background: #3498db; color: white; padding: 8px 12px; border-radius: 0; border: none;">Message User</summary>
+                    <div style="position: absolute; top: 100%; left: 50%; transform: translateX(-50%); margin-top: 8px; padding: 12px; background: rgba(52, 152, 219, 0.1); border: 2px solid #3498db; border-radius: 0; min-width: 300px; z-index: 1000;">
+                      <%= form_with url: message_repeat_offender_admin_low_quality_dashboard_index_path, method: :post, local: true do |form| %>
+                        <%= form.hidden_field :user_id, value: offender_data[:user].id %>
+                        <div style="margin-bottom: 12px;">
+                          <label style="display: block; color: #E4DCC6; font-size: 12px; margin-bottom: 4px; text-transform: uppercase;">Message to <%= offender_data[:display_name] %>:</label>
+                          <%= form.text_area :message,
+                              placeholder: "Hi! We've noticed some patterns in your recent ships. Let's chat about how to improve quality...",
+                              required: true,
+                              style: "width: 100%; min-height: 80px; padding: 10px; background: transparent; border: 1px solid #E4DCC6; color: #ffffff; border-radius: 0; resize: vertical;" %>
+                        </div>
+                        <%= form.submit "Send Message",
+                            style: "background: #3498db; color: white; border: none; padding: 8px 16px; cursor: pointer; border-radius: 0; font-weight: 700;" %>
+                      <% end %>
+                    </div>
+                  </details>
+                <% else %>
+                  <span style="color: #E4DCC6; font-size: 12px;">No Slack ID</span>
+                <% end %>
               </td>
             </tr>
           <% end %>
