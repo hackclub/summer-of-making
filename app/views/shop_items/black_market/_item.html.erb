@@ -25,14 +25,21 @@
   <% end %>
 <% end %>
 <div class="shop-item-row" data-item-price="<%= regional_price %>" data-item-id="<%= item.id %>">
-  <div class="shop-item-image">
+  <div class="shop-item-image relative">
     <% if item.image.attached? %>
       <%= image_tag item.image.variant(:thumb), class: "rounded-lg w-full h-auto object-scale-down aspect-square max-h-48" %>
     <% end %>
   </div>
   <div class="shop-item-details">
     <div class="shop-item-header">
-      <h3 class="shop-item-title"><%= item.name %> <% if item.created_at > 24.hours.ago %><blink style="color: red">(NEW!!)</blink><% end %></h3>
+      <h3 class="shop-item-title flex items-center justify-between">
+        <span><%= item.name %> <% if item.created_at > 24.hours.ago %><blink style="color: red">(NEW!!)</blink><% end %></span>
+        <% if item.on_sale? %>
+          <blink style="color: red">
+            <%= item.sale_percentage %>% OFF
+          </blink>
+        <% end %>
+      </h3>
     </div>
     <div class="shop-item-description">
       <%= raw item.description %> <%# erb_lint:disable ErbSafety %>
@@ -65,11 +72,25 @@
                 <% if regional_price == 0 %>
                   Acquire!
                 <% else %>
-                  <span class="flex items-center justify-center gap-1">Buy for
-                    <span class="flex items-center gap-1">
-                      <%= render_shells regional_price %>
+                  <% if item.on_sale? %>
+                    <% original_price = (@regionalization_enabled && @selected_region) ?
+                         (item.ticket_cost + (item.send("price_offset_#{@selected_region.downcase}") || 0)) :
+                         item.ticket_cost %>
+                    <span class="flex items-center justify-center gap-2">
+                      <span class="flex items-center gap-1 text-gray-400 line-through text-xs">
+                        <%= render_shells original_price %>
+                      </span>
+                      <span class="flex items-center gap-1 text-red-600 font-bold">
+                        <%= render_shells regional_price %>
+                      </span>
                     </span>
-                  </span>
+                  <% else %>
+                    <span class="flex items-center justify-center gap-1">Buy for
+                      <span class="flex items-center gap-1">
+                        <%= render_shells regional_price %>
+                      </span>
+                    </span>
+                  <% end %>
                 <% end %>
               </span>
             <% else %>
