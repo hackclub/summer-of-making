@@ -15,5 +15,4 @@ class OneTime::BackfillMagicReportersJob < ApplicationJob
       project.update!(magic_reporter_id: project.magic_reporter_whodunnit&.to_i)
     end
   end
-
 end
