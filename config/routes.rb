@@ -423,7 +423,11 @@ Rails.application.routes.draw do
           patch :unresolve
         end
       end
-      resources :fulfillment_dashboard, only: [ :index ]
+      resources :fulfillment_dashboard, only: [ :index ] do
+      collection do
+        post :send_letter_mail
+      end
+    end
       resources :voting_dashboard, only: [ :index ]
       resources :payouts_dashboard, only: [ :index ]
       resources :shop_orders do
