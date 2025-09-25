@@ -15,7 +15,7 @@ class ApplicationController < ActionController::Base
   before_action do
     Rails.logger.info ">>> Session[:user_id] = #{session[:user_id]}"
     Rails.logger.info ">>> Current user ID: #{current_user&.id}"
-    Rails.logger.info ">>> Request IP: #{request.remote_ip}, User-Agent: #{request.user_agent}"
+    Rails.logger.info ">>> Request IP: #{request.remote_ip}, User-Agent: #{request.user_agent[0..100]}"
   end
 
   before_action :authenticate_user!
