@@ -20,6 +20,7 @@ class ApplicationController < ActionController::Base
   before_action :authenticate_user!
   before_action :check_if_banned
   before_action :fetch_hackatime_data_if_needed
+
   # before_action :auto_activate_brainrot_mode_if_eligible
   # after_action :track_page_view
 
