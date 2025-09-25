@@ -10,7 +10,7 @@ default: &default
       processes: <%= ENV.fetch("JOB_CONCURRENCY", 1) %>
       polling_interval: 0.1
       # main lane - default jobs and low priority 
-    - queues: ["literally_whenever", "default" ,"*"]
+    - queues: ["literally_whenever", "free_stickers_sync", "default" ,"*"]
       name: main_<%= Rails.env %>
       threads: 6
       processes: <%= ENV.fetch("JOB_CONCURRENCY", 1) %>
