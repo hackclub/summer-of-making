@@ -1,0 +1,51 @@
+<div id="email-auth-modal" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm transition-all duration-300 opacity-0"
+    style="display: none;"
+    data-controller="email-auth"
+    data-action="click->email-auth#closeBackground">
+  <div class="absolute inset-0 flex items-center justify-center p-4">
+    <div class="relative w-full max-w-md transform scale-95 transition-all duration-300"
+        data-email-auth-target="container"
+        data-action="click->email-auth#stopPropagation">
+      <%= render C::Card.new(css_classes: 'relative overflow-visible') do %>
+        <button class="absolute top-4 right-4 z-10 text-[#8B4513] hover:text-[#3a2f25] transition-colors p-2 rounded-full hover:bg-[#E7CFB5]/30"
+            data-action="click->email-auth#close">
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+          </svg>
+        </button>
+        <div class="p-8 pt-12">
+          <div class="text-center mb-8">
+            <h2 class="text-3xl font-bold text-[#3a2f25] font-['DynaPuff',sans-serif] mb-3">Welcome Back!</h2>
+            <p class="text-[#3a2f25] font-['Fredoka',sans-serif] text-lg leading-relaxed">
+              Enter your email to receive a magic link and join us on the island
+            </p>
+          </div>
+          <form data-email-auth-target="form" class="space-y-6">
+            <div class="relative font-dynapuff ">
+              <%= image_tag "email.svg", alt: "Email", class: "absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 pointer-events-none z-10 opacity-60" %>
+              <input type="email"
+                  required
+                  placeholder="your@email.com"
+                  autocomplete="email"
+                  class="marble-textarea with-icon w-full font-['Fredoka',sans-serif] text-lg"
+                  data-email-auth-target="emailInput"
+                  data-action="keydown->email-auth#handleKeydown">
+            </div>
+            <div class="hidden bg-red-50 border-2 border-red-200 text-red-700 px-4 py-4 rounded-xl text-base font-['Fredoka',sans-serif]"
+                data-email-auth-target="errorMessage">
+            </div>
+            <div class="hidden bg-green-50 border-2 border-green-200 text-green-700 px-4 py-4 rounded-xl text-base font-['Fredoka',sans-serif]"
+                data-email-auth-target="successMessage">
+            </div>
+            <button type="submit"
+                class="marble-button w-full text-center text-lg font-['Fredoka',sans-serif] py-3"
+                data-email-auth-target="submitButton"
+                data-action="click->email-auth#sendMagicLink">
+              Send Magic Link
+            </button>
+          </form>
+        </div>
+      <% end %>
+    </div>
+  </div>
+</div>

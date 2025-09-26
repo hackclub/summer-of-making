@@ -60,7 +60,7 @@ class User < ApplicationRecord
   has_one :user_hackatime_data, dependent: :destroy
   has_one :user_profile, class_name: "User::Profile", dependent: :destroy
   has_one :tutorial_progress, dependent: :destroy
-  has_one :magic_link, dependent: :destroy
+  has_many :magic_links, dependent: :destroy
   has_many :shop_orders
   has_many :shop_card_grants
   has_many :user_badges, dependent: :destroy
