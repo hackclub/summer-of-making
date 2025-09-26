@@ -381,6 +381,11 @@ Rails.application.routes.draw do
   post "api/devlogs", to: "devlogs#api_create"
 
   resources :ship_event_feedbacks
+  resources :ship_events, only: [] do
+    member do
+      get :feedback
+    end
+  end
 
   post "track_view", to: "view_tracking#create"
 
@@ -497,6 +502,10 @@ Rails.application.routes.draw do
       end
       resources :sinkenings, only: [ :show, :update ], path: "sinkening"
       resources :advent_stickers, only: [ :index, :new, :create, :edit, :update, :destroy ]
+      resources :ship_events, only: [] do
+      member do
+        post :regenerate_feedback
+      end
     end
 
     constraints YswsReviewerConstraint do

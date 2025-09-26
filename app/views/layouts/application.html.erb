@@ -310,6 +310,9 @@
 
         .sinkening-container {
           transform: rotate(-<%= rotation_intensity %>deg) translateY(<%= vertical_intensity %>px);
+          overflow: hidden;
+          width: 100vw;
+          max-width: 100%;
         }
 
         .sinkening-water {
@@ -318,6 +321,7 @@
           width: 150vw;
           margin-left: -25vw;
           height: calc(35rem + <%= adjusted_intensity*300 %>vh);
+          max-height: 100vh;
         }
 
         .sinkening-water-2 {
@@ -326,6 +330,11 @@
           width: 150vw;
           margin-left: -25vw;
           height: calc(35rem + <%= adjusted_intensity*300 %>vh);
+          max-height: 100vh;
+        }
+
+        html, body {
+          overflow: hidden;
         }
       </style>
     <% end %>

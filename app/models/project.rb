@@ -594,6 +594,13 @@ class Project < ApplicationRecord
 
       payout = Payout.create!(amount: current_payout_difference, payable: ship, user:, reason:, escrowed: false)
 
+      # Generate AI feedback just after payout
+      begin
+        ShipFeedbackService.new(ship).generate_feedback
+      rescue => e
+        Rails.logger.error "Failed to generate feedback for ship #{ship.id}: #{e.message}"
+      end
+
       puts "PAYOUTCREASED(#{payout.id}) ship.id:#{ship.id} min:#{min} max:#{max} rating_at_vote_count:#{current_rating} pc:#{pc} mult:#{mult} hours:#{hours} amount:#{amount} current_payout_sum:#{current_payout_sum} current_payout_difference:#{current_payout_difference}"
     end
   end

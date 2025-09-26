@@ -257,6 +257,46 @@
                           %>
                         </div>
                       </div>
+                      
+                      <% if item.has_feedback? %>
+                        <div class="mt-6" data-controller="ship-feedback" data-ship-feedback-ship-event-id-value="<%= item.id %>">
+                          <div class="border border-[#D8CDB3] rounded-xl bg-[#F9F5E7] p-4">
+                            <div class="flex items-center justify-between">
+                              <button
+                                class="flex-1 text-left text-som-highlight hover:text-som-dark text-sm font-medium flex items-center justify-between transition-colors"
+                                data-ship-feedback-target="toggle"
+                                data-action="click->ship-feedback#toggle"
+                              >
+                                <span>Show AI Feedback</span>
+                                <%= inline_svg("icons/chevron_down.svg", class: "w-4 h-4 transform transition-transform duration-200") %>
+                              </button>
+
+                              <% admin_tool("ml-3") do %>
+                                <button
+                                  class="px-2 py-1 text-xs bg-[#FFBABA] text-som-dark rounded hover:bg-[#ff9f9f] transition-colors"
+                                  data-action="click->ship-feedback#regenerate"
+                                  title="Regenerate AI Feedback"
+                                >
+                                  Regenerate
+                                </button>
+                              <% end %>
+                            </div>
+
+                            <div class="hidden mt-4 pt-4 border-t border-[#D8CDB3]" data-ship-feedback-target="loading">
+                              <div class="animate-pulse space-y-3">
+                                <div class="h-4 bg-[#E5D8B1] rounded w-3/4"></div>
+                                <div class="h-4 bg-[#E5D8B1] rounded w-full"></div>
+                                <div class="h-4 bg-[#E5D8B1] rounded w-5/6"></div>
+                                <div class="h-4 bg-[#E5D8B1] rounded w-4/5"></div>
+                              </div>
+                            </div>
+
+                            <div class="hidden mt-4 pt-4 border-t border-[#D8CDB3] text-som-dark" data-ship-feedback-target="content">
+                            
+                            </div>
+                          </div>
+                        </div>
+                      <% end %>
                     </div>
                   </div>
 
