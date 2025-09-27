@@ -8,6 +8,7 @@
 #  ai_feedback           :text
 #  explanation           :text             not null
 #  invalid_reason        :text
+#  ip                    :string
 #  is_low_quality        :boolean          default(FALSE), not null
 #  marked_invalid_at     :datetime
 #  music_played          :boolean
@@ -17,7 +18,10 @@
 #  project_2_demo_opened :boolean          default(FALSE)
 #  project_2_repo_opened :boolean          default(FALSE)
 #  status                :string           default("active"), not null
+#  time_off_tab_ms       :integer
+#  time_on_tab_ms        :integer
 #  time_spent_voting_ms  :integer
+#  user_agent            :string
 #  created_at            :datetime         not null
 #  updated_at            :datetime         not null
 #  marked_invalid_by_id  :bigint
@@ -29,6 +33,7 @@
 #
 # Indexes
 #
+#  index_votes_on_ip                    (ip)
 #  index_votes_on_marked_invalid_at     (marked_invalid_at)
 #  index_votes_on_marked_invalid_by_id  (marked_invalid_by_id)
 #  index_votes_on_project_1_id          (project_1_id)
@@ -36,6 +41,9 @@
 #  index_votes_on_ship_event_1_id       (ship_event_1_id)
 #  index_votes_on_ship_event_2_id       (ship_event_2_id)
 #  index_votes_on_status                (status)
+#  index_votes_on_time_off_tab_ms       (time_off_tab_ms)
+#  index_votes_on_time_on_tab_ms        (time_on_tab_ms)
+#  index_votes_on_user_agent            (user_agent)
 #  index_votes_on_user_and_ship_events  (user_id,ship_event_1_id,ship_event_2_id) UNIQUE
 #  index_votes_on_user_id               (user_id)
 #
