@@ -7,27 +7,18 @@ class ShipFeedbackService
     votes = collect_payout_votes
     return nil if votes.empty?
 
-    explanations = votes.filter_map do |vote|
-      begin
-        opposing_project = vote.ship_event_1 == @ship_event ? vote.ship_event_2.project : vote.ship_event_1.project
-        our_vote_change = vote.vote_changes.find_by(project: @ship_event.project)
+    explanations = votes.map do |vote|
+      opposing_project = vote.ship_event_1 == @ship_event ? vote.ship_event_2.project : vote.ship_event_1.project
+      our_vote_change = vote.vote_changes.find_by(project: @ship_event.project)
 
-        next unless our_vote_change&.result.present?
+      vote_data = {
+        opposing_project: opposing_project.title,
+        outcome: our_vote_change.result,
+        explanation: vote.explanation
+      }
 
-        vote_data = {
-          opposing_project: opposing_project&.title || "Unknown Project",
-          outcome: our_vote_change.result,
-          explanation: vote.explanation || "No explanation provided"
-        }
-
-        vote_data.to_json
-      rescue => e
-        Rails.logger.warn "Failed to process vote #{vote.id} for ship_event #{@ship_event.id}: #{e.message}"
-        next
-      end
+      vote_data.to_json
     end.join("\n---\n")
-
-    return nil if explanations.blank?
 
     prompt = build_feedback_prompt(explanations)
 
@@ -60,25 +51,18 @@ class ShipFeedbackService
   private
 
   def collect_payout_votes
-    return Vote.none unless @ship_event&.project.present?
-
     project = @ship_event.project
 
-    begin
-      Vote.joins(:vote_changes)
-          .where(vote_changes: { project: project })
-          .where("votes.created_at > ?", @ship_event.created_at)
-          .where(status: "active")
-          .includes(:user)
-          .limit(18)
-    rescue => e
-      Rails.logger.warn "Failed to collect votes for ship_event #{@ship_event.id}: #{e.message}"
-      Vote.none
-    end
+    Vote.joins(:vote_changes)
+        .where(vote_changes: { project: project })
+        .where("votes.created_at > ?", @ship_event.created_at)
+        .where(status: "active")
+        .includes(:user)
+        .limit(18)
   end
 
   def build_feedback_prompt(explanations)
-    project_name = @ship_event.project&.title || "Unknown Project"
+    project_name = @ship_event.project.title
 
     <<~PROMPT
       You are an expert project reviewer providing constructive feedback for a shipped project called "#{project_name}".
