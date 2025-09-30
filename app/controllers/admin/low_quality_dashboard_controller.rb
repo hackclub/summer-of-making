@@ -1,5 +1,5 @@
 module Admin
-  class LowQualityDashboardController < ApplicationController
+  class LowQualityDashboardController <ApplicationController
     before_action :authenticate_ship_certifier!
     skip_before_action :authenticate_admin!
 
