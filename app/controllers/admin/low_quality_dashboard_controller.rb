@@ -251,6 +251,51 @@ module Admin
       end
 
       @admin_resolution_counts = @admin_resolution_counts.sort_by { |_, count| -count }.to_h
+
+      # Track YSWS reviewer decisions (including returns)
+      calculate_ysws_reviewer_metrics
+    end
+
+    def calculate_ysws_reviewer_metrics
+      # Track YSWS reviewer decisions this month
+      @ysws_reviewer_decisions = {}
+      
+      # Count ship certification approvals/rejections
+      ship_decisions = ShipCertification.where(updated_at: @current_month_start..Time.current)
+                                      .where.not(judgement: :pending)
+                                      .includes(:reviewer)
+      
+      ship_decisions.find_each do |cert|
+        next unless cert.reviewer
+        
+        reviewer_name = cert.reviewer.display_name || cert.reviewer.email
+        @ysws_reviewer_decisions[reviewer_name] ||= { approvals: 0, rejections: 0, returns: 0, total: 0 }
+        
+        case cert.judgement
+        when "approved"
+          @ysws_reviewer_decisions[reviewer_name][:approvals] += 1
+        when "rejected"
+          @ysws_reviewer_decisions[reviewer_name][:rejections] += 1
+        end
+        
+        @ysws_reviewer_decisions[reviewer_name][:total] += 1
+      end
+      
+      # Count YSWS returns to certifier
+      ysws_returns = ShipCertification.where(ysws_returned_at: @current_month_start..Time.current)
+                                     .includes(:ysws_returned_by)
+      
+      ysws_returns.find_each do |cert|
+        next unless cert.ysws_returned_by
+        
+        reviewer_name = cert.ysws_returned_by.display_name || cert.ysws_returned_by.email
+        @ysws_reviewer_decisions[reviewer_name] ||= { approvals: 0, rejections: 0, returns: 0, total: 0 }
+        @ysws_reviewer_decisions[reviewer_name][:returns] += 1
+        @ysws_reviewer_decisions[reviewer_name][:total] += 1
+      end
+      
+      # Sort by total decisions descending
+      @ysws_reviewer_decisions = @ysws_reviewer_decisions.sort_by { |_, counts| -counts[:total] }.to_h
     end
 
     def calculate_impact_metrics
