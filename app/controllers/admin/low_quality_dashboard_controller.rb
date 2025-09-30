@@ -48,9 +48,13 @@ module Admin
     end
 
     def mark_low_quality
-      project = Project.find(params[:project_id])
-      reason = params[:reason]
+      project = Project.find_by(id: params[:project_id])
+      unless project
+        redirect_to admin_low_quality_dashboard_index_path, alert: "Project not found."
+        return
+      end
 
+      reason = params[:reason]
       if reason.blank?
         redirect_to admin_low_quality_dashboard_index_path, alert: "Reason is required when marking as low quality."
         return
@@ -85,7 +89,12 @@ module Admin
     end
 
     def mark_ok
-      project = Project.find(params[:project_id])
+      project = Project.find_by(id: params[:project_id])
+      unless project
+        redirect_to admin_low_quality_dashboard_index_path, alert: "Project not found."
+        return
+      end
+
       ok_reason = params[:ok_reason].to_s.presence
       FraudReport.where(suspect_type: "Project", suspect_id: project.id, resolved: false).update_all(resolved: true, resolved_at: Time.current, resolved_by_id: current_user.id, resolved_outcome: "ok", resolved_message: ok_reason)
       FraudReport.where(suspect_type: "ShipEvent").joins("JOIN ship_events ON ship_events.id = fraud_reports.suspect_id").where(ship_events: { project_id: project.id }, resolved: false).update_all(resolved: true, resolved_at: Time.current, resolved_by_id: current_user.id, resolved_outcome: "ok", resolved_message: ok_reason)
@@ -94,9 +103,13 @@ module Admin
     end
 
     def message_repeat_offender
-      user = User.find(params[:user_id])
-      message = params[:message]
+      user = User.find_by(id: params[:user_id])
+      unless user
+        redirect_to admin_low_quality_dashboard_index_path, alert: "User not found."
+        return
+      end
 
+      message = params[:message]
       if message.blank?
         redirect_to admin_low_quality_dashboard_index_path, alert: "Message content is required."
         return
