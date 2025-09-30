@@ -44,8 +44,9 @@ class ShipReviewerPayoutRequest < ApplicationRecord
     if reviewer
       # Get reviewer's position in weekly leaderboard
       position = get_reviewer_position(reviewer)
-      multiplier = ShipReviewerMultiplierService.calculate_multiplier_for_position(position)
-      effective_rate = ShipReviewerMultiplierService.calculate_effective_rate(position)
+      result = ShipReviewerMultiplierService.calculate_multiplier_and_effective_rate_for_position(position)
+      multiplier = result[:multiplier]
+      effective_rate = result[:effective_rate]
 
       # Return both amount and multiplier for storage
       {
