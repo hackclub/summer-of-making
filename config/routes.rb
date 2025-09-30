@@ -398,6 +398,7 @@ Rails.application.routes.draw do
         collection do
           post :mark_low_quality
           post :mark_ok
+          post :message_repeat_offender
         end
       end
     end
