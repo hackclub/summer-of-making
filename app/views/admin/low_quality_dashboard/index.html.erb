@@ -196,7 +196,8 @@
                 </div>
                 <div>
                   <div style="font-weight: 600; color: #ffffff;">
-                    <%= link_to project.title, project, style: "color: var(--color-primary)" %>
+
+|                    <%= link_to project.title, project, style: "color: var(--color-primary)", target: "_blank", rel: "noopener" %>
                   </div>
                   <small style="color: #E4DCC6; opacity: 0.9;">by <%= project.user.display_name %></small>
                 </div>
@@ -395,16 +396,39 @@ document.addEventListener('DOMContentLoaded', function() {
         }
       }
 
-      // Auto-focus text input when opening
-      setTimeout(function() {
-        if (details.open) {
+      // No longer needed - moved to toggle event handler
+    });
+    
+    // Listen for the toggle event to handle focus properly
+    details.addEventListener('toggle', function() {
+      if (details.open) {
+        // Use requestAnimationFrame to ensure DOM has updated
+        requestAnimationFrame(function() {
           var textInput = details.querySelector('textarea, input[type="text"]');
           if (textInput) {
             textInput.focus();
           }
-        }
-      }, 0);
+        });
+      }
     });
+  });
+
+  // Handle Enter key submission for forms
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) {
+      var target = e.target;
+      
+      // Check if we're in a textarea or text input within a form
+      if ((target.tagName === 'TEXTAREA' || target.tagName === 'INPUT') && target.form) {
+        e.preventDefault();
+        
+        // Find the submit button in the form and click it
+        var submitButton = target.form.querySelector('input[type="submit"]');
+        if (submitButton) {
+          submitButton.click();
+        }
+      }
+    }
   });
 });
 </script>
