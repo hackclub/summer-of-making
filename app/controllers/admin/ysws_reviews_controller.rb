@@ -175,34 +175,34 @@ module Admin
     # Count YSWS review submissions
     submissions_query = User.joins("INNER JOIN ysws_review_submissions ON users.id = ysws_review_submissions.reviewer_id")
                            .where.not(ysws_review_submissions: { reviewer_id: nil })
-    
+
     if time_filter
       submissions_query = submissions_query.where("ysws_review_submissions.updated_at >= ?", time_filter)
     end
-    
+
     submissions = submissions_query.group("users.id", "users.display_name", "users.email")
                                  .pluck("users.id", "users.display_name", "users.email", "COUNT(ysws_review_submissions.id)")
-                                 .map { |id, name, email, count| [id, name, email, count] }
-    
+                                 .map { |id, name, email, count| [ id, name, email, count ] }
+
     # Count returns to certifier
     returns_query = User.joins("INNER JOIN ship_certifications ON users.id = ship_certifications.ysws_returned_by_id")
                        .where.not(ship_certifications: { ysws_returned_by_id: nil })
-    
+
     if time_filter
       returns_query = returns_query.where("ship_certifications.ysws_returned_at >= ?", time_filter)
     end
-    
+
     returns = returns_query.group("users.id", "users.display_name", "users.email")
                          .pluck("users.id", "users.display_name", "users.email", "COUNT(ship_certifications.id)")
-                         .map { |id, name, email, count| [id, name, email, count] }
-    
+                         .map { |id, name, email, count| [ id, name, email, count ] }
+
     # Combine submissions and returns
     combined_decisions = {}
-    
+
     submissions.each do |id, name, email, count|
       combined_decisions[id] = { name: name, email: email, submissions: count, returns: 0, total: count }
     end
-    
+
     returns.each do |id, name, email, count|
       if combined_decisions[id]
         combined_decisions[id][:returns] = count
@@ -211,12 +211,12 @@ module Admin
         combined_decisions[id] = { name: name, email: email, submissions: 0, returns: count, total: count }
       end
     end
-    
+
     # Sort by total decisions and return as leaderboard format
     combined_decisions.values
                      .sort_by { |user| -user[:total] }
                      .first(20)
-                     .map { |user| [user[:name], user[:email], user[:total]] }
+                     .map { |user| [ user[:name], user[:email], user[:total] ] }
   end
 
   def apply_language_filter(projects, filter_string)
