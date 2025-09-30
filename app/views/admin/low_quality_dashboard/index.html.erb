@@ -398,7 +398,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
       // No longer needed - moved to toggle event handler
     });
-    
+
     // Listen for the toggle event to handle focus properly
     details.addEventListener('toggle', function() {
       if (details.open) {
@@ -417,11 +417,11 @@ document.addEventListener('DOMContentLoaded', function() {
   document.addEventListener('keydown', function(e) {
     if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) {
       var target = e.target;
-      
+
       // Check if we're in a textarea or text input within a form
       if ((target.tagName === 'TEXTAREA' || target.tagName === 'INPUT') && target.form) {
         e.preventDefault();
-        
+
         // Find the submit button in the form and click it
         var submitButton = target.form.querySelector('input[type="submit"]');
         if (submitButton) {
