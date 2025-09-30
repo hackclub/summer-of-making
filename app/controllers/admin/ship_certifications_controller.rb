@@ -164,7 +164,7 @@ module Admin
 
       # Calculate payment stats for reviewers including pending requests
       # Only count decisions made since the payout system was implemented (September 3, 2025)
-      feature_launch_date = Date.new(2025, 9, 3).beginning_of_day
+      feature_launch_date = Rails.configuration.x.ship_certifications_payout_launch_at.beginning_of_day
 
       @payment_stats = User.joins("INNER JOIN ship_certifications ON users.id = ship_certifications.reviewer_id")
         .joins("INNER JOIN projects ON ship_certifications.project_id = projects.id")
