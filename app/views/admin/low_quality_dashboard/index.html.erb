@@ -113,20 +113,22 @@
               </td>
               <td style="text-align: center;">
                 <% if offender_data[:user]&.slack_id.present? %>
-                  <details style="position: relative;">
-                    <summary style="color: #E4DCC6; cursor: pointer; font-size: 13px; background: #3498db; color: white; padding: 8px 12px; border-radius: 0; border: none;">Message User</summary>
-                    <div style="position: absolute; top: 100%; left: 50%; transform: translateX(-50%); margin-top: 8px; padding: 12px; background: rgba(52, 152, 219, 0.1); border: 2px solid #3498db; border-radius: 0; min-width: 300px; z-index: 1000;">
+                  <details class="message-user-dropdown" style="position: relative; display: inline-block;">
+                    <summary style="color: #E4DCC6; cursor: pointer; font-size: 13px; background: #3498db; color: white; padding: 8px 12px; border-radius: 4px; border: none; list-style: none;">Message User</summary>
+                    <div class="dropdown-content" style="position: absolute; top: 100%; right: 0; margin-top: 8px; padding: 16px; background: rgba(28, 27, 34, 0.95); border: 2px solid #3498db; border-radius: 4px; min-width: 320px; max-width: 400px; z-index: 1000; box-shadow: 0 4px 12px rgba(0,0,0,0.3);">
                       <%= form_with url: message_repeat_offender_admin_low_quality_dashboard_index_path, method: :post, local: true do |form| %>
                         <%= form.hidden_field :user_id, value: offender_data[:user].id %>
                         <div style="margin-bottom: 12px;">
-                          <label style="display: block; color: #E4DCC6; font-size: 12px; margin-bottom: 4px; text-transform: uppercase;">Message to <%= offender_data[:display_name] %>:</label>
+                          <label style="display: block; color: #E4DCC6; font-size: 12px; margin-bottom: 6px; text-transform: uppercase; font-weight: 600;">Message to <%= offender_data[:display_name] %>:</label>
                           <%= form.text_area :message,
                               placeholder: "Hi! We've noticed some patterns in your recent ships. Let's chat about how to improve quality...",
                               required: true,
-                              style: "width: 100%; min-height: 80px; padding: 10px; background: transparent; border: 1px solid #E4DCC6; color: #ffffff; border-radius: 0; resize: vertical;" %>
+                              style: "width: 100%; min-height: 80px; padding: 12px; background: rgba(228, 220, 198, 0.08); border: 1px solid #E4DCC6; color: #ffffff; border-radius: 4px; resize: vertical; font-family: inherit; font-size: 14px; box-sizing: border-box;" %>
                         </div>
-                        <%= form.submit "Send Message",
-                            style: "background: #3498db; color: white; border: none; padding: 8px 16px; cursor: pointer; border-radius: 0; font-weight: 700;" %>
+                        <div style="display: flex; gap: 8px; justify-content: flex-end;">
+                          <%= form.submit "Send Message",
+                              style: "background: #3498db; color: white; border: none; padding: 10px 16px; cursor: pointer; border-radius: 4px; font-weight: 600; font-size: 13px;" %>
+                        </div>
                       <% end %>
                     </div>
                   </details>
@@ -393,6 +395,36 @@ document.addEventListener('DOMContentLoaded', function() {
       toggleButton.classList.remove('pill-gray');
       toggleButton.classList.add('pill-blue');
     }
+  });
+
+  // Handle action buttons auto-focus and collapse behavior
+  document.querySelectorAll('details').forEach(function(details) {
+    var summary = details.querySelector('summary');
+    
+    summary.addEventListener('click', function(e) {
+      // Get the parent row to find sibling details elements
+      var row = details.closest('tr');
+      if (row) {
+        // Close other details in the same row when opening this one
+        if (!details.open) {
+          row.querySelectorAll('details').forEach(function(otherDetails) {
+            if (otherDetails !== details && otherDetails.open) {
+              otherDetails.open = false;
+            }
+          });
+        }
+      }
+      
+      // Auto-focus text input when opening
+      setTimeout(function() {
+        if (details.open) {
+          var textInput = details.querySelector('textarea, input[type="text"]');
+          if (textInput) {
+            textInput.focus();
+          }
+        }
+      }, 0);
+    });
   });
 });
 </script>
