@@ -127,11 +127,13 @@ module Admin
     private
 
     def calculate_analytics_data
-      # Time periods for comparison
-      @current_week_start = 7.days.ago
-      @last_week_start = 14.days.ago
-      @current_month_start = 30.days.ago
-      @last_month_start = 60.days.ago
+      # Time periods for comparison using proper boundaries
+      @current_week_start = Time.current.beginning_of_week
+      @last_week_start = 1.week.ago.beginning_of_week
+      @last_week_end = 1.week.ago.end_of_week
+      @current_month_start = Time.current.beginning_of_month
+      @last_month_start = 1.month.ago.beginning_of_month
+      @last_month_end = 1.month.ago.end_of_month
 
       calculate_volume_metrics
       calculate_resolution_metrics
@@ -148,7 +150,7 @@ module Admin
         .count
 
       @reports_last_week = FraudReport
-        .where(created_at: @last_week_start..@current_week_start)
+        .where(created_at: @last_week_start..@last_week_end)
         .where("reason LIKE ?", "LOW_QUALITY:%")
         .count
 
@@ -158,7 +160,7 @@ module Admin
         .count
 
       @reports_last_month = FraudReport
-        .where(created_at: @last_month_start..@current_month_start)
+        .where(created_at: @last_month_start..@last_month_end)
         .where("reason LIKE ?", "LOW_QUALITY:%")
         .count
 
