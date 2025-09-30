@@ -380,7 +380,7 @@ document.addEventListener('DOMContentLoaded', function() {
   // Handle action buttons auto-focus and collapse behavior
   document.querySelectorAll('details').forEach(function(details) {
     var summary = details.querySelector('summary');
-    
+
     summary.addEventListener('click', function(e) {
       // Get the parent row to find sibling details elements
       var row = details.closest('tr');
@@ -394,7 +394,7 @@ document.addEventListener('DOMContentLoaded', function() {
           });
         }
       }
-      
+
       // Auto-focus text input when opening
       setTimeout(function() {
         if (details.open) {
