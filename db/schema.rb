@@ -448,10 +448,10 @@ ActiveRecord::Schema[8.0].define(version: 2025_09_27_122852) do
     t.text "notes"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-    t.text "recertification_instructions"
     t.text "ysws_feedback_reasons"
     t.bigint "ysws_returned_by_id"
     t.datetime "ysws_returned_at"
+    t.text "recertification_instructions"
     t.index ["project_id", "judgement"], name: "index_ship_certifications_on_project_id_and_judgement"
     t.index ["project_id"], name: "index_ship_certifications_on_project_id"
     t.index ["reviewer_id"], name: "index_ship_certifications_on_reviewer_id"

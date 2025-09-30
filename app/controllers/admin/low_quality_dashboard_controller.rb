@@ -194,20 +194,21 @@ module Admin
       resolved_reports = FraudReport.resolved.where("reason LIKE ?", "LOW_QUALITY:%")
 
       @resolved_current_week = resolved_reports
-        .where(updated_at: @current_week_start..Time.current)
+        .where(resolved_at: @current_week_start..Time.current)
         .count
 
       @resolved_current_month = resolved_reports
-        .where(updated_at: @current_month_start..Time.current)
+        .where(resolved_at: @current_month_start..Time.current)
         .count
 
       # Average time to resolution
       resolved_with_time = resolved_reports
-        .where(updated_at: @current_month_start..Time.current)
+        .where(resolved_at: @current_month_start..Time.current)
         .where.not(created_at: nil)
+        .where.not(resolved_at: nil)
 
       if resolved_with_time.any?
-        total_resolution_time = resolved_with_time.sum { |report| report.updated_at - report.created_at }
+        total_resolution_time = resolved_with_time.sum { |report| report.resolved_at - report.created_at }
         @avg_resolution_time_hours = (total_resolution_time / resolved_with_time.count) / 3600.0
       else
         @avg_resolution_time_hours = 0
@@ -223,26 +224,23 @@ module Admin
     end
 
     def calculate_efficiency_metrics
-      # Track which admins are handling cases (based on PaperTrail versions)
+      # Track which admins are handling cases (based on resolved_by_id field)
       resolved_reports = FraudReport.resolved
         .where("reason LIKE ?", "LOW_QUALITY:%")
-        .where(updated_at: @current_month_start..Time.current)
+        .where(resolved_at: @current_month_start..Time.current)
 
       @admin_resolution_counts = {}
 
       resolved_reports.find_each do |report|
-        # Try to get the last version that marked it as resolved
-        # Use JSONB operator to check for 'resolved' key changes
-        versions = report.versions.where("object_changes ? 'resolved'").order(:created_at)
-        last_resolver_version = versions.last
-
-        if last_resolver_version && last_resolver_version.whodunnit
-          resolver_id = last_resolver_version.whodunnit.to_i
-          resolver = User.find_by(id: resolver_id)
+        if report.resolved_by_id
+          resolver = User.find_by(id: report.resolved_by_id)
           if resolver
             resolver_name = resolver.display_name || resolver.email
             @admin_resolution_counts[resolver_name] ||= 0
             @admin_resolution_counts[resolver_name] += 1
+          else
+            @admin_resolution_counts["Unknown User ID #{report.resolved_by_id}"] ||= 0
+            @admin_resolution_counts["Unknown User ID #{report.resolved_by_id}"] += 1
           end
         else
           @admin_resolution_counts["Unknown"] ||= 0
@@ -273,7 +271,7 @@ module Admin
 
       total_resolved = FraudReport.resolved
         .where("reason LIKE ?", "LOW_QUALITY:%")
-        .where(updated_at: @current_month_start..Time.current)
+        .where(resolved_at: @current_month_start..Time.current)
         .distinct
         .count("CASE WHEN suspect_type = 'Project' THEN suspect_id ELSE (SELECT project_id FROM ship_events WHERE ship_events.id = fraud_reports.suspect_id LIMIT 1) END")
 
@@ -324,7 +322,7 @@ module Admin
           .count
 
         resolutions = FraudReport
-          .where(updated_at: week_start..week_end)
+          .where(resolved_at: week_start..week_end)
           .where("reason LIKE ?", "LOW_QUALITY:%")
           .resolved
           .count
