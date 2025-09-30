@@ -239,8 +239,9 @@ module Admin
             @admin_resolution_counts[resolver_name] ||= 0
             @admin_resolution_counts[resolver_name] += 1
           else
-            @admin_resolution_counts["Unknown User ID #{report.resolved_by_id}"] ||= 0
-            @admin_resolution_counts["Unknown User ID #{report.resolved_by_id}"] += 1
+            key = "Unknown User ID #{report.resolved_by_id}"
+            @admin_resolution_counts[key] ||= 0
+            @admin_resolution_counts[key] += 1
           end
         else
           @admin_resolution_counts["Unknown"] ||= 0
