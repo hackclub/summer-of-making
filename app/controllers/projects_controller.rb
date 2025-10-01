@@ -77,6 +77,10 @@ class ProjectsController < ApplicationController
   end
 
   def create
+    if Flipper.enabled?(:creation_locked, current_user)
+      redirect_to my_projects_path, alert: "Sorry bud, summer of making is over."
+      return
+    end
     @project = current_user.projects.build(project_params)
 
     if not_img?(params[:project][:banner])

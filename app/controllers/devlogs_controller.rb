@@ -31,6 +31,10 @@ class DevlogsController < ApplicationController
 
   def create
     @project = Project.find(params[:project_id])
+    if Flipper.enabled?(:creation_locked, current_user)
+      redirect_to project_path(@project), alert: "Sorry bud, summer of making is over."
+      return
+    end
 
     unless current_user == @project.user
       redirect_to project_path(@project), alert: "wuh"
@@ -149,6 +153,10 @@ class DevlogsController < ApplicationController
 
     project = Project.find_by(id: params[:project_id])
     return render json: { error: "Project not found" }, status: :not_found unless project
+
+    if Flipper.enabled?(:creation_locked, user)
+      return render json: { error: "Devlog creation is currently unavailable" }, status: :forbidden
+    end
 
     # Check if the user owns the project
     unless user == project.user
