@@ -104,5 +104,4 @@ class ShipReviewerPayoutRequest < ApplicationRecord
     position = weekly_leaderboard.find_index { |user_id, _count| user_id == reviewer.id }
     position ? position + 1 : nil
   end
-
 end
