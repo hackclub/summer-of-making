@@ -3,6 +3,7 @@ module Admin
     before_action :authenticate_ship_certifier!, except: []
     skip_before_action :authenticate_admin!
 
+
     def index
       @filter = params[:filter] || "pending"
       @category_filter = params[:category_filter]
@@ -106,35 +107,23 @@ module Admin
       current_est = Time.current.in_time_zone(est_zone)
       week_start = current_est.beginning_of_week(:sunday)
       @leaderboard_week = User.joins("INNER JOIN ship_certifications ON users.id = ship_certifications.reviewer_id")
-        .joins("INNER JOIN projects ON ship_certifications.project_id = projects.id")
         .where.not(ship_certifications: { reviewer_id: nil })
         .where("ship_certifications.updated_at >= ?", week_start)
-        .where("ship_certifications.updated_at > ship_certifications.created_at")
-        .where.not(ship_certifications: { judgement: :pending })
-        .where(projects: { is_deleted: false })
         .group("users.id", "users.display_name", "users.email")
         .order("COUNT(ship_certifications.id) DESC")
         .limit(20)
         .pluck("users.display_name", "users.email", "COUNT(ship_certifications.id)")
 
       @leaderboard_day = User.joins("INNER JOIN ship_certifications ON users.id = ship_certifications.reviewer_id")
-        .joins("INNER JOIN projects ON ship_certifications.project_id = projects.id")
         .where.not(ship_certifications: { reviewer_id: nil })
         .where("ship_certifications.updated_at >= ?", 24.hours.ago)
-        .where("ship_certifications.updated_at > ship_certifications.created_at")
-        .where.not(ship_certifications: { judgement: :pending })
-        .where(projects: { is_deleted: false })
         .group("users.id", "users.display_name", "users.email")
         .order("COUNT(ship_certifications.id) DESC")
         .limit(20)
         .pluck("users.display_name", "users.email", "COUNT(ship_certifications.id)")
 
       @leaderboard_all = User.joins("INNER JOIN ship_certifications ON users.id = ship_certifications.reviewer_id")
-        .joins("INNER JOIN projects ON ship_certifications.project_id = projects.id")
         .where.not(ship_certifications: { reviewer_id: nil })
-        .where("ship_certifications.updated_at > ship_certifications.created_at")
-        .where.not(ship_certifications: { judgement: :pending })
-        .where(projects: { is_deleted: false })
         .group("users.id", "users.display_name", "users.email")
         .order("COUNT(ship_certifications.id) DESC")
         .limit(20)
@@ -164,7 +153,7 @@ module Admin
 
       # Calculate payment stats for reviewers including pending requests
       # Only count decisions made since the payout system was implemented (September 3, 2025)
-      feature_launch_date = Rails.configuration.x.ship_certifications_payout_launch_at.beginning_of_day
+      feature_launch_date = Date.new(2025, 9, 3).beginning_of_day
 
       @payment_stats = User.joins("INNER JOIN ship_certifications ON users.id = ship_certifications.reviewer_id")
         .joins("INNER JOIN projects ON ship_certifications.project_id = projects.id")
