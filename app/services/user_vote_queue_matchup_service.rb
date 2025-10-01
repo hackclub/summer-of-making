@@ -100,6 +100,7 @@ class UserVoteQueueMatchupService
       if selected_project_data.empty?
         # First pick: unpaid and immature (< 12 votes) (kinda borrowing uncertaiity from bayseain systems but not really)
         available_unpaid_immature = @immature_unpaid_projects.select { |p| eligible_for_selection?(p, used_user_ids, used_repo_links, used_ship_event_ids) }
+        available_unpaid_immature = @unpaid_projects.select { |p| eligible_for_selection?(p, used_user_ids, used_repo_links, used_ship_event_ids) } if available_unpaid_immature.empty?
         first_project_data = weighted_sample(available_unpaid_immature)
         next unless first_project_data
 
@@ -134,7 +135,24 @@ class UserVoteQueueMatchupService
     end
 
     if selected_project_data.size < 2 && @unpaid_projects.any?
-      first_project_data = weighted_sample(@unpaid_projects)
+      eligible_unpaid = @unpaid_projects.reject { |p| used_ship_event_ids.include?(p[:ship_event_id]) }
+      first_project_data = weighted_sample(eligible_unpaid)
+      return nil unless first_project_data
+      remaining_projects = @projects_with_time.reject { |p|
+        p[:user_id] == first_project_data[:user_id] ||
+        (p[:repo_link].present? && p[:repo_link] == first_project_data[:repo_link]) ||
+        used_ship_event_ids.include?(p[:ship_event_id])
+      }
+      if remaining_projects.any?
+        second_project_data = weighted_sample(remaining_projects)
+        selected_project_data = [ first_project_data, second_project_data ]
+      end
+    end
+
+    if selected_project_data.size < 2 && !@unpaid_projects.any?
+      eligible_paid = @paid_projects.reject { |p| used_ship_event_ids.include?(p[:ship_event_id]) }
+      eligible_paid = @projects_with_time.reject { |p| used_ship_event_ids.include?(p[:ship_event_id]) } if eligible_paid.empty?
+      first_project_data = weighted_sample(eligible_paid)
       return nil unless first_project_data
       remaining_projects = @projects_with_time.reject { |p|
         p[:user_id] == first_project_data[:user_id] ||
