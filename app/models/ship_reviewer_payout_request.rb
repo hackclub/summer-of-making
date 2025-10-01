@@ -44,9 +44,8 @@ class ShipReviewerPayoutRequest < ApplicationRecord
     if reviewer
       # Get reviewer's position in weekly leaderboard
       position = get_reviewer_position(reviewer)
-      result = ShipReviewerMultiplierService.calculate_multiplier_and_effective_rate_for_position(position)
-      multiplier = result[:multiplier]
-      effective_rate = result[:effective_rate]
+      multiplier = ShipReviewerMultiplierService.calculate_multiplier_for_position(position)
+      effective_rate = ShipReviewerMultiplierService.calculate_effective_rate(position)
 
       # Return both amount and multiplier for storage
       {
@@ -61,6 +60,23 @@ class ShipReviewerPayoutRequest < ApplicationRecord
         multiplier: 1.0,
         position: nil
       }
+    end
+  end
+
+  def approve!(approver)
+    transaction do
+      update!(
+        status: :approved,
+        approved_by: approver,
+        approved_at: Time.current
+      )
+
+      Payout.create!(
+        user: reviewer,
+        amount: amount,
+        reason: "Ship certification review payment: #{decisions_count} decisions",
+        payable: reviewer
+      )
     end
   end
 
@@ -89,20 +105,4 @@ class ShipReviewerPayoutRequest < ApplicationRecord
     position ? position + 1 : nil
   end
 
-  def approve!(approver)
-    transaction do
-      update!(
-        status: :approved,
-        approved_by: approver,
-        approved_at: Time.current
-      )
-
-      Payout.create!(
-        user: reviewer,
-        amount: amount,
-        reason: "Ship certification review payment: #{decisions_count} decisions",
-        payable: reviewer
-      )
-    end
-  end
 end
