@@ -77,7 +77,7 @@ class ShipReviewerPayoutRequest < ApplicationRecord
       .joins("INNER JOIN projects ON ship_certifications.project_id = projects.id")
       .where.not(ship_certifications: { reviewer_id: nil })
       .where("ship_certifications.updated_at >= ?", week_start)
-      .where("ship_certifications.updated_at >= ship_certifications.created_at")
+      .where("ship_certifications.updated_at > ship_certifications.created_at")
       .where.not(ship_certifications: { judgement: :pending })
       .where(projects: { is_deleted: false })
       .group("users.id")
