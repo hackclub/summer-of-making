@@ -87,6 +87,7 @@ class ShopItem < ApplicationRecord
   end
 
   validates_presence_of :ticket_cost, :name, :description
+  validate :agh_contents_must_be_valid_json
   def manually_fulfilled?
     MANUAL_FULFILLMENT_TYPES.include? self.class
   end
@@ -140,6 +141,18 @@ class ShopItem < ApplicationRecord
   end
 
   private
+
+  def agh_contents_must_be_valid_json
+    return if agh_contents.blank?
+
+    return if agh_contents.is_a?(Hash) || agh_contents.is_a?(Array)
+
+    !!JSON.parse(agh_contents) if agh_contents.is_a?(String)
+  rescue JSON::ParserError
+    msg = "must be valid JSON format. Use double quotes for strings,"
+    msg += " e.g., [{\"sku\": \"value\", \"quantity\": 1}]"
+    errors.add(:agh_contents, msg)
+  end
 
   def clear_carousel_cache_if_image_changed
     Rails.cache.delete(Cache::CarouselPrizesJob::CACHE_KEY) if image.attached? && show_in_carousel?
