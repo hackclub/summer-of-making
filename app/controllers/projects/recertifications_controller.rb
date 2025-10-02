@@ -4,7 +4,7 @@ class Projects::RecertificationsController < ApplicationController
   def create
     authorize @project, :request_recertification?
 
-    deadline = local(2025, 10, 2, 23, 59, 59)
+    deadline = Time.zone.local(2025, 10, 2, 23, 59, 59)
     if Time.current > deadline
       if current_user.has_permission?("post_deadline_recert_used")
         current_user.add_permission("no_recert")
