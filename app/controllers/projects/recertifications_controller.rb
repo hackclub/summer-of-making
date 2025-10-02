@@ -4,10 +4,6 @@ class Projects::RecertificationsController < ApplicationController
   def create
     authorize @project, :request_recertification?
 
-    if current_user.recertification_blocked?
-      redirect_to project_path(@project), alert: "Nice try but you're blocked from requesting recerts"
-      return
-    end
 
     deadline = Time.zone.local(2025, 10, 2, 23, 59, 59)
     if Time.current > deadline
