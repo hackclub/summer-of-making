@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 class SessionsController < ApplicationController
-  skip_before_action :authenticate_user!, only: %i[new create failure magic_link auto_login_dev]
+  skip_before_action :authenticate_user!, only: %i[new create failure magic_link auto_login_dev send_magic_link]
 
   def new
     state = SecureRandom.hex(24)
@@ -146,6 +146,53 @@ class SessionsController < ApplicationController
       redirect_to root_path, notice: "Auto-logged in as #{user.display_name}!"
     else
       redirect_to root_path, alert: "User 1 not found"
+    end
+  end
+
+  def send_magic_link
+    email = params.require(:email).downcase.strip
+
+    unless email.match?(URI::MailTo::EMAIL_REGEXP)
+      return render json: { error: "Invalid email format" }, status: :bad_request
+    end
+
+    user = User.find_by(email: email)
+
+    if user.nil?
+      return render json: {
+        error: "No account found with that email address. Please sign up first."
+      }, status: :not_found
+    end
+
+    magic_link = user.magic_links.create!
+    begin
+      AuthenticationMailer.magic_link(user, magic_link).deliver_now
+
+      Rails.logger.tagged("EmailAuth") do
+        Rails.logger.info({
+          event: "magic_link_sent",
+          user_id: user.id,
+          email: email,
+          magic_link_id: magic_link.id
+        }.to_json)
+      end
+
+      render json: {
+        message: "Success! Check your email!"
+      }, status: :ok
+    rescue StandardError => e
+      Rails.logger.tagged("EmailAuth") do
+        Rails.logger.error({
+          event: "magic_link_send_failed",
+          user_id: user.id,
+          email: email,
+          error: e.message
+        }.to_json)
+      end
+
+      render json: {
+        error: "Failed to send email. Please try again."
+      }, status: :internal_server_error
     end
   end
 
