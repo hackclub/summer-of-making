@@ -4,7 +4,7 @@ class Projects::ShipsController < ApplicationController
   def create
     authorize @project, :ship?
 
-    if Flipper.enabled?(:creation_locked, current_user)
+    if Flipper.enabled?(:ship_locked, current_user)
       redirect_to project_path(@project), alert: "Sorry bud, summer of making is over."
       return
     end
