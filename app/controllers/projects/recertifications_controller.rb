@@ -9,7 +9,7 @@ class Projects::RecertificationsController < ApplicationController
       return
     end
 
-    deadline = Time.zone.parse("2025-10-02 23:59:59 EST")
+    deadline = Time.zone.local(2025, 10, 2, 23, 59, 59)
     if Time.current > deadline
       current_user.add_permission("no_recert")
       redirect_to project_path(@project), alert: "Summer of Making is over! You used your one post-deadline recert request."
