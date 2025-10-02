@@ -447,6 +447,8 @@ Rails.application.routes.draw do
           post :revoke_ship_certifier
           post :grant_ysws_reviewer
           post :revoke_ysws_reviewer
+          post :block_recertification
+          post :unblock_recertification
           post :give_black_market
           post :take_away_black_market
           post :ban_user
