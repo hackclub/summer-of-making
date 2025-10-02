@@ -86,7 +86,7 @@ class UserVoteQueueMatchupService
   end
 
   def pick_pair(used_ship_event_ids: Set.new)
-    return nil if @unpaid_projects.empty? || @projects_with_time.size < 2
+    return nil if @projects_with_time.size < 2
 
     selected_project_data = []
     used_user_ids = Set.new
@@ -100,7 +100,8 @@ class UserVoteQueueMatchupService
       if selected_project_data.empty?
         # First pick: unpaid and immature (< 12 votes) (kinda borrowing uncertaiity from bayseain systems but not really)
         available_unpaid_immature = @immature_unpaid_projects.select { |p| eligible_for_selection?(p, used_user_ids, used_repo_links, used_ship_event_ids) }
-        available_unpaid_immature = @unpaid_projects.select { |p| eligible_for_selection?(p, used_user_ids, used_repo_links, used_ship_event_ids) } if available_unpaid_immature.empty?
+        available_unpaid_immature = @projects_with_time.select { |p| eligible_for_selection?(p, used_user_ids, used_repo_links, used_ship_event_ids) } if available_unpaid_immature.empty?
+        # technically, it might be paid, but idc.
         first_project_data = weighted_sample(available_unpaid_immature)
         next unless first_project_data
 

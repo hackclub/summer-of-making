@@ -176,7 +176,7 @@ class UserVoteQueue < ApplicationRecord
     service = UserVoteQueueMatchupService
                 .new(user_id: user_id, excluded_ship_event_ids: excluded)
                 .build!
-    return 0 if service.projects_with_time.empty? || service.unpaid_projects.empty?
+    return 0 if service.projects_with_time.empty?
 
     new_pairs = []
     (additional_pairs * 30).times do
