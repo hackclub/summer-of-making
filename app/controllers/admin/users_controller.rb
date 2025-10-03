@@ -313,11 +313,14 @@ module Admin
     private
 
     def ensure_authorized_user
+      # Allow admins and fraud team full access
+      return if current_user&.is_admin? || current_user&.fraud_team_member?
+
       # Ship certifiers can only access recertification blocking actions
-      if current_user&.ship_certifier? && !current_user&.is_admin?
+      if current_user&.ship_certifier?
         allowed_actions = %w[show block_recertification unblock_recertification]
         redirect_to(root_path, alert: "whomp whomp") unless allowed_actions.include?(action_name)
-      elsif !(current_user&.is_admin? || current_user&.fraud_team_member?)
+      else
         redirect_to root_path, alert: "whomp whomp"
       end
     end
