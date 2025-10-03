@@ -14,7 +14,7 @@ class AddIndexesToFraudReportsAndShipCertifications < ActiveRecord::Migration[8.
 
     # Add composite index for common query pattern: resolved fraud reports by date range
     # CONCURRENT: Does not block reads/writes during index creation
-    add_index :fraud_reports, [:resolved, :resolved_at], algorithm: :concurrently, if_not_exists: true
+    add_index :fraud_reports, [ :resolved, :resolved_at ], algorithm: :concurrently, if_not_exists: true
 
     # Add index for ysws_returned_at on ship_certifications for YSWS leaderboard queries
     # CONCURRENT: Does not block reads/writes during index creation

@@ -437,7 +437,7 @@ class Project < ApplicationRecord
 
   def can_request_recertification?
     return false if user.recertification_blocked?
-    
+
     latest_ship_certification&.rejected? &&
     ship_events.any? &&
     !latest_ship_certification.pending?

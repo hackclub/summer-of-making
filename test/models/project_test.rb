@@ -120,14 +120,14 @@ class ProjectTest < ActiveSupport::TestCase
     @project.user.add_permission("no_recert")
     @project.ship_certifications.create!(judgement: :rejected)
     @project.ship_events.create!
-    
+
     assert_not @project.can_request_recertification?
   end
 
   test "non-blocked users can request recertification when conditions are met" do
     @project.ship_certifications.create!(judgement: :rejected)
     @project.ship_events.create!
-    
+
     assert @project.can_request_recertification?
   end
 end
