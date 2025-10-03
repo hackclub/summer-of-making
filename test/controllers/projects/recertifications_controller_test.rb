@@ -104,7 +104,7 @@ class Projects::RecertificationsControllerTest < ActionDispatch::IntegrationTest
 
   test "should log recertification attempts" do
     travel_to Time.zone.local(2025, 10, 3, 12, 0, 0) do
-      assert_changes -> { Rails.logger } do
+      assert_logs(nil, /recertification/i) do
         post project_recertifications_path(@project), params: {
           recertification_instructions: "Test"
         }
