@@ -10,7 +10,7 @@ rescue ArgumentError, TypeError
   Time.zone.local(2025, 9, 3, 0, 0, 0)
 end
 
- # Recertification deadline configuration
+# Recertification deadline configuration
 # After this deadline, users get only one additional recertification attempt before being blocked
 # Configure via ENV['RECERTIFICATION_DEADLINE'] (in app time zone),
 # defaulting to 2025-10-02 23:59:59 EST
