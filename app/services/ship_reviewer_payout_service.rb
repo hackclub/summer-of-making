@@ -1,4 +1,6 @@
 class ShipReviewerPayoutService
+  # Feature launch date - when ship reviewer payouts started
+  FEATURE_LAUNCH_DATE = Date.new(2025, 9, 3).beginning_of_day.freeze
   def self.can_request_payout?(reviewer)
     unpaid_decisions = count_unpaid_decisions(reviewer)
     unpaid_decisions >= 2 && !has_pending_request?(reviewer)
@@ -27,8 +29,6 @@ class ShipReviewerPayoutService
 
   def self.count_unpaid_decisions(reviewer)
     # Count decisions made by this reviewer since the payout system was implemented
-    # Only count decisions made after September 3, 2025 (when this feature went live)
-    feature_launch_date = Date.new(2025, 9, 3).beginning_of_day
 
     total_decisions = ShipCertification
       .unscoped
@@ -36,7 +36,7 @@ class ShipReviewerPayoutService
       .where(reviewer: reviewer)
       .where.not(judgement: :pending)
       .where("ship_certifications.updated_at > ship_certifications.created_at")
-      .where("ship_certifications.updated_at >= ?", feature_launch_date)
+      .where("ship_certifications.updated_at >= ?", FEATURE_LAUNCH_DATE)
       .where(projects: { is_deleted: false })
       .count
 
