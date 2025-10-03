@@ -319,7 +319,7 @@ module Admin
       # Ship certifiers can only access recertification blocking actions
       if current_user&.ship_certifier?
         allowed_actions = %w[show block_recertification unblock_recertification]
-        return unless allowed_actions.include?(action_name)
+        return if allowed_actions.include?(action_name)
       end
 
       redirect_to root_path, alert: "whomp whomp"
