@@ -77,7 +77,9 @@ class ProjectsController < ApplicationController
   end
 
   def create
-    if Flipper.enabled?(:creation_locked, current_user)
+    # Check if project creation is locked via feature flag (defaults to false if flag doesn't exist)
+    if Flipper.exist?(:creation_locked) && Flipper.enabled?(:creation_locked, current_user)
+      Rails.logger.info("[ProjectCreation] User #{current_user&.id} blocked by creation_locked feature flag")
       redirect_to my_projects_path, alert: "Sorry bud, summer of making is over."
       return
     end

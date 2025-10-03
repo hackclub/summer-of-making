@@ -153,6 +153,28 @@ module Admin
       redirect_to admin_user_path(@user)
     end
 
+    def block_recertification
+      if @user.recertification_blocked?
+        flash[:notice] = "this user is already blocked from recerts"
+      else
+        @user.add_permission("no_recert")
+        @user.create_activity("block_recertification")
+        flash[:success] = "blocked this user from requesting recerts"
+      end
+      redirect_back_or_to admin_user_path(@user)
+    end
+
+    def unblock_recertification
+      unless @user.recertification_blocked?
+        flash[:notice] = "this user isn't blocked from recerts"
+      else
+        @user.remove_permission("no_recert")
+        @user.create_activity("unblock_recertification")
+        flash[:success] = "user can request recerts again"
+      end
+      redirect_back_or_to admin_user_path(@user)
+    end
+
     def ban_user
       @user.ban_user!("admin_ban")
       flash[:success] = "get rekt"
@@ -291,7 +313,11 @@ module Admin
     private
 
     def ensure_authorized_user
-      unless current_user&.is_admin? || current_user&.fraud_team_member?
+      # Ship certifiers can only access recertification blocking actions
+      if current_user&.ship_certifier? && !current_user&.is_admin?
+        allowed_actions = %w[show block_recertification unblock_recertification]
+        redirect_to(root_path, alert: "whomp whomp") unless allowed_actions.include?(action_name)
+      elsif !(current_user&.is_admin? || current_user&.fraud_team_member?)
         redirect_to root_path, alert: "whomp whomp"
       end
     end

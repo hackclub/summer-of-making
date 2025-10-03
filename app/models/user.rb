@@ -452,6 +452,10 @@ class User < ApplicationRecord
     is_admin? || fraud_team_member?
   end
 
+  def recertification_blocked?
+    has_permission?("no_recert")
+  end
+
   def blue_check?
     has_badge?(:verified)
   end

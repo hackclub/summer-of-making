@@ -68,6 +68,6 @@ class ProjectPolicy < ApplicationPolicy
   end
 
   def request_recertification?
-    user && user == record.user
+    user && user == record.user && !user.recertification_blocked?
   end
 end
