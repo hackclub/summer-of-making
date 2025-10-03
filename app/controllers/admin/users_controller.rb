@@ -318,7 +318,7 @@ module Admin
         allowed_actions = %w[show block_recertification unblock_recertification]
         unless allowed_actions.include?(action_name)
           redirect_to root_path, alert: "whomp whomp"
-          nil
+          return
         end
       elsif !(current_user&.is_admin? || current_user&.fraud_team_member?)
         redirect_to root_path, alert: "whomp whomp"
