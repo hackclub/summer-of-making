@@ -421,13 +421,13 @@ class User < ApplicationRecord
   end
 
   def add_permission(permission)
-    current_permissions = permissions || []
+    current_permissions = (permissions || []).dup
     current_permissions << permission.to_s unless current_permissions.include?(permission.to_s)
     update!(permissions: current_permissions)
   end
 
   def remove_permission(permission)
-    current_permissions = permissions || []
+    current_permissions = (permissions || []).dup
     current_permissions.delete(permission.to_s)
     update!(permissions: current_permissions)
   end
