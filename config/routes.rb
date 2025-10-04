@@ -401,6 +401,12 @@ Rails.application.routes.draw do
           post :message_repeat_offender
         end
       end
+      resources :users, only: [ :show ] do
+        member do
+          post :block_recertification
+          post :unblock_recertification
+        end
+      end
     end
 
     constraints FraudTeamConstraint do
