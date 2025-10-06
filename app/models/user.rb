@@ -498,6 +498,80 @@ class User < ApplicationRecord
     balance + escrowed_balance
   end
 
+  def shells_earned
+    # no one would be dumb enough to issue themselves a 9,999 shell payout for testing, right?
+    # ... right?
+    payouts.released
+            .where(amount: 0.01..5000)
+            # journey payouts got messed up + are not really relevant for SOM stuff
+            .where.not("reason LIKE ?", "Journey Payout for%")
+            .where.not("reason LIKE ?", "Corrected Journey Payout for%")
+            .where.not("reason LIKE ?", "Hopefully Final Actual Corrected Journey Payout for%")
+            .sum(:amount).to_i
+  end
+
+  def shells_spent
+    payouts.where("amount < 0 AND amount >= -5000")
+            .where.not(reason: "Balance reset because of Journey oopsies.")
+            .where.not("reason LIKE ?", "Revert Journey Payout for%")
+            .or(payouts.where("amount < 0 AND amount <= -5000").where(reason: nil))
+            .sum("ABS(amount)").to_f
+  end
+
+  def usd_spent_by_hack_club
+    shop_orders
+      .worth_counting
+      .joins(:shop_item)
+      .sum("COALESCE(shop_items.usd_cost, 0) * shop_orders.quantity")
+      .to_i
+  end
+
+  def most_expensive_order
+    shop_orders
+      .worth_counting
+      .includes(:shop_item)
+      .order(Arel.sql("frozen_item_price * quantity DESC NULLS LAST"))
+      .first
+  end
+
+  def most_expensive_item
+    shop_item_id = shop_orders
+      .worth_counting
+      .joins(:shop_item)
+      .order(Arel.sql("frozen_item_price DESC NULLS LAST"))
+      .limit(1)
+      .pluck("shop_items.id")
+      .first
+
+    return nil unless shop_item_id
+
+    ShopItem.find_by(id: shop_item_id)
+  end
+
+  def project_with_most_time
+    # iterating over projects and doing a max_by(total_seconds_coded) does work.. but it does a lot of sequential
+    # queries and no one wants that. this does it in one!
+    projects
+      .left_joins(:devlogs)
+      .group(:id)
+      .order(Arel.sql("COALESCE(SUM(devlogs.duration_seconds), 0) DESC"))
+      .limit(1)
+      .first
+  end
+
+  def project_with_highest_shells_per_hour
+    # same thing as above. there is a cleaner way to do it but that way does N+1's :pensive:
+    projects
+      .joins(:ship_events)
+      .left_joins(:devlogs)
+      .joins(ship_events: :payouts)
+      .where(payouts: { user_id: id })
+      .group(:id)
+      .having("COALESCE(SUM(devlogs.duration_seconds), 0) > 0")
+      .order(Arel.sql("SUM(payouts.amount) / (COALESCE(SUM(devlogs.duration_seconds), 0) / 3600.0) DESC"))
+      .first
+  end
+
   def votes_required_for_release
     approved_count = ship_events
       .joins(project: :ship_certifications)
