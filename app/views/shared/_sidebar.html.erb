@@ -110,6 +110,24 @@
             css_class: user_is_banned ? "opacity-50 cursor-not-allowed" : "cursor-pointer"
           ) %>
         </li>
+
+        <% if Flipper.enabled?(:wrapped, current_user) %>
+          <li class="flex justify-start">
+            <%= render C::Link.new(
+              target: wrapped_path,
+              text: "Wrapped",
+              icon: "star",
+              large: true,
+              animate_push: true,
+              highlight: current_page?(wrapped_path),
+              text_attr: {
+                data: { sidebar_target: "collapseFade" },
+                class: "text-3xl"
+              },
+              underline_attr: { data: { sidebar_target: "underline" } }
+            ) %>
+          </li>
+        <% end %>
         <% if current_user&.verified_check? %>
         <li class="flex justify-start">
             <%= render C::Link.new(

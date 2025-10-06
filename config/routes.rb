@@ -254,6 +254,7 @@ Rails.application.routes.draw do
   get "my_projects", to: "projects#my_projects"
   post "check_link", to: "projects#check_link"
   get "check_github_readme", to: "projects#check_github_readme"
+  get "wrapped", to: "wrapped#show"
   get "campfire", to: "campfire#index"
   get "campfire/hackatime_status", to: "campfire#hackatime_status"
 
