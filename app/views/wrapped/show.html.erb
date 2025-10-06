@@ -10,7 +10,10 @@
 <% helper_slide = @wrapped.helper_slide? %>
 <% helper_tickets_closed = helper_slide ? @wrapped.helper_tickets_closed : nil %>
 <% votes_cast = @wrapped.votes_cast %>
-<% total_slides = 9 + (helper_slide ? 1 : 0) %>
+<% helper_tickets_opened = helper_slide ? @wrapped.helper_tickets_opened : nil %>
+<% shells_rank_data = @wrapped.shells_earned_rank %>
+<% has_shells_rank = shells_rank_data.present? && shells_rank_data[:rank].to_i.positive? && shells_rank_data[:total].to_i.positive? %>
+<% total_slides = 9 + (helper_slide ? 1 : 0) + (has_shells_rank ? 1 : 0) %>
 
 <div class="min-h-[calc(100vh-8rem)] w-full flex flex-col items-center justify-center py-10 px-6">
   <div
@@ -71,7 +74,7 @@
           </span>
         </div>
         <p class="text-lg md:text-xl max-w-2xl text-slate-600 text-balance">
-            You re-invested your winnings into gear and goodies worth every <span class="ml-2 line-through text-sm text-slate-500">penny</span> shell.
+            You re-invested your winnings into gear, goodies and tools worth every <span class="ml-2 line-through text-sm text-slate-500">penny</span> shell.
         </p>
       </div>
 
@@ -220,6 +223,44 @@
           <p class="text-lg md:text-xl max-w-2xl text-emerald-700/80 text-balance">
             awesome work clearing the queue!
           </p>
+          <% if helper_tickets_opened && helper_tickets_opened.positive? %>
+            <p class="text-base md:text-lg text-emerald-700/70 text-balance">
+              handled across <%= number_with_delimiter(helper_tickets_opened) %> tickets opened.
+            </p>
+          <% end %>
+        </div>
+      <% end %>
+
+      <% if has_shells_rank %>
+        <% rank_value = shells_rank_data[:rank].to_i %>
+        <% total_ranked = shells_rank_data[:total].to_i %>
+        <% percentile = total_ranked.positive? ? ((rank_value.to_f / total_ranked) * 100.0) : nil %>
+        <div
+          class="absolute inset-0 flex flex-col items-center justify-center gap-6 bg-gradient-to-br from-amber-50 via-amber-100 to-lime-100 p-14 text-center text-slate-900 opacity-0 pointer-events-none scale-95 transition-all duration-700 ease-out"
+          data-wrapped-target="slide">
+          <p class="font-medium uppercase tracking-[0.35em] text-sm text-amber-600 text-balance">Shell Leaderboard</p>
+          <div class="flex flex-col items-center gap-4">
+            <div class="text-5xl md:text-6xl font-black text-amber-700">
+              #<span
+                data-wrapped-target="counter"
+                data-wrapped-counter-type="integer"
+                data-wrapped-counter-value="<%= rank_value %>">
+                0
+              </span>
+            </div>
+            <p class="text-lg md:text-xl text-amber-800/80 text-balance max-w-2xl">
+              You ranked <%= rank_value.ordinalize %> out of <%= number_with_delimiter(total_ranked) %> shell earners.
+            </p>
+          </div>
+          <% if percentile %>
+            <p class="text-base md:text-lg text-amber-700/70 text-balance">
+              That’s the top <%= number_to_percentage(percentile, precision: 1) %> of the leaderboard.
+            </p>
+          <% else %>
+            <p class="text-base md:text-lg text-amber-700/70 text-balance">
+              Keep shipping—every shell you earn nudges you higher up the board.
+            </p>
+          <% end %>
         </div>
       <% end %>
 

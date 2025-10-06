@@ -123,7 +123,47 @@ class WrappedPresenter
     end
   end
 
+  def shells_earned_rank
+    return @shells_earned_rank if defined?(@shells_earned_rank)
+
+    total_shells = shells_earned
+    return @shells_earned_rank = nil if total_shells.zero?
+
+    @shells_earned_rank = Rails.cache.fetch("wrapped/shells_rank/#{user.id}/#{total_shells}", expires_in: 10.minutes) do
+      rank = shells_earned_rank_value(total_shells)
+      total = shells_earned_total_with_shells
+      { rank:, total: total }
+    end
+  end
+
   private
+
+  def shells_earned_rank_value(total_shells)
+    shells_leaderboard_scope
+      .having("SUM(payouts.amount) > ?", total_shells)
+      .pluck("users.id")
+      .size + 1
+  end
+
+  def shells_earned_total_with_shells
+    Rails.cache.fetch("wrapped/shells_total_with_shells", expires_in: 10.minutes) do
+      shells_leaderboard_scope
+        .having("SUM(payouts.amount) > 0")
+        .pluck("users.id")
+        .size
+    end
+  end
+
+  def shells_leaderboard_scope
+    User
+      .joins(:payouts)
+      .merge(Payout.released)
+      .where(payouts: { amount: 0.01..5000 })
+      .where.not("payouts.reason LIKE ?", "Journey Payout for%")
+      .where.not("payouts.reason LIKE ?", "Corrected Journey Payout for%")
+      .where.not("payouts.reason LIKE ?", "Hopefully Final Actual Corrected Journey Payout for%")
+      .group("users.id")
+  end
 
   def helper_ticket_stats
     return @helper_ticket_stats if defined?(@helper_ticket_stats)
