@@ -421,13 +421,13 @@ class User < ApplicationRecord
   end
 
   def add_permission(permission)
-    current_permissions = permissions || []
+    current_permissions = (permissions || []).dup
     current_permissions << permission.to_s unless current_permissions.include?(permission.to_s)
     update!(permissions: current_permissions)
   end
 
   def remove_permission(permission)
-    current_permissions = permissions || []
+    current_permissions = (permissions || []).dup
     current_permissions.delete(permission.to_s)
     update!(permissions: current_permissions)
   end
@@ -450,6 +450,10 @@ class User < ApplicationRecord
 
   def admin_or_fraud_team_member?
     is_admin? || fraud_team_member?
+  end
+
+  def recertification_blocked?
+    has_permission?("no_recert")
   end
 
   def blue_check?

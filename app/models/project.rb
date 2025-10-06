@@ -357,6 +357,10 @@ class Project < ApplicationRecord
 
   def shipping_requirements
     {
+      recertification_not_blocked: {
+        met: !user.recertification_blocked?,
+        message: "You are blocked from shipping. Contact an admin if you believe this is an error."
+      },
       devlogs: {
         met: devlogs_since_last_ship.count >= 1,
         message: "You must have at least one devlog #{ship_events.count > 0 ? "since the last ship" : ""}"
@@ -436,6 +440,8 @@ class Project < ApplicationRecord
   end
 
   def can_request_recertification?
+    return false if user.recertification_blocked?
+
     latest_ship_certification&.rejected? &&
     ship_events.any? &&
     !latest_ship_certification.pending?

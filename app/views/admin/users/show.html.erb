@@ -73,6 +73,15 @@
       </div>
 
       <div>
+        <strong>Recert Blocked:</strong><br>
+        <% if @user.recertification_blocked? %>
+          <span class="pill pill-red">✓ blocked</span>
+        <% else %>
+          <span class="pill pill-green">nah they good</span>
+        <% end %>
+      </div>
+
+      <div>
         <strong>Banned:</strong><br>
         <% if @user.is_banned? %>
           <span class="pill pill-red">yurp</span>
@@ -571,6 +580,12 @@
         <%= button_to "revoke ysws reviewer permissions", revoke_ysws_reviewer_admin_user_path(@user), confirm: "ya sure you wanna do that?", class: "abtn secondary" %>
       <% else %>
         <%= button_to "grant ysws reviewer permissions", grant_ysws_reviewer_admin_user_path(@user), class: "abtn primary" %>
+      <% end %>
+
+      <% if @user.recertification_blocked? %>
+        <%= button_to "unblock recertification requests", unblock_recertification_admin_user_path(@user), class: "abtn primary" %>
+      <% else %>
+        <%= button_to "block recertification spam", block_recertification_admin_user_path(@user), confirm: "this will stop them from requesting recerts", class: "abtn secondary" %>
       <% end %>
 
       <%= button_to "force refresh hackatime", refresh_hackatime_admin_user_path(@user), class: 'abtn secondary' %>

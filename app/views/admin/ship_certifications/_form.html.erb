@@ -15,7 +15,10 @@
     <b style="color: var(--color-muted);">Project:</b> <%= link_to project.title, project, style: 'color: var(--color-primary); font-weight: 600; text-decoration: underline;' %> |
     <%= link_to "View on Platform", project_path(project), target: "_blank", style: 'color: var(--color-primary); font-weight: 600; text-decoration: underline;' %><br>
     <b style="color: var(--color-muted);">User:</b> <%= project.user.display_name %> |
-    <%= link_to "Admin Profile", admin_user_path(project.user), target: "_blank", style: 'color: var(--color-primary); font-weight: 600; text-decoration: underline;' %><br>
+    <%= link_to "Admin Profile", admin_user_path(project.user), target: "_blank", style: 'color: var(--color-primary); font-weight: 600; text-decoration: underline;' %>
+    <% if project.user.recertification_blocked? %>
+      <span class="pill pill-red" style="font-size: 0.7em; margin-left: 0.5rem;">BLOCKED FROM RECERTS</span>
+    <% end %><br>
     <b style="color: var(--color-muted);">Ship Events:</b> <span style="color: var(--color-primary); font-weight: 600;"> <%= project.ship_events.size %></span><br>
     <b style="color: var(--color-muted);">Certification Type:</b> <span style="color: var(--color-primary); font-weight: 600;"> <%= project.certification_type&.humanize %></span><br>
     <b style="color: var(--color-muted);">Created:</b> <span style="color: var(--color-primary); font-weight: 600;"> <%= project.created_at.strftime("%m/%d/%Y at %I:%M %p") %></span><br>

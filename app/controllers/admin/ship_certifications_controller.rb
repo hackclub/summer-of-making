@@ -266,7 +266,7 @@ module Admin
       end
 
       # Check if status is not pending
-      if params[:ship_certification][:judgement] == "pending"
+      if params[:ship_certification] && params[:ship_certification][:judgement] == "pending"
         errors << 'Change status from "pending" to approved or rejected'
       end
 

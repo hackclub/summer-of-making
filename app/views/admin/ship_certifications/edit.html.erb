@@ -44,6 +44,14 @@
   <div class="special-instructions"><%= simple_format(@ship_certification.recertification_instructions) %></div>
 <% end %>
 
+<div style="margin-bottom: 2rem;">
+  <% if @ship_certification.project.user.recertification_blocked? %>
+    <%= button_to "Unblock Recerts", unblock_recertification_admin_user_path(@ship_certification.project.user), class: "abtn primary small" %>
+  <% else %>
+    <%= button_to "Block Recerts", block_recertification_admin_user_path(@ship_certification.project.user), confirm: "Stop this user from requesting recerts?", class: "abtn secondary small" %>
+  <% end %>
+</div>
+
 <div class="edit-ship-cert-form">
   <%= render 'form', ship_certification: @ship_certification, current_user: current_user %>
 </div>

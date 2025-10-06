@@ -4,7 +4,9 @@ class Projects::ShipsController < ApplicationController
   def create
     authorize @project, :ship?
 
-    if Flipper.enabled?(:ship_locked, current_user)
+    # Check if shipping is locked via feature flag (defaults to false if flag doesn't exist)
+    if Flipper.exist?(:ship_locked) && Flipper.enabled?(:ship_locked, current_user)
+      Rails.logger.info("[ShipCreation] User #{current_user&.id} blocked by ship_locked feature flag for project #{@project.id}")
       redirect_to project_path(@project), alert: "Sorry bud, summer of making is over."
       return
     end

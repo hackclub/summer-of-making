@@ -402,6 +402,12 @@ Rails.application.routes.draw do
           post :message_repeat_offender
         end
       end
+      resources :users, only: [ :show ] do
+        member do
+          post :block_recertification
+          post :unblock_recertification
+        end
+      end
     end
 
     constraints FraudTeamConstraint do
@@ -448,6 +454,8 @@ Rails.application.routes.draw do
           post :revoke_ship_certifier
           post :grant_ysws_reviewer
           post :revoke_ysws_reviewer
+          post :block_recertification
+          post :unblock_recertification
           post :give_black_market
           post :take_away_black_market
           post :ban_user

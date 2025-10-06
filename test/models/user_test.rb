@@ -46,7 +46,15 @@
 require "test_helper"
 
 class UserTest < ActiveSupport::TestCase
-  # test "the truth" do
-  #   assert true
-  # end
+  test "user can be blocked from recertification" do
+    user = users(:one)
+
+    assert_not user.recertification_blocked?
+
+    user.add_permission("no_recert")
+    assert user.recertification_blocked?
+
+    user.remove_permission("no_recert")
+    assert_not user.recertification_blocked?
+  end
 end
