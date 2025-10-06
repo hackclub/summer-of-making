@@ -115,6 +115,14 @@ class WrappedPresenter
     stats[:tickets_opened].to_i
   end
 
+  def votes_cast
+    if user.respond_to?(:votes_count) && !user.votes_count.nil?
+      user.votes_count.to_i
+    else
+      user.votes.count
+    end
+  end
+
   private
 
   def helper_ticket_stats
