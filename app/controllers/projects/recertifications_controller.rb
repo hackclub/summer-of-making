@@ -4,6 +4,13 @@ class Projects::RecertificationsController < ApplicationController
   def create
     authorize @project, :request_recertification?
 
+    # Check if user is blocked from recertification
+    if current_user.recertification_blocked?
+      Rails.logger.info("[Recertification] User #{current_user.id} attempted recert while blocked")
+      redirect_to project_path(@project), alert: "You are blocked from requesting re-certifications. If you have questions, please create a ticket in #ask-the-shipwrights."
+      return
+    end
+
     # Post-deadline recertification logic:
     # After the deadline, users are granted exactly one additional recertification attempt.
     # If they've already used this "grace" attempt (post_deadline_recert_used permission),
