@@ -7,7 +7,9 @@
 <% project_ratio_hours = @wrapped.project_total_hours(project_ratio) %>
 <% project_ratio_rate = @wrapped.project_shells_per_hour(project_ratio) %>
 
-<% total_slides = 8 %>
+<% helper_slide = @wrapped.helper_slide? %>
+<% helper_tickets_closed = helper_slide ? @wrapped.helper_tickets_closed : nil %>
+<% total_slides = 8 + (helper_slide ? 1 : 0) %>
 
 <div class="min-h-[calc(100vh-8rem)] w-full flex flex-col items-center justify-center py-10 px-6">
   <div
@@ -175,6 +177,26 @@
           </p>
         <% end %>
       </div>
+
+      <% if helper_slide %>
+        <div
+          class="absolute inset-0 flex flex-col items-center justify-center gap-6 bg-gradient-to-br from-emerald-50 via-emerald-100 to-sky-100 p-14 text-center text-slate-900 opacity-0 pointer-events-none scale-95 transition-all duration-700 ease-out"
+          data-wrapped-target="slide">
+          <p class="font-medium uppercase tracking-[0.35em] text-sm text-emerald-600 text-balance">Support Hero</p>
+          <div class="flex items-center gap-4 text-6xl md:text-7xl font-black drop-shadow-sm text-emerald-700">
+            <span
+              data-wrapped-target="counter"
+              data-wrapped-counter-type="integer"
+              data-wrapped-counter-value="<%= helper_tickets_closed %>">
+              0
+            </span>
+            <span class="text-2xl font-semibold text-emerald-500">tickets closed</span>
+          </div>
+          <p class="text-lg md:text-xl max-w-2xl text-emerald-700/80 text-balance">
+            awesome work clearing the queue!
+          </p>
+        </div>
+      <% end %>
 
       <div
         class="absolute inset-0 flex flex-col items-center justify-center gap-6 bg-gradient-to-br from-slate-200 via-slate-100 to-slate-300 p-14 text-center text-slate-900 opacity-0 pointer-events-none scale-95 transition-all duration-700 ease-out"
