@@ -2,7 +2,6 @@ class Projects::RecertificationsController < ApplicationController
   before_action :set_project
 
   def create
-    authorize @project, :request_recertification?
 
     # Post-deadline recertification logic:
     # After the deadline, users are granted exactly one additional recertification attempt.
@@ -21,6 +20,8 @@ class Projects::RecertificationsController < ApplicationController
         Rails.logger.info("[Recertification] User #{current_user.id} using post-deadline recert attempt for project #{@project.id}")
       end
     end
+
+    authorize @project, :request_recertification?
 
     instructions = params[:recertification_instructions]
 

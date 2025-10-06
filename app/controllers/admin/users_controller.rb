@@ -169,6 +169,7 @@ module Admin
         flash[:notice] = "this user isn't blocked from recerts"
       else
         @user.remove_permission("no_recert")
+        @user.remove_permission("post_deadline_recert_used")
         @user.create_activity("unblock_recertification")
         flash[:success] = "user can request recerts again"
       end
