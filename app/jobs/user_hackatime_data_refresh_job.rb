@@ -68,7 +68,7 @@ class UserHackatimeDataRefreshJob < ApplicationJob
 
     message = build_warning_message(project, unlogged_hours, remaining_hours)
 
-#    SendSlackDmJob.perform_later(user.slack_id, message)
+    #    SendSlackDmJob.perform_later(user.slack_id, message)
     Rails.cache.write(cache_key, Time.current.to_i, expires_in: WARNING_COOLDOWN)
 
     Rails.logger.info "Sent unlogged time warning to #{user.display_name} for project '#{project.title}' - #{unlogged_hours}h unlogged"
