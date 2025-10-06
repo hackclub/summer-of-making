@@ -1,6 +1,8 @@
 # frozen_string_literal: true
 
 class WrappedPresenter
+  HELPER_STATS_MISS = :__wrapped_helper_stats_miss
+
   attr_reader :user
 
   def initialize(user)
@@ -90,5 +92,66 @@ class WrappedPresenter
     return nil unless hours && shells
 
     (shells / hours).round(2)
+  end
+
+  def helper_slide?
+    stats = helper_ticket_stats
+    return false unless stats
+
+    stats[:helper] && stats[:tickets_closed].to_i.positive?
+  end
+
+  def helper_tickets_closed
+    stats = helper_ticket_stats
+    return nil unless stats
+
+    stats[:tickets_closed].to_i
+  end
+
+  def helper_tickets_opened
+    stats = helper_ticket_stats
+    return nil unless stats
+
+    stats[:tickets_opened].to_i
+  end
+
+  def votes_cast
+    if user.respond_to?(:votes_count) && !user.votes_count.nil?
+      user.votes_count.to_i
+    else
+      user.votes.count
+    end
+  end
+
+  private
+
+  def helper_ticket_stats
+    return @helper_ticket_stats if defined?(@helper_ticket_stats)
+    return @helper_ticket_stats = nil unless user.slack_id.present?
+
+    cache_key = "wrapped/helper_stats/#{user.slack_id}"
+    cached = Rails.cache.fetch(cache_key, expires_in: 10.minutes) do
+      fetch_helper_ticket_stats || HELPER_STATS_MISS
+    end
+
+    @helper_ticket_stats = cached == HELPER_STATS_MISS ? nil : cached
+  end
+
+  def fetch_helper_ticket_stats
+    response = Faraday.get(
+      "https://nephthys.hackclub.com/api/user",
+      { id: user.slack_id },
+      { "Accept" => "application/json" }
+    )
+
+    return nil unless response.success?
+
+    data = JSON.parse(response.body)
+    return nil unless data.is_a?(Hash)
+
+    data.deep_symbolize_keys
+  rescue StandardError => e
+    Rails.logger.warn("Wrapped helper stats error for user #{user.id}: #{e.class} #{e.message}")
+    nil
   end
 end
