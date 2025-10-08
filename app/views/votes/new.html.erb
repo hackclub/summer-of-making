@@ -170,19 +170,17 @@
                     <span><%= "devlog".pluralize(ship_devlogs.count) %></span>
                     <span>•</span>
                     <span class="text-gray-800"><%= format_seconds(ship_time_seconds) %></span>
-                    <% admin_tool do %>
-                      <%= render "shared/project_twiddles", project: project %>
-                      <span>•</span>
-                      <span>Ship Date: <span class="text-black"><%= ship_event.created_at.strftime("%b %d") %></span></span>
-                      <span>•</span>
-                      <span>Paid: <span class="text-black"><%= @paid_ship_event_ids&.include?(ship_event.id) ? "Yes" : "No" %></span></span>
-                      <span>•</span>
-                      <span>Ship Event ID: <span class="text-black"><%= ship_event.id %></span></span>
-                      <span>•</span>
-                      <span>Project ID: <span class="text-black"><%= project.id %></span></span>
-                      <span>•</span>
-                      <span>Certification Status: <span class="text-black"><%= project.certification_status_text %></span></span>
-                    <% end %>
+                    <%= render "shared/project_twiddles", project: project %>
+                    <span>•</span>
+                    <span>Ship Date: <span class="text-black"><%= ship_event.created_at.strftime("%b %d") %></span></span>
+                    <span>•</span>
+                    <span>Paid: <span class="text-black"><%= @paid_ship_event_ids&.include?(ship_event.id) ? "Yes" : "No" %></span></span>
+                    <span>•</span>
+                    <span>Ship Event ID: <span class="text-black"><%= ship_event.id %></span></span>
+                    <span>•</span>
+                    <span>Project ID: <span class="text-black"><%= project.id %></span></span>
+                    <span>•</span>
+                    <span>Certification Status: <span class="text-black"><%= project.certification_status_text %></span></span>
                   </div>
 
                   <div class="text-base sm:text-lg text-gray-600"
