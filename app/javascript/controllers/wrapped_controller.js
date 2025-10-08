@@ -3,7 +3,7 @@ import { Controller } from "@hotwired/stimulus";
 export default class extends Controller {
   static targets = ["slide", "progressBar", "counter"];
   static values = {
-    interval: { type: Number, default: 8000 }
+    interval: { type: Number, default: 3700 }
   };
 
   connect() {
