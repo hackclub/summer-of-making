@@ -59,7 +59,7 @@ export default class extends Controller {
       alert('Please attach an attachment before posting your devlog.')
       return
     }
-    
+
     this.preventDoubleSubmission(event)
   }
 
@@ -84,13 +84,6 @@ export default class extends Controller {
         this.resetButton()
         if (ev.detail && ev.detail.success) {
           this.element.reset()
-        } else {
-          const turnstileEl = document.querySelector('[data-controller="turnstile"]')
-          if (turnstileEl && turnstileEl.controller) {
-            try { turnstileEl.controller.reset() } catch (_) {}
-          } else if (window.turnstile) {
-            try { window.turnstile.reset() } catch (_) {}
-          }
         }
       }, { once: true })
     }
@@ -99,7 +92,7 @@ export default class extends Controller {
   disableSubmitButton() {
     try {
       const button = this.submitButtonTarget
-      
+
       button.innerHTML = `
         <div class="inline-flex items-center">
           <span>${this.loadingTextValue}</span>
@@ -148,4 +141,4 @@ export default class extends Controller {
     this.counterTarget.textContent = remaining > 0 ? `${remaining} more characters required` : `Looks awesome! Ty <3`
     this.counterTarget.className = `text-sm mt-1 ${remaining > 0 ? 'text-gray-600' : 'text-forest'}`
   }
-} 
+}
