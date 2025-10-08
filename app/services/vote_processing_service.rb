@@ -6,17 +6,17 @@ class VoteProcessingService
   end
 
   def process
-    reason = low_quality_reason
-    if reason
-      updates = {
-        status: "invalid",
-        invalid_reason: reason,
-        marked_invalid_at: Time.current
-      }
-      updates[:is_low_quality] = true if Vote.column_names.include?("is_low_quality")
-      @vote.update!(updates)
-      return
-    end
+    # reason = low_quality_reason
+    # if reason
+    #   updates = {
+    #     status: "invalid",
+    #     invalid_reason: reason,
+    #     marked_invalid_at: Time.current
+    #   }
+    #   updates[:is_low_quality] = true if Vote.column_names.include?("is_low_quality")
+    #   @vote.update!(updates)
+    #   return
+    # end
 
     if @vote.winning_project_id.nil?
       process_tie
