@@ -543,17 +543,17 @@ class Project < ApplicationRecord
       ship_event_vote_count = VoteChange.where(project: self).where("created_at > ?", ship.created_at).count
 
       # Only process ship events that have exactly 18 votes
-      next unless ship_event_vote_count == 18
+      next unless ship_event_vote_count == 14
 
       # Calculate cumulative vote count for this ship event payout
       votes_before_ship = VoteChange.where(project: self).where("created_at <= ?", ship.created_at).count
-      cumulative_vote_count_at_payout = votes_before_ship + 18
+      cumulative_vote_count_at_payout = votes_before_ship + 14
 
       puts "Ship #{ship.id} created at #{ship.created_at}: votes_before=#{votes_before_ship}, cumulative=#{cumulative_vote_count_at_payout}"
 
       # Find when this ship event got its 18th vote
       # This is when votes_before_ship + votes after ship creation = cumulative_vote_count_at_payout
-      ship_votes_needed = 18
+      ship_votes_needed = 14
       target_vote_count = votes_before_ship + ship_votes_needed
 
       # Get the project's ELO rating when it reached this target vote count
