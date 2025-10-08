@@ -217,6 +217,14 @@
 
                   <%= render "shared/report", id: index == 0 ? 'new-tutorial-vote-report' : nil, suspect: ship_event, already_reported: @reported_ship_event_ids&.include?(ship_event.id) %>
                 </div>
+                <%# it'll cause N+1 but meh %>
+                <% if project.latest_ship_certification&.proof_video&.attached? %>
+                  <div class="bg-soft-bone/50 border border-saddle-taupe/30 rounded-lg p-3">
+                    <video controls class="w-full max-h-64 rounded">
+                      <source src="<%= url_for(project.latest_ship_certification.proof_video) %>" type="<%= project.latest_ship_certification.proof_video.content_type %>">
+                    </video>
+                  </div>
+                <% end %>
               </div>
 
               <div class="space-y-4 sm:space-y-8" id="<%= index == 0 ? 'new-tutorial-vote-devlogs' : nil %>">
