@@ -13,12 +13,6 @@
   <%# Tab visibility tracking fields %>
   <%= f.hidden_field :time_on_tab_ms, value: 0, data: { tab_visibility_target: "timeOnTab" } %>
   <%= f.hidden_field :time_off_tab_ms, value: 0, data: { tab_visibility_target: "timeOffTab" } %>
-  <% if ENV['TURNSTILE_SITE_KEY'].present? %>
-    <div class="flex flex-col items-center mb-4">
-      <div data-controller="turnstile" data-sitekey="<%= ENV['TURNSTILE_SITE_KEY'] %>" data-theme="auto" data-mode="non-interactive"></div>
-      <div id="turnstile-error"></div>
-    </div>
-  <% end %>
   <div class="text-center">
     <h2 class="text-md sm:text-md md:text-lg lg:text-2xl mb-6 sm:mb-8 text-center">
       A good ship is technical, creative, and tells the story of how it was made.
