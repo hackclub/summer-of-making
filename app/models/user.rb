@@ -696,6 +696,11 @@ class User < ApplicationRecord
     end
   end
 
+  def guess_address
+    addies = fetch_idv.dig(:identity, :addresses)
+    addies.find { |addr| addr[:primary] } || addies.first
+  end
+
   def verification_status
     return :not_linked if identity_vault_id.blank?
 
