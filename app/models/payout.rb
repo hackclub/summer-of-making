@@ -34,7 +34,7 @@ class Payout < ApplicationRecord
   scope :escrowed, -> { where(escrowed: true) }
   scope :released, -> { where(escrowed: false) }
 
-  VOTE_COUNT_REQUIRED = 14
+  VOTE_COUNT_REQUIRED = 10
 
   # x = ELO percentile (0-1)
   def self.calculate_multiplier(x)
