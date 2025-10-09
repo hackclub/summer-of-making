@@ -21,6 +21,22 @@ consumer.subscriptions.create("BalloonsChannel", {
     }
     
     this.createFloatingBalloon(data)
+
+    if (data.type === 'ShipPayout') {
+      const unpaidCountEl = document.getElementById('unpaid-count')
+      const totalEl = document.getElementById('total-ship-events')
+      const bar = document.getElementById('unpaid-progress-bar')
+      if (unpaidCountEl && totalEl && bar) {
+        const total = parseInt(totalEl.textContent || '0', 10)
+        let unpaid = parseInt(unpaidCountEl.textContent || '0', 10)
+        if (total > 0 && unpaid > 0) {
+          unpaid = unpaid - 1
+          unpaidCountEl.textContent = unpaid
+          const percentUnpaid = Math.max(0, Math.min(100, Math.round((unpaid / total) * 100)))
+          bar.style.width = `${percentUnpaid}%`
+        }
+      }
+    }
   },
 
   createFloatingBalloon(data) {
@@ -50,6 +66,8 @@ consumer.subscriptions.create("BalloonsChannel", {
       balloonContainer.innerHTML = this.createDevlogBalloon(data)
     } else if (data.type === 'ShipEvent') {
       balloonContainer.innerHTML = this.createShipEventBalloon(data)
+    } else if (data.type === 'ShipPayout') {
+      balloonContainer.innerHTML = this.createShipPayoutBalloon(data)
     }
 
     // Add balloon knock effect when hovering the balloon
@@ -131,6 +149,39 @@ consumer.subscriptions.create("BalloonsChannel", {
           <div style="margin-bottom: 0.75rem;">
             <span style="font-weight: 600; font-size: 0.875rem; color: #374151;">project shipped!
             </span>
+          </div>
+          <p style="font-size: 0.875rem; color: ${data.color}; margin: 0; font-weight: 500; line-height: 1.4;">${data.tagline}</p>
+          </a>
+        </div>
+      </div>
+    `
+  },
+
+  createShipPayoutBalloon(data) {
+    const template = document.getElementById('balloon-template')
+    let balloonSvg = template ? template.innerHTML : ''
+    balloonSvg = balloonSvg.replace('stroke="#4A2D24"', `stroke="${data.color}"`)
+    return `
+      <div style="position: relative; display: flex; flex-direction: column; align-items: center;">
+        <div class="balloon-body" style="margin-bottom: -10px; z-index: 2; color: ${data.color};">
+          ${balloonSvg}
+        </div>
+        <div class="string-sway-container" style="display: flex; flex-direction: column; align-items: center;">
+          <a href="${data.href}" target="_blank" class="balloon-card" style="
+          display: block;
+          text-decoration: none;
+          border-radius: 0.5rem;
+          border: 2px solid rgba(124, 74, 51, 0.1);
+          background: radial-gradient(circle at 50% 50%, #F6DBBA, #E6D4BE);
+          padding: 1rem;
+          max-width: 20rem;
+          box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+          z-index: 1;
+          cursor: pointer;
+          transition: transform 0.2s ease;
+        ">
+          <div style="margin-bottom: 0.75rem;">
+            <span style="font-weight: 600; font-size: 0.875rem; color: #374151;">ship paid!</span>
           </div>
           <p style="font-size: 0.875rem; color: ${data.color}; margin: 0; font-weight: 500; line-height: 1.4;">${data.tagline}</p>
           </a>

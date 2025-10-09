@@ -10,6 +10,21 @@ class VotesController < ApplicationController
   def new
     @vote = Vote.new
     @user_vote_count = current_user.votes.active.count
+
+    approved_project_ids = Project.joins(:ship_certifications)
+                                  .where(ship_certifications: { judgement: :approved })
+                                  .distinct
+                                  .pluck(:id)
+
+    @total_ship_events = ShipEvent.where(project_id: approved_project_ids).count
+    any_payout_ship_event_ids = Payout.joins("JOIN ship_events ON payouts.payable_id = ship_events.id")
+                                      .where(payable_type: "ShipEvent")
+                                      .where(ship_events: { project_id: approved_project_ids })
+                                      .distinct
+                                      .pluck(:payable_id)
+    @total_unpaid_ship_events = ShipEvent.where(project_id: approved_project_ids)
+                                         .where.not(id: any_payout_ship_event_ids)
+                                         .count
   end
 
   def create
