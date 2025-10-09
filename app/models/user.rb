@@ -698,6 +698,7 @@ class User < ApplicationRecord
 
   def guess_address
     addies = fetch_idv.dig(:identity, :addresses)
+    return nil unless addies.present? && addies&.any?
     addies.find { |addr| addr[:primary] } || addies.first
   end
 

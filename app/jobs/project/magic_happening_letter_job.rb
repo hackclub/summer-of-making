@@ -2,6 +2,8 @@ class Project::MagicHappeningLetterJob < ApplicationJob
   queue_as :default
 
   def perform(project)
+    return unless project&.user&.guess_address&.present?
+
     response = TheseusService.create_letter_v1(
       "instant/som25-magic-happening",
       {
