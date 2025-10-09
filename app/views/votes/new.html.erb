@@ -36,7 +36,7 @@
   <%= render "shared/page_title",
       title: "Vote",
       subtitle: "Vote on others' projects! #{Vote.count} votes have been submitted so far!" %>
-  <% if defined?(@total_unpaid_ship_events)%>
+  <% if defined?(@total_unpaid_ship_events) %>
     <div class="bg-[#F6DBBA] rounded-2xl p-3 md:p-4 mb-4">
       <div class="flex items-center justify-center">
           <p class="text-som-dark text-4xl font-medium"> <%= @total_unpaid_ship_events %> Ships to go</p>
