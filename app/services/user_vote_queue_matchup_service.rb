@@ -80,8 +80,8 @@ class UserVoteQueueMatchupService
 
     @unpaid_projects = @projects_with_time.select { |p| !p[:is_paid] }
     @paid_projects = @projects_with_time.select { |p| p[:is_paid] }
-    @mature_unpaid_projects = @projects_with_time.select { |p| p[:votes_count].to_i >= 12 && !p[:is_paid] }
-    @immature_unpaid_projects = @projects_with_time.select { |p| p[:votes_count].to_i < 12 && !p[:is_paid] }
+    @mature_unpaid_projects = @projects_with_time.select { |p| p[:votes_count].to_i >= 10 && !p[:is_paid] }
+    @immature_unpaid_projects = @projects_with_time.select { |p| p[:votes_count].to_i < 5 && !p[:is_paid] }
     self
   end
 
