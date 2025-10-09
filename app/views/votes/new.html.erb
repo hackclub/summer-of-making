@@ -36,23 +36,12 @@
   <%= render "shared/page_title",
       title: "Vote",
       subtitle: "Vote on others' projects! #{Vote.count} votes have been submitted so far!" %>
-  <% if defined?(@total_unpaid_ship_events) && @total_ship_events.to_i > 0 %>
-    <% paid = @total_ship_events - @total_unpaid_ship_events %>
-    <% percent_unpaid = ((@total_unpaid_ship_events.to_f / @total_ship_events) * 100).round %>
+  <% if defined?(@total_unpaid_ship_events)%>
     <div class="bg-[#F6DBBA] rounded-2xl p-3 md:p-4 mb-4">
-      <div class="flex items-center justify-between mb-2">
-        <div class="flex items-center gap-2">
-          <p class="text-som-dark text-base md:text-lg font-medium">Ships to go</p>
-        </div>
-        <p class="text-som-detail text-xs md:text-sm">
-          <span id="unpaid-count"><%= @total_unpaid_ship_events %></span> to go
-          <span id="total-ship-events" class="sr-only"><%= @total_ship_events %></span>
-        </p>
+      <div class="flex items-center justify-center">
+          <p class="text-som-dark text-4xl font-medium"> <%= @total_unpaid_ship_events %> Ships to go</p>
       </div>
-      <div class="h-3 bg-white/60 rounded-full border border-[#E4DCC6] overflow-hidden">
-        <div id="unpaid-progress-bar" class="h-full bg-forest transition-all duration-300" style="width: <%= percent_unpaid %>%"></div>
-      </div>
-    </div>
+  </div>
   <% end %>
   <%# so amber doesn't have to answer the same question over and over%>
   <% if flash[:vote_rejected].present? %>
