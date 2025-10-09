@@ -48,9 +48,13 @@ module Admin
     end
 
     def mark_low_quality
-      project = Project.find(params[:project_id])
-      reason = params[:reason]
+      project = Project.find_by(id: params[:project_id])
+      unless project
+        redirect_to admin_low_quality_dashboard_index_path, alert: "Project not found."
+        return
+      end
 
+      reason = params[:reason]
       if reason.blank?
         redirect_to admin_low_quality_dashboard_index_path, alert: "Reason is required when marking as low quality."
         return
@@ -85,7 +89,12 @@ module Admin
     end
 
     def mark_ok
-      project = Project.find(params[:project_id])
+      project = Project.find_by(id: params[:project_id])
+      unless project
+        redirect_to admin_low_quality_dashboard_index_path, alert: "Project not found."
+        return
+      end
+
       ok_reason = params[:ok_reason].to_s.presence
       FraudReport.where(suspect_type: "Project", suspect_id: project.id, resolved: false).update_all(resolved: true, resolved_at: Time.current, resolved_by_id: current_user.id, resolved_outcome: "ok", resolved_message: ok_reason)
       FraudReport.where(suspect_type: "ShipEvent").joins("JOIN ship_events ON ship_events.id = fraud_reports.suspect_id").where(ship_events: { project_id: project.id }, resolved: false).update_all(resolved: true, resolved_at: Time.current, resolved_by_id: current_user.id, resolved_outcome: "ok", resolved_message: ok_reason)
@@ -93,14 +102,38 @@ module Admin
       redirect_to admin_low_quality_dashboard_index_path, notice: "Marked OK and cleared reports."
     end
 
+    def message_repeat_offender
+      user = User.find_by(id: params[:user_id])
+      unless user
+        redirect_to admin_low_quality_dashboard_index_path, alert: "User not found."
+        return
+      end
+
+      message = params[:message]
+      if message.blank?
+        redirect_to admin_low_quality_dashboard_index_path, alert: "Message content is required."
+        return
+      end
+
+      if user.slack_id.present?
+        formatted_message = "Hi #{user.display_name || 'there'}! This is a message from the Shipwright team:\n\n#{message}\n\nKeep building amazing things!"
+        SendSlackDmJob.perform_later(user.slack_id, formatted_message)
+        redirect_to admin_low_quality_dashboard_index_path, notice: "Message sent to #{user.display_name}."
+      else
+        redirect_to admin_low_quality_dashboard_index_path, alert: "User doesn't have a Slack ID configured."
+      end
+    end
+
     private
 
     def calculate_analytics_data
-      # Time periods for comparison
-      @current_week_start = 7.days.ago
-      @last_week_start = 14.days.ago
-      @current_month_start = 30.days.ago
-      @last_month_start = 60.days.ago
+      # Time periods for comparison using proper boundaries
+      @current_week_start = Time.current.beginning_of_week
+      @last_week_start = 1.week.ago.beginning_of_week
+      @last_week_end = 1.week.ago.end_of_week
+      @current_month_start = Time.current.beginning_of_month
+      @last_month_start = 1.month.ago.beginning_of_month
+      @last_month_end = 1.month.ago.end_of_month
 
       calculate_volume_metrics
       calculate_resolution_metrics
@@ -117,7 +150,7 @@ module Admin
         .count
 
       @reports_last_week = FraudReport
-        .where(created_at: @last_week_start..@current_week_start)
+        .where(created_at: @last_week_start..@last_week_end)
         .where("reason LIKE ?", "LOW_QUALITY:%")
         .count
 
@@ -127,7 +160,7 @@ module Admin
         .count
 
       @reports_last_month = FraudReport
-        .where(created_at: @last_month_start..@current_month_start)
+        .where(created_at: @last_month_start..@last_month_end)
         .where("reason LIKE ?", "LOW_QUALITY:%")
         .count
 
@@ -161,20 +194,21 @@ module Admin
       resolved_reports = FraudReport.resolved.where("reason LIKE ?", "LOW_QUALITY:%")
 
       @resolved_current_week = resolved_reports
-        .where(updated_at: @current_week_start..Time.current)
+        .where(resolved_at: @current_week_start..Time.current)
         .count
 
       @resolved_current_month = resolved_reports
-        .where(updated_at: @current_month_start..Time.current)
+        .where(resolved_at: @current_month_start..Time.current)
         .count
 
       # Average time to resolution
       resolved_with_time = resolved_reports
-        .where(updated_at: @current_month_start..Time.current)
+        .where(resolved_at: @current_month_start..Time.current)
         .where.not(created_at: nil)
+        .where.not(resolved_at: nil)
 
       if resolved_with_time.any?
-        total_resolution_time = resolved_with_time.sum { |report| report.updated_at - report.created_at }
+        total_resolution_time = resolved_with_time.sum { |report| report.resolved_at - report.created_at }
         @avg_resolution_time_hours = (total_resolution_time / resolved_with_time.count) / 3600.0
       else
         @avg_resolution_time_hours = 0
@@ -190,26 +224,24 @@ module Admin
     end
 
     def calculate_efficiency_metrics
-      # Track which admins are handling cases (based on PaperTrail versions)
+      # Track which admins are handling cases (based on resolved_by_id field)
       resolved_reports = FraudReport.resolved
         .where("reason LIKE ?", "LOW_QUALITY:%")
-        .where(updated_at: @current_month_start..Time.current)
+        .where(resolved_at: @current_month_start..Time.current)
 
       @admin_resolution_counts = {}
 
       resolved_reports.find_each do |report|
-        # Try to get the last version that marked it as resolved
-        # Use JSONB operator to check for 'resolved' key changes
-        versions = report.versions.where("object_changes ? 'resolved'").order(:created_at)
-        last_resolver_version = versions.last
-
-        if last_resolver_version && last_resolver_version.whodunnit
-          resolver_id = last_resolver_version.whodunnit.to_i
-          resolver = User.find_by(id: resolver_id)
+        if report.resolved_by_id
+          resolver = User.find_by(id: report.resolved_by_id)
           if resolver
             resolver_name = resolver.display_name || resolver.email
             @admin_resolution_counts[resolver_name] ||= 0
             @admin_resolution_counts[resolver_name] += 1
+          else
+            key = "Unknown User ID #{report.resolved_by_id}"
+            @admin_resolution_counts[key] ||= 0
+            @admin_resolution_counts[key] += 1
           end
         else
           @admin_resolution_counts["Unknown"] ||= 0
@@ -240,7 +272,7 @@ module Admin
 
       total_resolved = FraudReport.resolved
         .where("reason LIKE ?", "LOW_QUALITY:%")
-        .where(updated_at: @current_month_start..Time.current)
+        .where(resolved_at: @current_month_start..Time.current)
         .distinct
         .count("CASE WHEN suspect_type = 'Project' THEN suspect_id ELSE (SELECT project_id FROM ship_events WHERE ship_events.id = fraud_reports.suspect_id LIMIT 1) END")
 
@@ -291,7 +323,7 @@ module Admin
           .count
 
         resolutions = FraudReport
-          .where(updated_at: week_start..week_end)
+          .where(resolved_at: week_start..week_end)
           .where("reason LIKE ?", "LOW_QUALITY:%")
           .resolved
           .count

@@ -205,13 +205,6 @@ class YswsReviewerConstraint
 end
 
 Rails.application.routes.draw do
-  # Temporary flash testing routes (remove after testing)
-  if Rails.env.development?
-    get "/test/flash/notice", to: "flash_test#test_notice"
-    get "/test/flash/alert", to: "flash_test#test_alert"
-    get "/test/flash/both", to: "flash_test#test_both"
-  end
-
   mount ActiveInsights::Engine => "/insights"
   # Define your application routes per the DSL in https://guides.rubyonrails.org/routing.html
 
@@ -246,10 +239,6 @@ Rails.application.routes.draw do
   get "users/identity_vault_callback", to: "users#identity_vault_callback", as: :identity_vault_callback
   get "users/link_identity_vault", to: "users#link_identity_vault", as: :link_identity_vault
 
-  # Brainrot mode API endpoints
-  get "brainrot/status", to: "brainrot#status"
-  get "brainrot/random_sound", to: "brainrot#random_sound"
-
   # Tutorial
   get "tutorial/todo_modal", to: "tutorials#todo_modal"
 
@@ -265,6 +254,7 @@ Rails.application.routes.draw do
   get "my_projects", to: "projects#my_projects"
   post "check_link", to: "projects#check_link"
   get "check_github_readme", to: "projects#check_github_readme"
+  get "wrapped", to: "wrapped#show"
   get "campfire", to: "campfire#index"
   get "campfire/hackatime_status", to: "campfire#hackatime_status"
 
@@ -409,6 +399,13 @@ Rails.application.routes.draw do
         collection do
           post :mark_low_quality
           post :mark_ok
+          post :message_repeat_offender
+        end
+      end
+      resources :users, only: [ :show ] do
+        member do
+          post :block_recertification
+          post :unblock_recertification
         end
       end
     end
@@ -457,6 +454,8 @@ Rails.application.routes.draw do
           post :revoke_ship_certifier
           post :grant_ysws_reviewer
           post :revoke_ysws_reviewer
+          post :block_recertification
+          post :unblock_recertification
           post :give_black_market
           post :take_away_black_market
           post :ban_user

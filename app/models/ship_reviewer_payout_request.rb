@@ -44,33 +44,23 @@ class ShipReviewerPayoutRequest < ApplicationRecord
     if reviewer
       # Get reviewer's position in weekly leaderboard
       position = get_reviewer_position(reviewer)
+      multiplier = ShipReviewerMultiplierService.calculate_multiplier_for_position(position)
       effective_rate = ShipReviewerMultiplierService.calculate_effective_rate(position)
-      decisions_count * effective_rate
+
+      # Return both amount and multiplier for storage
+      {
+        amount: decisions_count * effective_rate,
+        multiplier: multiplier,
+        position: position
+      }
     else
       # Fall back to base rate if no reviewer provided
-      decisions_count * ShipReviewerMultiplierService::BASE_SHELLS_PER_REVIEW
+      {
+        amount: decisions_count * ShipReviewerMultiplierService::BASE_SHELLS_PER_REVIEW,
+        multiplier: 1.0,
+        position: nil
+      }
     end
-  end
-
-  private
-
-  def self.get_reviewer_position(reviewer)
-    # Calculate this week's Sunday in EST (same logic as controller)
-    est_zone = ActiveSupport::TimeZone.new("America/New_York")
-    current_est = Time.current.in_time_zone(est_zone)
-    week_start = current_est.beginning_of_week(:sunday)
-
-    # Get weekly leaderboard
-    weekly_leaderboard = User.joins("INNER JOIN ship_certifications ON users.id = ship_certifications.reviewer_id")
-      .where.not(ship_certifications: { reviewer_id: nil })
-      .where("ship_certifications.updated_at >= ?", week_start)
-      .group("users.id")
-      .order("COUNT(ship_certifications.id) DESC")
-      .pluck("users.id", "COUNT(ship_certifications.id)")
-
-    # Find reviewer's position (1-indexed)
-    position = weekly_leaderboard.find_index { |user_id, _count| user_id == reviewer.id }
-    position ? position + 1 : nil
   end
 
   def approve!(approver)
@@ -88,5 +78,30 @@ class ShipReviewerPayoutRequest < ApplicationRecord
         payable: reviewer
       )
     end
+  end
+
+  private
+
+  def self.get_reviewer_position(reviewer)
+    # Calculate this week's Sunday in EST (same logic as controller)
+    est_zone = ActiveSupport::TimeZone.new("America/New_York")
+    current_est = Time.current.in_time_zone(est_zone)
+    week_start = current_est.beginning_of_week(:sunday)
+
+    # Get weekly leaderboard with consistent logic from ship_certifications_controller
+    weekly_leaderboard = User.joins("INNER JOIN ship_certifications ON users.id = ship_certifications.reviewer_id")
+      .joins("INNER JOIN projects ON ship_certifications.project_id = projects.id")
+      .where.not(ship_certifications: { reviewer_id: nil })
+      .where("ship_certifications.updated_at >= ?", week_start)
+      .where("ship_certifications.updated_at > ship_certifications.created_at")
+      .where.not(ship_certifications: { judgement: :pending })
+      .where(projects: { is_deleted: false })
+      .group("users.id")
+      .order("COUNT(ship_certifications.id) DESC")
+      .pluck("users.id", "COUNT(ship_certifications.id)")
+
+    # Find reviewer's position (1-indexed)
+    position = weekly_leaderboard.find_index { |user_id, _count| user_id == reviewer.id }
+    position ? position + 1 : nil
   end
 end

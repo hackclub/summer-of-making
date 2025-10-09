@@ -7,21 +7,20 @@ export default class extends Controller {
   }
 
   connect() {
-    this.startPolling()
+    this._onVisibilityChange = this.onVisibilityChange?.bind(this) || (() => {})
+    document.addEventListener('visibilitychange', this._onVisibilityChange)
+    if (!document.hidden) this.startPolling()
   }
 
   disconnect() {
+    document.removeEventListener('visibilitychange', this._onVisibilityChange)
     this.stopPolling()
   }
 
   startPolling() {
-    // Update immediately
+    if (this.pollInterval) return
     this.updateDashboard()
-    
-    // Then update every interval
-    this.pollInterval = setInterval(() => {
-      this.updateDashboard()
-    }, this.updateIntervalValue)
+    this.pollInterval = setInterval(() => this.updateDashboard(), this.updateIntervalValue)
   }
 
   stopPolling() {
@@ -29,10 +28,13 @@ export default class extends Controller {
       clearInterval(this.pollInterval)
       this.pollInterval = null
     }
+    this.abortInFlight()
   }
 
   updateDashboard() {
-    fetch('/campfire/hackatime_status')
+    this.abortInFlight()
+    this._abortController = new AbortController()
+    fetch('/campfire/hackatime_status', { signal: this._abortController.signal })
       .then(response => response.json())
       .then(data => {
         if (data.dashboard) {
@@ -60,5 +62,18 @@ export default class extends Controller {
 
   refresh() {
     this.updateDashboard()
+  }
+
+  onVisibilityChange() {
+    if (document.hidden) {
+      this.stopPolling()
+    } else {
+      this.startPolling()
+    }
+  }
+
+  abortInFlight() {
+    try { this._abortController?.abort() } catch (_) {}
+    this._abortController = null
   }
 } 

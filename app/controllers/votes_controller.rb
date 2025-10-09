@@ -10,28 +10,24 @@ class VotesController < ApplicationController
   def new
     @vote = Vote.new
     @user_vote_count = current_user.votes.active.count
+
+    approved_project_ids = Project.joins(:ship_certifications)
+                                  .where(ship_certifications: { judgement: :approved })
+                                  .distinct
+                                  .pluck(:id)
+
+    @total_ship_events = ShipEvent.where(project_id: approved_project_ids).count
+    any_payout_ship_event_ids = Payout.joins("JOIN ship_events ON payouts.payable_id = ship_events.id")
+                                      .where(payable_type: "ShipEvent")
+                                      .where(ship_events: { project_id: approved_project_ids })
+                                      .distinct
+                                      .pluck(:payable_id)
+    @total_unpaid_ship_events = ShipEvent.where(project_id: approved_project_ids)
+                                         .where.not(id: any_payout_ship_event_ids)
+                                         .count
   end
 
   def create
-    if TurnstileService.enabled?
-      token = params[:"cf-turnstile-response"] || params[:cf_turnstile_response] || params.dig(:vote, :cf_turnstile_response)
-      verification = TurnstileService.verify(token, remote_ip: request.remote_ip)
-      unless verification[:success]
-        respond_to do |format|
-          format.turbo_stream do
-            render turbo_stream: turbo_stream.update(
-              "turnstile-error",
-              ActionController::Base.helpers.content_tag(:div, "Turnstile verification failed. Please try again.", class: "text-vintage-red text-sm mt-2")
-            ), status: :unprocessable_entity
-          end
-          format.html do
-            redirect_to new_vote_path, alert: "Turnstile verification failed. Please try again."
-          end
-        end
-        return
-      end
-    end
-
     ship_event_1_id = params[:vote][:ship_event_1_id]&.to_i
     ship_event_2_id = params[:vote][:ship_event_2_id]&.to_i
     signature = params[:vote][:signature]
@@ -80,10 +76,14 @@ class VotesController < ApplicationController
       return
     end
 
-    @vote = current_user.votes.build(vote_params.except(:ship_event_1_id, :ship_event_2_id, :signature))
+    @vote = current_user.votes.build(vote_params.except(:ship_event_1_id, :ship_event_2_id, :signature, :time_on_tab_ms, :time_off_tab_ms))
     @vote.ship_event_1_id = ship_event_1_id
     @vote.ship_event_2_id = ship_event_2_id
     @vote.time_spent_voting_ms = time_spt_ms
+    @vote.user_agent = request.user_agent
+    @vote.ip = request.remote_ip
+    @vote.time_on_tab_ms = params[:vote][:time_on_tab_ms].to_i
+    @vote.time_off_tab_ms = params[:vote][:time_off_tab_ms].to_i
 
     @vote.project_1_id = project_1_id
     @vote.project_2_id = project_2_id
@@ -167,7 +167,7 @@ class VotesController < ApplicationController
       if Flipper.enabled?(:lock_voting, current_user)
         redirect_to locked_votes_path, alert: "Your voting access has been temporarily disabled due to too many low-quality votes." and return
       end
-      if Flipper.enabled?(:voting_paused)
+      if Flipper.enabled?(:voting_paused) unless Flipper.enabled?(:privileged_voting, current_user)
         redirect_to locked_votes_path, alert: "Voting is temporarily paused. Please try again later." and return
       end
     end
@@ -248,14 +248,13 @@ class VotesController < ApplicationController
   def set_projects
     @vote_queue = current_user.user_vote_queue || current_user.build_user_vote_queue.tap(&:save!)
 
-    @vote_queue.with_lock do
-      if @vote_queue.queue_exhausted?
-        # speed up the web req: matchup generation is expensive and per matchup it takes ~400ms
-        @vote_queue.refill_queue!(1)
-        RefillUserVoteQueueJob.perform_later(current_user.id)
-      elsif @vote_queue.needs_refill?
-        RefillUserVoteQueueJob.perform_later(current_user.id)
-      end
+    # If queue is exhausted or needs refill, queue background job and return early to prevent memory leak
+    if @vote_queue.queue_exhausted?
+      RefillUserVoteQueueJob.perform_later(current_user.id)
+      redirect_to campfire_path, alert: "No votes for you to make right now! Come back in 30 seconds once we've generated some new ones."
+      return
+    elsif @vote_queue.needs_refill?
+      RefillUserVoteQueueJob.perform_later(current_user.id)
     end
 
     Rails.logger.info("bc js work #{@vote_queue.inspect}")
@@ -332,6 +331,7 @@ class VotesController < ApplicationController
 
   def vote_params
     params.expect(vote: %i[winning_project_id explanation
-                           ship_event_1_id ship_event_2_id signature cf_turnstile_response])
+                           ship_event_1_id ship_event_2_id signature
+                           time_on_tab_ms time_off_tab_ms])
   end
 end

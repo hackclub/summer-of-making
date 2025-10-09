@@ -4,17 +4,18 @@
   <div>
     <div class="px-4 md:px-8 max-w-6xl mx-auto">
       <div class="space-y-4 sm:space-y-6" id="devlogs-list" data-controller="view-tracker">
-        <% @recent_devlogs&.each do |devlog| %>
-          <%= render "devlogs/devlog_card",
-            devlog: devlog,
-            context: 'explore',
-            show_project_title: true,
-            show_project_navigation: true,
-            show_likes: true,
-            show_project_link: true,
-            show_comment_modal: true,
-            show_stonks: false %>
-        <% end %>
+        <%= render partial: "devlogs/devlog_card",
+            collection: @recent_devlogs,
+            as: :devlog,
+            locals: {
+              context: 'explore',
+              show_project_title: true,
+              show_project_navigation: true,
+              show_likes: true,
+              show_project_link: true,
+              show_comment_modal: true,
+              show_stonks: false
+            } %>
       </div>
 
       <div id="load-more-devlogs">

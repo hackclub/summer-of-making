@@ -3,18 +3,21 @@
 class ProjectsController < ApplicationController
   include ActionView::RecordIdentifier
   include ViewTrackable
+
   skip_before_action :verify_authenticity_token, only: [ :check_link ]
-  before_action :set_project,
-                only: %i[show edit update stake_stonks unstake_stonks destroy update_coordinates unplace_coordinates]
+  skip_before_action :authenticate_user!, only: %i[show]
+
+  before_action :set_project_for_show, only: [ :show ]
+  before_action :set_project_for_edit, only: [ :edit, :update ]
+  before_action :set_project_basic, only: [ :stake_stonks, :unstake_stonks, :destroy, :update_coordinates, :unplace_coordinates ]
+
   before_action :check_if_shipped, only: %i[edit update]
   before_action :authorize_user, only: [ :destroy ]
   before_action :require_hackatime, only: [ :create ]
   before_action :check_identity_verification, except: %i[show]
-  skip_before_action :authenticate_user!, only: %i[show]
 
   def show
     authorize @project, :show?
-    # track_view(@project)
 
     if current_user
       current_user.user_badges.load
@@ -27,7 +30,7 @@ class ProjectsController < ApplicationController
     # Include shipwright advice in timeline for project owner only
     timeline_items = [ @devlogs, @ship_events ]
     if current_user == @project.user
-      @shipwright_advices = @project.shipwright_advices.includes(:ship_certification).sort_by(&:created_at).reverse
+      @shipwright_advices = @project.shipwright_advices.sort_by(&:created_at).reverse
       timeline_items << @shipwright_advices
     end
 
@@ -74,6 +77,12 @@ class ProjectsController < ApplicationController
   end
 
   def create
+    # Check if project creation is locked via feature flag (defaults to false if flag doesn't exist)
+    if Flipper.exist?(:creation_locked) && Flipper.enabled?(:creation_locked, current_user)
+      Rails.logger.info("[ProjectCreation] User #{current_user&.id} blocked by creation_locked feature flag")
+      redirect_to my_projects_path, alert: "Sorry bud, summer of making is over."
+      return
+    end
     @project = current_user.projects.build(project_params)
 
     if not_img?(params[:project][:banner])
@@ -509,22 +518,58 @@ class ProjectsController < ApplicationController
     redirect_to my_projects_path, alert: "You must link your HackaTime account before creating a project. Please go to Settings to link your account."
   end
 
-  def set_project
+  def set_project_for_show
+    associations = {
+      user: [ :user_hackatime_data, :user_badges ],
+      banner_attachment: :blob,
+      ship_certifications: [ { proof_video_attachment: :blob } ],
+      followers: :projects,
+      devlogs: [
+        { user: :user_badges },
+        { user_advent_sticker: { shop_item: [ :image_attachment, :silhouette_image_attachment ] } },
+        { file_attachment: :blob }
+      ],
+      ship_events: [ :payouts ],
+      stonks: []
+    }
+
+    if user_signed_in?
+      associations[:devlogs] << { comments: { user: :user_badges } }
+    end
+
+    if user_signed_in? && (current_user.is_admin? || is_own_project?)
+      associations[:shipwright_advices] = [ :ship_certification ]
+    end
+
+    @project = Project.includes(associations).find(params[:id])
+  rescue ActiveRecord::RecordNotFound
+    deleted_project = Project.with_deleted.find_by(id: params[:id])
+    if deleted_project&.is_deleted?
+      redirect_to projects_path, alert: "This project has been deleted."
+    else
+      redirect_to projects_path, alert: "Project not found."
+    end
+  end
+
+  def set_project_for_edit
     @project = Project.includes(
-      {
-        user: [ :user_hackatime_data, :user_badges ],
-        devlogs: [
-          { user: :user_badges },
-          { comments: { user: :user_badges } },
-          { file_attachment: :blob }
-        ],
-        ship_events: [
-          :payouts
-        ],
-        followers: :projects
-      },
-      { banner_attachment: :blob },
-      ship_certifications: [ { proof_video_attachment: :blob } ]
+      user: [ :user_hackatime_data, :user_badges ],
+      banner_attachment: :blob,
+      devlogs: [ :file_attachment ]
+    ).find(params[:id])
+  rescue ActiveRecord::RecordNotFound
+    deleted_project = Project.with_deleted.find_by(id: params[:id])
+    if deleted_project&.is_deleted?
+      redirect_to projects_path, alert: "This project has been deleted."
+    else
+      redirect_to projects_path, alert: "Project not found."
+    end
+  end
+
+  def set_project_basic
+    @project = Project.includes(
+      user: [ :user_badges ],
+      banner_attachment: :blob
     ).find(params[:id])
   rescue ActiveRecord::RecordNotFound
     deleted_project = Project.with_deleted.find_by(id: params[:id])
@@ -563,5 +608,12 @@ class ProjectsController < ApplicationController
     else
       false
     end
+  end
+
+  # Efficient ownership check - database-level boolean query, cached
+  def is_own_project?
+    @is_own_project ||= Project.with_deleted
+                               .where(id: params[:id], user: current_user)
+                               .exists?
   end
 end

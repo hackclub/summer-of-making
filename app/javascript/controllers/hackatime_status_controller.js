@@ -5,19 +5,20 @@ export default class extends Controller {
   static values = { tutorialActive: Boolean }
 
   connect() {
-    if (this.tutorialActiveValue) {
-      this.startPolling()
-    }
+    this._onVisibilityChange = this.onVisibilityChange?.bind(this) || (() => {})
+    document.addEventListener('visibilitychange', this._onVisibilityChange)
+    if (!document.hidden && this.tutorialActiveValue) this.startPolling()
   }
 
   disconnect() {
+    document.removeEventListener('visibilitychange', this._onVisibilityChange)
     this.stopPolling()
   }
 
   startPolling() {
-    this.pollInterval = setInterval(() => {
-      this.updateStatus()
-    }, 1000)
+    if (this.pollInterval) return
+    this.updateStatus()
+    this.pollInterval = setInterval(() => this.updateStatus(), 1000)
 
     this.observer = new MutationObserver(() => {
       if (this.hasStatusTarget && this.statusTarget.textContent.includes('Setup done')) {
@@ -38,10 +39,13 @@ export default class extends Controller {
       this.observer.disconnect()
       this.observer = null
     }
+    this.abortInFlight()
   }
 
   updateStatus() {
-    fetch('/campfire/hackatime_status')
+    this.abortInFlight()
+    this._abortController = new AbortController()
+    fetch('/campfire/hackatime_status', { signal: this._abortController.signal })
       .then(response => response.json())
       .then(data => {
         if (data.hackatime_projects) {
@@ -118,5 +122,18 @@ export default class extends Controller {
         }
       })
       .catch(error => console.log('Status check failed:', error))
+  }
+
+  onVisibilityChange() {
+    if (document.hidden) {
+      this.stopPolling()
+    } else if (this.tutorialActiveValue) {
+      this.startPolling()
+    }
+  }
+
+  abortInFlight() {
+    try { this._abortController?.abort() } catch (_) {}
+    this._abortController = null
   }
 } 

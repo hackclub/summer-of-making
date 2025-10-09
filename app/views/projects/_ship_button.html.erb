@@ -1,10 +1,12 @@
 <% if !project.is_shipped %>
+  <% creation_locked = Flipper.enabled?(:ship_locked, current_user) %>
   <% if policy(project).can_see_certification_details? && project.latest_ship_certification&.rejected? %>
     <%= render C::StyledButton.new(
         text: "Ship It!",
         kind: "primary",
         icon: "ship.svg",
-        data: {
+        disabled: creation_locked,
+        data: creation_locked ? {} : {
           controller: "modal",
           action: "click->modal#open",
           modal_id: "#{project.id}",
@@ -16,7 +18,8 @@
           text: "Ship It!",
           kind: "primary",
           icon: "ship.svg",
-          data: {
+          disabled: creation_locked,
+          data: creation_locked ? {} : {
             controller: "modal",
             action: "modal#open",
             modal_id: "#{project.id}",
@@ -27,7 +30,8 @@
           text: "Ship It!",
           kind: "primary",
           icon: "ship.svg",
-          data: {
+          disabled: creation_locked,
+          data: creation_locked ? {} : {
             action: "new-tutorial#startShipScene",
           }) %>
     <% end %>

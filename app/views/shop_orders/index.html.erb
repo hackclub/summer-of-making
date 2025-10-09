@@ -12,9 +12,7 @@
   <% if @orders.any? %>
     <!-- Orders list -->
     <div class="space-y-6">
-      <% @orders.each do |order| %>
-        <%= render 'order_list_item', order: order %>
-      <% end %>
+      <%= render partial: 'order_list_item', collection: @orders, as: :order %>
     </div>
 
     <!-- Order summary -->

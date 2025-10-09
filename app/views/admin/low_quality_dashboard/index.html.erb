@@ -96,6 +96,7 @@
           <tr>
             <th style="text-align: left;">User</th>
             <th style="text-align: right;">Report Count</th>
+            <th style="text-align: center;">Actions</th>
           </tr>
         </thead>
         <tbody>
@@ -109,6 +110,11 @@
               </td>
               <td style="text-align: right;">
                 <span class="pill pill-red"><%= offender_data[:report_count] %></span>
+              </td>
+              <td style="text-align: center;">
+                <button disabled style="color: #666; cursor: not-allowed; font-size: 13px; background: #555; padding: 8px 12px; border-radius: 4px; border: none; opacity: 0.6;">
+                  Coming Soon
+                </button>
               </td>
             </tr>
           <% end %>
@@ -190,7 +196,8 @@
                 </div>
                 <div>
                   <div style="font-weight: 600; color: #ffffff;">
-                    <%= link_to project.title, project, style: "color: var(--color-primary)" %>
+
+|                    <%= link_to project.title, project, style: "color: var(--color-primary)", target: "_blank", rel: "noopener" %>
                   </div>
                   <small style="color: #E4DCC6; opacity: 0.9;">by <%= project.user.display_name %></small>
                 </div>
@@ -368,6 +375,59 @@ document.addEventListener('DOMContentLoaded', function() {
       toggleButton.textContent = 'Show Analytics';
       toggleButton.classList.remove('pill-gray');
       toggleButton.classList.add('pill-blue');
+    }
+  });
+
+  // Handle action buttons auto-focus and collapse behavior
+  document.querySelectorAll('details').forEach(function(details) {
+    var summary = details.querySelector('summary');
+
+    summary.addEventListener('click', function(e) {
+      // Get the parent row to find sibling details elements
+      var row = details.closest('tr');
+      if (row) {
+        // Close other details in the same row when opening this one
+        if (!details.open) {
+          row.querySelectorAll('details').forEach(function(otherDetails) {
+            if (otherDetails !== details && otherDetails.open) {
+              otherDetails.open = false;
+            }
+          });
+        }
+      }
+
+      // No longer needed - moved to toggle event handler
+    });
+
+    // Listen for the toggle event to handle focus properly
+    details.addEventListener('toggle', function() {
+      if (details.open) {
+        // Use requestAnimationFrame to ensure DOM has updated
+        requestAnimationFrame(function() {
+          var textInput = details.querySelector('textarea, input[type="text"]');
+          if (textInput) {
+            textInput.focus();
+          }
+        });
+      }
+    });
+  });
+
+  // Handle Enter key submission for forms
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) {
+      var target = e.target;
+
+      // Check if we're in a textarea or text input within a form
+      if ((target.tagName === 'TEXTAREA' || target.tagName === 'INPUT') && target.form) {
+        e.preventDefault();
+
+        // Find the submit button in the form and click it
+        var submitButton = target.form.querySelector('input[type="submit"]');
+        if (submitButton) {
+          submitButton.click();
+        }
+      }
     }
   });
 });

@@ -9,11 +9,11 @@ class HourlyHackatimeRefreshJob < ApplicationJob
     from = "2025-05-16"
     to = Time.zone.today.strftime("%Y-%m-%d")
 
-    users.find_each do |user|
-      RefreshHackatimeStatsJob.perform_later(user.id, from: from, to: to)
-    end
-    Rails.logger.debug { "Hourly Hackatime refresh job performed for #{users.count} users" }
-    message = "Hourly Hackatime refresh job performed for #{users.count} users"
+    jobs = users.map { |u| RefreshHackatimeStatsJob.new(u.id, from: from, to: to) }
+    ActiveJob.perform_all_later(jobs)
+
+    Rails.logger.debug { "Hourly Hackatime refresh job performed for #{jobs.size} users" }
+    message = "Hourly Hackatime refresh job performed for #{jobs.size} users"
 
     begin
       client = Slack::Web::Client.new(token: ENV.fetch("SLACK_BOT_TOKEN", nil))

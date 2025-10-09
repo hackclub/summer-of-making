@@ -364,6 +364,10 @@ class Project < ApplicationRecord
 
   def shipping_requirements
     {
+      recertification_not_blocked: {
+        met: !user.recertification_blocked?,
+        message: "You are blocked from shipping. Contact an admin if you believe this is an error."
+      },
       devlogs: {
         met: devlogs_since_last_ship.count >= 1,
         message: "You must have at least one devlog #{ship_events.count > 0 ? "since the last ship" : ""}"
@@ -443,6 +447,8 @@ class Project < ApplicationRecord
   end
 
   def can_request_recertification?
+    return false if user.recertification_blocked?
+
     latest_ship_certification&.rejected? &&
     ship_events.any? &&
     !latest_ship_certification.pending?
@@ -544,17 +550,17 @@ class Project < ApplicationRecord
       ship_event_vote_count = VoteChange.where(project: self).where("created_at > ?", ship.created_at).count
 
       # Only process ship events that have exactly 18 votes
-      next unless ship_event_vote_count == 18
+      next unless ship_event_vote_count == 10
 
       # Calculate cumulative vote count for this ship event payout
       votes_before_ship = VoteChange.where(project: self).where("created_at <= ?", ship.created_at).count
-      cumulative_vote_count_at_payout = votes_before_ship + 18
+      cumulative_vote_count_at_payout = votes_before_ship + 10
 
       puts "Ship #{ship.id} created at #{ship.created_at}: votes_before=#{votes_before_ship}, cumulative=#{cumulative_vote_count_at_payout}"
 
       # Find when this ship event got its 18th vote
       # This is when votes_before_ship + votes after ship creation = cumulative_vote_count_at_payout
-      ship_votes_needed = 18
+      ship_votes_needed = 10
       target_vote_count = votes_before_ship + ship_votes_needed
 
       # Get the project's ELO rating when it reached this target vote count

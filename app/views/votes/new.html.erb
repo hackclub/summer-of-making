@@ -36,6 +36,13 @@
   <%= render "shared/page_title",
       title: "Vote",
       subtitle: "Vote on others' projects! #{Vote.count} votes have been submitted so far!" %>
+  <% if defined?(@total_unpaid_ship_events) %>
+    <div class="bg-[#F6DBBA] rounded-2xl p-3 md:p-4 mb-4">
+      <div class="flex items-center justify-center">
+          <p class="text-som-dark text-4xl font-medium"> <%= @total_unpaid_ship_events %> Ships to go</p>
+      </div>
+  </div>
+  <% end %>
   <%# so amber doesn't have to answer the same question over and over%>
   <% if flash[:vote_rejected].present? %>
     <div id="vote-rejected-modal" data-controller="modal" class="hidden fixed inset-0 z-50 overflow-auto bg-black/30 flex items-center justify-center p-2 md:p-4" data-action="click->modal#clickOutsideHandler">
@@ -170,19 +177,17 @@
                     <span><%= "devlog".pluralize(ship_devlogs.count) %></span>
                     <span>•</span>
                     <span class="text-gray-800"><%= format_seconds(ship_time_seconds) %></span>
-                    <% admin_tool do %>
-                      <%= render "shared/project_twiddles", project: project %>
-                      <span>•</span>
-                      <span>Ship Date: <span class="text-black"><%= ship_event.created_at.strftime("%b %d") %></span></span>
-                      <span>•</span>
-                      <span>Paid: <span class="text-black"><%= @paid_ship_event_ids&.include?(ship_event.id) ? "Yes" : "No" %></span></span>
-                      <span>•</span>
-                      <span>Ship Event ID: <span class="text-black"><%= ship_event.id %></span></span>
-                      <span>•</span>
-                      <span>Project ID: <span class="text-black"><%= project.id %></span></span>
-                      <span>•</span>
-                      <span>Certification Status: <span class="text-black"><%= project.certification_status_text %></span></span>
-                    <% end %>
+                    <%= render "shared/project_twiddles", project: project %>
+                    <span>•</span>
+                    <span>Ship Date: <span class="text-black"><%= ship_event.created_at.strftime("%b %d") %></span></span>
+                    <span>•</span>
+                    <span>Paid: <span class="text-black"><%= @paid_ship_event_ids&.include?(ship_event.id) ? "Yes" : "No" %></span></span>
+                    <span>•</span>
+                    <span>Ship Event ID: <span class="text-black"><%= ship_event.id %></span></span>
+                    <span>•</span>
+                    <span>Project ID: <span class="text-black"><%= project.id %></span></span>
+                    <span>•</span>
+                    <span>Certification Status: <span class="text-black"><%= project.certification_status_text %></span></span>
                   </div>
 
                   <div class="text-base sm:text-lg text-gray-600"
@@ -217,6 +222,14 @@
 
                   <%= render "shared/report", id: index == 0 ? 'new-tutorial-vote-report' : nil, suspect: ship_event, already_reported: @reported_ship_event_ids&.include?(ship_event.id) %>
                 </div>
+                <%# it'll cause N+1 but meh %>
+                <% if project.latest_ship_certification&.proof_video&.attached? %>
+                  <div class="bg-soft-bone/50 border border-saddle-taupe/30 rounded-lg p-3">
+                    <video controls class="w-full max-h-64 rounded">
+                      <source src="<%= url_for(project.latest_ship_certification.proof_video) %>" type="<%= project.latest_ship_certification.proof_video.content_type %>">
+                    </video>
+                  </div>
+                <% end %>
               </div>
 
               <div class="space-y-4 sm:space-y-8" id="<%= index == 0 ? 'new-tutorial-vote-devlogs' : nil %>">

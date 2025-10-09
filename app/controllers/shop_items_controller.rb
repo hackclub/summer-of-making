@@ -11,6 +11,11 @@ class ShopItemsController < ApplicationController
   end
 
   def index
+  @shop_closed = Flipper.enabled?(:shop_closed, current_user)
+    if @shop_closed
+      @shop_items = []
+      return
+    end
   @selected_region = @regionalization_enabled ? determine_user_region : nil
     @region_auto_detected = @regionalization_enabled && session[:region_auto_detected]
 
@@ -92,6 +97,7 @@ class ShopItemsController < ApplicationController
 
   def black_market
     return redirect_to shop_path unless current_user&.has_black_market? || current_user&.is_admin?
+    return redirect_to shop_path if Flipper.enabled?(:shop_closed, current_user)
 
     @selected_region = @regionalization_enabled ? determine_user_region : nil
     @region_auto_detected = @regionalization_enabled && session[:region_auto_detected]

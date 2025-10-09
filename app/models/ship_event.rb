@@ -77,6 +77,10 @@ class ShipEvent < ApplicationRecord
           .sum(:duration_seconds)
   end
 
+  def vote_count
+    VoteChange.where(project: project).where("created_at <= ?", created_at).count
+  end
+
   private
 
   def maybe_create_ship_certification

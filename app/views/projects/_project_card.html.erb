@@ -362,7 +362,13 @@
                     rows="5"
                     class="som-horizontal-input mt-1 block w-full text-sm"></textarea>
                 </div>
-                <% if @project.can_request_recertification? %>
+                <% if @project.user.recertification_blocked? %>
+                  <div class="mt-3 p-3 bg-gray-100 border border-gray-300 rounded-lg">
+                    <p class="text-sm text-gray-600">
+                      🚫 Oh, no! It seems like you can't ask for re-certification anymore. If you have any questions, please create a ticket in #ask-the-shipwrights.
+                    </p>
+                  </div>
+                <% elsif @project.can_request_recertification? %>
                   <%= form_with url: project_recertification_path(@project), method: :post, local: true, id: "recertification-instructions-form-#{@project.id}" do |f| %>
                     <%= f.text_area :recertification_instructions, id: "recertification-instructions-#{@project.id}", style: "display:none;" %>
                   <% end %>

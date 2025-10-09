@@ -1,19 +1,18 @@
 <% target_id = local_assigns.fetch(:target_id, "devlogs-list") %>
 
-<% if devlogs&.any? %>
-  <% devlogs.each do |devlog| %>
-    <%= turbo_stream.append target_id do %>
-      <%= render "devlogs/devlog_card",
-        devlog: devlog,
-        context: 'explore',
-        show_project_title: true,
-        show_project_navigation: true,
-        show_likes: true,
-        show_project_link: true,
-        show_comment_modal: true,
-        show_stonks: false %>
-    <% end %>
-  <% end %>
+<%= turbo_stream.append target_id do %>
+  <%= render partial: "devlogs/devlog_card",
+             collection: devlogs,
+             as: :devlog,
+             locals: {
+               context: 'explore',
+               show_project_title: true,
+               show_project_navigation: true,
+               show_likes: true,
+               show_project_link: true,
+               show_comment_modal: true,
+               show_stonks: false
+      } %>
 <% end %>
 
 <%= turbo_stream.replace "load-more-devlogs" do %>

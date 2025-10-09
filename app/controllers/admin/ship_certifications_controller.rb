@@ -3,6 +3,7 @@ module Admin
     before_action :authenticate_ship_certifier!, except: []
     skip_before_action :authenticate_admin!
 
+
     def index
       @filter = params[:filter] || "pending"
       @category_filter = params[:category_filter]
@@ -105,28 +106,11 @@ module Admin
       est_zone = ActiveSupport::TimeZone.new("America/New_York")
       current_est = Time.current.in_time_zone(est_zone)
       week_start = current_est.beginning_of_week(:sunday)
-      @leaderboard_week = User.joins("INNER JOIN ship_certifications ON users.id = ship_certifications.reviewer_id")
-        .where.not(ship_certifications: { reviewer_id: nil })
-        .where("ship_certifications.updated_at >= ?", week_start)
-        .group("users.id", "users.display_name", "users.email")
-        .order("COUNT(ship_certifications.id) DESC")
-        .limit(20)
-        .pluck("users.display_name", "users.email", "COUNT(ship_certifications.id)")
 
-      @leaderboard_day = User.joins("INNER JOIN ship_certifications ON users.id = ship_certifications.reviewer_id")
-        .where.not(ship_certifications: { reviewer_id: nil })
-        .where("ship_certifications.updated_at >= ?", 24.hours.ago)
-        .group("users.id", "users.display_name", "users.email")
-        .order("COUNT(ship_certifications.id) DESC")
-        .limit(20)
-        .pluck("users.display_name", "users.email", "COUNT(ship_certifications.id)")
-
-      @leaderboard_all = User.joins("INNER JOIN ship_certifications ON users.id = ship_certifications.reviewer_id")
-        .where.not(ship_certifications: { reviewer_id: nil })
-        .group("users.id", "users.display_name", "users.email")
-        .order("COUNT(ship_certifications.id) DESC")
-        .limit(20)
-        .pluck("users.display_name", "users.email", "COUNT(ship_certifications.id)")
+      # Build optimized leaderboards using shared base scope
+      @leaderboard_week = reviewer_leaderboard(since: week_start)
+      @leaderboard_day = reviewer_leaderboard(since: 24.hours.ago)
+      @leaderboard_all = reviewer_leaderboard(since: nil)
 
       @decided_last_24h = ShipCertification.where.not(judgement: :pending)
         .where("ship_certifications.updated_at >= ?", 24.hours.ago)
@@ -151,10 +135,18 @@ module Admin
       end
 
       # Calculate payment stats for reviewers including pending requests
+      # Only count decisions made since the payout system was implemented (September 3, 2025)
+      feature_launch_date = Date.new(2025, 9, 3).beginning_of_day
+
       @payment_stats = User.joins("INNER JOIN ship_certifications ON users.id = ship_certifications.reviewer_id")
+        .joins("INNER JOIN projects ON ship_certifications.project_id = projects.id")
         .joins("LEFT JOIN payouts ON users.id = payouts.user_id AND payouts.reason LIKE 'Ship certification review payment:%'")
         .joins("LEFT JOIN ship_reviewer_payout_requests ON users.id = ship_reviewer_payout_requests.reviewer_id")
         .where.not(ship_certifications: { reviewer_id: nil })
+        .where("ship_certifications.updated_at >= ?", feature_launch_date)
+        .where("ship_certifications.updated_at > ship_certifications.created_at")
+        .where.not(ship_certifications: { judgement: :pending })
+        .where(projects: { is_deleted: false })
         .group("users.id", "users.display_name", "users.email")
         .select("users.display_name", "users.email", "COUNT(DISTINCT ship_certifications.id) as review_count", "COALESCE(SUM(payouts.amount), 0) as total_paid", "COALESCE(SUM(CASE WHEN ship_reviewer_payout_requests.status = 0 THEN ship_reviewer_payout_requests.amount ELSE 0 END), 0) as pending_amount")
         .order("total_paid DESC")
@@ -238,6 +230,25 @@ module Admin
 
     private
 
+    def reviewer_leaderboard(since: nil)
+      # Optimized leaderboard query using ActiveRecord associations
+      scope = ShipCertification
+        .joins(:reviewer, :project)
+        .where.not(reviewer_id: nil)
+        .where("ship_certifications.updated_at > ship_certifications.created_at")
+        .where.not(judgement: :pending)
+        .where(projects: { is_deleted: false })
+        .group("users.id", "users.display_name", "users.email")
+        .order("COUNT(ship_certifications.id) DESC")
+        .limit(20)
+
+      if since.present?
+        scope = scope.where("ship_certifications.updated_at >= ?", since)
+      end
+
+      scope.pluck("users.display_name", "users.email", "COUNT(ship_certifications.id)")
+    end
+
     def validate_certification_requirements
       errors = []
 
@@ -255,7 +266,7 @@ module Admin
       end
 
       # Check if status is not pending
-      if params[:ship_certification][:judgement] == "pending"
+      if params[:ship_certification] && params[:ship_certification][:judgement] == "pending"
         errors << 'Change status from "pending" to approved or rejected'
       end
 

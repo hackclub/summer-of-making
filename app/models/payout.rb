@@ -34,7 +34,9 @@ class Payout < ApplicationRecord
   scope :escrowed, -> { where(escrowed: true) }
   scope :released, -> { where(escrowed: false) }
 
-  VOTE_COUNT_REQUIRED = 18
+  VOTE_COUNT_REQUIRED = 10
+
+  after_create_commit :broadcast_ship_payout_balloon
 
   # x = ELO percentile (0-1)
   def self.calculate_multiplier(x)
@@ -51,5 +53,19 @@ class Payout < ApplicationRecord
 
   def set_user_id
     self.user ||= payable.is_a?(User) ? payable : payable.user
+  end
+
+  def broadcast_ship_payout_balloon
+    return unless payable_type == "ShipEvent" && escrowed == false
+
+    project = payable.project
+    hours = payable.hours_covered
+    mult = hours.to_f > 0 ? (amount.to_f / hours.to_f).round(1) : 0
+    ActionCable.server.broadcast "balloons", {
+      type: "ShipPayout",
+      href: Rails.application.routes.url_helpers.project_url(project, only_path: true),
+      color: project.user.user_profile&.balloon_color || %w[#b00b69 #69b00b #d90ba7 #1ffffa].sample,
+      tagline: ERB::Util.html_escape("Paid #{project.title}: #{amount.to_i} shells (#{hours.round(1)}h × #{mult}x)")
+    }
   end
 end

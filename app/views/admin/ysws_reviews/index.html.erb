@@ -24,6 +24,81 @@
       Airtable Dashboard
     </a>
   </div>
+
+  <div style="background: var(--color-card); padding: 1rem; border-radius: 8px; flex: 2;">
+    <h3>YSWS Reviewer Leaderboard</h3>
+    <div id="ysws_week_board">
+      <p style="margin-bottom: 0.5rem; font-size: 0.95em; color: var(--color-primary);">This week (Sunday-Sunday EST)</p>
+      <% if @leaderboard_week.any? %>
+        <table style="width: 100%; font-size: 0.9rem;">
+          <thead>
+            <tr>
+              <th style="text-align: left;">Reviewer</th>
+              <th style="text-align: right;">Reviews completed</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% @leaderboard_week.each do |name, email, count| %>
+              <tr style="background: <%= cycle('#1c1b22', '#414142') %>;">
+                <td><%= name || email %></td>
+                <td style="text-align: right;"><%= count %></td>
+              </tr>
+            <% end %>
+          </tbody>
+        </table>
+      <% else %>
+        <p>nuthing here!</p>
+      <% end %>
+    </div>
+    <button id="ysws_daily" class="abtn small">show daily leaderboard</button>
+    <div id="ysws_daily_board" style="display: none; margin-top: 1rem;">
+      <p style="margin-bottom: 0.5rem; font-size: 0.95em; color: var(--color-primary);">Past 24 hours</p>
+      <% if @leaderboard_day && @leaderboard_day.any? %>
+        <table style="width: 100%; font-size: 0.9rem;">
+          <thead>
+            <tr>
+              <th style="text-align: left;">Reviewer</th>
+              <th style="text-align: right;">Reviews completed</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% @leaderboard_day.each do |name, email, count| %>
+              <tr>
+                <td><%= name || email %></td>
+                <td style="text-align: right;"><%= count %></td>
+              </tr>
+            <% end %>
+          </tbody>
+        </table>
+      <% else %>
+        <p>nuthin here!</p>
+      <% end %>
+    </div>
+    <button id="ysws_all" class="abtn small">how about all time?</button>
+    <div id="ysws_all_board" style="display: none; margin-top: 1rem;">
+      <p style="margin-bottom: 0.5rem; font-size: 0.95em; color: var(--color-primary);">All time</p>
+      <% if @leaderboard_all.any? %>
+        <table style="width: 100%; font-size: 0.9rem;">
+          <thead>
+            <tr>
+              <th style="text-align: left;">Reviewer</th>
+              <th style="text-align: right;">Reviews completed</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% @leaderboard_all.each do |name, email, count| %>
+              <tr>
+                <td><%= name || email %></td>
+                <td style="text-align: right;"><%= count %></td>
+              </tr>
+            <% end %>
+          </tbody>
+        </table>
+      <% else %>
+        <p>nuthin here!</p>
+      <% end %>
+    </div>
+  </div>
 </div>
 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
   <div style="display: flex; gap: 1rem;">
@@ -142,4 +217,46 @@
     </div>
   <% end %>
 </div>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    // YSWS Leaderboard toggle buttons
+    const yswsDailyBtn = document.getElementById('ysws_daily');
+    const yswsAllBtn = document.getElementById('ysws_all');
+    const yswsWeekBoard = document.getElementById('ysws_week_board');
+    const yswsDailyBoard = document.getElementById('ysws_daily_board');
+    const yswsAllBoard = document.getElementById('ysws_all_board');
+
+    function showWeeklyIfNothingElse() {
+      // Show weekly leaderboard if both daily and all-time are hidden
+      if (yswsDailyBoard.style.display === 'none' && yswsAllBoard.style.display === 'none') {
+        yswsWeekBoard.style.display = 'block';
+      }
+    }
+
+    if (yswsDailyBtn) {
+      yswsDailyBtn.addEventListener('click', function() {
+        yswsWeekBoard.style.display = 'none';
+        yswsAllBoard.style.display = 'none';
+        yswsDailyBoard.style.display = yswsDailyBoard.style.display === 'none' ? 'block' : 'none';
+        yswsDailyBtn.textContent = yswsDailyBoard.style.display === 'none' ? 'show daily leaderboard' : 'hide daily leaderboard';
+        yswsAllBtn.textContent = 'how about all time?';
+        // Show weekly if daily was just hidden
+        showWeeklyIfNothingElse();
+      });
+    }
+
+    if (yswsAllBtn) {
+      yswsAllBtn.addEventListener('click', function() {
+        yswsWeekBoard.style.display = 'none';
+        yswsDailyBoard.style.display = 'none';
+        yswsAllBoard.style.display = yswsAllBoard.style.display === 'none' ? 'block' : 'none';
+        yswsAllBtn.textContent = yswsAllBoard.style.display === 'none' ? 'how about all time?' : 'hide all time leaderboard';
+        yswsDailyBtn.textContent = 'show daily leaderboard';
+        // Show weekly if all-time was just hidden
+        showWeeklyIfNothingElse();
+      });
+    }
+  });
+</script>
 </body>

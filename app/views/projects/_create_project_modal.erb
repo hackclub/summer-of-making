@@ -10,6 +10,11 @@
     </div>
 
     <div class="max-h-[calc(90vh-100px)] overflow-y-auto overflow-x-hidden">
+      <% if Flipper.enabled?(:creation_locked, current_user) %>
+        <div class="p-3 md:p-6 mx-auto w-[calc(100%-2px)]">
+          <p>Summer of Making is over. Thanks for participating!</p>
+        </div>
+      <% else %>
       <%= form_with model: Project.new, class: "p-3 md:p-6 mx-auto w-[calc(100%-2px)]", data: { controller: "project-form repo-autofill" } do |f| %>
 
         <!-- Project Form Step -->
@@ -285,6 +290,7 @@
             <%= render C::StyledButton.new(text: "Create Project", type: :button, data: { project_form_target: "createButton", action: "click->project-form#submitProject" }, kind: :primary) %>
           </div>
         </div>
+      <% end %>
       <% end %>
     </div>
   <% end %>

@@ -9,11 +9,12 @@ class ShipReviewerPayoutService
 
     unpaid_decisions = count_unpaid_decisions(reviewer)
     payable_decisions = (unpaid_decisions / 2) * 2 # Only pay for complete pairs
-    amount = ShipReviewerPayoutRequest.calculate_amount_for_decisions(payable_decisions, reviewer: reviewer)
+    calculation = ShipReviewerPayoutRequest.calculate_amount_for_decisions(payable_decisions, reviewer: reviewer)
 
     request = ShipReviewerPayoutRequest.create!(
       reviewer: reviewer,
-      amount: amount,
+      amount: calculation[:amount],
+      multiplier: calculation[:multiplier],
       decisions_count: payable_decisions,
       status: :pending,
       requested_at: Time.current

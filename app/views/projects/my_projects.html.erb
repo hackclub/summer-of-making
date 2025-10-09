@@ -4,6 +4,7 @@
     subtitle: "What'ya buildin'?" %>
 
   <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-8 auto-rows-fr">
+    <% creation_locked = Flipper.enabled?(:creation_locked, current_user) %>
     <% if @projects.any? %>
       <% @projects.each do |project| %>
         <%= link_to project_path(project) do %>
@@ -63,10 +64,8 @@
             text: "Create Project",
             type: "primary",
             icon: "plus.svg",
-            data: {
-              action: "click->modal#open",
-              modal_type: "create-project"
-            }) %>
+            disabled: creation_locked,
+            data: (creation_locked ? {} : { action: "click->modal#open", modal_type: "create-project" }) ) %>
       </div>
     <% else %>
       <%= render C::Card.new(css_classes: "col-span-full flex flex-col items-center", padding: "lg") do %>
@@ -96,12 +95,12 @@
               text: "Create Your Project",
               type: "primary",
               icon: "plus.svg",
-              disabled: current_user.hackatime_projects.empty?,
-              data: {
+              disabled: (current_user.hackatime_projects.empty? || creation_locked),
+              data: (creation_locked ? {} : {
                 action: "click->modal#open",
                 modal_type: "create-project"
-              },
-              css_classes: "mx-auto animate-bounce #{'animate-bounce' if current_user.projects.empty?}") %>
+              }),
+              css_classes: "mx-auto #{'animate-bounce' if !creation_locked && current_user.projects.empty?}") %>
         </div>
       <% end %>
     <% end %>

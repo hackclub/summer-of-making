@@ -31,6 +31,12 @@ class DevlogsController < ApplicationController
 
   def create
     @project = Project.find(params[:project_id])
+    # Check if devlog creation is locked via feature flag (defaults to false if flag doesn't exist)
+    if Flipper.exist?(:creation_locked) && Flipper.enabled?(:creation_locked, current_user)
+      Rails.logger.info("[DevlogCreation] User #{current_user&.id} blocked by creation_locked feature flag for project #{@project.id}")
+      redirect_to project_path(@project), alert: "Sorry bud, summer of making is over."
+      return
+    end
 
     unless current_user == @project.user
       redirect_to project_path(@project), alert: "wuh"
@@ -149,6 +155,11 @@ class DevlogsController < ApplicationController
 
     project = Project.find_by(id: params[:project_id])
     return render json: { error: "Project not found" }, status: :not_found unless project
+
+    if Flipper.enabled?(:creation_locked, user)
+      Rails.logger.info("[DevlogCreation API] User #{user.id} blocked by creation_locked feature flag for project #{project.id}")
+      return render json: { error: "Devlog creation is currently unavailable" }, status: :forbidden
+    end
 
     # Check if the user owns the project
     unless user == project.user

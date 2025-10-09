@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_09_23_213146) do
+ActiveRecord::Schema[8.0].define(version: 2025_10_02_233210) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -306,6 +306,8 @@ ActiveRecord::Schema[8.0].define(version: 2025_09_23_213146) do
     t.string "resolved_outcome"
     t.text "resolved_message"
     t.index ["category"], name: "index_fraud_reports_on_category"
+    t.index ["resolved", "resolved_at"], name: "index_fraud_reports_on_resolved_and_resolved_at"
+    t.index ["resolved_at"], name: "index_fraud_reports_on_resolved_at"
     t.index ["resolved_by_id"], name: "index_fraud_reports_on_resolved_by_id"
     t.index ["user_id", "suspect_type", "suspect_id"], name: "index_fraud_reports_on_user_and_suspect", unique: true
     t.index ["user_id"], name: "index_fraud_reports_on_user_id"
@@ -451,13 +453,15 @@ ActiveRecord::Schema[8.0].define(version: 2025_09_23_213146) do
     t.text "notes"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-    t.text "recertification_instructions"
     t.text "ysws_feedback_reasons"
     t.bigint "ysws_returned_by_id"
     t.datetime "ysws_returned_at"
+    t.text "recertification_instructions"
+    t.boolean "is_reshipped"
     t.index ["project_id", "judgement"], name: "index_ship_certifications_on_project_id_and_judgement"
     t.index ["project_id"], name: "index_ship_certifications_on_project_id"
     t.index ["reviewer_id"], name: "index_ship_certifications_on_reviewer_id"
+    t.index ["ysws_returned_at"], name: "index_ship_certifications_on_ysws_returned_at"
     t.index ["ysws_returned_by_id"], name: "index_ship_certifications_on_ysws_returned_by_id"
   end
 
@@ -964,6 +968,11 @@ ActiveRecord::Schema[8.0].define(version: 2025_09_23_213146) do
     t.datetime "processed_at"
     t.text "ai_feedback"
     t.boolean "is_low_quality", default: false, null: false
+    t.string "user_agent"
+    t.string "ip"
+    t.integer "time_on_tab_ms"
+    t.integer "time_off_tab_ms"
+    t.index ["ip"], name: "index_votes_on_ip"
     t.index ["marked_invalid_at"], name: "index_votes_on_marked_invalid_at"
     t.index ["marked_invalid_by_id"], name: "index_votes_on_marked_invalid_by_id"
     t.index ["project_1_id"], name: "index_votes_on_project_1_id"
@@ -971,6 +980,9 @@ ActiveRecord::Schema[8.0].define(version: 2025_09_23_213146) do
     t.index ["ship_event_1_id"], name: "index_votes_on_ship_event_1_id"
     t.index ["ship_event_2_id"], name: "index_votes_on_ship_event_2_id"
     t.index ["status"], name: "index_votes_on_status"
+    t.index ["time_off_tab_ms"], name: "index_votes_on_time_off_tab_ms"
+    t.index ["time_on_tab_ms"], name: "index_votes_on_time_on_tab_ms"
+    t.index ["user_agent"], name: "index_votes_on_user_agent"
     t.index ["user_id", "ship_event_1_id", "ship_event_2_id"], name: "index_votes_on_user_and_ship_events", unique: true
     t.index ["user_id"], name: "index_votes_on_user_id"
   end

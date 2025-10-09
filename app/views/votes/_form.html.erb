@@ -3,34 +3,26 @@
   class: "space-y-6",
   data: {
     turbo: true,
-    controller: "form",
-    action: "submit->form#validateAndPreventDoubleSubmission"
+    controller: "form tab-visibility",
+    action: "submit->form#validateAndPreventDoubleSubmission submit->tab-visibility#prepareForSubmission"
   }) do |f| %>
-
   <%# Ship event IDs and signature for secure voting %>
   <%= f.hidden_field :ship_event_1_id, value: @ship_events&.first&.id, data: { form_target: "shipEvent1" } %>
   <%= f.hidden_field :ship_event_2_id, value: @ship_events&.last&.id, data: { form_target: "shipEvent2" } %>
   <%= f.hidden_field :signature, value: @vote_signature %>
-
-  <% if ENV['TURNSTILE_SITE_KEY'].present? %>
-    <div class="flex flex-col items-center mb-4">
-      <div data-controller="turnstile" data-sitekey="<%= ENV['TURNSTILE_SITE_KEY'] %>" data-theme="auto" data-mode="non-interactive"></div>
-      <div id="turnstile-error"></div>
-    </div>
-  <% end %>
-
+  <%# Tab visibility tracking fields %>
+  <%= f.hidden_field :time_on_tab_ms, value: 0, data: { tab_visibility_target: "timeOnTab" } %>
+  <%= f.hidden_field :time_off_tab_ms, value: 0, data: { tab_visibility_target: "timeOffTab" } %>
   <div class="text-center">
     <h2 class="text-md sm:text-md md:text-lg lg:text-2xl mb-6 sm:mb-8 text-center">
       A good ship is technical, creative, and tells the story of how it was made.
       By that definition, which of these two projects is better?
     </h2>
-
     <% if vote.errors[:winning_project_id].any? %>
       <div class="text-vintage-red text-sm mb-4">
         Please select which project you think is better
       </div>
     <% end %>
-
     <div class="flex flex-col sm:flex-row justify-center items-center space-y-4 sm:space-y-0 sm:space-x-6 mb-6">
       <label class="flex items-center cursor-pointer">
         <%= f.radio_button :winning_project_id, @projects.first.id, class: "sr-only peer", required: true %>
@@ -40,7 +32,6 @@
           </div>
         </div>
       </label>
-
       <label class="flex items-center cursor-pointer">
         <%= f.radio_button :winning_project_id, "tie", class: "sr-only peer", required: true %>
         <div class="som-button-primary peer-checked:!bg-nice-blue peer-checked:!text-white border-2 border-transparent peer-checked:!border-nice-blue transition-all duration-300">
@@ -49,7 +40,6 @@
           </div>
         </div>
       </label>
-
       <label class="flex items-center cursor-pointer">
         <%= f.radio_button :winning_project_id, @projects.last.id, class: "sr-only peer", required: true %>
         <div class="som-button-primary peer-checked:!bg-saddle-taupe peer-checked:!text-white border-2 border-transparent peer-checked:!border-saddle-taupe transition-all duration-300">
@@ -60,30 +50,28 @@
       </label>
     </div>
   </div>
-
-  <div class="space-y-2">
-    <%= f.text_area :explanation,
-      class: "som-horizontal-input w-full rounded-lg resize-none focus:ring-2 focus:ring-nice-blue focus:border-nice-blue transition-colors #{'border-vintage-red' if vote.errors[:explanation].any?}",
-      rows: 4,
-      required: true,
-      minlength: 100,
-      data: { form_target: "explanation" },
-      placeholder: "Tell us why you made this choice..." %>
-
-    <% if vote.errors[:explanation].any? %>
-      <div class="text-vintage-red text-sm mt-1">
-        <%= vote.errors[:explanation].join(", ") %>
-      </div>
-    <% end %>
-
-    <div class="text-sm mt-1" data-form-target="counter"></div>
-  </div>
-
+  <% if false %>
+    <div class="space-y-2">
+      <%= f.text_area :explanation,
+        class: "som-horizontal-input w-full rounded-lg resize-none focus:ring-2 focus:ring-nice-blue focus:border-nice-blue transition-colors #{'border-vintage-red' if vote.errors[:explanation].any?}",
+        rows: 4,
+        required: true,
+        minlength: 100,
+        data: { form_target: "explanation" },
+        placeholder: "Tell us why you made this choice..." %>
+      <% if vote.errors[:explanation].any? %>
+        <div class="text-vintage-red text-sm mt-1">
+          <%= vote.errors[:explanation].join(", ") %>
+        </div>
+      <% end %>
+      <div class="text-sm mt-1" data-form-target="counter"></div>
+    </div>
+  <% end %>
   <div class="flex justify-center items-center w-full">
     <%= render C::StyledButton.new(
         text: "Submit Vote",
         type: :submit,
-        css_classes: "opacity-75 cursor-not-allowed pointer-events-none",
+        css_classes: "",
         data: { form_target: "submitButton" }) %>
   </div>
 <% end %>
