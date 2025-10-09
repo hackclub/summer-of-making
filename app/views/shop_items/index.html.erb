@@ -17,11 +17,27 @@
       <% end %>
     </div>
 
-  <% if current_user && current_verification_status != :verified %>
-    <div class="flex justify-center mb-4">
-      <%= render "verification_callout" %>
+  <% if @shop_closed %>
+    <div class="flex justify-center items-center min-h-[60vh]">
+      <div class="bg-vintage-red bg-opacity-30 backdrop-blur-lg p-8 rounded-xl shadow-lg text-center max-w-2xl">
+        <h1 class="text-2xl font-bold mb-4">The Shop has closed!</h1>
+        <p class="text-lg mb-6">Aw, Snap! The shop has closed, but we hope you found something you liked! Thank you for being part of Summer of Making!</p>
+        <% if current_user&.shop_orders&.any? %>
+          <%= render C::StyledButton.new(
+            text: "View My Orders",
+            link: shop_orders_path,
+            kind: :primary,
+            fill_width: false,
+            icon: nil) %>
+        <% end %>
+      </div>
     </div>
-  <% end %>
+  <% else %>
+    <% if current_user && current_verification_status != :verified %>
+      <div class="flex justify-center mb-4">
+        <%= render "verification_callout" %>
+      </div>
+    <% end %>
 
   <div class="flex flex-col sm:flex-row items-center justify-between gap-4 mb-6">
     <div class="flex flex-col sm:flex-row items-center gap-4">
@@ -225,6 +241,7 @@
         </div>
       <% end %>
     <% end %>
+  <% end %>
   </div>
 </div>
 
