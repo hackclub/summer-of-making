@@ -76,7 +76,6 @@ class UserVoteQueueMatchupService
       }
     end
     @projects_with_time.sort_by! { |p| p[:ship_date] }
-    Rails.logger.info("projects_with_time: #{@projects_with_time.map { |p| [ p[:project_id], p[:votes_count] ] }}")
 
     @unpaid_projects = @projects_with_time.select { |p| !p[:is_paid] }
     @paid_projects = @projects_with_time.select { |p| p[:is_paid] }
@@ -88,87 +87,57 @@ class UserVoteQueueMatchupService
   def pick_pair(used_ship_event_ids: Set.new)
     return nil if @projects_with_time.size < 2
 
-    selected_project_data = []
     used_user_ids = Set.new
     used_repo_links = Set.new
 
-    attempts = 0
-    max_attempts = 25
-    while selected_project_data.size < 2 && attempts < max_attempts
-      attempts += 1
+    first_pool =
+      @immature_unpaid_projects.presence ||
+      @mature_unpaid_projects.presence ||
+      @paid_projects.presence
 
-      if selected_project_data.empty?
-        # First pick: unpaid and immature (< 12 votes) (kinda borrowing uncertaiity from bayseain systems but not really)
-        available_unpaid_immature = @immature_unpaid_projects.select { |p| eligible_for_selection?(p, used_user_ids, used_repo_links, used_ship_event_ids) }
-        available_unpaid_immature = @projects_with_time.select { |p| eligible_for_selection?(p, used_user_ids, used_repo_links, used_ship_event_ids) } if available_unpaid_immature.empty?
-        # technically, it might be paid, but idc.
-        first_project_data = weighted_sample(available_unpaid_immature)
-        next unless first_project_data
+    first_candidates = first_pool.select { |p|
+      eligible_for_selection?(p, used_user_ids, used_repo_links, used_ship_event_ids)
+    }
 
-        selected_project_data << first_project_data
-        used_user_ids << first_project_data[:user_id]
-        used_repo_links << first_project_data[:repo_link] if first_project_data[:repo_link].present?
-
-        first_time = first_project_data[:total_time]
-        min_time = first_time * 0.7
-        max_time = first_time * 1.3
-
-        compatible_mature_unpaid = @mature_unpaid_projects.select { |p| eligible_for_selection?(p, used_user_ids, used_repo_links, used_ship_event_ids) && time_compatible?(p, min_time, max_time) }
-        if compatible_mature_unpaid.any?
-          second_project_data = weighted_sample(compatible_mature_unpaid)
-          selected_project_data << second_project_data
-          used_user_ids << second_project_data[:user_id]
-          used_repo_links << second_project_data[:repo_link] if second_project_data[:repo_link].present?
-        else
-          compatible_paid = @paid_projects.select { |p| eligible_for_selection?(p, used_user_ids, used_repo_links, used_ship_event_ids) && time_compatible?(p, min_time, max_time) }
-          if compatible_paid.any?
-            second_project_data = weighted_sample(compatible_paid)
-            selected_project_data << second_project_data
-            used_user_ids << second_project_data[:user_id]
-            used_repo_links << second_project_data[:repo_link] if second_project_data[:repo_link].present?
-          else
-            selected_project_data.clear
-            used_user_ids.clear
-            used_repo_links.clear
-          end
-        end
-      end
+    first = weighted_sample(first_candidates)
+    unless first
+      Rails.logger.info("func pick_pair: can't find first project")
+      return nil
     end
 
-    if selected_project_data.size < 2 && @unpaid_projects.any?
-      eligible_unpaid = @unpaid_projects.reject { |p| used_ship_event_ids.include?(p[:ship_event_id]) }
-      first_project_data = weighted_sample(eligible_unpaid)
-      return nil unless first_project_data
-      remaining_projects = @projects_with_time.reject { |p|
-        p[:user_id] == first_project_data[:user_id] ||
-        (p[:repo_link].present? && p[:repo_link] == first_project_data[:repo_link]) ||
-        used_ship_event_ids.include?(p[:ship_event_id])
+    used_user_ids << first[:user_id]
+    used_repo_links << first[:repo_link]
+    used_ship_event_ids = used_ship_event_ids.dup.add(first[:ship_event_id])
+
+    first_t = first[:total_time]
+    min_t, max_t = [ first_t * 0.7, first_t * 1.3 ]
+
+    second_pool =
+      @mature_unpaid_projects.presence ||
+      @paid_projects.presence
+
+    second_candidates = second_pool.select { |p|
+      eligible_for_selection?(p, used_user_ids, used_repo_links, used_ship_event_ids) && time_compatible?(p, min_t, max_t)
+    }
+    second = weighted_sample(second_candidates)
+
+    if second.nil?
+      second_candidates = @projects_with_time.select { |p|
+        eligible_for_selection?(p, used_user_ids, used_repo_links, used_ship_event_ids)
       }
-      if remaining_projects.any?
-        second_project_data = weighted_sample(remaining_projects)
-        selected_project_data = [ first_project_data, second_project_data ]
-      end
+      second = weighted_sample(second_candidates)
     end
 
-    if selected_project_data.size < 2 && !@unpaid_projects.any?
-      eligible_paid = @paid_projects.reject { |p| used_ship_event_ids.include?(p[:ship_event_id]) }
-      eligible_paid = @projects_with_time.reject { |p| used_ship_event_ids.include?(p[:ship_event_id]) } if eligible_paid.empty?
-      first_project_data = weighted_sample(eligible_paid)
-      return nil unless first_project_data
-      remaining_projects = @projects_with_time.reject { |p|
-        p[:user_id] == first_project_data[:user_id] ||
-        (p[:repo_link].present? && p[:repo_link] == first_project_data[:repo_link]) ||
-        used_ship_event_ids.include?(p[:ship_event_id])
-      }
-      if remaining_projects.any?
-        second_project_data = weighted_sample(remaining_projects)
-        selected_project_data = [ first_project_data, second_project_data ]
-      end
+    unless second
+      Rails.logger.info("func pick_pair: can't find second project")
+      return nil
     end
 
-    return nil if selected_project_data.size < 2
+    a = first[:ship_event_id]
+    b = second[:ship_event_id]
+    return nil if a.nil? || b.nil?
 
-    selected_project_data.map { |p| p[:ship_event_id] }.minmax
+    [ a, b ].minmax
   end
 
   private
