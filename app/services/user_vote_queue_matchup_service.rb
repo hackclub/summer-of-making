@@ -111,22 +111,19 @@ class UserVoteQueueMatchupService
 
     first_t = first[:total_time]
     min_t, max_t = [ first_t * 0.7, first_t * 1.3 ]
+    first_is_paid = @paid_projects&.include?(first)
 
     second_pool =
-      @mature_unpaid_projects.presence ||
-      @paid_projects.presence
+    if first_is_paid
+      @unpaid_projects.presence
+    else
+      @mature_unpaid_projects.presence || @paid_projects.presence
+    end
 
     second_candidates = second_pool.select { |p|
       eligible_for_selection?(p, used_user_ids, used_repo_links, used_ship_event_ids) && time_compatible?(p, min_t, max_t)
     }
     second = weighted_sample(second_candidates)
-
-    if second.nil?
-      second_candidates = @projects_with_time.select { |p|
-        eligible_for_selection?(p, used_user_ids, used_repo_links, used_ship_event_ids)
-      }
-      second = weighted_sample(second_candidates)
-    end
 
     unless second
       Rails.logger.info("func pick_pair: can't find second project")
