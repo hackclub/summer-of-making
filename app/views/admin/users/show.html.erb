@@ -558,6 +558,11 @@
     <div class="agrid">
       <%= button_to "🥸 impersonate?", impersonate_admin_user_path(@user), class: 'abtn secondary' %>
 
+      <%= form_with url: refill_admin_user_path(@user) do |f| %>
+        <%= f.number_field :count, placeholder: "count", value: 5, style: "padding: 0.5em; border-radius: 6px; border: 1px solid var(--color-border); background: var(--color-darker); color: var(--color-text);" %>
+        <%= f.submit "refill votes", class: 'abtn primary' %>
+      <% end %>
+
       <% if @user.freeze_shop_activity? %>
         <%= button_to "defrost (allow shop activity again)", defrost_admin_user_path(@user), class: 'abtn primary' %>
       <% else %>
