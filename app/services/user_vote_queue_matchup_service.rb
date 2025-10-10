@@ -92,12 +92,16 @@ class UserVoteQueueMatchupService
 
     first_pool =
       @immature_unpaid_projects.presence ||
-      @mature_unpaid_projects.presence ||
+      @unpaid_projects.presence ||
       @paid_projects.presence
+
+    puts "first_poll: #{first_pool.count}"
 
     first_candidates = first_pool.select { |p|
       eligible_for_selection?(p, used_user_ids, used_repo_links, used_ship_event_ids)
     }
+
+    puts "first_cd: #{first_candidates.count}"
 
     first = weighted_sample(first_candidates)
     unless first
@@ -110,19 +114,24 @@ class UserVoteQueueMatchupService
     used_ship_event_ids = used_ship_event_ids.dup.add(first[:ship_event_id])
 
     first_t = first[:total_time]
-    min_t, max_t = [ first_t * 0.7, first_t * 1.3 ]
+    min_t, max_t = [ first_t * 0.5, first_t * 1.5 ]
     first_is_paid = @paid_projects&.include?(first)
 
     second_pool =
     if first_is_paid
+      puts "first paid"
       @unpaid_projects.presence
     else
+      puts "first unpaid"
       @mature_unpaid_projects.presence || @paid_projects.presence
     end
+
+    puts "second_pool: #{second_pool.count}"
 
     second_candidates = second_pool.select { |p|
       eligible_for_selection?(p, used_user_ids, used_repo_links, used_ship_event_ids) && time_compatible?(p, min_t, max_t)
     }
+    puts "second_cd: #{second_candidates.count}"
     second = weighted_sample(second_candidates)
 
     unless second
@@ -163,6 +172,8 @@ class UserVoteQueueMatchupService
       cumulative_weight += weights[index]
       return project if random <= cumulative_weight
     end
+
+    puts "project wg#{ projects.count}"
 
     projects.first
   end
