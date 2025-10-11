@@ -184,8 +184,6 @@
                   <%= index + 1 %>.
                   <% if project %>
                     <%= link_to project.title, project_path(project), class: "underline decoration-dotted decoration-slate-300 hover:decoration-slate-600" %>
-                  <% else %>
-                    Project missing
                   <% end %>
                 </span>
                 <span class="text-slate-500"><%= pluralize(entry[:devlogs_count], "devlog") %></span>
