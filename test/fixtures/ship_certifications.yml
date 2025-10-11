@@ -21,6 +21,7 @@
 #  index_ship_certifications_on_project_id                (project_id)
 #  index_ship_certifications_on_project_id_and_judgement  (project_id,judgement)
 #  index_ship_certifications_on_reviewer_id               (reviewer_id)
+#  index_ship_certifications_on_ysws_returned_at          (ysws_returned_at)
 #  index_ship_certifications_on_ysws_returned_by_id       (ysws_returned_by_id)
 #
 # Foreign Keys
