@@ -79,7 +79,10 @@
       <% end %>
     </div>
 
-    <div class="relative h-[560px] w-full overflow-hidden rounded-3xl shadow-2xl">
+    <div
+      class="relative h-[560px] w-full overflow-hidden rounded-3xl shadow-2xl"
+      data-wrapped-target="slideContainer"
+      data-action="click->wrapped#handleTap">
       <div
         class="absolute inset-0 flex flex-col items-center justify-center gap-6 bg-gradient-to-br from-slate-100 via-violet-100 to-sky-100 p-14 text-center text-slate-900 opacity-0 pointer-events-none scale-95 transition-all duration-700 ease-out"
         data-wrapped-target="slide">

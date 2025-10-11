@@ -2,7 +2,7 @@ import { Controller } from "@hotwired/stimulus";
 import { toPng } from "html-to-image";
 
 export default class extends Controller {
-  static targets = ["slide", "progressBar", "counter", "shareFeedback", "bento", "downloadButton", "audio", "audioToggle"];
+  static targets = ["slide", "progressBar", "counter", "shareFeedback", "bento", "downloadButton", "audio", "audioToggle", "slideContainer"];
   static values = {
     interval: { type: Number, default: 3700 },
     shareUrl: String,
@@ -61,6 +61,29 @@ export default class extends Controller {
     } else if (event.key === "ArrowLeft") {
       event.preventDefault();
       this.previous();
+    }
+  }
+
+  handleTap(event) {
+    if (!this.hasSlideContainerTarget) return;
+    if (event.defaultPrevented) return;
+    if (event.detail > 1) return;
+
+    if (this.shouldIgnoreTap(event)) return;
+
+    const clientX = this.extractClientX(event);
+    if (clientX === null) return;
+
+    const rect = this.slideContainerTarget.getBoundingClientRect();
+    if (!rect || rect.width === 0) return;
+
+    if (clientX < rect.left || clientX > rect.right) return;
+
+    const relativeX = clientX - rect.left;
+    if (relativeX < rect.width / 2) {
+      this.previous();
+    } else {
+      this.next();
     }
   }
 
@@ -371,5 +394,37 @@ export default class extends Controller {
     const isPlaying = this.audioElement && !this.audioElement.paused;
     button.textContent = isPlaying ? "Pause soundtrack" : "Play soundtrack";
     button.setAttribute("aria-pressed", isPlaying ? "true" : "false");
+  }
+
+  shouldIgnoreTap(event) {
+    const target = event.target;
+    if (!target) return false;
+
+    if (target.closest("button, a, input, textarea, select, label, [data-wrapped-tap-ignore], [role='button']")) {
+      return true;
+    }
+
+    const selection = window.getSelection ? window.getSelection() : null;
+    if (selection && selection.type === "Range") {
+      return true;
+    }
+
+    return false;
+  }
+
+  extractClientX(event) {
+    if (typeof event.clientX === "number") {
+      return event.clientX;
+    }
+
+    if (event.touches && event.touches[0]) {
+      return event.touches[0].clientX;
+    }
+
+    if (event.changedTouches && event.changedTouches[0]) {
+      return event.changedTouches[0].clientX;
+    }
+
+    return null;
   }
 }
