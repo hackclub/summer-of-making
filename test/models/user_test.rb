@@ -31,6 +31,7 @@
 #  timezone                             :string
 #  tutorial_video_seen                  :boolean          default(FALSE), not null
 #  votes_count                          :integer          default(0), not null
+#  wrapped_share_token                  :string
 #  ysws_verified                        :boolean          default(FALSE)
 #  created_at                           :datetime         not null
 #  updated_at                           :datetime         not null
@@ -39,9 +40,10 @@
 #
 # Indexes
 #
-#  index_users_on_projects_count     (projects_count)
-#  index_users_on_ship_events_count  (ship_events_count)
-#  index_users_on_votes_count        (votes_count)
+#  index_users_on_projects_count       (projects_count)
+#  index_users_on_ship_events_count    (ship_events_count)
+#  index_users_on_votes_count          (votes_count)
+#  index_users_on_wrapped_share_token  (wrapped_share_token) UNIQUE
 #
 require "test_helper"
 
