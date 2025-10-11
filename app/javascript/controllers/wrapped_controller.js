@@ -2,7 +2,7 @@ import { Controller } from "@hotwired/stimulus";
 import { toPng } from "html-to-image";
 
 export default class extends Controller {
-  static targets = ["slide", "progressBar", "counter", "shareFeedback", "bento", "downloadButton"];
+  static targets = ["slide", "progressBar", "counter", "shareFeedback", "bento", "downloadButton", "audio", "audioToggle"];
   static values = {
     interval: { type: Number, default: 3700 },
     shareUrl: String,
@@ -18,11 +18,13 @@ export default class extends Controller {
     this.shareFeedbackTimeout = null;
     this.updateSlides();
     this.startTimer();
+    this.setupAudio();
   }
 
   disconnect() {
     window.removeEventListener("keydown", this.boundKeydown);
     this.stopTimer();
+    this.teardownAudio();
     if (this.shareFeedbackTimeout) {
       clearTimeout(this.shareFeedbackTimeout);
       this.shareFeedbackTimeout = null;
@@ -282,5 +284,72 @@ export default class extends Controller {
       .trim()
       .replace(/[^a-z0-9]+/g, "-")
       .replace(/^-+|-+$/g, "");
+  }
+
+  setupAudio() {
+    if (!this.hasAudioTarget) return;
+
+    this.audioElement = this.audioTarget;
+    this.audioElement.loop = true;
+    this.audioElement.defaultPlaybackRate = 0.8;
+    this.audioElement.playbackRate = 0.8;
+
+    this.boundAudioPlay = this.handleAudioPlay.bind(this);
+    this.boundAudioPause = this.handleAudioPause.bind(this);
+
+    this.audioElement.addEventListener("play", this.boundAudioPlay);
+    this.audioElement.addEventListener("pause", this.boundAudioPause);
+
+    this.updateAudioButtonLabel();
+  }
+
+  teardownAudio() {
+    if (!this.audioElement) return;
+
+    this.audioElement.pause();
+    this.audioElement.removeEventListener("play", this.boundAudioPlay);
+    this.audioElement.removeEventListener("pause", this.boundAudioPause);
+    this.boundAudioPlay = null;
+    this.boundAudioPause = null;
+    this.audioElement = null;
+    this.updateAudioButtonLabel();
+  }
+
+  async toggleAudio(event) {
+    event.preventDefault();
+    if (!this.audioElement) return;
+
+    if (this.audioElement.paused) {
+      try {
+        await this.audioElement.play();
+      } catch (error) {
+        console.warn("Audio playback was prevented", error);
+        this.dispatch("audio-playback-error", { detail: { error } });
+        this.updateAudioButtonLabel();
+      }
+    } else {
+      this.audioElement.pause();
+    }
+  }
+
+  handleAudioPlay() {
+    if (!this.audioElement) return;
+
+    this.audioElement.defaultPlaybackRate = 0.8;
+    this.audioElement.playbackRate = 0.8;
+    this.updateAudioButtonLabel();
+  }
+
+  handleAudioPause() {
+    this.updateAudioButtonLabel();
+  }
+
+  updateAudioButtonLabel() {
+    if (!this.hasAudioToggleTarget) return;
+
+    const button = this.audioToggleTarget;
+    const isPlaying = this.audioElement && !this.audioElement.paused;
+    button.textContent = isPlaying ? "Pause soundtrack" : "Play soundtrack";
+    button.setAttribute("aria-pressed", isPlaying ? "true" : "false");
   }
 }
