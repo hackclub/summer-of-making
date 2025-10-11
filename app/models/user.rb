@@ -67,6 +67,8 @@ class User < ApplicationRecord
   has_many :comments
   has_many :likes
 
+  has_secure_token :wrapped_share_token
+
   accepts_nested_attributes_for :user_profile
   has_many :hackatime_projects
   has_many :fraud_reports, foreign_key: :user_id, class_name: "FraudReport", dependent: :destroy
@@ -225,6 +227,13 @@ class User < ApplicationRecord
         raise
       end
     end
+  end
+
+  def ensure_wrapped_share_token!
+    return wrapped_share_token if wrapped_share_token.present?
+
+    regenerate_wrapped_share_token
+    wrapped_share_token
   end
 
   def refresh_profile!

@@ -1,9 +1,12 @@
 import { Controller } from "@hotwired/stimulus";
+import { toPng } from "html-to-image";
 
 export default class extends Controller {
-  static targets = ["slide", "progressBar", "counter"];
+  static targets = ["slide", "progressBar", "counter", "shareFeedback", "bento", "downloadButton"];
   static values = {
-    interval: { type: Number, default: 3700 }
+    interval: { type: Number, default: 3700 },
+    shareUrl: String,
+    username: String
   };
 
   connect() {
@@ -12,6 +15,7 @@ export default class extends Controller {
     window.addEventListener("keydown", this.boundKeydown);
     this.element.style.setProperty("--wrapped-interval", `${this.intervalValue}ms`);
     this.animatedCounters = new WeakSet();
+    this.shareFeedbackTimeout = null;
     this.updateSlides();
     this.startTimer();
   }
@@ -19,6 +23,10 @@ export default class extends Controller {
   disconnect() {
     window.removeEventListener("keydown", this.boundKeydown);
     this.stopTimer();
+    if (this.shareFeedbackTimeout) {
+      clearTimeout(this.shareFeedbackTimeout);
+      this.shareFeedbackTimeout = null;
+    }
   }
 
   previous(event) {
@@ -169,5 +177,110 @@ export default class extends Controller {
       default:
         return Math.round(value).toLocaleString();
     }
+  }
+
+  copyShareLink(event) {
+    event.preventDefault();
+    if (!this.hasShareUrlValue) return;
+
+    const url = this.shareUrlValue;
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard
+        .writeText(url)
+        .then(() => this.showShareFeedback())
+        .catch(() => this.fallbackCopy(url));
+    } else {
+      this.fallbackCopy(url);
+    }
+  }
+
+  async downloadBento(event) {
+    event.preventDefault();
+    if (!this.hasBentoTarget) return;
+
+    const node = this.bentoTarget;
+    const wasHidden = node.classList.contains("hidden");
+    if (wasHidden) node.classList.remove("hidden");
+
+    this.toggleDownloadButton(true);
+
+    try {
+      const dataUrl = await toPng(node, {
+        backgroundColor: "#f8fafc",
+        cacheBust: true,
+        pixelRatio: Math.min(window.devicePixelRatio || 2, 3)
+      });
+
+      const link = document.createElement("a");
+      link.download = `${this.filenameForBento()}.png`;
+      link.href = dataUrl;
+      link.click();
+      this.dispatch("bento-export-success");
+    } catch (error) {
+      console.error("Failed to export bento grid", error);
+      this.dispatch("bento-export-error", { detail: { error } });
+    } finally {
+      if (wasHidden) node.classList.add("hidden");
+      this.toggleDownloadButton(false);
+    }
+  }
+
+  fallbackCopy(text) {
+    try {
+      const temp = document.createElement("textarea");
+      temp.value = text;
+      temp.setAttribute("readonly", "");
+      temp.style.position = "absolute";
+      temp.style.left = "-9999px";
+      document.body.appendChild(temp);
+      temp.select();
+      document.execCommand("copy");
+      document.body.removeChild(temp);
+      this.showShareFeedback();
+    } catch (error) {
+      console.error("Copy failed", error);
+      this.dispatch("copy-error", { detail: { error } });
+    }
+  }
+
+  showShareFeedback() {
+    if (!this.hasShareFeedbackTarget) return;
+
+    const element = this.shareFeedbackTarget;
+    element.classList.remove("hidden");
+    if (this.shareFeedbackTimeout) clearTimeout(this.shareFeedbackTimeout);
+    this.shareFeedbackTimeout = setTimeout(() => {
+      element.classList.add("hidden");
+    }, 2000);
+  }
+
+  toggleDownloadButton(isBusy) {
+    if (!this.hasDownloadButtonTarget) return;
+
+    const button = this.downloadButtonTarget;
+    if (!button.dataset.originalText) {
+      button.dataset.originalText = button.textContent.trim();
+    }
+    button.disabled = isBusy;
+    button.classList.toggle("opacity-60", isBusy);
+    button.classList.toggle("cursor-not-allowed", isBusy);
+    button.textContent = isBusy ? "Preparing..." : button.dataset.originalText;
+  }
+
+  filenameForBento() {
+    if (this.hasUsernameValue && this.usernameValue) {
+      const slug = this.slugify(this.usernameValue);
+      return slug ? `${slug}-wrapped` : "wrapped";
+    }
+    return "wrapped";
+  }
+
+  slugify(value) {
+    return value
+      .toString()
+      .toLowerCase()
+      .trim()
+      .replace(/[^a-z0-9]+/g, "-")
+      .replace(/^-+|-+$/g, "");
   }
 }
