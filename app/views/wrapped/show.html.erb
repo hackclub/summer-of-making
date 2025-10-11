@@ -28,7 +28,7 @@
 <% devlogs_count = @wrapped.devlogs_count %>
 <% devlog_projects_count = @wrapped.devlog_projects_count %>
 <% top_devlog_projects = @wrapped.top_devlog_projects(4) %>
-<% total_slides = 10 + (helper_slide ? 1 : 0) + (has_shells_rank ? 1 : 0) %>
+<% total_slides = 11 + (helper_slide ? 1 : 0) + (has_shells_rank ? 1 : 0) %>
 
 <div class="min-h-[calc(100vh-8rem)] w-full flex flex-col items-center justify-center py-10 px-6">
   <div
@@ -388,6 +388,36 @@
           </p>
         <% end %>
       </div>
+
+      <div
+        class="absolute inset-0 flex flex-col items-center justify-center gap-6 bg-gradient-to-br from-slate-900 via-violet-900/80 to-slate-800 p-14 text-center text-white opacity-0 pointer-events-none scale-95 transition-all duration-700 ease-out"
+        data-wrapped-target="slide">
+        <p class="font-medium uppercase tracking-[0.35em] text-sm text-white/70 text-balance">Wrapped Complete</p>
+        <h2 class="text-4xl md:text-5xl font-black text-balance md:text-6xl">
+          Thanks for making your summer count &lt;3
+        </h2>
+        <p class="text-lg md:text-xl max-w-2xl text-white/80 text-balance">
+          We hope you had as much fun taking part in SOM as we did running it!
+        </p>
+        <div class="flex flex-col items-center gap-3 sm:flex-row sm:gap-4">
+          <% if share_url.present? %>
+            <button
+              type="button"
+              class="rounded-full bg-white px-5 py-2.5 text-sm font-semibold uppercase tracking-[0.2em] text-slate-900 shadow-lg transition hover:bg-slate-200"
+              data-action="wrapped#shareWrapped">
+              Share your wrapped
+            </button>
+          <% end %>
+          <button
+            type="button"
+            class="rounded-full bg-slate-900/80 px-5 py-2.5 text-sm font-semibold uppercase tracking-[0.2em] text-white shadow-lg transition hover:bg-slate-700"
+            data-action="wrapped#downloadBento"
+            data-wrapped-target="downloadButton">
+            Download bento grid
+          </button>
+        </div>
+        <span class="hidden text-sm font-medium text-emerald-300" data-wrapped-target="shareFeedback">Link copied!</span>
+      </div>
     </div>
 
     <div class="absolute inset-x-0 bottom-8 z-30 flex items-center justify-between px-10">
@@ -405,18 +435,6 @@
       </button>
     </div>
   </div>
-
-    <div class="mt-12 flex flex-col items-center gap-3 text-center">
-      <button
-        class="rounded-full bg-slate-900 px-6 py-3 text-sm font-semibold uppercase tracking-[0.25em] text-white shadow-lg transition hover:bg-slate-700"
-        data-action="wrapped#downloadBento"
-        data-wrapped-target="downloadButton">
-        Download bento grid
-      </button>
-      <p class="text-sm text-slate-600 max-w-md">
-        Save a share-ready snapshot of <%= display_name %>'s highlights as a single image.
-      </p>
-    </div>
 
     <div class="hidden fixed -left-[9999px] top-0 z-[-1] w-full" data-wrapped-target="bento" aria-hidden="true">
       <div class="w-[1200px] rounded-3xl bg-slate-50 p-12 text-slate-900 shadow-2xl">

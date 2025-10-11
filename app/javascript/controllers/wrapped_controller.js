@@ -181,8 +181,29 @@ export default class extends Controller {
     }
   }
 
+  async shareWrapped(event) {
+    if (event) event.preventDefault();
+    if (!this.hasShareUrlValue) return;
+
+    const url = this.shareUrlValue;
+    const title = this.hasUsernameValue && this.usernameValue ? `${this.usernameValue}'s Summer of Making Wrapped` : "Summer of Making Wrapped";
+
+    if (navigator.share) {
+      try {
+        await navigator.share({ title, url });
+        this.showShareFeedback();
+        return;
+      } catch (error) {
+        if (error && error.name === "AbortError") return;
+        console.warn("Native share failed, falling back to copy", error);
+      }
+    }
+
+    this.copyShareLink();
+  }
+
   copyShareLink(event) {
-    event.preventDefault();
+    if (event) event.preventDefault();
     if (!this.hasShareUrlValue) return;
 
     const url = this.shareUrlValue;
@@ -248,11 +269,10 @@ export default class extends Controller {
   showShareFeedback() {
     if (!this.hasShareFeedbackTarget) return;
 
-    const element = this.shareFeedbackTarget;
-    element.classList.remove("hidden");
+    this.shareFeedbackTargets.forEach((element) => element.classList.remove("hidden"));
     if (this.shareFeedbackTimeout) clearTimeout(this.shareFeedbackTimeout);
     this.shareFeedbackTimeout = setTimeout(() => {
-      element.classList.add("hidden");
+      this.shareFeedbackTargets.forEach((element) => element.classList.add("hidden"));
     }, 2000);
   }
 
