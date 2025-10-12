@@ -1,0 +1,18 @@
+<div
+  class="absolute inset-0 flex flex-col items-center justify-center gap-6 bg-gradient-to-br from-purple-50 via-pink-50 to-rose-100 p-14 text-center text-slate-900 opacity-0 pointer-events-none scale-95 transition-all duration-700 ease-out"
+  data-wrapped-target="slide">
+  <p class="font-medium uppercase tracking-[0.35em] text-sm text-slate-500 text-balance">Most Time Spent</p>
+  <% if project_time.present? %>
+    <h2 class="text-4xl md:text-5xl font-black text-balance">
+      <%= link_to project_time.title, project_path(project_time), class: "underline decoration-dotted decoration-slate-400 hover:decoration-slate-600" %>
+    </h2>
+    <p class="text-lg md:text-xl max-w-2xl text-slate-600 text-balance">
+      You logged <span class="font-semibold"><%= format_seconds(project_time_seconds || 0, include_days: true) %></span> building this.
+    </p>
+  <% else %>
+    <h2 class="text-4xl md:text-5xl font-black text-balance">No project time yet</h2>
+    <p class="text-lg md:text-xl max-w-2xl text-slate-600 text-balance">
+      someone hasn't been locking in...
+    </p>
+  <% end %>
+</div>

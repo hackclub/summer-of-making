@@ -69,7 +69,7 @@ class User < ApplicationRecord
   has_many :comments
   has_many :likes
 
-  has_secure_token :wrapped_share_token
+  before_create :generate_wrapped_share_token
 
   accepts_nested_attributes_for :user_profile
   has_many :hackatime_projects
@@ -877,5 +877,21 @@ class User < ApplicationRecord
         Rails.logger.error("Failed to notify xyz.hackclub.com: #{e.message}")
       end
     # end
+  end
+
+  def generate_wrapped_share_token
+    self.wrapped_share_token ||= loop do
+      token = SecureRandom.alphanumeric(7)
+      break token unless User.exists?(wrapped_share_token: token)
+    end
+  end
+
+  def regenerate_wrapped_share_token
+    loop do
+      self.wrapped_share_token = SecureRandom.alphanumeric(7)
+      break unless User.where.not(id: id).exists?(wrapped_share_token: wrapped_share_token)
+    end
+    save!
+    wrapped_share_token
   end
 end

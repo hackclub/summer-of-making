@@ -1,0 +1,20 @@
+<button
+  type="button"
+  class="absolute top-9 right-4 z-30 inline-flex h-10 w-10 items-center justify-center rounded-full bg-slate-900 text-white shadow transition hover:bg-slate-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-slate-900"
+  data-action="wrapped#toggleAudio"
+  data-wrapped-target="audioToggle"
+  data-wrapped-tap-ignore
+  aria-pressed="false"
+  aria-label="Play soundtrack">
+  <svg class="h-5 w-5" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+    <path d="M12 3v18a1 1 0 0 1-1.707.707l-4-4A1 1 0 0 1 6 17V7a1 1 0 0 1 .293-.707l4-4A1 1 0 0 1 12 3Zm-4 4.414V16.586L10 18.586V5.414L8 7.414ZM16.5 4a3.5 3.5 0 0 1 0 7h-.75a.75.75 0 0 1 0-1.5h.75a2 2 0 0 0 0-4h-.75a.75.75 0 0 1 0-1.5h.75Zm0 7a3.5 3.5 0 0 1 0 7h-.75a.75.75 0 0 1 0-1.5h.75a2 2 0 0 0 0-4h-.75a.75.75 0 0 1 0-1.5h.75Z" />
+  </svg>
+  <span class="sr-only">Play soundtrack</span>
+</button>
+<audio
+  class="hidden"
+  preload="auto"
+  src="<%= asset_path("wrapped.mp3") %>"
+  data-wrapped-target="audio"
+  aria-hidden="true">
+</audio>

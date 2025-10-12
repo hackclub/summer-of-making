@@ -1,0 +1,39 @@
+<div
+  class="absolute inset-0 flex flex-col items-center justify-center gap-6 bg-gradient-to-br from-sky-50 via-emerald-50 to-lime-100 p-14 text-center text-slate-900 opacity-0 pointer-events-none scale-95 transition-all duration-700 ease-out"
+  data-wrapped-target="slide">
+  <p class="font-medium uppercase tracking-[0.35em] text-sm text-slate-500 text-balance">Devlog Sprint</p>
+  <div class="flex items-center gap-4 text-6xl md:text-7xl font-black drop-shadow-sm text-slate-800">
+    <span
+      data-wrapped-target="counter"
+      data-wrapped-counter-type="integer"
+      data-wrapped-counter-value="<%= devlogs_count %>">
+      0
+    </span>
+    <span class="text-2xl font-semibold text-slate-500">devlogs</span>
+  </div>
+  <% if devlogs_count.positive? %>
+    <p class="text-lg md:text-xl max-w-2xl text-slate-600 text-balance">
+      You published them across <span class="font-semibold text-slate-800"><%= pluralize(devlog_projects_count, "project") %></span>.
+    </p>
+  <% else %>
+    <p class="text-lg md:text-xl max-w-2xl text-slate-600 text-balance">
+      No devlogs logged yet—but there’s always next season.
+    </p>
+  <% end %>
+  <% if top_devlog_projects.present? %>
+    <div class="mt-4 w-full max-w-md space-y-2 text-sm md:text-base text-slate-600">
+      <% top_devlog_projects.each_with_index do |entry, index| %>
+        <% project = entry[:project] %>
+        <div class="flex items-center justify-between gap-4 rounded-full border border-slate-900/5 bg-white/70 px-4 py-2 shadow-sm backdrop-blur">
+          <span class="font-semibold text-slate-700">
+            <%= index + 1 %>.
+            <% if project %>
+              <%= link_to project.title, project_path(project), class: "underline decoration-dotted decoration-slate-300 hover:decoration-slate-600" %>
+            <% end %>
+          </span>
+          <span class="text-slate-500"><%= pluralize(entry[:devlogs_count], "devlog") %></span>
+        </div>
+      <% end %>
+    </div>
+  <% end %>
+</div>
