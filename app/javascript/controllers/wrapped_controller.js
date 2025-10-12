@@ -2,7 +2,7 @@ import { Controller } from "@hotwired/stimulus";
 import { toPng } from "html-to-image";
 
 export default class extends Controller {
-  static targets = ["slide", "progressBar", "counter", "shareFeedback", "bento", "downloadButton", "audio", "audioToggle", "slideContainer"];
+  static targets = ["slide", "progressBar", "counter", "shareFeedback", "bento", "downloadButton", "audio", "audioToggle", "slideContainer", "overlay"];
   static values = {
     interval: { type: Number, default: 3700 },
     shareUrl: String,
@@ -11,14 +11,20 @@ export default class extends Controller {
 
   connect() {
     this.currentIndex = 0;
+    this.showHasStarted = false;
+    this.overlayHideTimeout = null;
     this.boundKeydown = this.handleKeydown.bind(this);
     window.addEventListener("keydown", this.boundKeydown);
     this.element.style.setProperty("--wrapped-interval", `${this.intervalValue}ms`);
     this.animatedCounters = new WeakSet();
     this.shareFeedbackTimeout = null;
     this.updateSlides();
-    this.startTimer();
     this.setupAudio();
+    this.resetOverlayState();
+
+    if (!this.hasOverlayTarget) {
+      this.startShow();
+    }
   }
 
   disconnect() {
@@ -29,11 +35,16 @@ export default class extends Controller {
       clearTimeout(this.shareFeedbackTimeout);
       this.shareFeedbackTimeout = null;
     }
+    if (this.overlayHideTimeout) {
+      clearTimeout(this.overlayHideTimeout);
+      this.overlayHideTimeout = null;
+    }
   }
 
   previous(event) {
     if (event) event.preventDefault();
     if (!this.hasSlideTarget) return;
+    if (!this.showHasStarted) return;
 
     this.currentIndex = (this.currentIndex - 1 + this.slideTargets.length) % this.slideTargets.length;
     this.updateSlides();
@@ -43,6 +54,7 @@ export default class extends Controller {
   next(event) {
     if (event) event.preventDefault();
     if (!this.hasSlideTarget) return;
+    if (!this.showHasStarted) return;
 
     this.currentIndex = (this.currentIndex + 1) % this.slideTargets.length;
     this.updateSlides();
@@ -54,6 +66,8 @@ export default class extends Controller {
     const tag = event.target.tagName;
     if (["INPUT", "TEXTAREA", "SELECT"].includes(tag)) return;
     if (event.target.isContentEditable) return;
+
+    if (!this.showHasStarted) return;
 
     if (event.key === "ArrowRight") {
       event.preventDefault();
@@ -68,6 +82,7 @@ export default class extends Controller {
     if (!this.hasSlideContainerTarget) return;
     if (event.defaultPrevented) return;
     if (event.detail > 1) return;
+    if (!this.showHasStarted) return;
 
     if (this.shouldIgnoreTap(event)) return;
 
@@ -89,6 +104,7 @@ export default class extends Controller {
 
   startTimer() {
     this.stopTimer();
+    if (!this.showHasStarted) return;
     if (this.slideTargets.length <= 1) return;
 
     const interval = this.intervalValue;
@@ -97,7 +113,54 @@ export default class extends Controller {
   }
 
   restartTimer() {
+    if (!this.showHasStarted) return;
     this.startTimer();
+  }
+
+  startShow() {
+    if (this.showHasStarted) return;
+
+    this.showHasStarted = true;
+    this.animateCountersForCurrentSlide();
+    this.startTimer();
+  }
+
+  resetOverlayState() {
+    if (!this.hasOverlayTarget) return;
+
+    this.overlayTarget.classList.remove("hidden", "pointer-events-none", "opacity-0");
+    this.overlayTarget.setAttribute("aria-hidden", "false");
+    this.overlayHideTimeout = null;
+  }
+
+  hideOverlay() {
+    if (!this.hasOverlayTarget) return;
+
+    this.overlayTarget.classList.add("opacity-0", "pointer-events-none");
+    this.overlayTarget.setAttribute("aria-hidden", "true");
+
+    if (this.overlayHideTimeout) {
+      clearTimeout(this.overlayHideTimeout);
+    }
+
+    this.overlayHideTimeout = window.setTimeout(() => {
+      this.overlayTarget.classList.add("hidden");
+      this.overlayHideTimeout = null;
+    }, 400);
+  }
+
+  async startExperience(event) {
+    if (event) event.preventDefault();
+
+    const audioPromise = this.playAudioElement();
+
+    if (!this.showHasStarted) {
+      this.startShow();
+    }
+
+    this.hideOverlay();
+
+    await audioPromise;
   }
 
   stopTimer() {
@@ -146,6 +209,8 @@ export default class extends Controller {
   }
 
   animateCountersForCurrentSlide() {
+    if (!this.showHasStarted) return;
+
     const slide = this.slideTargets[this.currentIndex];
     if (!slide) return;
 
@@ -244,18 +309,29 @@ export default class extends Controller {
     event.preventDefault();
     if (!this.hasBentoTarget) return;
 
-    const node = this.bentoTarget;
-    const wasHidden = node.classList.contains("hidden");
-    if (wasHidden) node.classList.remove("hidden");
-
     this.toggleDownloadButton(true);
+    const captureContext = this.prepareBentoForCapture();
+    const bentoNode = captureContext && captureContext.node ? captureContext.node : this.bentoTarget;
 
     try {
-      const dataUrl = await toPng(node, {
+      await Promise.all([this.waitForLayout(), this.ensureFontsLoaded()]);
+
+      const exportOptions = {
         backgroundColor: "#f8fafc",
         cacheBust: true,
-        pixelRatio: Math.min(window.devicePixelRatio || 2, 3)
-      });
+        pixelRatio: captureContext && captureContext.pixelRatio ? captureContext.pixelRatio : Math.min(window.devicePixelRatio || 2, 3),
+        style: {
+          transform: "scale(1)",
+          transformOrigin: "top left"
+        }
+      };
+
+      if (captureContext && captureContext.width && captureContext.height) {
+        exportOptions.width = captureContext.width;
+        exportOptions.height = captureContext.height;
+      }
+
+      const dataUrl = await toPng(bentoNode, exportOptions);
 
       const link = document.createElement("a");
       link.download = `${this.filenameForBento()}.png`;
@@ -266,9 +342,85 @@ export default class extends Controller {
       console.error("Failed to export bento grid", error);
       this.dispatch("bento-export-error", { detail: { error } });
     } finally {
-      if (wasHidden) node.classList.add("hidden");
+      if (captureContext && typeof captureContext.restore === "function") {
+        captureContext.restore();
+      }
       this.toggleDownloadButton(false);
     }
+  }
+
+  prepareBentoForCapture() {
+    if (!this.hasBentoTarget) return null;
+
+    const container = document.createElement("div");
+    container.style.position = "fixed";
+    container.style.inset = "0";
+    container.style.zIndex = "-1";
+    container.style.pointerEvents = "none";
+    container.style.opacity = "0";
+    container.style.display = "flex";
+    container.style.alignItems = "flex-start";
+    container.style.justifyContent = "flex-start";
+    container.style.overflow = "visible";
+    container.style.background = "transparent";
+
+    const templateRoot = this.bentoTarget.querySelector("[data-wrapped-bento-root]");
+    const nodeToClone = templateRoot || this.bentoTarget;
+    const clone = nodeToClone.cloneNode(true);
+
+    clone.classList.remove("hidden");
+    clone.style.opacity = "1";
+    clone.style.position = "static";
+    clone.style.top = "auto";
+    clone.style.left = "auto";
+    clone.style.right = "auto";
+    clone.style.bottom = "auto";
+    clone.style.margin = "0";
+    clone.style.width = "auto";
+    clone.style.height = "auto";
+    clone.style.maxWidth = "none";
+    clone.style.transform = "none";
+    clone.style.pointerEvents = "none";
+    clone.style.display = "block";
+
+    container.appendChild(clone);
+    document.body.appendChild(container);
+
+    const rect = clone.getBoundingClientRect();
+    const width = Math.max(1, Math.ceil(rect.width));
+    const height = Math.max(1, Math.ceil(rect.height));
+
+    if (width > 0 && height > 0) {
+      clone.style.width = `${width}px`;
+      clone.style.height = `${height}px`;
+    }
+
+    return {
+      node: clone,
+      width,
+      height,
+      pixelRatio: 2,
+      restore() {
+        if (container.parentNode) {
+          container.parentNode.removeChild(container);
+        }
+      }
+    };
+  }
+
+  waitForLayout() {
+    return new Promise((resolve) => {
+      requestAnimationFrame(() => {
+        requestAnimationFrame(resolve);
+      });
+    });
+  }
+
+  ensureFontsLoaded() {
+    if (document.fonts && typeof document.fonts.ready === "object") {
+      return document.fonts.ready.catch(() => {});
+    }
+    return Promise.resolve();
   }
 
   fallbackCopy(text) {
@@ -358,18 +510,28 @@ export default class extends Controller {
     this.updateAudioButtonLabel();
   }
 
+  async playAudioElement() {
+    if (!this.audioElement) return false;
+    if (!this.audioElement.paused) return true;
+
+    try {
+      await this.audioElement.play();
+      this.updateAudioButtonLabel();
+      return true;
+    } catch (error) {
+      console.warn("Audio playback was prevented", error);
+      this.dispatch("audio-playback-error", { detail: { error } });
+      this.updateAudioButtonLabel();
+      return false;
+    }
+  }
+
   async toggleAudio(event) {
-    event.preventDefault();
+    if (event) event.preventDefault();
     if (!this.audioElement) return;
 
     if (this.audioElement.paused) {
-      try {
-        await this.audioElement.play();
-      } catch (error) {
-        console.warn("Audio playback was prevented", error);
-        this.dispatch("audio-playback-error", { detail: { error } });
-        this.updateAudioButtonLabel();
-      }
+      await this.playAudioElement();
     } else {
       this.audioElement.pause();
     }
@@ -392,8 +554,15 @@ export default class extends Controller {
 
     const button = this.audioToggleTarget;
     const isPlaying = this.audioElement && !this.audioElement.paused;
-    button.textContent = isPlaying ? "Pause soundtrack" : "Play soundtrack";
+    const label = isPlaying ? "Pause soundtrack" : "Play soundtrack";
+
     button.setAttribute("aria-pressed", isPlaying ? "true" : "false");
+    button.setAttribute("aria-label", label);
+
+    const srOnlyText = button.querySelector(".sr-only");
+    if (srOnlyText) {
+      srOnlyText.textContent = label;
+    }
   }
 
   shouldIgnoreTap(event) {

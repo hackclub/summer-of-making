@@ -30,37 +30,26 @@
 <% top_devlog_projects = @wrapped.top_devlog_projects(4) %>
 <% total_slides = 11 + (helper_slide ? 1 : 0) + (has_shells_rank ? 1 : 0) %>
 
-<div class="min-h-[calc(100vh-8rem)] w-full flex flex-col items-center justify-center py-10 px-6">
+<div class="h-full sm:min-h-[calc(100vh-8rem)] w-full flex flex-col items-center justify-center py-10 px-6">
   <div
     class="w-full max-w-5xl"
     data-controller="wrapped"
     data-wrapped-interval-value="8000"
     data-wrapped-username-value="<%= display_name %>"
-    <%= %(data-wrapped-share-url-value="#{share_url}") if share_url.present? %>>
-    <% if @viewer_is_owner && share_url.present? %>
-      <div class="mb-6 flex flex-col gap-4 rounded-3xl border border-slate-900/10 bg-white/70 p-6 shadow-lg backdrop-blur sm:flex-row sm:items-center sm:justify-between">
-        <div class="flex flex-col gap-1 text-slate-700">
-          <span class="text-xs font-semibold uppercase tracking-[0.25em] text-slate-500">Shareable Link</span>
-          <span class="text-sm font-medium text-slate-700 break-all sm:max-w-sm"><%= share_url %></span>
-        </div>
-        <div class="flex items-center gap-3">
-          <button
-            class="rounded-full bg-slate-900 text-white px-5 py-2.5 text-sm font-semibold hover:bg-slate-700 transition"
-            data-action="wrapped#copyShareLink">
-            Copy link
-          </button>
-          <span class="hidden text-sm font-medium text-emerald-600" data-wrapped-target="shareFeedback">Copied!</span>
-        </div>
-      </div>
-    <% end %>
-    <div class="mb-6 flex flex-col items-center gap-2 sm:flex-row sm:justify-end">
+    <% if share_url.present? %>data-wrapped-share-url-value="<%= share_url %>"<% end %>>
+    <div class="relative w-full">
       <button
         type="button"
-        class="rounded-full bg-slate-900 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-slate-700"
+        class="absolute top-9 right-4 z-30 inline-flex h-10 w-10 items-center justify-center rounded-full bg-slate-900 text-white shadow transition hover:bg-slate-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-slate-900"
         data-action="wrapped#toggleAudio"
         data-wrapped-target="audioToggle"
-        aria-pressed="false">
-        Play soundtrack
+        data-wrapped-tap-ignore
+        aria-pressed="false"
+        aria-label="Play soundtrack">
+        <svg class="h-5 w-5" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+          <path d="M12 3v18a1 1 0 0 1-1.707.707l-4-4A1 1 0 0 1 6 17V7a1 1 0 0 1 .293-.707l4-4A1 1 0 0 1 12 3Zm-4 4.414V16.586L10 18.586V5.414L8 7.414ZM16.5 4a3.5 3.5 0 0 1 0 7h-.75a.75.75 0 0 1 0-1.5h.75a2 2 0 0 0 0-4h-.75a.75.75 0 0 1 0-1.5h.75Zm0 7a3.5 3.5 0 0 1 0 7h-.75a.75.75 0 0 1 0-1.5h.75a2 2 0 0 0 0-4h-.75a.75.75 0 0 1 0-1.5h.75Z" />
+        </svg>
+        <span class="sr-only">Play soundtrack</span>
       </button>
       <audio
         class="hidden"
@@ -69,8 +58,27 @@
         data-wrapped-target="audio"
         aria-hidden="true">
       </audio>
-    </div>
-    <div class="relative w-full">
+      <div
+        class="absolute inset-0 z-40 flex flex-col items-center justify-center gap-6 bg-slate-900/90 px-8 text-center text-white transition-opacity duration-500"
+        data-wrapped-target="overlay"
+        role="dialog"
+        aria-modal="true"
+        aria-hidden="false"
+        aria-labelledby="wrapped-audio-overlay-title">
+        <div class="max-w-lg space-y-4">
+          <h2 id="wrapped-audio-overlay-title" class="text-3xl font-black tracking-tight sm:text-4xl">Start with the soundtrack</h2>
+          <p class="text-base leading-relaxed text-slate-200 sm:text-lg">
+            Hit play to launch your Wrapped with the Summer of Making soundtrack. You can pause anytime from the top-right control.
+          </p>
+        </div>
+        <button
+          type="button"
+          class="inline-flex items-center justify-center rounded-full bg-white px-6 py-3 text-sm font-semibold uppercase tracking-[0.25em] text-slate-900 shadow-lg transition hover:bg-slate-200 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
+          data-action="wrapped#startExperience"
+          autofocus>
+          Start Wrapped
+        </button>
+      </div>
       <div class="absolute top-6 right-6 left-6 z-20 flex gap-2">
       <% total_slides.times do %>
         <div class="h-1.5 w-full overflow-hidden rounded-full bg-slate-900/25 shadow-[inset_0_0_4px_rgba(15,23,42,0.35)]">
@@ -397,10 +405,10 @@
         data-wrapped-target="slide">
         <p class="font-medium uppercase tracking-[0.35em] text-sm text-white/70 text-balance">Wrapped Complete</p>
         <h2 class="text-4xl md:text-5xl font-black text-balance md:text-6xl">
-          Thanks for making your summer count &lt;3
+          Thanks for making your summer count!
         </h2>
         <p class="text-lg md:text-xl max-w-2xl text-white/80 text-balance">
-          We hope you had as much fun taking part in SOM as we did running it!
+          We hope you had as much fun taking part as we did running it!
         </p>
         <div class="flex flex-col items-center gap-3 sm:flex-row sm:gap-4">
           <% if share_url.present? %>
@@ -440,7 +448,7 @@
   </div>
 
     <div class="hidden fixed -left-[9999px] top-0 z-[-1] w-full" data-wrapped-target="bento" aria-hidden="true">
-      <div class="w-[1200px] rounded-3xl bg-slate-50 p-12 text-slate-900 shadow-2xl">
+      <div class="w-[1200px] rounded-3xl bg-slate-50 p-12 text-slate-900 shadow-2xl" data-wrapped-bento-root>
         <div class="grid grid-cols-12 gap-6">
           <div class="col-span-12 rounded-3xl bg-gradient-to-br from-violet-500 via-indigo-500 to-sky-500 p-10 text-white shadow-lg">
             <p class="text-xs font-semibold uppercase tracking-[0.35em] text-white/80">Summer of Making 2025</p>
