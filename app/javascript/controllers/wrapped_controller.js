@@ -323,13 +323,8 @@ export default class extends Controller {
         style: {
           transform: "scale(1)",
           transformOrigin: "top left"
-        }
+        },
       };
-
-      if (captureContext && captureContext.width && captureContext.height) {
-        exportOptions.width = captureContext.width;
-        exportOptions.height = captureContext.height;
-      }
 
       const dataUrl = await toPng(bentoNode, exportOptions);
 

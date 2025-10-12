@@ -1,0 +1,70 @@
+<div
+  class="w-full max-w-5xl"
+  data-controller="wrapped"
+  data-wrapped-interval-value="8000"
+  data-wrapped-username-value="<%= display_name %>"
+  <% if share_url.present? %>data-wrapped-share-url-value="<%= share_url %>"<% end %>>
+  <div class="relative w-full">
+    <%= render "wrapped/audio_toggle" %>
+    <%= render "wrapped/audio_overlay" %>
+    <div class="absolute top-6 right-6 left-6 z-20 flex gap-2">
+      <% total_slides.times do %>
+        <div class="h-1.5 w-full overflow-hidden rounded-full bg-slate-900/25 shadow-[inset_0_0_4px_rgba(15,23,42,0.35)]">
+          <div class="h-full w-0 bg-slate-900 transition-[width] duration-[var(--wrapped-interval,8000ms)] shadow-sm" data-wrapped-target="progressBar"></div>
+        </div>
+      <% end %>
+    </div>
+
+    <div
+      class="relative h-screen sm:h-[560px] w-full overflow-hidden sm:rounded-3xl sm:shadow-2xl"
+      data-wrapped-target="slideContainer"
+      data-action="click->wrapped#handleTap">
+      <%= render "wrapped/slides/intro", display_name: display_name %>
+      <%= render "wrapped/slides/shells_earned", wrapped: wrapped %>
+      <%= render "wrapped/slides/shells_spent", wrapped: wrapped %>
+      <%= render "wrapped/slides/votes_cast", votes_cast: votes_cast %>
+      <%= render "wrapped/slides/devlog_sprint",
+        devlogs_count: devlogs_count,
+        devlog_projects_count: devlog_projects_count,
+        top_devlog_projects: top_devlog_projects %>
+      <%= render "wrapped/slides/hack_club_covered", wrapped: wrapped %>
+      <%= render "wrapped/slides/biggest_shell_drop", order: order, wrapped: wrapped %>
+      <%= render "wrapped/slides/priciest_item", item: item, wrapped: wrapped %>
+      <%= render "wrapped/slides/most_time_spent", project_time: project_time, project_time_seconds: project_time_seconds %>
+      <% if helper_slide %>
+        <%= render "wrapped/slides/helper",
+          helper_tickets_closed: helper_tickets_closed,
+          helper_tickets_opened: helper_tickets_opened %>
+      <% end %>
+      <% if has_shells_rank %>
+        <%= render "wrapped/slides/shell_leaderboard",
+          rank_value: rank_value,
+          total_ranked: total_ranked,
+          percentile: percentile %>
+      <% end %>
+      <%= render "wrapped/slides/shells_per_hour",
+        project_ratio: project_ratio,
+        project_ratio_rate: project_ratio_rate,
+        project_ratio_hours: project_ratio_hours %>
+      <%= render "wrapped/slides/complete", share_url: share_url %>
+    </div>
+
+    <%= render "wrapped/navigation" %>
+  </div>
+
+  <%= render "wrapped/bento",
+    display_name: display_name,
+    wrapped: wrapped,
+    votes_cast: votes_cast,
+    helper_slide: helper_slide,
+    helper_tickets_closed: helper_tickets_closed,
+    order: order,
+    project_time: project_time,
+    project_time_seconds: project_time_seconds,
+    project_ratio: project_ratio,
+    project_ratio_rate: project_ratio_rate,
+    project_ratio_hours: project_ratio_hours,
+    has_shells_rank: has_shells_rank,
+    rank_value: rank_value,
+    total_ranked: total_ranked %>
+</div>

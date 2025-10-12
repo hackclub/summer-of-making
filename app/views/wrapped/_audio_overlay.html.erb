@@ -1,0 +1,21 @@
+<div
+  class="absolute inset-0 z-40 flex flex-col items-center justify-center gap-6 bg-slate-900/90 px-8 text-center text-white transition-opacity duration-500"
+  data-wrapped-target="overlay"
+  role="dialog"
+  aria-modal="true"
+  aria-hidden="false"
+  aria-labelledby="wrapped-audio-overlay-title">
+  <div class="max-w-lg space-y-4">
+    <h2 id="wrapped-audio-overlay-title" class="text-3xl font-black tracking-tight sm:text-4xl">Start with the soundtrack</h2>
+    <p class="text-base leading-relaxed text-slate-200 sm:text-lg">
+      Hit play to launch your Wrapped with the Summer of Making soundtrack. You can pause anytime from the top-right control.
+    </p>
+  </div>
+  <button
+    type="button"
+    class="inline-flex items-center justify-center rounded-full bg-white px-6 py-3 text-sm font-semibold uppercase tracking-[0.25em] text-slate-900 shadow-lg transition hover:bg-slate-200 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
+    data-action="wrapped#startExperience"
+    autofocus>
+    Start Wrapped
+  </button>
+</div>

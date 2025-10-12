@@ -1,0 +1,27 @@
+<div
+  class="absolute inset-0 flex flex-col items-center justify-center gap-6 bg-gradient-to-br from-amber-50 via-amber-100 to-lime-100 p-14 text-center text-slate-900 opacity-0 pointer-events-none scale-95 transition-all duration-700 ease-out"
+  data-wrapped-target="slide">
+  <p class="font-medium uppercase tracking-[0.35em] text-sm text-amber-600 text-balance">Shell Leaderboard</p>
+  <div class="flex flex-col items-center gap-4">
+    <div class="text-5xl md:text-6xl font-black text-amber-700">
+      #<span
+        data-wrapped-target="counter"
+        data-wrapped-counter-type="integer"
+        data-wrapped-counter-value="<%= rank_value %>">
+        0
+      </span>
+    </div>
+    <p class="text-lg md:text-xl text-amber-800/80 text-balance max-w-2xl">
+      You ranked <%= rank_value.ordinalize %> out of <%= number_with_delimiter(total_ranked) %> shell earners.
+    </p>
+  </div>
+  <% if percentile %>
+    <p class="text-base md:text-lg text-amber-700/70 text-balance">
+      That’s the top <%= number_to_percentage(percentile, precision: 1) %> of the leaderboard.
+    </p>
+  <% else %>
+    <p class="text-base md:text-lg text-amber-700/70 text-balance">
+      Keep shipping—every shell you earn nudges you higher up the board.
+    </p>
+  <% end %>
+</div>

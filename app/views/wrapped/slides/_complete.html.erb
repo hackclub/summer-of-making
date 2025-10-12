@@ -1,0 +1,29 @@
+<div
+  class="absolute inset-0 flex flex-col items-center justify-center gap-6 bg-gradient-to-br from-slate-900 via-violet-900/80 to-slate-800 p-14 text-center text-white opacity-0 pointer-events-none scale-95 transition-all duration-700 ease-out"
+  data-wrapped-target="slide">
+  <p class="font-medium uppercase tracking-[0.35em] text-sm text-white/70 text-balance">Wrapped Complete</p>
+  <h2 class="text-4xl md:text-5xl font-black text-balance md:text-6xl">
+    Thanks for making your summer count!
+  </h2>
+  <p class="text-lg md:text-xl max-w-2xl text-white/80 text-balance">
+    We hope you had as much fun taking part as we did running it!
+  </p>
+  <div class="flex flex-col items-center gap-3 sm:flex-row sm:gap-4">
+    <% if share_url.present? %>
+      <button
+        type="button"
+        class="rounded-full bg-white px-5 py-2.5 text-sm font-semibold uppercase tracking-[0.2em] text-slate-900 shadow-lg transition hover:bg-slate-200"
+        data-action="wrapped#shareWrapped">
+        Share your wrapped
+      </button>
+    <% end %>
+    <button
+      type="button"
+      class="rounded-full bg-slate-900/80 px-5 py-2.5 text-sm font-semibold uppercase tracking-[0.2em] text-white shadow-lg transition hover:bg-slate-700"
+      data-action="wrapped#downloadBento"
+      data-wrapped-target="downloadButton">
+      Download bento grid
+    </button>
+  </div>
+  <span class="hidden text-sm font-medium text-emerald-300" data-wrapped-target="shareFeedback">Link copied!</span>
+</div>
