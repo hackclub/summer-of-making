@@ -47,6 +47,18 @@ class VoteMf < ApplicationRecord
     validates :voter_id, uniqueness: { scope: :project_id }
     validate :validate_ballot
 
+  # it will return a 0.0..1.0 (b/w 0 and 1) normalized composite score across all criteria – sum / n_critieria * (label - 1)
+  def normalized_total_score
+    values = ballot.is_a?(Hash) ? ballot.values : []
+    return nil if values.empty?
+
+    int_values = values.map(&:to_i)
+    max_total = (CRITERIA.size * (GRADE_LABELS.size - 1)).to_f
+    return 0.0 if max_total <= 0
+
+    (int_values.sum / max_total).clamp(0.0, 1.0)
+  end
+
     def ballot_labels
         return {} unless ballot.is_a?(Hash)
         ballot.to_h.transform_values do |v|

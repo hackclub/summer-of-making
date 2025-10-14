@@ -1,0 +1,77 @@
+<div class="container mx-auto px-0 sm:px-4 py-4 md:py-8">
+  <%= render "shared/page_title", title: "Showcase", subtitle: "Rate this project using Majority Judgment" %>
+
+  <div class="bg-[#F6DBBA] sm:rounded-xl p-4 mx-2 sm:mx-auto max-w-240">
+    <div class="flex items-start gap-4">
+      <div class="h-20 w-20 flex-shrink-0">
+        <%= image_tag @project.banner, alt: @project.title, class: "w-full h-full object-cover rounded-lg", loading: "lazy" %>
+      </div>
+      <div class="flex-grow min-w-0">
+        <h3 class="text-xl sm:text-3xl mb-1 truncate"><%= @project.title %></h3>
+        <div class="text-base sm:text-lg text-gray-600">
+          <div><%= @project.description %></div>
+        </div>
+        <div class="grid grid-cols-1 sm:flex sm:flex-wrap justify-center gap-3 sm:gap-4 mt-3">
+          <% if @project.demo_link.present? %>
+            <%= render C::StyledButton.new(
+                text: "Demo",
+                link: @project.demo_link,
+                link_target: "_blank",
+                icon: "world.svg",
+                onclick: "event.stopPropagation()") %>
+          <% end %>
+          <% if @project.repo_link.present? %>
+            <%= render C::StyledButton.new(
+                text: "Repository",
+                link: @project.repo_link,
+                link_target: "_blank",
+                icon: "git.svg",
+                onclick: "event.stopPropagation()") %>
+          <% end %>
+          <%= render "shared/report", suspect: @project, already_reported: FraudReport.already_reported_by?(current_user, @project) %>
+        </div>
+      </div>
+    </div>
+
+    <div class="space-y-4 sm:space-y-6 mt-8">
+      <% @devlogs.each do |devlog| %>
+        <%= render "devlogs/devlog_card",
+            devlog: devlog,
+            context: 'voting',
+            show_comments_inline: false,
+            show_comment_modal: false,
+            show_likes: false,
+            content_margin: 'p-2',
+            no_parchment: true %>
+      <% end %>
+    </div>
+  </div>
+
+  <div class="mx-2 sm:mx-auto mt-8 sm:mt-12 max-w-220">
+    <%= render C::Container.new do %>
+      <div class="p-0 sm:p-2">
+        <%= form_with url: showcase_path, method: :post, data: { turbo: true }, class: "space-y-4" do |f| %>
+          <%= hidden_field_tag :project_id, @project.id %>
+          <%= hidden_field_tag :time_spent_voting_ms, 0, id: "time_spent_voting_ms" %>
+
+          <div class="space-y-3">
+            <% @criteria.each do |criterion| %>
+              <div class="bg-soft-bone/50 border border-saddle-taupe/30 rounded-lg p-3">
+                <div class="mb-2 font-medium text-som-dark capitalize"><%= criterion %></div>
+                <%= select_tag "vote_mf[ballot][#{criterion}]",
+                      options_for_select(@grade_labels),
+                      include_blank: "Select grade",
+                      required: true,
+                      class: "som-horizontal-input w-full" %>
+              </div>
+            <% end %>
+          </div>
+
+          <div class="flex justify-center items-center w-full mt-4">
+            <%= render C::StyledButton.new(text: "Submit", type: :submit) %>
+          </div>
+        <% end %>
+      </div>
+    <% end %>
+  </div>
+</div>
