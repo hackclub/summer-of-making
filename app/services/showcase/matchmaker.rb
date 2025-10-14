@@ -154,7 +154,7 @@ module Showcase
             return {} if project_ids.empty?
 
             scores_by_project_id = Hash.new { |h, k| h[k] = [] }
-            VoteMf.where(project_id: project_ids).select(:project_id, :ballot).find_each(batch_size: 50) do |vmf|
+            VoteMf.where(project_id: project_ids).select(:id, :project_id, :ballot).find_each(batch_size: 50) do |vmf|
                 s = vmf.normalized_total_score
                 scores_by_project_id[vmf.project_id] << s if s
             end
