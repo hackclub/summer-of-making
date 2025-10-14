@@ -946,6 +946,17 @@ ActiveRecord::Schema[8.0].define(version: 2025_10_02_233210) do
     t.index ["vote_id"], name: "index_vote_changes_on_vote_id"
   end
 
+  create_table "vote_mfs", force: :cascade do |t|
+    t.bigint "project_id", null: false
+    t.bigint "voter_id", null: false
+    t.integer "time_spent_voting_ms"
+    t.jsonb "ballot", default: {}, null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["project_id"], name: "index_vote_mfs_on_project_id"
+    t.index ["voter_id"], name: "index_vote_mfs_on_voter_id"
+  end
+
   create_table "votes", force: :cascade do |t|
     t.bigint "user_id", null: false
     t.text "explanation", null: false
