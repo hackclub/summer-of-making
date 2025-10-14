@@ -205,6 +205,8 @@ class YswsReviewerConstraint
 end
 
 Rails.application.routes.draw do
+  get "/showcase", to: "showcase#new", as: :showcase
+  post "/showcase", to: "showcase#create"
   mount ActiveInsights::Engine => "/insights"
   # Define your application routes per the DSL in https://guides.rubyonrails.org/routing.html
 
