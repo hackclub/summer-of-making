@@ -123,6 +123,35 @@ class WrappedPresenter
     end
   end
 
+  def devlogs_count
+    @devlogs_count ||= user.devlogs.count
+  end
+
+  def devlog_projects_count
+    @devlog_projects_count ||= user.devlogs.select(:project_id).distinct.count
+  end
+
+  def top_devlog_projects(limit = 4)
+    @top_devlog_projects ||= {}
+    @top_devlog_projects[limit] ||= begin
+      counts = user.devlogs
+                  .joins(:project)
+                  .group("projects.id")
+                  .order(Arel.sql("COUNT(devlogs.id) DESC"))
+                  .limit(limit)
+                  .count
+
+      projects_by_id = Project.with_deleted.where(id: counts.keys).index_by(&:id)
+
+      counts.map do |project_id, count|
+        project = projects_by_id[project_id]
+        next unless project
+
+        { project:, devlogs_count: count }
+      end.compact
+    end
+  end
+
   def shells_earned_rank
     return @shells_earned_rank if defined?(@shells_earned_rank)
 

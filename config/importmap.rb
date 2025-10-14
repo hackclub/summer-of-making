@@ -8,6 +8,7 @@ pin_all_from "app/javascript/controllers", under: "controllers"
 
 pin "chartkick", to: "chartkick.js"
 pin "Chart.bundle", to: "Chart.bundle.js"
+pin "html-to-image" # @1.11.13
 
 pin "@tiptap/core", to: "@tiptap--core.js" # @2.12.0
 pin "@tiptap/pm/commands", to: "@tiptap--pm--commands.js" # @2.12.0

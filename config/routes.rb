@@ -257,6 +257,7 @@ Rails.application.routes.draw do
   post "check_link", to: "projects#check_link"
   get "check_github_readme", to: "projects#check_github_readme"
   get "wrapped", to: "wrapped#show"
+  get "wrapped/share/:share_token", to: "wrapped#share", as: :shared_wrapped
   get "campfire", to: "campfire#index"
   get "campfire/hackatime_status", to: "campfire#hackatime_status"
 

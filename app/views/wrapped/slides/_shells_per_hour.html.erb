@@ -1,0 +1,36 @@
+<div
+  class="absolute inset-0 flex flex-col items-center justify-center gap-6 bg-gradient-to-br from-slate-200 via-slate-100 to-slate-300 p-14 text-center text-slate-900 opacity-0 pointer-events-none scale-95 transition-all duration-700 ease-out"
+  data-wrapped-target="slide">
+  <p class="font-medium uppercase tracking-[0.35em] text-sm text-slate-600 text-balance">Shells Per Hour Champ</p>
+  <% if project_ratio.present? && project_ratio_rate %>
+    <h2 class="text-4xl md:text-5xl font-black text-balance">
+      <%= link_to project_ratio.title, project_path(project_ratio), class: "underline decoration-dotted decoration-slate-400 hover:decoration-slate-700" %>
+    </h2>
+    <p class="text-lg md:text-xl max-w-2xl text-slate-600 text-balance">
+      <span class="font-semibold flex items-center justify-center gap-2 text-3xl text-slate-900">
+        <%= image_tag "shell.png", width: 40, alt: "Shell icon", class: "w-9 h-9" %>
+        <span
+          data-wrapped-target="counter"
+          data-wrapped-counter-type="decimal"
+          data-wrapped-counter-precision="2"
+          data-wrapped-counter-value="<%= project_ratio_rate %>">
+          0.00
+        </span>
+        <span class="text-lg text-slate-500">shells/hour</span>
+      </span>
+      over <%= format_seconds((project_ratio_hours ? (project_ratio_hours * 3600).to_i : 0), include_days: true) %> of logged work.
+    </p>
+  <% elsif project_ratio.present? %>
+    <h2 class="text-4xl md:text-5xl font-black text-balance">
+      <%= project_ratio.title %>
+    </h2>
+    <p class="text-lg md:text-xl max-w-2xl text-slate-600 text-balance">
+      Keep logging time to unlock a shells-per-hour stat here.
+    </p>
+  <% else %>
+    <h2 class="text-4xl md:text-5xl font-black text-balance">No shell/hour data</h2>
+    <p class="text-lg md:text-xl max-w-2xl text-slate-600 text-balance">
+      no ships? boring...
+    </p>
+  <% end %>
+</div>

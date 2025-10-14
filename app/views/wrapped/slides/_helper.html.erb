@@ -1,0 +1,22 @@
+<div
+  class="absolute inset-0 flex flex-col items-center justify-center gap-6 bg-gradient-to-br from-emerald-50 via-emerald-100 to-sky-100 p-14 text-center text-slate-900 opacity-0 pointer-events-none scale-95 transition-all duration-700 ease-out"
+  data-wrapped-target="slide">
+  <p class="font-medium uppercase tracking-[0.35em] text-sm text-emerald-600 text-balance">Support Hero</p>
+  <div class="flex items-center gap-4 text-6xl md:text-7xl font-black drop-shadow-sm text-emerald-700">
+    <span
+      data-wrapped-target="counter"
+      data-wrapped-counter-type="integer"
+      data-wrapped-counter-value="<%= helper_tickets_closed %>">
+      0
+    </span>
+    <span class="text-2xl font-semibold text-emerald-500">tickets closed</span>
+  </div>
+  <p class="text-lg md:text-xl max-w-2xl text-emerald-700/80 text-balance">
+    awesome work clearing the queue!
+  </p>
+  <% if helper_tickets_opened && helper_tickets_opened.positive? %>
+    <p class="text-base md:text-lg text-emerald-700/70 text-balance">
+      handled across <%= number_with_delimiter(helper_tickets_opened) %> tickets opened.
+    </p>
+  <% end %>
+</div>

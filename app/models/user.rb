@@ -31,6 +31,7 @@
 #  timezone                             :string
 #  tutorial_video_seen                  :boolean          default(FALSE), not null
 #  votes_count                          :integer          default(0), not null
+#  wrapped_share_token                  :string
 #  ysws_verified                        :boolean          default(FALSE)
 #  created_at                           :datetime         not null
 #  updated_at                           :datetime         not null
@@ -39,9 +40,10 @@
 #
 # Indexes
 #
-#  index_users_on_projects_count     (projects_count)
-#  index_users_on_ship_events_count  (ship_events_count)
-#  index_users_on_votes_count        (votes_count)
+#  index_users_on_projects_count       (projects_count)
+#  index_users_on_ship_events_count    (ship_events_count)
+#  index_users_on_votes_count          (votes_count)
+#  index_users_on_wrapped_share_token  (wrapped_share_token) UNIQUE
 #
 class User < ApplicationRecord
   has_paper_trail
@@ -66,6 +68,8 @@ class User < ApplicationRecord
   has_many :user_badges, dependent: :destroy
   has_many :comments
   has_many :likes
+
+  before_create :generate_wrapped_share_token
 
   accepts_nested_attributes_for :user_profile
   has_many :hackatime_projects
@@ -225,6 +229,13 @@ class User < ApplicationRecord
         raise
       end
     end
+  end
+
+  def ensure_wrapped_share_token!
+    return wrapped_share_token if wrapped_share_token.present?
+
+    regenerate_wrapped_share_token
+    wrapped_share_token
   end
 
   def refresh_profile!
@@ -866,5 +877,21 @@ class User < ApplicationRecord
         Rails.logger.error("Failed to notify xyz.hackclub.com: #{e.message}")
       end
     # end
+  end
+
+  def generate_wrapped_share_token
+    self.wrapped_share_token ||= loop do
+      token = SecureRandom.alphanumeric(7)
+      break token unless User.exists?(wrapped_share_token: token)
+    end
+  end
+
+  def regenerate_wrapped_share_token
+    loop do
+      self.wrapped_share_token = SecureRandom.alphanumeric(7)
+      break unless User.where.not(id: id).exists?(wrapped_share_token: wrapped_share_token)
+    end
+    save!
+    wrapped_share_token
   end
 end

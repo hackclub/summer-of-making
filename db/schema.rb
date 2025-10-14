@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_10_02_233210) do
+ActiveRecord::Schema[8.0].define(version: 2025_10_11_193937) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -457,7 +457,6 @@ ActiveRecord::Schema[8.0].define(version: 2025_10_02_233210) do
     t.bigint "ysws_returned_by_id"
     t.datetime "ysws_returned_at"
     t.text "recertification_instructions"
-    t.boolean "is_reshipped"
     t.index ["project_id", "judgement"], name: "index_ship_certifications_on_project_id_and_judgement"
     t.index ["project_id"], name: "index_ship_certifications_on_project_id"
     t.index ["reviewer_id"], name: "index_ship_certifications_on_reviewer_id"
@@ -899,9 +898,11 @@ ActiveRecord::Schema[8.0].define(version: 2025_10_02_233210) do
     t.integer "devlogs_count", default: 0, null: false
     t.integer "votes_count", default: 0, null: false
     t.integer "ship_events_count", default: 0, null: false
+    t.string "wrapped_share_token"
     t.index ["projects_count"], name: "index_users_on_projects_count"
     t.index ["ship_events_count"], name: "index_users_on_ship_events_count"
     t.index ["votes_count"], name: "index_users_on_votes_count"
+    t.index ["wrapped_share_token"], name: "index_users_on_wrapped_share_token", unique: true
   end
 
   create_table "versions", force: :cascade do |t|

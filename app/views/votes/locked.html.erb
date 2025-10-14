@@ -3,14 +3,10 @@
     title: "Vote",
     subtitle: "Vote on others' projects to get payouts!" %>
 
-  <%= render C::Card.new(css_classes: "text-lg text-center", padding: "lg") do %>
-    <% if defined?(Flipper) && Flipper.enabled?(:lock_voting, current_user) %>
-      <p class="mb-4">You've been submitting too many low-quality votes.</p>
-      <p>Please take a break and review the guidelines before voting again.</p>
-    <% else %>
-      <p class="mb-4">Voting will begin globally after 100 certified projects with at least 10 hours of coding time have been shipped!</p>
-      <p class="text-2xl"><%= @full_projects_count %> / 100 approved 10+ hr projects</p>
-      <p>(<%= @approve_projects_count %> certified projects, any amount of coding time)</p>
-    <% end %>
-  <% end %>
+    <div class="flex justify-center items-center min-h-[60vh]">
+      <div class="bg-vintage-red bg-opacity-30 backdrop-blur-lg p-8 rounded-xl shadow-lg text-center max-w-2xl">
+        <h1 class="text-2xl font-bold mb-4">Voting has closed!</h1>
+        <p class="text-lg">Voting has concluded for this event. Thank you for being part of Summer of Making!</p>
+      </div>
+    </div>
 </div>

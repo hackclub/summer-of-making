@@ -1,0 +1,137 @@
+<div class="hidden fixed -left-[9999px] top-0 z-[-1] w-full" data-wrapped-target="bento" aria-hidden="true">
+  <div class="w-[1200px] rounded-3xl bg-gradient-to-br from-slate-100 via-white to-slate-50 p-12 text-slate-900 shadow-2xl" data-wrapped-bento-root>
+    <div class="grid grid-cols-12 gap-6 auto-rows-[minmax(220px,1fr)]">
+      <div class="relative col-span-12 overflow-hidden rounded-3xl bg-gradient-to-br from-violet-500 via-indigo-500 to-sky-500 p-10 text-white shadow-xl">
+        <div class="absolute -right-16 -top-20 h-52 w-52 rounded-full bg-white/30 blur-3xl"></div>
+        <div class="absolute -bottom-24 left-16 h-56 w-56 rounded-full bg-sky-200/40 blur-3xl"></div>
+        <div class="relative z-10 flex max-w-4xl flex-col gap-4">
+          <p class="text-xs font-semibold uppercase tracking-[0.35em] text-white/80">Summer of Making 2025</p>
+          <h2 class="text-5xl font-black md:text-6xl"><%= display_name %>'s Wrapped</h2>
+          <p class="text-lg text-white/85 md:text-xl">
+            What a year! Here’s a look back at your projects, shells and swag during Summer of Making 2025.
+          </p>
+        </div>
+      </div>
+
+      <div class="relative col-span-5 row-span-2 overflow-hidden rounded-3xl bg-gradient-to-br from-amber-400 via-orange-500 to-rose-500 p-8 text-white shadow-xl">
+        <div class="absolute -left-10 bottom-6 h-36 w-36 rounded-full bg-white/25 blur-3xl"></div>
+        <div class="absolute -right-14 top-10 h-40 w-40 rounded-full bg-rose-300/40 blur-3xl"></div>
+        <div class="relative z-10 flex h-full flex-col justify-between">
+          <div>
+            <p class="text-xs font-semibold uppercase tracking-[0.35em] text-white/70">Shells Earned</p>
+            <p class="mt-6 text-5xl font-black md:text-6xl"><%= number_with_delimiter(wrapped.shells_earned) %></p>
+            <div class="mt-6 space-y-2 text-sm text-white/85">
+              <p><span class="font-semibold text-white">Spent:</span> <%= number_with_delimiter(wrapped.shells_spent) %></p>
+              <p><span class="font-semibold text-white">Net:</span> <%= number_with_delimiter(wrapped.net_shells) %></p>
+            </div>
+          </div>
+          <% if has_shells_rank && total_ranked.to_i.positive? %>
+            <p class="text-sm font-semibold text-white/80">
+              #<%= number_with_delimiter(rank_value) %> out of <%= number_with_delimiter(total_ranked) %> on the shell leaderboard.
+            </p>
+          <% else %>
+            <p class="text-sm text-white/75">
+              Keep stacking shells to climb the leaderboard.
+            </p>
+          <% end %>
+        </div>
+      </div>
+
+      <div class="relative col-span-3 overflow-hidden rounded-3xl bg-gradient-to-br from-sky-500 via-cyan-400 to-teal-400 p-8 text-white shadow-lg">
+        <div class="absolute -left-10 top-10 h-36 w-36 rounded-full bg-white/20 blur-3xl"></div>
+        <div class="relative z-10 flex h-full flex-col justify-between">
+          <div>
+            <p class="text-xs font-semibold uppercase tracking-[0.35em] text-white/70">Community Impact</p>
+            <p class="mt-6 text-4xl font-black md:text-5xl"><%= number_with_delimiter(votes_cast) %></p>
+            <p class="mt-2 text-sm font-medium uppercase tracking-[0.2em] text-white/80">Votes Cast</p>
+          </div>
+          <% if helper_slide && helper_tickets_closed %>
+            <p class="text-sm text-white/80">
+              Closed <span class="font-semibold text-white"><%= number_with_delimiter(helper_tickets_closed) %></span> help tickets for other hackers.
+            </p>
+          <% else %>
+            <p class="text-sm text-white/75">
+              Show some love on ships to boost your community stats.
+            </p>
+          <% end %>
+        </div>
+      </div>
+
+      <div class="relative col-span-4 row-span-2 overflow-hidden rounded-3xl bg-gradient-to-bl from-slate-900 via-slate-800 to-indigo-900 p-8 text-white shadow-xl">
+        <div class="absolute right-6 top-4 h-44 w-44 rounded-full bg-indigo-500/30 blur-3xl"></div>
+        <div class="relative z-10 flex h-full flex-col justify-between">
+          <div>
+            <p class="text-xs font-semibold uppercase tracking-[0.35em] text-white/60">Shell Efficiency</p>
+            <% if project_ratio.present? && project_ratio_rate %>
+              <p class="mt-6 text-4xl font-black"><%= number_with_precision(project_ratio_rate, precision: 2) %> shells/hour</p>
+              <p class="mt-4 text-sm text-white/80">
+                From <span class="font-semibold text-white"><%= project_ratio.title %></span> over <%= format_seconds((project_ratio_hours ? (project_ratio_hours * 3600).to_i : 0), include_days: true) %>.
+              </p>
+            <% elsif project_ratio.present? %>
+              <p class="mt-6 text-3xl font-black"><%= project_ratio.title %></p>
+              <p class="mt-4 text-sm text-white/75">
+                Log more time to unlock shells-per-hour insights.
+              </p>
+            <% else %>
+              <p class="mt-6 text-3xl font-black">No payouts tracked yet</p>
+              <p class="mt-4 text-sm text-white/75">
+                Ship something and log payouts to populate this card.
+              </p>
+            <% end %>
+          </div>
+          <p class="text-xs uppercase tracking-[0.3em] text-white/50">Payouts & Time</p>
+        </div>
+      </div>
+
+      <div class="relative col-span-3 overflow-hidden rounded-3xl border border-slate-900/10 bg-gradient-to-br from-white via-amber-50 to-slate-50 p-8 text-slate-900 shadow-md">
+        <div class="absolute -right-10 top-8 h-36 w-36 rounded-full bg-amber-200/40 blur-3xl"></div>
+        <div class="relative z-10 flex h-full flex-col justify-between">
+          <div>
+            <p class="text-xs font-semibold uppercase tracking-[0.35em] text-slate-500">Biggest Haul</p>
+            <% if order.present? %>
+              <% item_name = order.shop_item&.name || "Mystery Reward" %>
+              <p class="mt-6 text-2xl font-black text-slate-900"><%= item_name %></p>
+              <% quantity = order.quantity.to_i %>
+              <p class="mt-4 text-sm text-slate-600">
+                <span class="font-semibold text-slate-800"><%= number_with_delimiter(quantity) %></span> item<%= "s" if quantity != 1 %> ·
+                <span class="font-semibold text-slate-800"><%= number_with_delimiter(wrapped.most_expensive_order_total.to_i) %></span> shells
+              </p>
+            <% else %>
+              <p class="mt-6 text-2xl font-black text-slate-900">No orders yet</p>
+              <p class="mt-4 text-sm text-slate-600">
+                Spot something shiny in the shop to fill this card next time.
+              </p>
+            <% end %>
+          </div>
+          <p class="text-xs uppercase tracking-[0.3em] text-slate-400">Hack Club Shop</p>
+        </div>
+      </div>
+
+      <div class="relative col-span-12 overflow-hidden rounded-3xl border border-slate-900/10 bg-gradient-to-r from-violet-100 via-fuchsia-50 to-sky-100 p-10 text-slate-900 shadow-lg">
+        <div class="absolute -left-14 top-6 h-48 w-48 rounded-full bg-violet-300/30 blur-3xl"></div>
+        <div class="absolute bottom-0 right-10 h-36 w-36 rounded-full bg-white/40 blur-2xl"></div>
+        <div class="relative z-10 flex flex-col gap-6 md:flex-row md:items-center md:justify-between">
+          <div class="max-w-2xl">
+            <p class="text-xs font-semibold uppercase tracking-[0.35em] text-slate-500">Most Time Logged</p>
+            <% if project_time.present? %>
+              <p class="mt-4 text-3xl font-black md:text-4xl"><%= project_time.title %></p>
+              <p class="mt-4 text-base text-slate-600 md:text-lg">
+                <span class="font-semibold text-slate-900"><%= format_seconds(project_time_seconds || 0, include_days: true) %></span> poured into this build.
+              </p>
+            <% else %>
+              <p class="mt-4 text-3xl font-black md:text-4xl">No tracked time yet</p>
+              <p class="mt-4 text-base text-slate-600 md:text-lg">
+                Log coding sessions with Hackatime to unlock this stat.
+              </p>
+            <% end %>
+          </div>
+          <p class="text-xs uppercase tracking-[0.3em] text-slate-400">Hack Club Projects</p>
+        </div>
+      </div>
+    </div>
+    <div class="mt-10 flex items-center justify-between border-t border-slate-900/10 pt-6 text-xs font-semibold uppercase tracking-[0.35em] text-slate-500">
+      <span>summer.hackclub.com</span>
+      <span>Generated <%= Time.zone.now.strftime("%b %-d, %Y") %></span>
+    </div>
+  </div>
+</div>
