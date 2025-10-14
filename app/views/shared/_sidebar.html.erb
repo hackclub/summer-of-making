@@ -79,12 +79,12 @@
 
         <li class="flex justify-start" id="new-tutorial-vote">
           <%= render C::Link.new(
-            target: new_vote_path,
-            text: "Vote",
+            target: showcase_path,
+            text: "Showcase",
             icon: (user_is_banned || !tab_unlocked) ? "lock" : "vote",
             large: true,
             animate_push: true,
-            highlight: current_page?(new_vote_path),
+            highlight: current_page?(showcase_path),
             text_attr: {
               data: { sidebar_target: "collapseFade" },
               class: "text-3xl"
