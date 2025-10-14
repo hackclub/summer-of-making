@@ -118,7 +118,7 @@
           <% if current_user.tutorial_progress.should_show_completion_modal? %>
             <%= render "tutorial/completion_modal" %>
           <% end %>
-          <% if current_page?(map_path) || current_page?(wrapped_path) || request.path.start_with?("/wrapped/share/")  %>
+          <% if current_page?(map_path) || current_page?(wrapped_path) || request.path.start_with?("/wrapped/share/") %>
             <%= yield %>
           <% else %>
             <div data-controller="sidebar" data-sidebar-collapsed-value="false">

@@ -19,11 +19,10 @@ output.each do |user|
   balance = user[:balance].to_f.round
   balance = balance.to_s.reverse.gsub(/(\d{3})(?=\d)/, '\\1,').reverse
 
-  msg = "Hello there! :hii: Heidi and I have noticed you still have #{balance} shells left over! " \
-            "The shop is closing in about 12 hours, and once it is closed, it is closed! " \
-            "So if you want any last goodies, best get to stepping! :run-aaa: " \
-            "If you have no need for your shells, you can <https://summer.hackclub.com/shop/items/258/buy|donate them> to others! " \
-            "Happy spending, and from everyone on the team, thank you for being part of the Summer of Making! :ohneheart:"
+  msg = "Hey! :hi-bear: This is the final message you will get about this, but the shop will close in under four hours and you still have #{balance} shells left! " \
+            ":siren-real: This is your last chance unless you have an extreme situation in which you cannot place your orders by then. " \
+            "If this applies to you, please DM <@U080A3QP42C>. If you have no need for your shells, you can <https://summer.hackclub.com/shop/items/258/buy|donate them> to others! " \
+            "Thank you, #{user[:display_name]}! :ohneheart:"
 
   begin
     SendSlackDmJob.perform_later(user[:slack_id], msg)
