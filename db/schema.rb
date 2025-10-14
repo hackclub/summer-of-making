@@ -1079,6 +1079,8 @@ ActiveRecord::Schema[8.0].define(version: 2025_10_11_193937) do
   add_foreign_key "view_events", "users"
   add_foreign_key "vote_changes", "projects"
   add_foreign_key "vote_changes", "votes"
+  add_foreign_key "vote_mfs", "projects"
+  add_foreign_key "vote_mfs", "users", column: "voter_id"
   add_foreign_key "votes", "projects", column: "project_1_id"
   add_foreign_key "votes", "projects", column: "project_2_id"
   add_foreign_key "votes", "ship_events", column: "ship_event_1_id"

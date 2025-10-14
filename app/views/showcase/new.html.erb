@@ -54,10 +54,23 @@
           <%= hidden_field_tag :project_id, @project.id %>
           <%= hidden_field_tag :time_spent_voting_ms, 0, id: "time_spent_voting_ms" %>
 
-          <div class="space-y-3">
+          <div class="space-y-4">
+          <div class="mb-4">
+            <ul class="list-disc pl-5 space-y-2 text-som-dark/90 text-xl">
+              <li>Grade each category independently using the 6‑point scale.</li>
+              <li>"Good" is solid; go higher only when it clearly stands out.</li>
+            </ul>
+          </div>
+            <% explain = {
+              "technical" => "Engineering quality: Do you think the author has put in effort in ensuring the robustness, perfomance and correctness of this?",
+              "creativity" => "Is this creative?",
+              "storytelling" => "How well it tells how it was made: clear README/devlogs, documentation, etc",
+              "originality" => "How distinct it is from common projects?"
+            } %>
             <% @criteria.each do |criterion| %>
-              <div class="bg-soft-bone/50 border border-saddle-taupe/30 rounded-lg p-3">
-                <div class="mb-2 font-medium text-som-dark capitalize"><%= criterion %></div>
+              <div class="bg-white/60 border-2 border-som-dark/25 rounded-lg p-4">
+                <div class="mb-2 font-bold text-xl text-som-dark capitalize"><%= criterion %></div>
+                <p class="mb-3 text-base text-som-dark/85"><%= explain[criterion.to_s] %></p>
                 <%= select_tag "vote_mf[ballot][#{criterion}]",
                       options_for_select(@grade_labels),
                       include_blank: "Select grade",
