@@ -1,90 +1,115 @@
 <div class="container mx-auto px-0 sm:px-4 py-4 md:py-8">
   <%= render "shared/page_title", title: "Showcase", subtitle: "The new vote thing" %>
 
-  <div class="bg-[#F6DBBA] sm:rounded-xl p-4 mx-2 sm:mx-auto max-w-240">
-    <div class="flex items-start gap-4">
-      <div class="h-20 w-20 flex-shrink-0">
-        <%= image_tag @project.banner, alt: @project.title, class: "w-full h-full object-cover rounded-lg", loading: "lazy" %>
-      </div>
-      <div class="flex-grow min-w-0">
-        <h3 class="text-xl sm:text-3xl mb-1 truncate"><%= @project.title %></h3>
-        <div class="text-base sm:text-lg text-gray-600">
-          <div><%= @project.description %></div>
+  <!-- Two Column Layout -->
+  <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 max-w-full">
+
+    <!-- LHS -->
+    <div class="space-y-6">
+      <div class="sticky top-4 z-10 bg-[#F6DBBA] rounded-xl p-4">
+        <div class="flex items-start gap-4">
+          <div class="h-20 w-20 flex-shrink-0">
+            <%= image_tag @project.banner, alt: @project.title, class: "w-full h-full object-cover rounded-lg", loading: "lazy" %>
+          </div>
+          <div class="flex-grow min-w-0">
+            <h3 class="text-xl sm:text-2xl mb-1 truncate font-bold"><%= @project.title %></h3>
+            <div class="text-sm sm:text-base text-gray-700">
+              <div><%= @project.description %></div>
+            </div>
+            <div class="flex flex-wrap gap-2 mt-3">
+              <% if @project.demo_link.present? %>
+                <%= render C::StyledButton.new(
+                    text: "Demo",
+                    link: @project.demo_link,
+                    link_target: "_blank",
+                    icon: "world.svg",
+                    onclick: "event.stopPropagation()") %>
+              <% end %>
+              <% if @project.repo_link.present? %>
+                <%= render C::StyledButton.new(
+                    text: "Repository",
+                    link: @project.repo_link,
+                    link_target: "_blank",
+                    icon: "git.svg",
+                    onclick: "event.stopPropagation()") %>
+              <% end %>
+              <%= render "shared/report", suspect: @project, already_reported: FraudReport.already_reported_by?(current_user, @project) %>
+            </div>
+          </div>
         </div>
-        <div class="grid grid-cols-1 sm:flex sm:flex-wrap justify-center gap-3 sm:gap-4 mt-3">
-          <% if @project.demo_link.present? %>
-            <%= render C::StyledButton.new(
-                text: "Demo",
-                link: @project.demo_link,
-                link_target: "_blank",
-                icon: "world.svg",
-                onclick: "event.stopPropagation()") %>
-          <% end %>
-          <% if @project.repo_link.present? %>
-            <%= render C::StyledButton.new(
-                text: "Repository",
-                link: @project.repo_link,
-                link_target: "_blank",
-                icon: "git.svg",
-                onclick: "event.stopPropagation()") %>
-          <% end %>
-          <%= render "shared/report", suspect: @project, already_reported: FraudReport.already_reported_by?(current_user, @project) %>
-        </div>
       </div>
-    </div>
 
-    <div class="space-y-4 sm:space-y-6 mt-8">
-      <% @devlogs.each do |devlog| %>
-        <%= render "devlogs/devlog_card",
-            devlog: devlog,
-            context: 'voting',
-            show_comments_inline: false,
-            show_comment_modal: false,
-            show_likes: false,
-            content_margin: 'p-2',
-            no_parchment: true %>
-      <% end %>
-    </div>
-  </div>
-
-  <div class="mx-2 sm:mx-auto mt-8 sm:mt-12 max-w-220">
-    <%= render C::Container.new do %>
-      <div class="p-0 sm:p-2">
-        <%= form_with url: showcase_path, method: :post, data: { turbo: true }, class: "space-y-4" do |f| %>
-          <%= hidden_field_tag :project_id, @project.id %>
-          <%= hidden_field_tag :time_spent_voting_ms, 0, id: "time_spent_voting_ms" %>
-
-          <div class="space-y-4">
-          <div class="mb-4">
-            <ul class="list-disc pl-5 space-y-2 text-som-dark/90 text-xl">
-              <li>Grade each category independently using the 6‑point scale.</li>
-              <li>"Good" is solid; go higher only when it clearly stands out.</li>
-            </ul>
-          </div>
-            <% explain = {
-              "technical" => "Engineering quality: Do you think the author has put in effort in ensuring the robustness, perfomance and correctness of this?",
-              "creativity" => "Is this creative?",
-              "storytelling" => "How well it tells how it was made: clear README/devlogs, documentation, etc",
-              "originality" => "How distinct it is from common projects?"
-            } %>
-            <% @criteria.each do |criterion| %>
-              <div class="bg-white/60 border-2 border-som-dark/25 rounded-lg p-4">
-                <div class="mb-2 font-bold text-xl text-som-dark capitalize"><%= criterion %></div>
-                <p class="mb-3 text-base text-som-dark/85"><%= explain[criterion.to_s] %></p>
-                <%= select_tag "vote_mf[ballot][#{criterion}]",
-                      options_for_select(@grade_labels),
-                      include_blank: "Select grade",
-                      required: true,
-                      class: "som-horizontal-input w-full" %>
-              </div>
-            <% end %>
-          </div>
-
-          <div class="flex justify-center items-center w-full mt-4">
-            <%= render C::StyledButton.new(text: "Submit", type: :submit) %>
-          </div>
+      <div class="space-y-4 max-h-[calc(100vh-20rem)] overflow-y-auto pr-2">
+        <% @devlogs.each do |devlog| %>
+          <%= render "devlogs/devlog_card",
+              devlog: devlog,
+              context: 'voting',
+              show_comments_inline: false,
+              show_comment_modal: false,
+              show_likes: false,
+              content_margin: 'p-2',
+              no_parchment: true %>
         <% end %>
       </div>
-    <% end %>
+    </div>
+
+    <!-- RHS -->
+    <div class="lg:sticky lg:top-4 lg:h-fit">
+      <%= render C::Container.new do %>
+        <div class="p-4 sm:p-6">
+          <%= form_with url: showcase_path, method: :post, data: { turbo: true }, class: "space-y-4" do |f| %>
+            <%= hidden_field_tag :project_id, @project.id %>
+            <%= hidden_field_tag :time_spent_voting_ms, 0, id: "time_spent_voting_ms" %>
+
+            <div class="mb-6">
+              <h2 class="text-2xl font-bold text-som-dark mb-3">Rate this Project</h2>
+              <ul class="list-disc pl-5 space-y-2 text-som-dark/90 text-base">
+                <li>Grade each category independently using the 6‑point scale.</li>
+                <li>"Good" is solid; go higher only when it clearly stands out.</li>
+              </ul>
+            </div>
+
+            <div class="space-y-4">
+              <% explain = {
+                "technical" => "Engineering quality: Do you think the author has put in effort in ensuring the robustness, perfomance and correctness of this?",
+                "creativity" => "Is this creative?",
+                "storytelling" => "How well it tells how it was made: clear README/devlogs, documentation, etc",
+                "originality" => "How distinct it is from common projects?"
+              } %>
+              <% @criteria.each do |criterion| %>
+                <div class="bg-[#f8f1e6] border border-[#d5bfa6] rounded-lg p-4">
+                  <div class="mb-2 font-bold text-xl text-som-dark capitalize"><%= criterion %></div>
+                  <p class="mb-3 text-sm text-som-dark/85"><%= explain[criterion.to_s] %></p>
+
+                  <div class="star-rating"
+                       data-controller="star-rating"
+                       data-star-rating-criterion-value="<%= criterion %>"
+                       data-star-rating-labels-value="<%= @grade_labels.to_json %>">
+                    <input type="hidden" name="vote_mf[ballot][<%= criterion %>]" id="rating_<%= criterion %>" required>
+                    <div class="flex items-center gap-1">
+                      <% 6.times do |i| %>
+                        <button type="button"
+                                class="text-3xl transition-all hover:scale-110 pb-1"
+                                data-star-rating-target="star"
+                                data-action="click->star-rating#selectRating mouseenter->star-rating#hoverRating mouseleave->star-rating#leaveRating"
+                                data-value="<%= i + 1 %>">
+                          <span class="text-gray-300">★</span>
+                        </button>
+                      <% end %>
+                      <span class="ml-3 text-sm text-som-dark/70" data-star-rating-target="label"></span>
+                    </div>
+                  </div>
+                </div>
+              <% end %>
+            </div>
+
+            <div class="flex justify-center items-center w-full mt-6">
+              <%= render C::StyledButton.new(text: "Submit", type: :submit) %>
+            </div>
+          <% end %>
+        </div>
+      <% end %>
+    </div>
+
   </div>
 </div>
