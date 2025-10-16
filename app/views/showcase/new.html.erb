@@ -2,11 +2,11 @@
   <%= render "shared/page_title", title: "Showcase", subtitle: "The new vote thing" %>
 
   <!-- Two Column Layout -->
-  <div class="grid grid-cols-1 lg:grid-cols-[3fr_2fr] gap-6 max-w-full">
+  <div class="grid grid-cols-1 lg:grid-cols-[3fr_2fr] gap-6 max-w-full h-[calc(100vh-12rem)] lg:h-[calc(100vh-16rem)]">
 
     <!-- LHS -->
-    <div class="space-y-6">
-      <div class="sticky top-4 z-10 bg-[#F6DBBA] rounded-xl p-4 z-100 ">
+    <div class="flex flex-col gap-6 h-full overflow-hidden">
+      <div class="flex-shrink-0 bg-[#F6DBBA] rounded-xl p-4">
         <div class="flex items-start gap-4">
           <div class="h-20 w-20 flex-shrink-0">
             <%= image_tag @project.banner, alt: @project.title, class: "w-full h-full object-cover rounded-lg", loading: "lazy" %>
@@ -14,7 +14,7 @@
           <div class="flex-grow min-w-0">
             <h3 class="text-xl sm:text-2xl mb-1 truncate font-bold"><%= @project.title %></h3>
             <div class="text-sm sm:text-base text-gray-700">
-              <div><%= @project.description %></div>
+              <div class="line-clamp-3"><%= @project.description %></div>
             </div>
             <div class="flex flex-wrap gap-2 mt-3">
               <% if @project.demo_link.present? %>
@@ -39,7 +39,7 @@
         </div>
       </div>
 
-      <div class="space-y-4 max-h-[calc(100vh-16rem)] overflow-y-auto pr-2">
+      <div class="flex-1 space-y-4 overflow-y-auto pr-2 min-h-0">
         <% @devlogs.each do |devlog| %>
           <%= render "devlogs/devlog_card",
               devlog: devlog,
@@ -54,7 +54,7 @@
     </div>
 
     <!-- RHS -->
-    <div class="lg:sticky lg:top-4 lg:h-fit">
+    <div class="h-full">
       <%= render C::Container.new do %>
         <div class="p-3 sm:p-4">
           <%= form_with url: showcase_path, method: :post, data: { turbo: true }, class: "space-y-2" do |f| %>
