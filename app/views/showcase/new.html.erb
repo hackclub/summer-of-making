@@ -2,11 +2,11 @@
   <%= render "shared/page_title", title: "Showcase", subtitle: "The new vote thing" %>
 
   <!-- Two Column Layout -->
-  <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 max-w-full">
+  <div class="grid grid-cols-1 lg:grid-cols-[3fr_2fr] gap-6 max-w-full">
 
     <!-- LHS -->
     <div class="space-y-6">
-      <div class="sticky top-4 z-10 bg-[#F6DBBA] rounded-xl p-4">
+      <div class="sticky top-4 z-10 bg-[#F6DBBA] rounded-xl p-4 z-100 ">
         <div class="flex items-start gap-4">
           <div class="h-20 w-20 flex-shrink-0">
             <%= image_tag @project.banner, alt: @project.title, class: "w-full h-full object-cover rounded-lg", loading: "lazy" %>
@@ -39,7 +39,7 @@
         </div>
       </div>
 
-      <div class="space-y-4 max-h-[calc(100vh-20rem)] overflow-y-auto pr-2">
+      <div class="space-y-4 max-h-[calc(100vh-16rem)] overflow-y-auto pr-2">
         <% @devlogs.each do |devlog| %>
           <%= render "devlogs/devlog_card",
               devlog: devlog,
@@ -56,20 +56,16 @@
     <!-- RHS -->
     <div class="lg:sticky lg:top-4 lg:h-fit">
       <%= render C::Container.new do %>
-        <div class="p-4 sm:p-6">
-          <%= form_with url: showcase_path, method: :post, data: { turbo: true }, class: "space-y-4" do |f| %>
+        <div class="p-3 sm:p-4">
+          <%= form_with url: showcase_path, method: :post, data: { turbo: true }, class: "space-y-2" do |f| %>
             <%= hidden_field_tag :project_id, @project.id %>
             <%= hidden_field_tag :time_spent_voting_ms, 0, id: "time_spent_voting_ms" %>
 
-            <div class="mb-6">
-              <h2 class="text-2xl font-bold text-som-dark mb-3">Rate this Project</h2>
-              <ul class="list-disc pl-5 space-y-2 text-som-dark/90 text-base">
-                <li>Grade each category independently using the 6‑point scale.</li>
-                <li>"Good" is solid; go higher only when it clearly stands out.</li>
-              </ul>
+            <div class="mb-4">
+              <h2 class="text-xl font-bold text-som-dark mb-2">Your grades, cowboy</h2>
             </div>
 
-            <div class="space-y-4">
+            <div class="space-y-3">
               <% explain = {
                 "technical" => "Engineering quality: Do you think the author has put in effort in ensuring the robustness, perfomance and correctness of this?",
                 "creativity" => "Is this creative?",
@@ -77,9 +73,9 @@
                 "originality" => "How distinct it is from common projects?"
               } %>
               <% @criteria.each do |criterion| %>
-                <div class="bg-[#f8f1e6] border border-[#d5bfa6] rounded-lg p-4">
-                  <div class="mb-2 font-bold text-xl text-som-dark capitalize"><%= criterion %></div>
-                  <p class="mb-3 text-sm text-som-dark/85"><%= explain[criterion.to_s] %></p>
+                <div class="bg-[#f8f1e6] border border-[#d5bfa6] rounded-lg p-3">
+                  <div class="mb-1 font-bold text-lg text-som-dark capitalize"><%= criterion %></div>
+                  <p class="mb-2 text-sm text-som-dark/85"><%= explain[criterion.to_s] %></p>
 
                   <div class="star-rating"
                        data-controller="star-rating"
@@ -103,7 +99,7 @@
               <% end %>
             </div>
 
-            <div class="flex justify-center items-center w-full mt-6">
+            <div class="flex justify-center items-center w-full mt-4">
               <%= render C::StyledButton.new(text: "Submit", type: :submit) %>
             </div>
           <% end %>
