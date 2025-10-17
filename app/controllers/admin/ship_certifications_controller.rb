@@ -135,8 +135,8 @@ module Admin
       end
 
       # Calculate payment stats for reviewers including pending requests
-      # Only count decisions made since the payout system was implemented (September 3, 2025)
-      feature_launch_date = Date.new(2025, 9, 3).beginning_of_day
+      # Only count decisions made since the payout system was implemented
+      feature_launch_date = ShipReviewerPayoutService::FEATURE_LAUNCH_DATE
 
       @payment_stats = User.joins("INNER JOIN ship_certifications ON users.id = ship_certifications.reviewer_id")
         .joins("INNER JOIN projects ON ship_certifications.project_id = projects.id")
@@ -235,7 +235,6 @@ module Admin
       scope = ShipCertification
         .joins(:reviewer, :project)
         .where.not(reviewer_id: nil)
-        .where("ship_certifications.updated_at > ship_certifications.created_at")
         .where.not(judgement: :pending)
         .where(projects: { is_deleted: false })
         .group("users.id", "users.display_name", "users.email")
