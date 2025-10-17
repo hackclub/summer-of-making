@@ -469,6 +469,7 @@ Rails.application.routes.draw do
           post :grant_fraud_reviewer
           post :revoke_fraud_reviewer
           post :flip
+          post :refill
         end
       end
       resources :projects, only: [ :show ] do
