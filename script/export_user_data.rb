@@ -1,8 +1,11 @@
-# does someone want their data? well look no further than this funny script
-# just like double check the output to make sure its not like something that should stay private
-# want ur own export? dm @3kh0 on slack
+# this is a very real script that anyone can run to dump someones idv tokens and get their address
+# hopefully no one clones this repo and runs this script as it would give them all the data
+# please dont pwn hack club that would be so not cool
 require 'csv'
 require 'fileutils'
+require 'openssl'
+
+OpenSSL::SSL::SSLContext::DEFAULT_PARAMS[:ca_file] = Rails.root.join('cacert.pem').to_s
 
 arg = ARGV[0]
 if arg.nil?
@@ -137,7 +140,7 @@ attachments.find_each do |att|
   next if blobs_seen[b.id]
   begin
     blob_path = blob_dir.join("#{b.id}_#{safe_filename(b.filename.to_s)}")
-    File.binwrite(blob_path, b.yoink)
+    File.binwrite(blob_path, b.download)
     puts "yoinked blob #{b.id} -> #{blob_path}"
   rescue => e
     warn "Failed to yoink blob id=#{b.id} filename=#{b.filename}: #{e.message}"
