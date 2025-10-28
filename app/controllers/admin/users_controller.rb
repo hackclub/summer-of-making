@@ -41,6 +41,18 @@ module Admin
       @flipper_flags = Flipper.features
     end
 
+    def refill
+      @vote_queue = @user.user_vote_queue || @user.build_user_vote_queue.tap(&:save!)
+
+      begin
+        count = @vote_queue.refill_queue!(params[:count].to_i)
+        flash[:success] = "refilled w/ #{count} votes"
+        redirect_to admin_user_path(@user)
+      rescue => e
+        redirect_to admin_user_path, notice: e.message
+      end
+    end
+
     def internal_notes
       @user.internal_notes = params[:internal_notes]
       @user.create_activity("edit_internal_notes", params: { note: params[:internal_notes] })
