@@ -5,6 +5,7 @@ body {
   padding-top: 60px;
   font-family: 'Roboto', 'Arial', sans-serif;
   margin: 0;
+  overflow-x: hidden;
 }
 
 .hidden {
