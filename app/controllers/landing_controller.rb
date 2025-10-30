@@ -28,7 +28,17 @@ class LandingController < ApplicationController
   def sign_up
     email = params.require(:email).downcase
     ref = params[:ref]
-
+    # flash error "signups are closed"
+    respond_to do |format|
+      format.html { redirect_to request.referer || projects_path, alert: "Signups are closed" }
+      format.json { render json: { ok: false, error: "Signups are closed" }, status: :service_unavailable }
+      format.turbo_stream do
+        flash.now[:alert] = "Signups are closed"
+        render turbo_stream: turbo_stream.update("flash-container", partial: "shared/flash"),
+               status: :service_unavailable
+      end
+    end
+    return
     unless email.match?(URI::MailTo::EMAIL_REGEXP)
       return respond_to do |format|
         format.html { redirect_to request.referer || projects_path, alert: "Invalid email format" }
