@@ -490,7 +490,7 @@
             text: all_requirements_met ? "Next: Check Links" : "Complete Requirements First",
             data: { ship_target: "nextButton2", action: "ship#next2" },
             icon: "check_circle.svg",
-            disabled: not all_requirements_met)
+            disabled: !all_requirements_met)
         %>
       </div>
     </div>
