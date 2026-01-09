@@ -154,7 +154,7 @@ class LandingController < ApplicationController
       "email" => email,
       "ip" => ip.to_s,
       "user_agent" => user_agent,
-      "synced_at" => Time.now.iso8601
+      "created_at" => Time.now.iso8601
     })
 
     table.batch_upsert([ record ], "email")
