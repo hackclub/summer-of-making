@@ -221,6 +221,7 @@ Rails.application.routes.draw do
   # Root path is landing page for unauthenticated, redirects to dashboard for authenticated
   root "landing#index"
   post "/sign-up", to: "landing#sign_up"
+  post "/mailing-list-signup", to: "landing#mailing_list_signup"
 
   # Authentication routes
   get "/auth/slack", to: "sessions#new"

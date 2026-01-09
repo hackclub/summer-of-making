@@ -4,7 +4,7 @@ require "open-uri"
 CHANNEL_LIST = %w[C015M4L9AHW C091CEEHJ9K C090JKDJYN8 C090B3T9R9R C092833JXKK]
 
 class LandingController < ApplicationController
-  skip_before_action :authenticate_user!, only: %i[index sign_up]
+  skip_before_action :authenticate_user!, only: %i[index sign_up mailing_list_signup]
 
   def index
     # @high_seas_reviews = Rails.cache.fetch("high_seas_reviews", expires_in: 1.hour) do
@@ -81,6 +81,25 @@ class LandingController < ApplicationController
     end
   end
 
+  def mailing_list_signup
+    email = params.require(:email).downcase.strip
+
+    unless email.match?(URI::MailTo::EMAIL_REGEXP)
+      return respond_to do |format|
+        format.json { render json: { ok: false, error: "Invalid email format" }, status: :bad_request }
+      end
+    end
+
+    # Sync to Airtable post_event_sign_ups table
+    sync_to_airtable_post_event(email, request.remote_ip, request.user_agent)
+
+    ahoy.track "mailing_list_signup", email: email
+
+    respond_to do |format|
+      format.json { render json: { ok: true, message: "Successfully subscribed!" } }
+    end
+  end
+
   private
 
   def send_slack_invite(email)
@@ -122,5 +141,25 @@ class LandingController < ApplicationController
     Rails.logger.error "IP lookup failed: #{e.message}"
     Honeybadger.notify(e)
     "?"
+  end
+
+  def sync_to_airtable_post_event(email, ip, user_agent)
+    table = Norairrecord.table(
+      ENV["AIRTABLE_API_KEY"] || Rails.application.credentials.airtable.api_key,
+      ENV["AIRTABLE_BASE_ID"] || Rails.application.credentials.airtable.base_id,
+      "post_event_sign_ups"
+    )
+
+    record = table.new({
+      "email" => email,
+      "ip" => ip.to_s,
+      "user_agent" => user_agent,
+      "synced_at" => Time.now.iso8601
+    })
+
+    table.batch_upsert([ record ], "email")
+  rescue StandardError => e
+    Rails.logger.error "Airtable sync failed: #{e.message}"
+    Honeybadger.notify(e)
   end
 end

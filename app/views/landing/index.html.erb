@@ -27,22 +27,24 @@
 
             <div class="flex flex-col gap-6 items-stretch lg:items-start">
               <h2 class="text-2xl sm:text-3xl mx-auto md:mx-0 text-[#3a2f25] font-medium font-['DynaPuff',sans-serif] -mt-2">
-                Build stuff. Get stuff. <span class="font-bold text-som-orange">Repeat.</span>
+                Summer of Making 2025 has <span class="font-bold text-som-orange">ended!</span>
               </h2>
-              <div class="flex flex-col self-stretch sm:flex-row gap-3">
-                <%# render "signup" #%>
-              </div>
-              <div class="flex flex-col items-center mx-auto">
-                <p class="font-['Fredoka',sans-serif] font-normal mb-1 -mx-2 text-lg sm:text-xl self-center text-[#3a2f25 relative">
-                  For ages 13 to 18. Ends September 30, 2025
+              <div class="flex flex-col items-center mx-auto gap-4">
+                <p class="font-['Fredoka',sans-serif] font-normal text-base sm:text-lg self-center text-[#3a2f25] text-center">
+                  Put your email below to hear about future Hack Club events!
                 </p>
-                <p class="font-['Fredoka',sans-serif] font-normal text-sm sm:text-md self-center text-[#3a2f25]">
-                  <span class="font-medium text-som-orange">Over 18?</span> Earn the same prizes by
-                  <a href="https://docs.google.com/document/d/1xiAoYrO6wY1knzZhI1TFYVqCo6q2R7A46he0w5tan90/edit?usp=sharing"
-                    class="font-medium text-som-orange hover:text-[#d14c26] underline decoration-2 underline-offset-2 transition-colors duration-200"
-                    target="_blank"
-                    rel="noopener noreferrer">getting teens to sign up</a>
-                </p>
+                <div class="w-full max-w-md">
+                  <%= render "mailing_list_signup" %>
+                </div>
+                <div class="mt-4 p-4 bg-white/50 rounded-xl border-2 border-som-orange/30">
+                  <p class="font-['Fredoka',sans-serif] font-normal text-base sm:text-lg text-[#3a2f25] text-center">
+                    <span class="font-semibold text-som-orange">Hack Club Flavortown</span> - the successor to Summer of Making 2025 - is running from Dec 22 - Mar 31.
+                    <a href="https://flavortown.hackclub.com"
+                      class="font-semibold text-som-orange hover:text-[#d14c26] underline decoration-2 underline-offset-2 transition-colors duration-200"
+                      target="_blank"
+                      rel="noopener noreferrer">Go to website.</a>
+                  </p>
+                </div>
               </div>
             </div>
           </div>
@@ -588,11 +590,23 @@
 
 <div class="pt-12 md:pt-20 pb-24 md:pb-48 px-2 md:px-4 sm:px-8">
   <div class="max-w-6xl mx-auto text-center">
-    <h3 class="text-4xl md:text-4xl lg:text-5xl font-bold mb-6 md:mb-8 text-[#3a2f25] font-['DynaPuff',sans-serif] flex flex-col md:flex-row gap-2 md:gap-3 lg:gap-4 justify-center">
-      <span class="mr-36 md:mr-0">Build stuff.</span><span class="ml-36 md:ml-0">Get stuff.</span><span class="text-som-orange text-5xl md:text-4xl lg:text-5xl">Repeat.</span>
+    <h3 class="text-3xl md:text-4xl lg:text-5xl font-bold mb-6 md:mb-8 text-[#3a2f25] font-['DynaPuff',sans-serif]">
+      Summer of Making 2025 has <span class="text-som-orange">ended!</span>
     </h3>
-    <div class="flex items-center justify-center max-w-md mx-auto px-2">
-      <%= render "signup" %>
+    <p class="font-['Fredoka',sans-serif] font-normal text-base sm:text-lg text-[#3a2f25] mb-6 max-w-2xl mx-auto">
+      Put your email below to hear about future Hack Club events!
+    </p>
+    <div class="flex items-center justify-center max-w-md mx-auto px-2 mb-8">
+      <%= render "mailing_list_signup" %>
+    </div>
+    <div class="max-w-xl mx-auto p-4 bg-white/50 rounded-xl border-2 border-som-orange/30">
+      <p class="font-['Fredoka',sans-serif] font-normal text-base sm:text-lg text-[#3a2f25] text-center">
+        <span class="font-semibold text-som-orange">Hack Club Flavortown</span> - the successor to Summer of Making 2025 - is running from Dec 22 - Mar 31.
+        <a href="https://flavortown.hackclub.com"
+          class="font-semibold text-som-orange hover:text-[#d14c26] underline decoration-2 underline-offset-2 transition-colors duration-200"
+          target="_blank"
+          rel="noopener noreferrer">Go to website.</a>
+      </p>
     </div>
   </div>
 </div>

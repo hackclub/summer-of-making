@@ -1,0 +1,27 @@
+<div data-controller="mailing-list" class="font-dynapuff w-full">
+  <div class="space-y-3">
+    <div class="relative">
+      <%= image_tag "email.svg", alt: "Email", class: "absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 pointer-events-none z-10 opacity-60" %>
+      <input type="email"
+             required
+             placeholder="Enter your email..."
+             autocomplete="email"
+             class="marble-textarea with-icon w-full"
+             data-mailing-list-target="emailInput"
+             id="mailing-list-email"
+             onkeydown="if(event.key==='Enter'){event.preventDefault();var btn=this.closest('[data-controller=mailing-list]').querySelector('.marble-button');if(btn){btn.click();}}">
+    </div>
+    <div class="hidden bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded-lg text-sm"
+         data-mailing-list-target="errorMsg">
+    </div>
+    <div class="hidden bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded-lg text-sm"
+         data-mailing-list-target="successMsg">
+    </div>
+    <button type="button"
+            class="marble-button w-full text-center"
+            data-action="click->mailing-list#subscribe"
+            data-mailing-list-target="submitBtn">
+      Subscribe to Updates
+    </button>
+  </div>
+</div>
