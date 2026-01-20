@@ -1,6 +1,8 @@
 # 🧭 Summer of Making
 This repository hosts the Ruby on Rails app for Hack Club's Summer of Making, a challenge for every teenager to build awesome projects and get rewarded! You can find more details on [summer.hackclub.com](https://summer.hackclub.com).
 
+**Note:** Summer of Making has ended! If you're looking to participate in a similar event, check out [Hack Club Flavortown](https://flavortown.hackclub.com?ref=som).
+
 ## Getting Started
 
 1. Copy `.env.example` to `.env` (`cp .env.example .env`), and set the following variables:
