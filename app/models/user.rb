@@ -716,31 +716,7 @@ class User < ApplicationRecord
   def verification_status
     return :not_linked if identity_vault_id.blank?
 
-    # rapid identify theft
-    if Rails.env.development? && ENV["BYPASS_IDV"] == "true"
-      notify_xyz_on_verified unless ysws_verified?
-      update(ysws_verified: true) unless ysws_verified?
-      return :verified
-    end
-
-    idv_data = fetch_idv[:identity]
-
-    case idv_data[:verification_status]
-    when "pending"
-      :pending
-    when "needs_submission"
-      :needs_resubmission
-    when "verified"
-      if idv_data[:ysws_eligible]
-        notify_xyz_on_verified unless ysws_verified?
-        update(ysws_verified: true) unless ysws_verified?
-        :verified
-      else
-        :ineligible
-      end
-    else
-      :ineligible
-    end
+    ysws_verified? ? :verified : :ineligible
   end
 
   def identity_vault_linked?
