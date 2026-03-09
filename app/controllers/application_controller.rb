@@ -15,6 +15,7 @@ class ApplicationController < ActionController::Base
 
   before_action :authenticate_user!
   before_action :check_if_banned
+  before_action :enforce_read_only_mode
   before_action :fetch_hackatime_data_if_needed
   after_action :track_page_view
 
@@ -81,7 +82,35 @@ class ApplicationController < ActionController::Base
 
   def info_for_paper_trail = { extra_data: { impersonating: impersonating?, pretending_to_be: current_impersonator && current_user }.compact_blank }
 
+  def enforce_read_only_mode
+    return if request.get? || request.head?
+    return if current_user&.is_admin?
+    return if read_only_exempt_controller?
+
+    respond_to do |format|
+      format.html { redirect_back fallback_location: root_path, alert: "Summer of Making has ended and is now in read-only mode." }
+      format.json { render json: { error: "Platform is in read-only mode" }, status: :forbidden }
+      format.turbo_stream { redirect_back fallback_location: root_path, alert: "Summer of Making has ended and is now in read-only mode." }
+      format.any { head :forbidden }
+    end
+  end
+
   private
+
+  READ_ONLY_EXEMPT_CONTROLLERS = %w[
+    sessions
+    landing
+    admin
+  ].freeze
+
+  def read_only_exempt_controller?
+    # this allows auth flows
+    return true if READ_ONLY_EXEMPT_CONTROLLERS.include?(controller_name)
+    # if people wanna delete their project, yeah sure, why not
+    return true if controller_name == "projects" && action_name == "destroy"
+
+    false
+  end
 
   def preload_current_user_associations
     return unless user_signed_in?
