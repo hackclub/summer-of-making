@@ -214,9 +214,9 @@ GEM
       concurrent-ruby (~> 1.1)
       webrick (~> 1.7)
       websocket-driver (~> 0.7)
-    ferrum_pdf (0.3.0)
+    ferrum_pdf (3.1.0)
+      actionpack (>= 6.0.0)
       ferrum (~> 0.15)
-      rails (>= 6.0.0)
     ffi (1.17.4-aarch64-linux-gnu)
     ffi (1.17.4-aarch64-linux-musl)
     ffi (1.17.4-arm-linux-gnu)
@@ -675,7 +675,7 @@ DEPENDENCIES
   dotenv-rails
   erb_lint
   faker
-  ferrum_pdf (~> 0.3.0)
+  ferrum_pdf (~> 3.1.0)
   flamegraph
   flipper (= 1.3.4)
   flipper-active_record (= 1.3.4)

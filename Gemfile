@@ -128,7 +128,7 @@ gem "groupdate", "~> 6.6"
 
 gem "ruby-openai", "~> 8.1"
 
-gem "ferrum_pdf", "~> 0.3.0"
+gem "ferrum_pdf", "~> 3.1.0"
 
 gem "streamio-ffmpeg", "~> 3.0"
 
