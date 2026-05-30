@@ -167,7 +167,7 @@ gem "activeinsights"
 
 gem "paper_trail"
 
-gem "strong_migrations", "~> 2.5"
+gem "strong_migrations", "~> 2.8"
 
 gem "jb", "~> 0.8.2"
 
