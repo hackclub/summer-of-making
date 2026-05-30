@@ -147,7 +147,7 @@ GEM
       csv
       railties (>= 7.2)
       safely_block (>= 1)
-    bootsnap (1.24.3)
+    bootsnap (1.24.5)
       msgpack (~> 1.2)
     brakeman (8.0.4)
       racc
@@ -332,7 +332,7 @@ GEM
       railties (>= 7.1)
       stimulus-rails
       turbo-rails
-    msgpack (1.8.0)
+    msgpack (1.8.1)
     multi_json (1.21.1)
     multipart-post (2.4.1)
     net-http (0.9.1)
