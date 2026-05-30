@@ -259,9 +259,7 @@ GEM
       ostruct
     i18n (1.14.8)
       concurrent-ruby (~> 1.0)
-    image_processing (1.14.0)
-      mini_magick (>= 4.9.5, < 6)
-      ruby-vips (>= 2.0.17, < 3)
+    image_processing (2.0.1)
     importmap-rails (2.2.3)
       actionpack (>= 6.0.0)
       activesupport (>= 6.0.0)
@@ -539,9 +537,6 @@ GEM
       faraday (>= 1)
       faraday-multipart (>= 1)
     ruby-progressbar (1.13.0)
-    ruby-vips (2.3.0)
-      ffi (~> 1.12)
-      logger
     rubyzip (3.3.0)
     safely_block (1.0.0)
     sanitize (7.0.0)
@@ -684,7 +679,7 @@ DEPENDENCIES
   geocoder
   groupdate (~> 6.6)
   honeybadger (~> 5.28)
-  image_processing (~> 1.14)
+  image_processing (~> 2.0)
   importmap-rails
   inline_svg
   jb (~> 0.8.2)
