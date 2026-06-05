@@ -48,9 +48,6 @@ gem "kamal", require: false
 # Add HTTP asset caching/compression and X-Sendfile acceleration to Puma [https://github.com/basecamp/thruster/]
 gem "thruster", require: false
 
-# Monitoring performance
-gem "skylight"
-
 # For call-stack profiling flamegraphs
 gem "stackprof"
 # Rack Mini Profiler [https://github.com/MiniProfiler/rack-mini-profiler]
