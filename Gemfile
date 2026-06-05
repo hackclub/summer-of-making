@@ -113,7 +113,7 @@ gem "airrecord"
 gem "norairrecord"
 
 # Honeybadger for team's error tracking
-gem "honeybadger", "~> 5.28"
+gem "honeybadger", "~> 6.6"
 
 gem "redcarpet"
 

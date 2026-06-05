@@ -254,7 +254,7 @@ GEM
       activesupport (>= 7.2)
     hashie (5.1.0)
       logger
-    honeybadger (5.30.0)
+    honeybadger (6.6.2)
       logger
       ostruct
     i18n (1.14.8)
@@ -681,7 +681,7 @@ DEPENDENCIES
   flipper-ui (= 1.3.4)
   geocoder
   groupdate (~> 6.6)
-  honeybadger (~> 5.28)
+  honeybadger (~> 6.6)
   image_processing (~> 1.14)
   importmap-rails
   inline_svg
