@@ -1,6 +1,9 @@
 FROM ruby:3.4.3
 
 # Install system dependencies
+ARG LIBHEIF_VERSION=1.23.2
+ARG LIBHEIF_SHA256=1405ed070421459b569ff49deab109b7f1a30a447e72a9b20a4154f774634a44
+
 RUN --mount=target=/var/lib/apt/lists,type=cache,sharing=locked \
     --mount=target=/var/cache/apt,type=cache,sharing=locked \
     rm -f /etc/apt/apt.conf.d/docker-clean && \
@@ -16,7 +19,18 @@ RUN --mount=target=/var/lib/apt/lists,type=cache,sharing=locked \
     curl \
     vim \
     ffmpeg \
-    imagemagick
+    imagemagick \
+    cmake libjpeg-dev libpng-dev libaom-dev libx265-dev libde265-dev && \
+    curl -sL "https://github.com/strukturag/libheif/archive/refs/tags/v${LIBHEIF_VERSION}.tar.gz" -o /tmp/libheif.tar.gz && \
+    echo "${LIBHEIF_SHA256} /tmp/libheif.tar.gz" | sha256sum -c - && \
+    tar xz -C /tmp/ -f /tmp/libheif.tar.gz && \
+    cd /tmp/libheif-${LIBHEIF_VERSION} && \
+    mkdir build && cd build && \
+    cmake --preset=release -DWITH_EXAMPLES=ON -DENABLE_PLUGIN_LOADING=NO .. && \
+    make -j$(nproc) && \
+    make install && \
+    ldconfig && \
+    cd / && rm -rf /tmp/libheif*
 
 # Set working directory
 WORKDIR /app

@@ -15,12 +15,26 @@ FROM docker.io/library/ruby:$RUBY_VERSION
 # Rails app lives here
 WORKDIR /rails
 
+ARG LIBHEIF_VERSION=1.23.2
+ARG LIBHEIF_SHA256=1405ed070421459b569ff49deab109b7f1a30a447e72a9b20a4154f774634a44
+
 # Install all packages (base + build dependencies)
 RUN apt-get update -qq && \
     DEBIAN_FRONTEND=noninteractive apt-get install --no-install-recommends -y \
         tzdata \
         curl libjemalloc2 libvips postgresql-client wget ffmpeg imagemagick \
-        build-essential git libpq-dev libyaml-dev pkg-config anacron procps zip && \
+        build-essential git libpq-dev libyaml-dev pkg-config anacron procps zip \
+        cmake libjpeg-dev libpng-dev libaom-dev libx265-dev libde265-dev && \
+    curl -sL "https://github.com/strukturag/libheif/archive/refs/tags/v${LIBHEIF_VERSION}.tar.gz" -o /tmp/libheif.tar.gz && \
+    echo "${LIBHEIF_SHA256} /tmp/libheif.tar.gz" | sha256sum -c - && \
+    tar xz -C /tmp/ -f /tmp/libheif.tar.gz && \
+    cd /tmp/libheif-${LIBHEIF_VERSION} && \
+    mkdir build && cd build && \
+    cmake --preset=release -DWITH_EXAMPLES=ON -DENABLE_PLUGIN_LOADING=NO .. && \
+    make -j$(nproc) && \
+    make install && \
+    ldconfig && \
+    cd / && rm -rf /tmp/libheif* && \
     rm -rf /var/lib/apt/lists /var/cache/apt/archives
 
 RUN ln -snf /usr/share/zoneinfo/America/New_York /etc/localtime && echo America/New_York > /etc/timezone
