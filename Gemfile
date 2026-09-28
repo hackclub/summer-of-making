@@ -131,8 +131,13 @@ gem "streamio-ffmpeg", "~> 3.0"
 
 gem "image_processing", "~> 1.14"
 
-gem "avo", ">= 3.2"
+gem "avo", "~> 3.32"
 gem "aws-sdk-s3", require: false
+
+# Security pin: stay on the json 2.x line. 2.19.9 fixes CVE-2026-... while json 3.x
+# is a breaking major (rejects duplicate keys/comments on parse) we don't want on
+# the archived app. Bump the floor if the advisory ever requires >= 3.
+gem "json", "~> 2.19", ">= 2.19.9"
 
 gem "lz_string", "~> 0.3.0"
 
