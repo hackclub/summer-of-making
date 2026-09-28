@@ -1,5 +1,6 @@
 # == Route Map
 #
+# Routes for application:
 #                                                    Prefix Verb   URI Pattern                                                                                       Controller#Action
 #                                                  showcase GET    /showcase(.:format)                                                                               showcase#new
 #                                                           POST   /showcase(.:format)                                                                               showcase#create
@@ -285,6 +286,7 @@
 #                                      rails_direct_uploads POST   /rails/active_storage/direct_uploads(.:format)                                                    active_storage/direct_uploads#create
 #
 # Routes for ActiveInsights::Engine:
+#                          Prefix Verb URI Pattern                                                    Controller#Action
 #                        requests GET  /requests(.:format)                                            active_insights/requests#index
 #                            jobs GET  /jobs(.:format)                                                active_insights/jobs#index
 #                                 GET  /jobs/:date(.:format)                                          active_insights/jobs#index
@@ -306,6 +308,7 @@
 #                            root GET  /                                                              active_insights/requests#index
 #
 # Routes for MissionControl::Jobs::Engine:
+#                      Prefix Verb   URI Pattern                                                    Controller#Action
 #     application_queue_pause DELETE /applications/:application_id/queues/:queue_id/pause(.:format) mission_control/jobs/queues/pauses#destroy
 #                             POST   /applications/:application_id/queues/:queue_id/pause(.:format) mission_control/jobs/queues/pauses#create
 #          application_queues GET    /applications/:application_id/queues(.:format)                 mission_control/jobs/queues#index
@@ -330,6 +333,7 @@
 #                        root GET    /                                                              mission_control/jobs/queues#index
 #
 # Routes for Blazer::Engine:
+#            Prefix Verb   URI Pattern                       Controller#Action
 #       run_queries POST   /queries/run(.:format)            blazer/queries#run
 #    cancel_queries POST   /queries/cancel(.:format)         blazer/queries#cancel
 #     refresh_query POST   /queries/:id/refresh(.:format)    blazer/queries#refresh
