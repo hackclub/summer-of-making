@@ -368,6 +368,15 @@ class User < ApplicationRecord
 
   def refresh_hackatime_data_now
     response = fetch_raw_hackatime_stats
+
+    # 404 = hackatime has no account for this slack_id. Clear the flag so we stop
+    # re-querying them every refresh (this was the source of ~276k 404s/day). Only
+    # a 404 clears it — a 5xx/timeout is transient and should be retried later.
+    if response.status == 404
+      update!(has_hackatime: false, has_hackatime_account: false)
+      return
+    end
+
     return unless response.success?
 
     result = JSON.parse(response.body)

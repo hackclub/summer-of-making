@@ -1,137 +1,125 @@
+# ⚠️ Summer of Making is ARCHIVED — the program has ended and this app is kept
+# only as a read-only archive. The recurring jobs that used to run here all did
+# background work against EXTERNAL services (hackatime, Slack, Airtable, GitHub,
+# the Mole categorizer, theseus fulfillment). None of that should run for a dead
+# program, so the whole production schedule is intentionally disabled.
+#
+# In particular, UserHackatimeDataRefreshJob looped over every ex-participant
+# once an hour and called hackatime.hackclub.com/api/v1/users/<slack_id>/stats;
+# for the many users who never had (or no longer have) a hackatime account that
+# 404s, and nothing cleared the has_hackatime flag, so it re-queried them
+# forever — ~276k 404s/day against hackatime. Leaving `production:` empty stops
+# the recurring dispatcher from scheduling anything.
+#
+# If the archive ever genuinely needs one of these back, re-enable just that
+# entry from the reference block below — do not restore the whole list.
+production: {}
+
+# ---------------------------------------------------------------------------
+# Previous schedule, preserved for reference (DISABLED — see note above).
+# ---------------------------------------------------------------------------
 # production:
-#   periodic_cleanup:
-#     class: CleanSoftDeletedRecordsJob
-#     queue: background
-#     args: [ 1000, { batch_size: 500 } ]
+#   hourly_hackatime_refresh:
+#     class: UserHackatimeDataRefreshJob
+#     queue: literally_whenever
 #     schedule: every hour
-#   periodic_command:
-#     command: "SoftDeletedRecord.due.delete_all"
-#     priority: 2
-#     schedule: at 5am every day
-
-production:
-  hourly_hackatime_refresh:
-    class: UserHackatimeDataRefreshJob
-    queue: literally_whenever
-    schedule: every hour
-    description: "Refresh Hackatime stats for all users with Hackatime enabled + DM people"
-
-  # generate_stonk_reports:
-  #   class: GenerateStonkReportJob
-  #   schedule: every day
-
-  # sync_slack_emotes:
-  #   class: SyncSlackEmotesJob
-  #   queue: default
-  #   schedule: every day
-  #   description: "Sync emotes from Slack :yay:"
-
-  update_slack_avatars:
-    class: UpdateSlackAvatarJob
-    schedule: every 6 hours
-    concurrency: 1
-    description: "Update all users' Slack avatars from Slack API"
-
-  # cleanup_unattached_storage:
-  #   command: "bundle exec rake active_storage:cleanup_unattached[7]"
-  #   schedule: every day
-  #   description: "Clean up unattached ActiveStorage blobs older than 7 days"
-
-  recalculate_devlog_times:
-    class: RecalculateDevlogTimesJob
-    command: perform_unique
-    schedule: every minute
-    concurrency: 1
-    description: "Recalculate devlogs' seconds_coded columns"
-
-  sync_user_to_airtable:
-    class: SyncUserToAirtableJob
-    schedule: every minute
-    concurrency: 1
-    description: "Sync user data to Airtable every minute with single execution limit"
-
-  sync_email_signup_to_airtable:
-    class: SyncEmailSignupToAirtableJob
-    schedule: every minute
-    concurrency: 1
-    description: "Sync email signups to Airtable every minute with single execution limit"
-
-  shop_kick_verification_limbo_orders:
-    class: Shop::KickVerificationLimboOrdersJob
-    schedule: every 30 minutes
-    concurrency: 1
-    description: "recheck verf on free stickers orders"
-
-  shop_reap_free_stickers_orders:
-    class: Shop::ReapFreeStickersOrdersJob
-    schedule: at 1am every day
-    concurrency: 1
-    description: "fulfill pending free stickers orders into theseus"
-
-  shop_table_sync_free_stickers_orders:
-    class: Shop::TableSyncFreeStickersOrdersJob
-    schedule: every hour
-    concurrency: 1
-    description: "CSV-sync free stickers orders into Airtable"
-
-  shop_table_sync_regular_orders:
-    class: Shop::TableSyncRegularOrdersJob
-    schedule: every 7 minutes
-    concurrency: 1
-    description: "CSV-sync non-free-stickers orders into Airtable"
-
-  # shop_process_letter_mail_orders:
-  #   class: Shop::ProcessLetterMailOrdersJob
-  #   schedule: every 2 days
-  #   concurrency: 1
-  #   description: "Process pending letter mail orders and send to Theseus som-fulfillment queue"
-
-  shop_process_warehouse_orders:
-    class: Shop::ProcessWarehouseOrdersJob
-    schedule: every 2 days
-    concurrency: 1
-    description: "Process pending warehouse item orders and create packages for warehouse fulfillment"
-
-  airtable_syncable_update:
-    class: AirtableSyncableUpdateJob
-    schedule: every 2 minutes
-    concurrency: 1
-    description: "Sync Airtable records every 2 minutes with single execution limit"
-
-  upload_to_unified_db:
-    class: YswsReview::UploadToUnifiedDbJob
-    schedule: every 5 minutes
-    concurrency: 1
-    description: "Upload approved YSWS from the SoM to the Unified db"
-
-  check_ysws_duplicates:
-    class: YswsReview::CheckDuplicatesJob
-    schedule: every 5 minutes
-    concurrency: 1
-    description: "Check for duplicate YSWS submissions across different programs"
-
-  mole_batch_guess_project_categorization:
-    class: Mole::BatchGuessProjectCategorizationJob
-    schedule: every 12 minutes # 5 times per hour
-    concurrency: 1
-    description: "Batch guess project categorization using Mole service"
-
-  sync_project_languages:
-    class: SyncProjectLanguagesJob
-    schedule: every minute
-    concurrency: 1
-    description: "Sync GitHub language stats for projects under review"
-
-  cache_map_points:
-    class: Cache::MapPointsJob
-    schedule: every 30 minutes
-    args: [ { force: true } ]
-
-  cache_carousel_prizes:
-    class: Cache::CarouselPrizesJob
-    schedule: every 1 hour
-    args: [ { force: true } ]
-
-  update_badge_counter_caches:
-    class: User::UpdateBadgeCounterCachesJob
-    schedule: at 4am every day
+#     description: "Refresh Hackatime stats for all users with Hackatime enabled + DM people"
+#
+#   update_slack_avatars:
+#     class: UpdateSlackAvatarJob
+#     schedule: every 6 hours
+#     concurrency: 1
+#     description: "Update all users' Slack avatars from Slack API"
+#
+#   recalculate_devlog_times:
+#     class: RecalculateDevlogTimesJob
+#     command: perform_unique
+#     schedule: every minute
+#     concurrency: 1
+#     description: "Recalculate devlogs' seconds_coded columns"
+#
+#   sync_user_to_airtable:
+#     class: SyncUserToAirtableJob
+#     schedule: every minute
+#     concurrency: 1
+#     description: "Sync user data to Airtable every minute with single execution limit"
+#
+#   sync_email_signup_to_airtable:
+#     class: SyncEmailSignupToAirtableJob
+#     schedule: every minute
+#     concurrency: 1
+#     description: "Sync email signups to Airtable every minute with single execution limit"
+#
+#   shop_kick_verification_limbo_orders:
+#     class: Shop::KickVerificationLimboOrdersJob
+#     schedule: every 30 minutes
+#     concurrency: 1
+#     description: "recheck verf on free stickers orders"
+#
+#   shop_reap_free_stickers_orders:
+#     class: Shop::ReapFreeStickersOrdersJob
+#     schedule: at 1am every day
+#     concurrency: 1
+#     description: "fulfill pending free stickers orders into theseus"
+#
+#   shop_table_sync_free_stickers_orders:
+#     class: Shop::TableSyncFreeStickersOrdersJob
+#     schedule: every hour
+#     concurrency: 1
+#     description: "CSV-sync free stickers orders into Airtable"
+#
+#   shop_table_sync_regular_orders:
+#     class: Shop::TableSyncRegularOrdersJob
+#     schedule: every 7 minutes
+#     concurrency: 1
+#     description: "CSV-sync non-free-stickers orders into Airtable"
+#
+#   shop_process_warehouse_orders:
+#     class: Shop::ProcessWarehouseOrdersJob
+#     schedule: every 2 days
+#     concurrency: 1
+#     description: "Process pending warehouse item orders and create packages for warehouse fulfillment"
+#
+#   airtable_syncable_update:
+#     class: AirtableSyncableUpdateJob
+#     schedule: every 2 minutes
+#     concurrency: 1
+#     description: "Sync Airtable records every 2 minutes with single execution limit"
+#
+#   upload_to_unified_db:
+#     class: YswsReview::UploadToUnifiedDbJob
+#     schedule: every 5 minutes
+#     concurrency: 1
+#     description: "Upload approved YSWS from the SoM to the Unified db"
+#
+#   check_ysws_duplicates:
+#     class: YswsReview::CheckDuplicatesJob
+#     schedule: every 5 minutes
+#     concurrency: 1
+#     description: "Check for duplicate YSWS submissions across different programs"
+#
+#   mole_batch_guess_project_categorization:
+#     class: Mole::BatchGuessProjectCategorizationJob
+#     schedule: every 12 minutes # 5 times per hour
+#     concurrency: 1
+#     description: "Batch guess project categorization using Mole service"
+#
+#   sync_project_languages:
+#     class: SyncProjectLanguagesJob
+#     schedule: every minute
+#     concurrency: 1
+#     description: "Sync GitHub language stats for projects under review"
+#
+#   cache_map_points:
+#     class: Cache::MapPointsJob
+#     schedule: every 30 minutes
+#     args: [ { force: true } ]
+#
+#   cache_carousel_prizes:
+#     class: Cache::CarouselPrizesJob
+#     schedule: every 1 hour
+#     args: [ { force: true } ]
+#
+#   update_badge_counter_caches:
+#     class: User::UpdateBadgeCounterCachesJob
+#     schedule: at 4am every day
