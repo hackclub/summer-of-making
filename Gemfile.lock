@@ -150,7 +150,7 @@ GEM
       safely_block (>= 1)
     bootsnap (1.24.3)
       msgpack (~> 1.2)
-    brakeman (8.0.6)
+    brakeman (8.1.0)
       racc
     builder (3.3.0)
     bullet (8.1.1)
