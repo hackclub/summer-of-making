@@ -9,14 +9,14 @@ Deletion and export requests are run from the Hack Club privacy hub. The hub cal
 
 ## Authentication
 
-Each call carries `Authorization: Bearer <token>`: an ES256 JWT signed by the hub with a 5 minute lifetime. `Privacy::Token` verifies it against the hub's JWKS (`PRIVACY_JWKS_URL`) using Ruby's OpenSSL, with no extra gems.
+Each call carries `Authorization: Bearer <token>`: an ES256 JWT signed by the hub with a 5 minute lifetime. `Privacy::Token` verifies it against the hub's JWKS at `https://yeet.hackclub.com/.well-known/jwks.json` using Ruby's OpenSSL, with no extra gems.
 
 The verifier checks:
 
 - the signature and `kid`
 - `typ: JWT`
 - `iss` is `hackclub-privacy`
-- `aud` equals `PRIVACY_AUDIENCE`
+- `aud` is `summer-of-making`
 - `exp` and `iat`, and that the lifetime is at most 300 seconds
 - the shape of the claims
 
@@ -84,10 +84,11 @@ A dry run performs the real deletion inside a transaction. It reads the per-tabl
 
 ## Running it against a local hub
 
+Nothing needs configuring in production. To test against a hub running on your machine, override the JWKS URL:
+
 ```sh
 # .env, or the web service's environment in docker compose
 PRIVACY_JWKS_URL=http://host.docker.internal:44100/.well-known/jwks.json
-PRIVACY_AUDIENCE=summer-of-making
 ```
 
 In the hub, register a target with slug and audience `summer-of-making` and base URL `http://127.0.0.1:3000`.

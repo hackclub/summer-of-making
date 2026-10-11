@@ -5,6 +5,9 @@ module Privacy
   # Programs act on these claims only, never on the request body.
   class Token
     ISSUER = "hackclub-privacy".freeze
+    AUDIENCE = "summer-of-making".freeze
+    # PRIVACY_JWKS_URL only exists to point local development at a local hub
+    JWKS_URL = ENV.fetch("PRIVACY_JWKS_URL", "https://yeet.hackclub.com/.well-known/jwks.json").freeze
     MAX_LIFETIME = 300
     LEEWAY = 30
     JWKS_TTL = 300
@@ -27,7 +30,7 @@ module Privacy
     @fetched_at = nil
 
     class << self
-      def verify!(token, audience: ENV.fetch("PRIVACY_AUDIENCE", "summer-of-making"), now: Time.now.to_i)
+      def verify!(token, audience: AUDIENCE, now: Time.now.to_i)
         raise Invalid, "missing_token" if token.blank?
 
         parts = token.split(".")
@@ -104,10 +107,7 @@ module Privacy
       end
 
       def refresh!
-        url = ENV["PRIVACY_JWKS_URL"]
-        raise Invalid, "jwks_not_configured" if url.blank?
-
-        uri = URI(url)
+        uri = URI(JWKS_URL)
         response = Net::HTTP.start(uri.host, uri.port, use_ssl: uri.scheme == "https", open_timeout: 5, read_timeout: 5) do |http|
           http.get(uri.request_uri, "Accept" => "application/json")
         end

@@ -24,7 +24,7 @@ module Api
       first_use = Rails.cache.write("privacy:jti:#{@claims.jti}", true, unless_exist: true, expires_in: 10.minutes)
       render json: { error: "replayed" }, status: :conflict unless first_use
     rescue Privacy::Token::Invalid => e
-      status = %w[jwks_unavailable jwks_not_configured].include?(e.code) ? :service_unavailable : :unauthorized
+      status = e.code == "jwks_unavailable" ? :service_unavailable : :unauthorized
       render json: { error: e.code }, status:
     end
 
