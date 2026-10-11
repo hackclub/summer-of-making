@@ -48,6 +48,17 @@ module Privacy
         build(claims)
       end
 
+      # records a verified token's jti and says whether this is its first use. postgres rather than
+      # Rails.cache, since a cache that can't be written would make every token look replayed
+      def first_use!(jti)
+        connection = ActiveRecord::Base.connection
+        connection.exec_delete("DELETE FROM privacy_token_uses WHERE used_at < now() - interval '1 day'")
+        inserted = connection.exec_update(ActiveRecord::Base.sanitize_sql([
+          "INSERT INTO privacy_token_uses (jti, used_at) VALUES (?, now()) ON CONFLICT DO NOTHING", jti
+        ]))
+        inserted == 1
+      end
+
       private
 
       def check_claims!(claims, audience, now)

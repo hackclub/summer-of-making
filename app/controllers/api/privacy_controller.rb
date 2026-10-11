@@ -21,8 +21,7 @@ module Api
       return render(json: { error: "action_mismatch" }, status: :bad_request) unless @claims.action == action_name
 
       # the hub mints a new jti for every attempt, so a repeat is a replay
-      first_use = Rails.cache.write("privacy:jti:#{@claims.jti}", true, unless_exist: true, expires_in: 10.minutes)
-      render json: { error: "replayed" }, status: :conflict unless first_use
+      render json: { error: "replayed" }, status: :conflict unless Privacy::Token.first_use!(@claims.jti)
     rescue Privacy::Token::Invalid => e
       status = e.code == "jwks_unavailable" ? :service_unavailable : :unauthorized
       render json: { error: e.code }, status:

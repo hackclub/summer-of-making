@@ -22,7 +22,7 @@ The verifier checks:
 
 Keys are cached for 5 minutes and refetched when an unknown `kid` shows up, so key rotation on the hub needs no change here.
 
-The endpoints act only on the token claims (`subject.emails`, `subject.slack_id`, `subject.identity_id`, `dry_run`), never the request body. A token's `jti` is accepted once (replay check via `Rails.cache`).
+The endpoints act only on the token claims (`subject.emails`, `subject.slack_id`, `subject.identity_id`, `dry_run`), never the request body. A token's `jti` is accepted once: used IDs are recorded in `privacy_token_uses` and pruned after a day, far longer than a token can live.
 
 Response: `200 {request_id, found, dry_run, deleted: {table: rows}, retained: [{type, count, reason}]}`. The endpoint is idempotent: once a user is deleted, later calls answer `found: false`.
 
