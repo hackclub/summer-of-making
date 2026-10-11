@@ -29,7 +29,7 @@
 #  project_2_id          :bigint
 #  ship_event_1_id       :bigint           not null
 #  ship_event_2_id       :bigint           not null
-#  user_id               :bigint           not null
+#  user_id               :bigint
 #
 # Indexes
 #
@@ -49,15 +49,17 @@
 #
 # Foreign Keys
 #
-#  fk_rails_...  (marked_invalid_by_id => users.id)
-#  fk_rails_...  (project_1_id => projects.id)
-#  fk_rails_...  (project_2_id => projects.id)
-#  fk_rails_...  (ship_event_1_id => ship_events.id)
-#  fk_rails_...  (ship_event_2_id => ship_events.id)
-#  fk_rails_...  (user_id => users.id)
+#  fk_rails_...  (marked_invalid_by_id => users.id) ON DELETE => nullify
+#  fk_rails_...  (project_1_id => projects.id) ON DELETE => cascade
+#  fk_rails_...  (project_2_id => projects.id) ON DELETE => cascade
+#  fk_rails_...  (ship_event_1_id => ship_events.id) ON DELETE => cascade
+#  fk_rails_...  (ship_event_2_id => ship_events.id) ON DELETE => cascade
+#  fk_rails_...  (user_id => users.id) ON DELETE => nullify
 #
 class Vote < ApplicationRecord
-  belongs_to :user, counter_cache: true
+  # nil once the account is deleted after a privacy request (docs/privacy.md)
+  belongs_to :user, counter_cache: true, optional: true
+  validates :user, presence: true, on: :create
   belongs_to :project_1, class_name: "Project", optional: true
   belongs_to :project_2, class_name: "Project", optional: true
   belongs_to :ship_event_1, class_name: "ShipEvent"

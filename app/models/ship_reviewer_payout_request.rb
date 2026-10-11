@@ -12,7 +12,7 @@
 #  created_at      :datetime         not null
 #  updated_at      :datetime         not null
 #  approved_by_id  :bigint
-#  reviewer_id     :bigint           not null
+#  reviewer_id     :bigint
 #
 # Indexes
 #
@@ -21,11 +21,13 @@
 #
 # Foreign Keys
 #
-#  fk_rails_...  (approved_by_id => users.id)
-#  fk_rails_...  (reviewer_id => users.id)
+#  fk_rails_...  (approved_by_id => users.id) ON DELETE => nullify
+#  fk_rails_...  (reviewer_id => users.id) ON DELETE => nullify
 #
 class ShipReviewerPayoutRequest < ApplicationRecord
-  belongs_to :reviewer, class_name: "User"
+  # nil once the account is deleted after a privacy request (docs/privacy.md)
+  belongs_to :reviewer, class_name: "User", optional: true
+  validates :reviewer, presence: true, on: :create
   belongs_to :approved_by, class_name: "User", optional: true
 
   enum :status, {
@@ -64,6 +66,8 @@ class ShipReviewerPayoutRequest < ApplicationRecord
   end
 
   def approve!(approver)
+    raise ArgumentError, "payout request #{id} has no reviewer (deleted after a privacy request)" unless reviewer
+
     transaction do
       update!(
         status: :approved,

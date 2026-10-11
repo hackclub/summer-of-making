@@ -9,7 +9,7 @@
 #  created_at         :datetime         not null
 #  updated_at         :datetime         not null
 #  theseus_package_id :string
-#  user_id            :bigint           not null
+#  user_id            :bigint
 #
 # Indexes
 #
@@ -18,15 +18,17 @@
 #
 # Foreign Keys
 #
-#  fk_rails_...  (user_id => users.id)
+#  fk_rails_...  (user_id => users.id) ON DELETE => nullify
 #
 class Shop::WarehousePackage < ApplicationRecord
   self.table_name = "shop_warehouse_packages"
 
-  belongs_to :user
+  # nil once the account is deleted after a privacy request (docs/privacy.md)
+  belongs_to :user, optional: true
   has_many :shop_orders, foreign_key: :warehouse_package_id, dependent: :nullify
 
   validates :frozen_address, presence: true
+  validates :user, presence: true, on: :create
   validates :theseus_package_id, uniqueness: true, allow_nil: true
 
   def send_to_theseus!
@@ -59,11 +61,11 @@ class Shop::WarehousePackage < ApplicationRecord
         address: address_params.compact_blank,
         contents: contents,
         tags: [ "summer-of-making", "som-warehouse-prize" ],
-        recipient_email: user.email,
+        recipient_email: user&.email,
         user_facing_title: "Summer of Making – #{headline.join ', '}",
         idempotency_key:,
         metadata: {
-          som_user: user.id,
+          som_user: user_id,
           orders: shop_orders.map do |order|
             {
               id: order.id,

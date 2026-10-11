@@ -10,7 +10,7 @@
 #  created_at   :datetime         not null
 #  updated_at   :datetime         not null
 #  payable_id   :bigint
-#  user_id      :bigint           not null
+#  user_id      :bigint
 #
 # Indexes
 #
@@ -25,9 +25,11 @@
 class Payout < ApplicationRecord
   # NOTE Aug 23, 2025 IST: Escrow is deprecated for new payouts.
   belongs_to :payable, polymorphic: true
-  belongs_to :user
+  # nil once the account is deleted after a privacy request (docs/privacy.md)
+  belongs_to :user, optional: true
 
   validates_presence_of :amount
+  validates :user, presence: true, on: :create
 
   before_validation :set_user_id
 
@@ -52,7 +54,9 @@ class Payout < ApplicationRecord
   private
 
   def set_user_id
-    self.user ||= payable.is_a?(User) ? payable : payable.user
+    return unless new_record?
+
+    self.user ||= payable.is_a?(User) ? payable : payable&.user
   end
 
   def broadcast_ship_payout_balloon

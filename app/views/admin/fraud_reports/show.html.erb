@@ -35,9 +35,13 @@
     <tr>
       <td style="padding: 0.5rem; border: 1px solid #ddd; font-weight: bold;">reporter:</td>
       <td style="padding: 0.5rem; border: 1px solid #ddd;">
-        <%= @fraud_report.reporter.try(:display_name) || @fraud_report.reporter.try(:email) %>
-        <br>
-        <small style="color: #666;">user id: <%= @fraud_report.reporter.id %></small>
+        <% if @fraud_report.reporter %>
+          <%= @fraud_report.reporter.display_name || @fraud_report.reporter.email %>
+          <br>
+          <small style="color: #666;">user id: <%= @fraud_report.reporter.id %></small>
+        <% else %>
+          Deleted user
+        <% end %>
       </td>
     </tr>
     <tr>

@@ -69,7 +69,11 @@
 <div class="asecs">
   <div class="asec" style="padding: 1.5em;">
     <h2>customer</h2>
-    <%= render partial: "admin/users/user", locals: { user: @shop_order.user } %>
+    <% if @shop_order.user %>
+      <%= render partial: "admin/users/user", locals: { user: @shop_order.user } %>
+    <% else %>
+      <p>Deleted user. The account was removed after a privacy request, so this order can only be rejected.</p>
+    <% end %>
   </div>
 
   <div class="asec" style="padding: 1.5em;">
@@ -221,7 +225,7 @@
 <div id="lazyd" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000; justify-content: center; align-items: center;">
   <div style="background: var(--color-darker); padding: 1rem; max-width: 800px; margin: 2em;">
     <h3>okay you lazy bum</h3>
-    <p>okay just make sure everythings chill, we bouta send a preauth grant to <strong><%= @shop_order.user.email %></strong> for</p>
+    <p>okay just make sure everythings chill, we bouta send a preauth grant to <strong><%= @shop_order.user&.email %></strong> for</p>
     <p><strong><%= @shop_order.shop_item.name %></strong> (qty: <%= @shop_order.quantity %>)</p>
 
     <%= form_with url: convert_to_preauth_admin_shop_order_path(@shop_order), method: :post, id: "preauthForm" do |f| %>

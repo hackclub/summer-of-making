@@ -20,7 +20,7 @@
         <% @pending_requests.each do |request| %>
           <tr style="border-bottom: 1px solid var(--color-border);">
             <td style="padding: 0.75rem;">
-              <strong><%= request.reviewer.display_name || request.reviewer.email %></strong>
+              <strong><%= request.reviewer ? (request.reviewer.display_name || request.reviewer.email) : "Deleted user" %></strong>
             </td>
             <td style="text-align: right; padding: 0.75rem;">
               <span class="pill pill-green"><%= request.amount %> shells</span>
@@ -33,11 +33,13 @@
             </td>
             <td style="text-align: center; padding: 0.75rem;">
               <div style="display: flex; gap: 0.5rem; justify-content: center;">
-                <%= button_to "Approve", approve_admin_ship_reviewer_payout_request_path(request),
-                    method: :patch,
-                    class: "pill pill-green",
-                    style: "border: none; padding: 0.3rem 0.8rem; cursor: pointer;",
-                    confirm: "Approve payout of #{request.amount} shells to #{request.reviewer.display_name || request.reviewer.email}?" %>
+                <% if request.reviewer %>
+                  <%= button_to "Approve", approve_admin_ship_reviewer_payout_request_path(request),
+                      method: :patch,
+                      class: "pill pill-green",
+                      style: "border: none; padding: 0.3rem 0.8rem; cursor: pointer;",
+                      confirm: "Approve payout of #{request.amount} shells to #{request.reviewer.display_name || request.reviewer.email}?" %>
+                <% end %>
                 <%= button_to "Reject", reject_admin_ship_reviewer_payout_request_path(request),
                     method: :patch,
                     class: "pill pill-red",
@@ -73,7 +75,7 @@
         <% @recent_requests.each do |request| %>
           <tr style="border-bottom: 1px solid var(--color-border);">
             <td style="padding: 0.75rem;">
-              <strong><%= request.reviewer.display_name || request.reviewer.email %></strong>
+              <strong><%= request.reviewer ? (request.reviewer.display_name || request.reviewer.email) : "Deleted user" %></strong>
             </td>
             <td style="text-align: right; padding: 0.75rem;">
               <%= request.amount %> shells

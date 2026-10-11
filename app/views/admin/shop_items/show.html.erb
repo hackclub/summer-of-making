@@ -198,8 +198,12 @@
       <% @shop_orders.each do |order| %>
         <tr>
           <td>
-            <%= link_to "#{order.user.display_name}",
-                        admin_user_path(order.user) %>
+            <% if order.user %>
+              <%= link_to "#{order.user.display_name}",
+                          admin_user_path(order.user) %>
+            <% else %>
+              Deleted user
+            <% end %>
           </td>
           <td><%= order.quantity %></td>
           <td><%= order.total_cost %></td>

@@ -288,7 +288,7 @@
               <% if devlog.ysws_review_approval %>
                 <p style="font-size: 0.8em; color: var(--color-text-muted);">
                   Last reviewed: <%= devlog.ysws_review_approval.reviewed_at.strftime("%b %d, %Y at %l:%M %p") %>
-                  <br>by <%= devlog.ysws_review_approval.user.display_name %>
+                  <br>by <%= devlog.ysws_review_approval.user&.display_name || "a deleted user" %>
                 </p>
               <% end %>
             </div>

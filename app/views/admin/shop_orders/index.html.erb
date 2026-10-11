@@ -155,9 +155,13 @@
     <div style="margin-bottom: 2em; border: 1px solid var(--color-border); border-radius: 8px; background: var(--color-darker);">
       <div style="padding: 1em; border-bottom: 1px solid var(--color-border); background: var(--color-dark);">
         <h3 style="margin: 0; color: var(--color-primary);">
-          <%= link_to group[:user].display_name || "Unknown", admin_user_path(group[:user]) %>
-            <small style="color: var(--color-muted); font-weight: normal;">
-            (<%= group[:user].email %>) slack: <%= link_to group[:user].slack_id, "https://hackclub.slack.com/team/#{group[:user].slack_id}", style: "color: var(--color-primary);" %></small>
+          <% if group[:user] %>
+            <%= link_to group[:user].display_name || "Unknown", admin_user_path(group[:user]) %>
+              <small style="color: var(--color-muted); font-weight: normal;">
+              (<%= group[:user].email %>) slack: <%= link_to group[:user].slack_id, "https://hackclub.slack.com/team/#{group[:user].slack_id}", style: "color: var(--color-primary);" %></small>
+          <% else %>
+            Deleted users
+          <% end %>
         </h3>
         <div style="margin-top: 0.5em; display: flex; gap: 1em; align-items: center;">
           <span class="pill pill-blue"><%= pluralize(group[:orders].count, 'order') %></span>
@@ -293,8 +297,12 @@
           <%= order.id %>
         </td>
         <td>
-          <%= link_to order.user.display_name || "Unknown", admin_user_path(order.user) %><br>
-          <small style="color: var(--color-muted);"><%= order.user.email %></small>
+          <% if order.user %>
+            <%= link_to order.user.display_name || "Unknown", admin_user_path(order.user) %><br>
+            <small style="color: var(--color-muted);"><%= order.user.email %></small>
+          <% else %>
+            Deleted user
+          <% end %>
         </td>
         <td>
           <%= order.shop_item.name %><br>
