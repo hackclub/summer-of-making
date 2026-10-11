@@ -12,7 +12,7 @@
 #  created_at      :datetime         not null
 #  updated_at      :datetime         not null
 #  approved_by_id  :bigint
-#  reviewer_id     :bigint           not null
+#  reviewer_id     :bigint
 #
 # Indexes
 #
@@ -21,8 +21,8 @@
 #
 # Foreign Keys
 #
-#  fk_rails_...  (approved_by_id => users.id)
-#  fk_rails_...  (reviewer_id => users.id)
+#  fk_rails_...  (approved_by_id => users.id) ON DELETE => nullify
+#  fk_rails_...  (reviewer_id => users.id) ON DELETE => nullify
 #
 require "test_helper"
 

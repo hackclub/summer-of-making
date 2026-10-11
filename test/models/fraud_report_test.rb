@@ -14,7 +14,7 @@
 #  updated_at       :datetime         not null
 #  resolved_by_id   :bigint
 #  suspect_id       :bigint
-#  user_id          :bigint           not null
+#  user_id          :bigint
 #
 # Indexes
 #
@@ -27,8 +27,8 @@
 #
 # Foreign Keys
 #
-#  fk_rails_...  (resolved_by_id => users.id)
-#  fk_rails_...  (user_id => users.id)
+#  fk_rails_...  (resolved_by_id => users.id) ON DELETE => nullify
+#  fk_rails_...  (user_id => users.id) ON DELETE => nullify
 #
 require "test_helper"
 

@@ -24,8 +24,8 @@
 #
 # Foreign Keys
 #
-#  fk_rails_...  (project_id => projects.id)
-#  fk_rails_...  (vote_id => votes.id)
+#  fk_rails_...  (project_id => projects.id) ON DELETE => cascade
+#  fk_rails_...  (vote_id => votes.id) ON DELETE => cascade
 #
 class VoteChange < ApplicationRecord
   belongs_to :vote

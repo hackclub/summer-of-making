@@ -24,9 +24,9 @@
 #
 # Foreign Keys
 #
-#  fk_rails_...  (project_id => projects.id)
-#  fk_rails_...  (reviewer_id => users.id)
-#  fk_rails_...  (ysws_returned_by_id => users.id)
+#  fk_rails_...  (project_id => projects.id) ON DELETE => cascade
+#  fk_rails_...  (reviewer_id => users.id) ON DELETE => nullify
+#  fk_rails_...  (ysws_returned_by_id => users.id) ON DELETE => nullify
 #
 class ShipCertification < ApplicationRecord
   has_paper_trail

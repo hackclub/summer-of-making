@@ -20,7 +20,7 @@
 #
 # Foreign Keys
 #
-#  fk_rails_...  (project_id => projects.id)
+#  fk_rails_...  (project_id => projects.id) ON DELETE => cascade
 #
 class ReadmeCheck < ApplicationRecord
   after_create :get_readme_content

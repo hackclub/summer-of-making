@@ -10,7 +10,7 @@
 #  created_at            :datetime         not null
 #  updated_at            :datetime         not null
 #  shop_item_id          :bigint           not null
-#  user_id               :bigint           not null
+#  user_id               :bigint
 #
 # Indexes
 #
@@ -20,7 +20,7 @@
 # Foreign Keys
 #
 #  fk_rails_...  (shop_item_id => shop_items.id)
-#  fk_rails_...  (user_id => users.id)
+#  fk_rails_...  (user_id => users.id) ON DELETE => nullify
 #
 one:
   user: one

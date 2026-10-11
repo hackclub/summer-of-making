@@ -18,8 +18,8 @@
 #
 # Foreign Keys
 #
-#  fk_rails_...  (project_id => projects.id)
-#  fk_rails_...  (reviewer_id => users.id)
+#  fk_rails_...  (project_id => projects.id) ON DELETE => cascade
+#  fk_rails_...  (reviewer_id => users.id) ON DELETE => nullify
 #
 class ReadmeCertification < ApplicationRecord
   belongs_to :reviewer, class_name: "User", optional: true

@@ -15,7 +15,7 @@
 #
 # Foreign Keys
 #
-#  fk_rails_...  (project_id => projects.id)
+#  fk_rails_...  (project_id => projects.id) ON DELETE => cascade
 #
 require "test_helper"
 
