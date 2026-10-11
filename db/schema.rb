@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_10_11_000001) do
+ActiveRecord::Schema[8.1].define(version: 2026_10_11_000002) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -358,6 +358,11 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_11_000001) do
     t.index ["payable_type", "payable_id"], name: "index_payouts_on_payable"
     t.index ["payable_type"], name: "index_payouts_on_payable_type"
     t.index ["user_id"], name: "index_payouts_on_user_id"
+  end
+
+  create_table "privacy_token_uses", primary_key: "jti", id: :string, force: :cascade do |t|
+    t.datetime "used_at", null: false
+    t.index ["used_at"], name: "index_privacy_token_uses_on_used_at"
   end
 
   create_table "project_follows", force: :cascade do |t|
