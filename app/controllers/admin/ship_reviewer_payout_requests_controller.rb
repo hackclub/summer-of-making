@@ -18,7 +18,7 @@ module Admin
     def approve
       @payout_request.approve!(current_user)
       redirect_to admin_ship_reviewer_payout_requests_path,
-                  notice: "Payout request approved! #{@payout_request.amount} shells paid to #{@payout_request.reviewer.display_name || @payout_request.reviewer.email}"
+                  notice: "Payout request approved! #{@payout_request.amount} shells paid to #{@payout_request.reviewer&.display_name || @payout_request.reviewer&.email}"
     rescue => e
       redirect_to admin_ship_reviewer_payout_requests_path,
                   alert: "Error approving payout: #{e.message}"

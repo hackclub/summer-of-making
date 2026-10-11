@@ -22,7 +22,7 @@
 #  updated_at                         :datetime         not null
 #  shop_card_grant_id                 :bigint
 #  shop_item_id                       :bigint           not null
-#  user_id                            :bigint           not null
+#  user_id                            :bigint
 #  warehouse_package_id               :bigint
 #
 # Indexes
@@ -40,7 +40,7 @@
 #
 #  fk_rails_...  (shop_card_grant_id => shop_card_grants.id)
 #  fk_rails_...  (shop_item_id => shop_items.id)
-#  fk_rails_...  (user_id => users.id)
+#  fk_rails_...  (user_id => users.id) ON DELETE => nullify
 #  fk_rails_...  (warehouse_package_id => shop_warehouse_packages.id)
 #
 one:

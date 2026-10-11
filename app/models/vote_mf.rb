@@ -8,7 +8,7 @@
 #  created_at           :datetime         not null
 #  updated_at           :datetime         not null
 #  project_id           :bigint           not null
-#  voter_id             :bigint           not null
+#  voter_id             :bigint
 #
 # Indexes
 #
@@ -17,12 +17,14 @@
 #
 # Foreign Keys
 #
-#  fk_rails_...  (project_id => projects.id)
-#  fk_rails_...  (voter_id => users.id)
+#  fk_rails_...  (project_id => projects.id) ON DELETE => cascade
+#  fk_rails_...  (voter_id => users.id) ON DELETE => nullify
 #
 class VoteMf < ApplicationRecord
     belongs_to :project
-    belongs_to :voter, class_name: "User"
+    # nil once the account is deleted after a privacy request (docs/privacy.md)
+    belongs_to :voter, class_name: "User", optional: true
+    validates :voter, presence: true, on: :create
 
     CRITERIA = %w[technical creativity storytelling originality].freeze
 

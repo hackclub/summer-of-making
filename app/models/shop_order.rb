@@ -20,7 +20,7 @@
 #  updated_at                         :datetime         not null
 #  shop_card_grant_id                 :bigint
 #  shop_item_id                       :bigint           not null
-#  user_id                            :bigint           not null
+#  user_id                            :bigint
 #  warehouse_package_id               :bigint
 #
 # Indexes
@@ -38,7 +38,7 @@
 #
 #  fk_rails_...  (shop_card_grant_id => shop_card_grants.id)
 #  fk_rails_...  (shop_item_id => shop_items.id)
-#  fk_rails_...  (user_id => users.id)
+#  fk_rails_...  (user_id => users.id) ON DELETE => nullify
 #  fk_rails_...  (warehouse_package_id => shop_warehouse_packages.id)
 #
 class ShopOrder < ApplicationRecord
@@ -50,7 +50,8 @@ class ShopOrder < ApplicationRecord
 
   tracked only: [ :create ], owner: Proc.new { |controller, model| controller&.current_user }
 
-  belongs_to :user
+  # nil once the account is deleted after a privacy request (docs/privacy.md)
+  belongs_to :user, optional: true
   belongs_to :shop_item
 
   has_many :payouts, as: :payable, dependent: :destroy
@@ -58,6 +59,7 @@ class ShopOrder < ApplicationRecord
   belongs_to :warehouse_package, class_name: "Shop::WarehousePackage", optional: true
 
   validates :quantity, presence: true, numericality: { only_integer: true, greater_than: 0 }, on: :create
+  validates :user, presence: true, on: :create
   validate :check_one_per_person_ever_limit, on: :create
   validate :check_max_quantity_limit, on: :create
   validate :check_black_market_access, on: :create
@@ -79,7 +81,7 @@ class ShopOrder < ApplicationRecord
   def get_agh_contents = shop_item.get_agh_contents(self)
 
   def full_name
-    "#{user.display_name}'s order for #{quantity} #{shop_item.name.pluralize(quantity)}"
+    "#{user&.display_name || "Deleted user"}'s order for #{quantity} #{shop_item.name.pluralize(quantity)}"
   end
 
   aasm timestamps: true do # SAGA PATTERN TIME BABEY
@@ -122,7 +124,7 @@ class ShopOrder < ApplicationRecord
         self.fulfilled_by = fulfilled_by
       end
       after do
-        Shop::SendOrderFulfilledDmJob.perform_later(self)
+        Shop::SendOrderFulfilledDmJob.perform_later(self) if user
       end
     end
 
@@ -146,9 +148,9 @@ class ShopOrder < ApplicationRecord
     "id" => :id,
     "status" => ->(_) { aasm_state.humanize },
     "user.id" => :user_id,
-    "user.display_name" => ->(_) { user.display_name },
-    "user.email" => ->(_) { user.email },
-    "user.slack" => ->(_) { user.slack_id },
+    "user.display_name" => ->(_) { user&.display_name },
+    "user.email" => ->(_) { user&.email },
+    "user.slack" => ->(_) { user&.slack_id },
     "created_at" => :created_at,
     "updated_at" => :updated_at,
     "awaiting_periodical_fulfillment_at" => :awaiting_periodical_fulfillment_at,
@@ -174,6 +176,8 @@ class ShopOrder < ApplicationRecord
   has_table_sync(:free_stickers_orders, "appNF8MGrk5KKcYZx", "tbldmKzmU0N3u2R5s", SYNC_MAPPING, scope: :free_stickers_sync)
 
   def approve!
+    raise ArgumentError, "order #{id} has no account (deleted after a privacy request)" unless user
+
     shop_item.fulfill!(self)
   end
 
@@ -270,7 +274,7 @@ class ShopOrder < ApplicationRecord
   end
 
   def create_refund_payout
-    return unless frozen_item_price.present? && frozen_item_price > 0 && quantity.present?
+    return unless user && frozen_item_price.present? && frozen_item_price > 0 && quantity.present?
 
     user.payouts.create!(
       amount: total_cost,

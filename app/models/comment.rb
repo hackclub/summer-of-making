@@ -19,8 +19,8 @@
 #
 # Foreign Keys
 #
-#  fk_rails_...  (devlog_id => devlogs.id)
-#  fk_rails_...  (user_id => users.id)
+#  fk_rails_...  (devlog_id => devlogs.id) ON DELETE => cascade
+#  fk_rails_...  (user_id => users.id) ON DELETE => cascade
 #
 class Comment < ApplicationRecord
   include ActionView::Helpers::SanitizeHelper

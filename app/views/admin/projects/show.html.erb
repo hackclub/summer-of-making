@@ -38,7 +38,7 @@
         <% vote = vote_change.vote %>
         <li>
           <b>
-            Vote #<%= vote.id %>, made by <%= link_to vote.user.display_name, admin_user_path(vote.user) %>
+            Vote #<%= vote.id %>, made by <%= vote.user ? link_to(vote.user.display_name, admin_user_path(vote.user)) : "a deleted user" %>
             <% unless vote.is_tie? %>
               for <%= link_to vote.winner_project.title_with_id, admin_project_path(vote.winner_project) %>
               over <%= link_to vote.loser_project.title_with_id, admin_project_path(vote.loser_project) %>:

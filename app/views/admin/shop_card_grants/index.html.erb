@@ -8,7 +8,7 @@
     <strong>Grant #<%= grant.id %></strong>
     <%= link_to "view", [:admin, grant] %>
     <br>
-    <strong>User:</strong> <%= grant.user.display_name %> (<%= grant.user.email %>)
+    <strong>User:</strong> <% if grant.user %><%= grant.user.display_name %> (<%= grant.user.email %>)<% else %>Deleted user<% end %>
     <br>
     <strong>Item:</strong> <%= grant.shop_item.name %>
     <br>

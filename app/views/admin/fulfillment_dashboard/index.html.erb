@@ -147,8 +147,12 @@
           <%= order.id %>
         </td>
         <td>
-          <%= link_to order.user.display_name || "Unknown", admin_user_path(order.user) %><br>
-          <small style="color: var(--color-muted);"><%= order.user.email %></small>
+          <% if order.user %>
+            <%= link_to order.user.display_name || "Unknown", admin_user_path(order.user) %><br>
+            <small style="color: var(--color-muted);"><%= order.user.email %></small>
+          <% else %>
+            Deleted user
+          <% end %>
         </td>
         <td>
           <%= order.shop_item.name %><br>

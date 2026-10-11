@@ -5,6 +5,7 @@ module Admin
     include Pagy::Backend
     before_action :ensure_authorized_user
     before_action :set_shop_order, except: [ :index, :pending, :awaiting_fulfillment ]
+    before_action :ensure_order_has_account, only: [ :approve, :mark_fulfilled, :convert_to_preauth ]
     skip_before_action :authenticate_admin!
 
     def scope
@@ -259,6 +260,13 @@ module Admin
 
     def set_shop_order
       @shop_order = scope.find(params[:id])
+    end
+
+    def ensure_order_has_account
+      return if @shop_order.user
+
+      flash[:error] = "this account was deleted after a privacy request, so the order can't be fulfilled"
+      redirect_to [ :admin, @shop_order ]
     end
 
     def get_stats

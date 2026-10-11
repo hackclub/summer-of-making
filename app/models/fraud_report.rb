@@ -14,7 +14,7 @@
 #  updated_at       :datetime         not null
 #  resolved_by_id   :bigint
 #  suspect_id       :bigint
-#  user_id          :bigint           not null
+#  user_id          :bigint
 #
 # Indexes
 #
@@ -27,14 +27,16 @@
 #
 # Foreign Keys
 #
-#  fk_rails_...  (resolved_by_id => users.id)
-#  fk_rails_...  (user_id => users.id)
+#  fk_rails_...  (resolved_by_id => users.id) ON DELETE => nullify
+#  fk_rails_...  (user_id => users.id) ON DELETE => nullify
 #
 class FraudReport < ApplicationRecord
   has_paper_trail
 
   belongs_to :suspect, polymorphic: true
-  belongs_to :reporter, class_name: "User", foreign_key: "user_id"
+  # nil once the account is deleted after a privacy request (docs/privacy.md)
+  belongs_to :reporter, class_name: "User", foreign_key: "user_id", optional: true
+  validates :reporter, presence: true, on: :create
   belongs_to :resolver, class_name: "User", foreign_key: "resolved_by_id", optional: true
 
   validates :user_id, uniqueness: { scope: [ :suspect_type, :suspect_id ], message: "You have already reported this project" }

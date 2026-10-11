@@ -18,8 +18,8 @@
 #
 # Foreign Keys
 #
-#  fk_rails_...  (project_id => projects.id)
-#  fk_rails_...  (user_id => users.id)
+#  fk_rails_...  (project_id => projects.id) ON DELETE => cascade
+#  fk_rails_...  (user_id => users.id) ON DELETE => cascade
 #
 class Stonk < ApplicationRecord
   DEFAULT_AMOUNT = 3 # Fixed amount of 3 dollars per stonk, but it'll be different for dreamland :smiling_face_with_3_hearts:

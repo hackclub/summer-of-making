@@ -14,7 +14,7 @@
 #
 # Foreign Keys
 #
-#  fk_rails_...  (ship_event_id => ship_events.id)
+#  fk_rails_...  (ship_event_id => ship_events.id) ON DELETE => cascade
 #
 class ShipEventFeedback < ApplicationRecord
   belongs_to :ship_event

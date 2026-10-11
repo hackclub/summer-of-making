@@ -111,6 +111,8 @@
 #                                                   payouts GET    /payouts(.:format)                                                                                payouts#index
 #                             ship_reviewer_payout_requests GET    /ship_reviewer_payout_requests(.:format)                                                          ship_reviewer_payout_requests#index
 #                                                           POST   /ship_reviewer_payout_requests(.:format)                                                          ship_reviewer_payout_requests#create
+#                                        api_privacy_delete POST   /api/privacy/delete(.:format)                                                                     api/privacy#delete
+#                                        api_privacy_export POST   /api/privacy/export(.:format)                                                                     api/privacy#export
 #                                           api_v1_users_me GET    /api/v1/users/me(.:format)                                                                        api/v1/users#me
 #                                   shipped_api_v1_projects GET    /api/v1/projects/shipped(.:format)                                                                api/v1/projects#shipped
 #                                           api_v1_projects GET    /api/v1/projects(.:format)                                                                        api/v1/projects#index
@@ -551,6 +553,8 @@ Rails.application.routes.draw do
 
   # API routes
   namespace :api do
+    post "privacy/delete", to: "privacy#delete"
+    post "privacy/export", to: "privacy#export"
     namespace :v1 do
       get "users/me", to: "users#me"
       resources :projects, only: [ :index, :show ] do

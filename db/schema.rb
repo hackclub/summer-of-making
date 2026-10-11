@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_10_11_193937) do
+ActiveRecord::Schema[8.1].define(version: 2026_10_11_000001) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -293,7 +293,7 @@ ActiveRecord::Schema[8.0].define(version: 2025_10_11_193937) do
   end
 
   create_table "fraud_reports", force: :cascade do |t|
-    t.bigint "user_id", null: false
+    t.bigint "user_id"
     t.string "suspect_type"
     t.bigint "suspect_id"
     t.string "reason"
@@ -346,7 +346,7 @@ ActiveRecord::Schema[8.0].define(version: 2025_10_11_193937) do
     t.decimal "amount", precision: 6, scale: 2
     t.string "payable_type"
     t.bigint "payable_id"
-    t.bigint "user_id", null: false
+    t.bigint "user_id"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.string "reason"
@@ -482,7 +482,7 @@ ActiveRecord::Schema[8.0].define(version: 2025_10_11_193937) do
   end
 
   create_table "ship_reviewer_payout_requests", force: :cascade do |t|
-    t.bigint "reviewer_id", null: false
+    t.bigint "reviewer_id"
     t.decimal "amount"
     t.integer "status"
     t.datetime "requested_at"
@@ -512,7 +512,7 @@ ActiveRecord::Schema[8.0].define(version: 2025_10_11_193937) do
   end
 
   create_table "shop_card_grants", force: :cascade do |t|
-    t.bigint "user_id", null: false
+    t.bigint "user_id"
     t.bigint "shop_item_id", null: false
     t.string "hcb_grant_hashid"
     t.integer "expected_amount_cents"
@@ -571,7 +571,7 @@ ActiveRecord::Schema[8.0].define(version: 2025_10_11_193937) do
   end
 
   create_table "shop_orders", force: :cascade do |t|
-    t.bigint "user_id", null: false
+    t.bigint "user_id"
     t.bigint "shop_item_id", null: false
     t.decimal "frozen_item_price", precision: 6, scale: 2
     t.integer "quantity"
@@ -601,7 +601,7 @@ ActiveRecord::Schema[8.0].define(version: 2025_10_11_193937) do
   end
 
   create_table "shop_warehouse_packages", force: :cascade do |t|
-    t.bigint "user_id", null: false
+    t.bigint "user_id"
     t.jsonb "frozen_address", null: false
     t.string "theseus_package_id"
     t.datetime "created_at", null: false
@@ -949,7 +949,7 @@ ActiveRecord::Schema[8.0].define(version: 2025_10_11_193937) do
 
   create_table "vote_mfs", force: :cascade do |t|
     t.bigint "project_id", null: false
-    t.bigint "voter_id", null: false
+    t.bigint "voter_id"
     t.integer "time_spent_voting_ms"
     t.jsonb "ballot", default: {}, null: false
     t.datetime "created_at", null: false
@@ -959,7 +959,7 @@ ActiveRecord::Schema[8.0].define(version: 2025_10_11_193937) do
   end
 
   create_table "votes", force: :cascade do |t|
-    t.bigint "user_id", null: false
+    t.bigint "user_id"
     t.text "explanation", null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
@@ -1001,7 +1001,7 @@ ActiveRecord::Schema[8.0].define(version: 2025_10_11_193937) do
 
   create_table "ysws_review_devlog_approvals", force: :cascade do |t|
     t.bigint "devlog_id", null: false
-    t.bigint "user_id", null: false, comment: "The reviewer who made this approval"
+    t.bigint "user_id", comment: "The reviewer who made this approval"
     t.boolean "approved", null: false
     t.integer "approved_seconds", comment: "Seconds approved by reviewer (may differ from devlog.duration_seconds)"
     t.text "notes", comment: "Internal notes from the reviewer"
@@ -1023,72 +1023,72 @@ ActiveRecord::Schema[8.0].define(version: 2025_10_11_193937) do
 
   add_foreign_key "active_storage_attachments", "active_storage_blobs", column: "blob_id"
   add_foreign_key "active_storage_variant_records", "active_storage_blobs", column: "blob_id"
-  add_foreign_key "comments", "devlogs"
-  add_foreign_key "comments", "users"
-  add_foreign_key "devlogs", "projects"
-  add_foreign_key "devlogs", "users"
-  add_foreign_key "fraud_reports", "users"
-  add_foreign_key "fraud_reports", "users", column: "resolved_by_id"
-  add_foreign_key "hackatime_projects", "users"
-  add_foreign_key "likes", "users"
-  add_foreign_key "magic_links", "users"
-  add_foreign_key "project_follows", "projects"
-  add_foreign_key "project_follows", "users"
-  add_foreign_key "project_languages", "projects"
-  add_foreign_key "projects", "users"
+  add_foreign_key "comments", "devlogs", on_delete: :cascade
+  add_foreign_key "comments", "users", on_delete: :cascade
+  add_foreign_key "devlogs", "projects", on_delete: :cascade
+  add_foreign_key "devlogs", "users", on_delete: :cascade
+  add_foreign_key "fraud_reports", "users", column: "resolved_by_id", on_delete: :nullify
+  add_foreign_key "fraud_reports", "users", on_delete: :nullify
+  add_foreign_key "hackatime_projects", "users", on_delete: :cascade
+  add_foreign_key "likes", "users", on_delete: :cascade
+  add_foreign_key "magic_links", "users", on_delete: :cascade
+  add_foreign_key "project_follows", "projects", on_delete: :cascade
+  add_foreign_key "project_follows", "users", on_delete: :cascade
+  add_foreign_key "project_languages", "projects", on_delete: :cascade
   add_foreign_key "projects", "users", column: "magic_reporter_id", on_delete: :nullify
-  add_foreign_key "readme_certifications", "projects"
-  add_foreign_key "readme_certifications", "users", column: "reviewer_id"
-  add_foreign_key "readme_checks", "projects"
-  add_foreign_key "ship_certifications", "projects"
-  add_foreign_key "ship_certifications", "users", column: "reviewer_id"
-  add_foreign_key "ship_certifications", "users", column: "ysws_returned_by_id"
-  add_foreign_key "ship_event_feedbacks", "ship_events"
-  add_foreign_key "ship_events", "projects"
-  add_foreign_key "ship_reviewer_payout_requests", "users", column: "approved_by_id"
-  add_foreign_key "ship_reviewer_payout_requests", "users", column: "reviewer_id"
-  add_foreign_key "shipwright_advices", "projects"
-  add_foreign_key "shipwright_advices", "ship_certifications"
+  add_foreign_key "projects", "users", on_delete: :cascade
+  add_foreign_key "readme_certifications", "projects", on_delete: :cascade
+  add_foreign_key "readme_certifications", "users", column: "reviewer_id", on_delete: :nullify
+  add_foreign_key "readme_checks", "projects", on_delete: :cascade
+  add_foreign_key "ship_certifications", "projects", on_delete: :cascade
+  add_foreign_key "ship_certifications", "users", column: "reviewer_id", on_delete: :nullify
+  add_foreign_key "ship_certifications", "users", column: "ysws_returned_by_id", on_delete: :nullify
+  add_foreign_key "ship_event_feedbacks", "ship_events", on_delete: :cascade
+  add_foreign_key "ship_events", "projects", on_delete: :cascade
+  add_foreign_key "ship_reviewer_payout_requests", "users", column: "approved_by_id", on_delete: :nullify
+  add_foreign_key "ship_reviewer_payout_requests", "users", column: "reviewer_id", on_delete: :nullify
+  add_foreign_key "shipwright_advices", "projects", on_delete: :cascade
+  add_foreign_key "shipwright_advices", "ship_certifications", on_delete: :cascade
   add_foreign_key "shop_card_grants", "shop_items"
-  add_foreign_key "shop_card_grants", "users"
+  add_foreign_key "shop_card_grants", "users", on_delete: :nullify
   add_foreign_key "shop_orders", "shop_card_grants"
   add_foreign_key "shop_orders", "shop_items"
   add_foreign_key "shop_orders", "shop_warehouse_packages", column: "warehouse_package_id"
-  add_foreign_key "shop_orders", "users"
-  add_foreign_key "shop_warehouse_packages", "users"
+  add_foreign_key "shop_orders", "users", on_delete: :nullify
+  add_foreign_key "shop_warehouse_packages", "users", on_delete: :nullify
   add_foreign_key "solid_queue_blocked_executions", "solid_queue_jobs", column: "job_id", on_delete: :cascade
   add_foreign_key "solid_queue_claimed_executions", "solid_queue_jobs", column: "job_id", on_delete: :cascade
   add_foreign_key "solid_queue_failed_executions", "solid_queue_jobs", column: "job_id", on_delete: :cascade
   add_foreign_key "solid_queue_ready_executions", "solid_queue_jobs", column: "job_id", on_delete: :cascade
   add_foreign_key "solid_queue_recurring_executions", "solid_queue_jobs", column: "job_id", on_delete: :cascade
   add_foreign_key "solid_queue_scheduled_executions", "solid_queue_jobs", column: "job_id", on_delete: :cascade
-  add_foreign_key "stonk_ticklers", "projects"
-  add_foreign_key "stonks", "projects"
-  add_foreign_key "stonks", "users"
-  add_foreign_key "timer_sessions", "devlogs"
-  add_foreign_key "timer_sessions", "projects"
-  add_foreign_key "timer_sessions", "users"
-  add_foreign_key "tutorial_progresses", "users"
-  add_foreign_key "user_advent_stickers", "devlogs"
+  add_foreign_key "stonk_ticklers", "projects", on_delete: :cascade
+  add_foreign_key "stonks", "projects", on_delete: :cascade
+  add_foreign_key "stonks", "users", on_delete: :cascade
+  add_foreign_key "timer_sessions", "devlogs", on_delete: :cascade
+  add_foreign_key "timer_sessions", "projects", on_delete: :cascade
+  add_foreign_key "timer_sessions", "users", on_delete: :cascade
+  add_foreign_key "tutorial_progresses", "users", on_delete: :cascade
+  add_foreign_key "user_advent_stickers", "devlogs", on_delete: :cascade
   add_foreign_key "user_advent_stickers", "shop_items"
-  add_foreign_key "user_advent_stickers", "users"
-  add_foreign_key "user_badges", "users"
-  add_foreign_key "user_hackatime_data", "users"
-  add_foreign_key "user_profiles", "users"
-  add_foreign_key "user_vote_queues", "users"
-  add_foreign_key "view_events", "users"
-  add_foreign_key "vote_changes", "projects"
-  add_foreign_key "vote_changes", "votes"
-  add_foreign_key "vote_mfs", "projects"
-  add_foreign_key "vote_mfs", "users", column: "voter_id"
-  add_foreign_key "votes", "projects", column: "project_1_id"
-  add_foreign_key "votes", "projects", column: "project_2_id"
-  add_foreign_key "votes", "ship_events", column: "ship_event_1_id"
-  add_foreign_key "votes", "ship_events", column: "ship_event_2_id"
-  add_foreign_key "votes", "users"
-  add_foreign_key "votes", "users", column: "marked_invalid_by_id"
-  add_foreign_key "ysws_review_devlog_approvals", "devlogs"
-  add_foreign_key "ysws_review_devlog_approvals", "users"
-  add_foreign_key "ysws_review_submissions", "projects"
-  add_foreign_key "ysws_review_submissions", "users", column: "reviewer_id"
+  add_foreign_key "user_advent_stickers", "users", on_delete: :cascade
+  add_foreign_key "user_badges", "users", on_delete: :cascade
+  add_foreign_key "user_hackatime_data", "users", on_delete: :cascade
+  add_foreign_key "user_profiles", "users", on_delete: :cascade
+  add_foreign_key "user_vote_queues", "users", on_delete: :cascade
+  add_foreign_key "view_events", "users", on_delete: :cascade
+  add_foreign_key "vote_changes", "projects", on_delete: :cascade
+  add_foreign_key "vote_changes", "votes", on_delete: :cascade
+  add_foreign_key "vote_mfs", "projects", on_delete: :cascade
+  add_foreign_key "vote_mfs", "users", column: "voter_id", on_delete: :nullify
+  add_foreign_key "votes", "projects", column: "project_1_id", on_delete: :cascade
+  add_foreign_key "votes", "projects", column: "project_2_id", on_delete: :cascade
+  add_foreign_key "votes", "ship_events", column: "ship_event_1_id", on_delete: :cascade
+  add_foreign_key "votes", "ship_events", column: "ship_event_2_id", on_delete: :cascade
+  add_foreign_key "votes", "users", column: "marked_invalid_by_id", on_delete: :nullify
+  add_foreign_key "votes", "users", on_delete: :nullify
+  add_foreign_key "ysws_review_devlog_approvals", "devlogs", on_delete: :cascade
+  add_foreign_key "ysws_review_devlog_approvals", "users", on_delete: :nullify
+  add_foreign_key "ysws_review_submissions", "projects", on_delete: :cascade
+  add_foreign_key "ysws_review_submissions", "users", column: "reviewer_id", on_delete: :nullify
 end

@@ -29,7 +29,7 @@ module Api
           amount: payout.amount,
           escrowed: payout.escrowed,
           payable_type: payout.payable_type,
-          user: {
+          user: payout.user && {
             id: payout.user.id,
             display_name: payout.user.display_name
           },

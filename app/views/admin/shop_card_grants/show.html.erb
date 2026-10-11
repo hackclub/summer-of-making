@@ -6,8 +6,12 @@
 <div style="border: 1px solid; margin-bottom: 1rem; padding: 0.5em">
   <h3>Grant Details</h3>
   <strong>User:</strong>
-  <%= link_to @shop_card_grant.user.display_name, [:admin, @shop_card_grant.user] %>
-  (<%= @shop_card_grant.user.email %>)
+  <% if @shop_card_grant.user %>
+    <%= link_to @shop_card_grant.user.display_name, [:admin, @shop_card_grant.user] %>
+    (<%= @shop_card_grant.user.email %>)
+  <% else %>
+    Deleted user
+  <% end %>
   <br>
   <strong>Shop Item:</strong>
   <%= link_to @shop_card_grant.shop_item.name, [:admin, @shop_card_grant.shop_item.becomes(ShopItem)] %>

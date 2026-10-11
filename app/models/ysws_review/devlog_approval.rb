@@ -12,7 +12,7 @@
 #  created_at                                                                               :datetime         not null
 #  updated_at                                                                               :datetime         not null
 #  devlog_id                                                                                :bigint           not null
-#  user_id(The reviewer who made this approval)                                             :bigint           not null
+#  user_id(The reviewer who made this approval)                                             :bigint
 #
 # Indexes
 #
@@ -21,8 +21,8 @@
 #
 # Foreign Keys
 #
-#  fk_rails_...  (devlog_id => devlogs.id)
-#  fk_rails_...  (user_id => users.id)
+#  fk_rails_...  (devlog_id => devlogs.id) ON DELETE => cascade
+#  fk_rails_...  (user_id => users.id) ON DELETE => nullify
 #
 class YswsReview::DevlogApproval < ApplicationRecord
   has_paper_trail
@@ -30,7 +30,8 @@ class YswsReview::DevlogApproval < ApplicationRecord
   self.table_name = "ysws_review_devlog_approvals"
 
   belongs_to :devlog
-  belongs_to :user # The reviewer
+  belongs_to :user, optional: true # The reviewer; nil once their account is deleted after a privacy request
+  validates :user, presence: true, on: :create
 
   validates :approved, inclusion: { in: [ true, false ] }
   validates :reviewed_at, presence: true

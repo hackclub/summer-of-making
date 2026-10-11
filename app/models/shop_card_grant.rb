@@ -8,7 +8,7 @@
 #  created_at            :datetime         not null
 #  updated_at            :datetime         not null
 #  shop_item_id          :bigint           not null
-#  user_id               :bigint           not null
+#  user_id               :bigint
 #
 # Indexes
 #
@@ -18,10 +18,12 @@
 # Foreign Keys
 #
 #  fk_rails_...  (shop_item_id => shop_items.id)
-#  fk_rails_...  (user_id => users.id)
+#  fk_rails_...  (user_id => users.id) ON DELETE => nullify
 #
 class ShopCardGrant < ApplicationRecord
-  belongs_to :user
+  # nil once the account is deleted after a privacy request (docs/privacy.md)
+  belongs_to :user, optional: true
+  validates :user, presence: true, on: :create
   belongs_to :shop_item
 
   def hcb_data
