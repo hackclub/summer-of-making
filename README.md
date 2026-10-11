@@ -43,3 +43,7 @@ This repository hosts the Ruby on Rails app for Hack Club's Summer of Making, a 
 8. Make sure you have VIPS (`libvips`) installed. For example, if you're running Ubuntu, do `sudo apt install libvips`.
 9. Run `bin/dev` to start the development server on port 3000, then visit `http://localhost:3000` in your browser.
 10. Profit?
+
+## Privacy requests
+
+GDPR deletion and export run through the Hack Club privacy hub. See [docs/privacy.md](docs/privacy.md).
