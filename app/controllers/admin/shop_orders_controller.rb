@@ -211,7 +211,6 @@ module Admin
             begin
               HCBService.rename_transaction(hashid: latest_disbursement, new_memo: memo)
             rescue => e
-              Honeybadger.notify(e)
             end
           end
         end
@@ -219,7 +218,6 @@ module Admin
         @shop_order.create_activity("convert_to_preauth", parameters: { amount_dollars: amount_dollars, grant_id: grant_rec.id })
         flash[:success] = "its done you lazy bum #{@shop_order.user.email}"
       rescue => e
-        Honeybadger.notify(e)
         flash[:error] = "dude stop being lazy: #{e.message}"
       end
 

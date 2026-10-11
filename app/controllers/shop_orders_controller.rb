@@ -113,8 +113,8 @@ class ShopOrdersController < ApplicationController
     end
 
   rescue StandardError => e
-    uuid = Honeybadger.notify(e)
-    flash[:alert] = "error! #{e.message} – report #{uuid} plz"
+    Rails.logger.error("Shop order creation failed: #{e.full_message}")
+    flash[:alert] = "Something went wrong while placing your order. Please try again or contact support."
     redirect_to(@item.requires_black_market? ? black_market_path : shop_path)
   end
 

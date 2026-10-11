@@ -13,9 +13,7 @@ class Shop::ProcessSinkeningStickersJob < ApplicationJob
 
     # Process each order individually (one letter per order)
     sinkening_orders.each do |order|
-      Honeybadger.context(sinkening_order: order.id) do
-        process_individual_order(order)
-      end
+      process_individual_order(order)
     end
   end
 

@@ -32,7 +32,6 @@ class Shop::WarehousePackage < ApplicationRecord
   validates :theseus_package_id, uniqueness: true, allow_nil: true
 
   def send_to_theseus!
-    Honeybadger.context(warehouse_package_id: id, shop_orders: shop_orders.pluck(:id)) do
     address_params = {
       first_name: frozen_address["first_name"],
       last_name: frozen_address["last_name"],
@@ -105,12 +104,6 @@ class Shop::WarehousePackage < ApplicationRecord
       if is_idempotency_error
         # Package was created on Theseus but we never got the ID back
         Rails.logger.error "Idempotency error for warehouse package #{id}: package exists on Theseus but we don't have the ID"
-        Honeybadger.notify(e, context: {
-          warehouse_package_id: id,
-          message: "WarehousePackage #{id} requires manual fixup - package exists on Theseus but theseus_package_id is nil",
-          idempotency_key: idempotency_key,
-          orders: shop_orders.pluck(:id)
-        })
         # Set a placeholder ID so orders can be marked as fulfilled
         # This prevents infinite retries while flagging for manual fixup
         update!(theseus_package_id: "MANUAL_FIXUP_NEEDED_#{idempotency_key}")
@@ -120,9 +113,8 @@ class Shop::WarehousePackage < ApplicationRecord
       Rails.logger.error "Bad request sending warehouse package #{id} to Theseus: #{e.message}"
       raise
     rescue => e
-        Rails.logger.error "Failed to send warehouse package #{id} to Theseus: #{e.message}"
-        raise
-      end
+      Rails.logger.error "Failed to send warehouse package #{id} to Theseus: #{e.message}"
+      raise
     end
   end
 end

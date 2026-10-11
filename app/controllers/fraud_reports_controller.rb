@@ -78,7 +78,6 @@ class FraudReportsController < ApplicationController
     end
   rescue => e
     Rails.logger.error "Fraud report creation failed: #{e.message}"
-    Honeybadger.notify(e)
     flash[:alert] = "Unable to submit report. Please try again."
     redirect_to request.referer || root_path
   end

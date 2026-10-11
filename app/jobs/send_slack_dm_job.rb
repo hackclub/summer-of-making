@@ -23,6 +23,5 @@ class SendSlackDmJob < ApplicationJob
     client.chat_postMessage(**params)
   rescue Slack::Web::Api::Errors::SlackError => e
     Rails.logger.error("Failed to send Slack DM: #{e.message}")
-    Honeybadger.notify(e, context: { recipient_id: recipient_id, message: message, blocks: blocks })
   end
 end

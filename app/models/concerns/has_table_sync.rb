@@ -42,25 +42,9 @@ module HasTableSync
           begin
             res = JSON.parse(response.body)
           rescue JSON::ParserError => e
-            Honeybadger.notify("Airtable table sync JSON parse error", context: {
-              model: self.name,
-              sync_name: sync_name,
-              url: url,
-              status: response.status,
-              headers: (response.respond_to?(:headers) ? response.headers : nil),
-              body: response.body.to_s
-            })
             raise
           end
           if res["error"]
-            Honeybadger.notify("Airtable table sync API error", context: {
-              model: self.name,
-              sync_name: sync_name,
-              url: url,
-              status: response.status,
-              error: res["error"],
-              response: res
-            })
             raise StandardError, res["error"]
           end
         end

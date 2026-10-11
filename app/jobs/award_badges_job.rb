@@ -21,7 +21,6 @@ class AwardBadgesJob < ApplicationJob
     raise
   rescue => e
     Rails.logger.error("Error awarding badges for user #{user_id}: #{e.message}")
-    Honeybadger.notify(e, context: { user_id: user_id, trigger_event: trigger_event, backfill: backfill })
     raise
   end
 end

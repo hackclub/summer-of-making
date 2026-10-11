@@ -117,7 +117,6 @@ class User < ApplicationRecord
 
     unless result["ok"]
       Rails.logger.error("Slack OAuth error: #{result['error']}")
-      Honeybadger.notify("Slack OAuth error: #{result['error']}")
       raise StandardError, "Failed to authenticate with Slack: #{result['error']}"
     end
 
@@ -177,11 +176,6 @@ class User < ApplicationRecord
         email: email,
         user_info: user_info.to_h
       }.to_json)
-      Honeybadger.notify("slack email fuck up???", context: {
-        slack_id: slack_id,
-        email: email,
-        user_info: user_info.to_h
-      })
       raise StandardError, "Slack ID #{slack_id} has an invalid email: #{email.inspect}"
     end
 
@@ -225,7 +219,6 @@ class User < ApplicationRecord
         retry
       else
         Rails.logger.error("slack api ratelimit, max retries on #{slack_id}.")
-        Honeybadger.notify("slack api ratelimit, max retries on #{slack_id}.")
         raise
       end
     end
@@ -303,7 +296,6 @@ class User < ApplicationRecord
       }.to_json)
     end
 
-    Honeybadger.notify(e, context: { user_id: id, slack_id: slack_id })
   end
 
   def hackatime_projects

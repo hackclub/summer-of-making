@@ -212,7 +212,6 @@ module Admin
 
     def impersonate
       unless current_user&.is_admin?
-        Honeybadger.notify("what the h-e-double-hockey-sticks?")
         return redirect_to root_path
       end
       if @user == current_user
@@ -283,7 +282,6 @@ module Admin
         end
       rescue => e
         Rails.logger.error("ruh ro, failed to do that #{e.message}")
-        Honeybadger.notify(e, context: { user_id: @user.id, trust_level: trust_level, reason: reason })
         flash[:error] = "error! #{e.message}"
       end
       redirect_to admin_user_path(@user)
@@ -294,7 +292,6 @@ module Admin
         @user.refresh_hackatime_data_now
         flash[:success] = "your wish is my command"
       rescue => e
-        Honeybadger.notify(e, context: { user_id: @user.id })
         flash[:error] = "failed manual refresh ht #{e.message}"
       end
       redirect_to admin_user_path(@user)
@@ -359,16 +356,13 @@ module Admin
           nil
         else
           Rails.logger.warn("Hackatime lookup failed for #{email}")
-          Honeybadger.notify("Hackatime lookup failed", context: { email: email, status: res.status })
           nil
         end
       rescue JSON::ParserError => e
         Rails.logger.error("Hackatime JSON parse error")
-        Honeybadger.notify(e, context: { email: email })
         nil
       rescue => e
         Rails.logger.error("Hackatime lookup error")
-        Honeybadger.notify(e, context: { email: email })
         nil
       end
     end

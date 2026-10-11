@@ -34,14 +34,6 @@ class UserHackatimeDataRefreshJob < ApplicationJob
           end
         rescue => e
           Rails.logger.error "Failed to process unlogged time warning for project #{project.id} (#{project.title}): #{e.message}"
-          Honeybadger.notify(e, context: {
-            job: "UserHackatimeDataRefreshJob",
-            project_id: project.id,
-            project_title: project.title,
-            user_id: user.id,
-            slack_id: user.slack_id,
-            hackatime_keys: project.hackatime_keys
-          })
         end
       end
     end
@@ -74,11 +66,6 @@ class UserHackatimeDataRefreshJob < ApplicationJob
     Rails.logger.info "Sent unlogged time warning to #{user.display_name} for project '#{project.title}' - #{unlogged_hours}h unlogged"
   rescue => e
     Rails.logger.error "Failed to send unlogged time warning for project #{project.id}: #{e.message}"
-    Honeybadger.notify(e, context: {
-      project_id: project.id,
-      user_id: user&.id,
-      slack_id: user&.slack_id
-    })
   end
 
   def build_warning_message(project, unlogged_hours, remaining_hours)

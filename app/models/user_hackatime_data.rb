@@ -40,12 +40,6 @@ class UserHackatimeData < ApplicationRecord
         result = fetch_combined_project_time_with_date(project_keys, "2025-06-16")
         if result.nil?
           Rails.logger.warn "Failed to fetch Hackatime data for project #{project.id} with keys #{project_keys} - using 0"
-          Honeybadger.notify("UserHackatimeData API failure", context: {
-            user_id: user.id,
-            slack_id: user.slack_id,
-            project_id: project.id,
-            project_keys: project_keys
-          })
           0
         else
           result
@@ -106,21 +100,13 @@ class UserHackatimeData < ApplicationRecord
         direct_data.dig("total_seconds")
       else
         Rails.logger.warn "Failed to fetch combined Hackatime data for user #{user.slack_id}: HTTP #{direct_res.status}"
-        Honeybadger.notify("UserHackatimeData API failure", context: {
-          user_id: user.id,
-          slack_id: user.slack_id,
-          status: direct_res.status,
-          project_keys: project_keys
-        })
         nil
       end
     rescue JSON::ParserError => e
       Rails.logger.error "JSON parse error fetching combined Hackatime data for user #{user.slack_id}: #{e.message}"
-      Honeybadger.notify("UserHackatimeData JSON parse error", context: { user_id: user.id, slack_id: user.slack_id, error: e.message })
       nil
     rescue => e
       Rails.logger.error "Error fetching combined Hackatime data for user #{user.slack_id}: #{e.message}"
-      Honeybadger.notify("UserHackatimeData error", context: { user_id: user.id, slack_id: user.slack_id, error: e.message })
       nil
     end
   end

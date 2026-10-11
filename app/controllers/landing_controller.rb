@@ -139,7 +139,6 @@ class LandingController < ApplicationController
     data["continent_name"] || data["continent_code"] || "?"
   rescue StandardError => e
     Rails.logger.error "IP lookup failed: #{e.message}"
-    Honeybadger.notify(e)
     "?"
   end
 
@@ -160,6 +159,5 @@ class LandingController < ApplicationController
     table.batch_upsert([ record ], "email")
   rescue StandardError => e
     Rails.logger.error "Airtable sync failed: #{e.message}"
-    Honeybadger.notify(e)
   end
 end

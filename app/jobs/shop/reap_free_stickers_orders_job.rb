@@ -9,13 +9,11 @@ class Shop::ReapFreeStickersOrdersJob < ApplicationJob
                .where.not(frozen_address: nil)
 
     orders.each do |order|
-      Honeybadger.context({ free_stickers_order: order.id }) do
-        begin
-          order.shop_item.fulfill!(order)
-        rescue StandardError => e
-          Honeybadger.notify(e)
-          next
-        end
+      begin
+        order.shop_item.fulfill!(order)
+      rescue StandardError => e
+        Rails.logger.error("Failed to fulfill free stickers order #{order.id}: #{e.full_message}")
+        next
       end
     end
   end

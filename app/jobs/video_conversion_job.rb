@@ -30,7 +30,6 @@ class VideoConversionJob < ApplicationJob
         Rails.logger.info "Video conversion completed for ShipCertification #{ship_certification_id}"
 
       rescue => e
-        Honeybadger.notify(e, context: { ship_certification_id: ship_certification_id })
         Rails.logger.error "Video conversion failed for ShipCertification #{ship_certification_id}: #{e.message}"
         raise e
       ensure

@@ -56,7 +56,6 @@ class ActiveStorageMoveJob < ApplicationJob
                                 )
                             end
                         rescue => e
-                            Honeybadger.notify(e, context: { blob_id: blob.id, key: blob.key, source: source, destination: destination })
                         end
                     end
                 end

@@ -26,8 +26,8 @@ module Admin
     private
 
     def handle_error(exception)
-      uuid = Honeybadger.notify(exception)
-      flash[:notice] = "oepsie woepsie, we made a f*cko boingo – look this up in honeybadger: #{uuid}"
+      Rails.logger.error("Admin request failed: #{exception.full_message}")
+      flash[:notice] = "An unexpected error occurred. Please try again or contact support."
       redirect_to admin_root_path
     end
 

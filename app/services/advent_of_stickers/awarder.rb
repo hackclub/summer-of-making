@@ -75,7 +75,6 @@ module AdventOfStickers
       end
     rescue => e
       Rails.logger.error("Advent Awarder error for devlog #{devlog.id}: #{e.message}")
-      Honeybadger.notify(e, context: { devlog_id: devlog.id, user_id: user&.id })
       nil
     end
   end

@@ -17,7 +17,6 @@ class Shop::KickVerificationLimboOrdersJob < ApplicationJob
         next
       end
     rescue StandardError => e
-      Honeybadger.notify(e)
       next
     end
   end

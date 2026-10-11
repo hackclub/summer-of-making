@@ -156,51 +156,23 @@ class Devlog < ApplicationRecord
           true
         else
           Rails.logger.error "Hackatime API failed for devlog #{id}: HTTP #{direct_res.status} - #{direct_res.body}"
-          Honeybadger.notify("Hackatime API failed for devlog", context: {
-            devlog_id: id,
-            user_id: user_id,
-            slack_id: user.slack_id,
-            status: direct_res.status,
-            body: direct_res.body.truncate(500)
-          })
           false
         end
       else
         if duration_seconds.nil?
           Rails.logger.info "devlog #{id} has no hackatime projects"
-          Honeybadger.notify("devlog #{id} has no hackatime projects", context: {
-            devlog_id: id,
-            user_id: user_id,
-            project_id: project_id,
-            created_at: created_at,
-            hackatime_projects: project.hackatime_keys
-          })
           update!(duration_seconds: 0, hackatime_pulled_at: Time.now)
           true
         else
           Rails.logger.info "devlog #{id} has no hackatime projects, keeping existing #{duration_seconds}"
-          Honeybadger.notify("devlog #{id} has no hackatime projects, keeping existing duration_seconds", context: {
-            devlog_id: id,
-            user_id: user_id,
-            project_id: project_id,
-            created_at: created_at,
-            hackatime_projects: project.hackatime_keys,
-            duration_seconds: duration_seconds
-          })
           false
         end
       end
     rescue JSON::ParserError => e
       Rails.logger.error "JSON parse error in recalculate_seconds_coded for Devlog #{id}: #{e.message}"
-      Honeybadger.notify("Devlog JSON parse error", context: { devlog_id: id, user_id: user_id, error: e.message })
       false
     rescue => e
       Rails.logger.error "Unexpected error in recalculate_seconds_coded for Devlog #{id}: #{e.message}"
-      Honeybadger.notify(
-        error_class: "Devlog recalculation error",
-        error_message: e.message,
-        context: { devlog_id: id, user_id: user_id, project_id: project_id }
-      )
 
       false
     end

@@ -74,12 +74,11 @@ class UsersController < ApplicationController
       begin
         current_user.sync_slack_id_into_idv!
       rescue => e
-        Honeybadger.notify(e)
       end
       ahoy.track "tutorial_step_identity_vault_linked", user_id: current_user.id
     rescue StandardError => e
-      uuid = Honeybadger.notify(e)
-      return redirect_to shop_path, alert: "Couldn't link identity: #{e.message} (ask support about error ID #{uuid}?)"
+      Rails.logger.error("Identity vault linking failed: #{e.full_message}")
+      return redirect_to shop_path, alert: "Couldn't link identity: #{e.message}"
     end
     redirect_to order_shop_item_path(ShopItem::FreeStickers.first), notice: "Successfully linked your identity!"
   end
@@ -129,7 +128,6 @@ class UsersController < ApplicationController
 
       if response.status == 429
         Rails.logger.error("hackatime rate limited: status=429, body=#{res.inspect}")
-        Honeybadger.notify("hackatime rate limited: status=429, body=#{res.inspect}")
         reset_at = res.is_a?(Hash) ? res[:reset_at] : nil
         msg = "HackaTime is getting dizzy from all the traffic, give it a moment to catch its breath!"
         msg += " (Try again after #{reset_at})" if reset_at
@@ -140,12 +138,10 @@ class UsersController < ApplicationController
       if response.status != 200
         if res.is_a?(String) && res.strip.start_with?("<!doctype html")
           Rails.logger.error("hackatime api returned HTML error page: status=#{response.status}, body=#{res[0..300]}...")
-          Honeybadger.notify("hackatime api returned HTML error page: status=#{response.status}, body=#{res[0..300]}...")
           redirect_to root_path, alert: "Hackatime returned a really weird error, give it another go?"
           return
         end
         Rails.logger.error("hackatime api fucky wucky status=#{response.status}, body=#{res.inspect}")
-        Honeybadger.notify("hackatime api fucky wucky: status=#{response.status}, body=#{res.inspect}")
         redirect_to root_path, alert: "Failed to connect to HackaTime (API error). Please try again later or contact support."
         return
       end
@@ -153,7 +149,6 @@ class UsersController < ApplicationController
       magic_link = res.is_a?(Hash) ? res[:magic_link] : nil
       if magic_link.blank?
         Rails.logger.error("hackatime never provided magic_link: #{res.inspect}")
-        Honeybadger.notify("hackatime never provided magic_link: #{res.inspect}")
         redirect_to root_path, alert: "Hackatime did not return the data we expected, give it another go?"
         return
       end
@@ -161,11 +156,9 @@ class UsersController < ApplicationController
       redirect_to magic_link, allow_other_host: true
     rescue Faraday::Error => e
       Rails.logger.error("hackatime connection error: #{e.class} #{e.message}")
-      Honeybadger.notify(e)
       redirect_to root_path, alert: "Could not connect to Hackatime, give it another go?"
     rescue => e
       Rails.logger.error("random ass error: #{e.class} #{e.message}")
-      Honeybadger.notify(e)
       redirect_to root_path, alert: "An unexpected error occurred while connecting to Hackatime. Give it another go?"
     end
   end

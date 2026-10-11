@@ -87,7 +87,6 @@ class IdentityVaultService
           retry
         else
           Rails.logger.error "idv poll failed after retry: #{e.message}"
-          Honeybadger.notify(e)
           raise
         end
       end
