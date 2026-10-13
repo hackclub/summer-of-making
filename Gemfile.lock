@@ -476,7 +476,7 @@ GEM
       logger
       prism (>= 1.6.0)
       tsort
-    rbtrace (0.5.3)
+    rbtrace (0.5.5)
       ffi (>= 1.0.6)
       msgpack (>= 0.4.3)
       optimist (>= 3.0.0)
@@ -703,7 +703,7 @@ DEPENDENCIES
   rack-mini-profiler
   rails (~> 8.1.4)
   rails_live_reload
-  rbtrace (~> 0.5.2)
+  rbtrace (~> 0.5.5)
   redcarpet
   redis (~> 5.4)
   rubocop-rails-omakase

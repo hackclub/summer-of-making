@@ -170,7 +170,7 @@ gem "strong_migrations", "~> 2.5"
 
 gem "jb", "~> 0.8.2"
 
-gem "rbtrace", "~> 0.5.2"
+gem "rbtrace", "~> 0.5.5"
 
 gem "autotuner", "~> 1.0"
 
