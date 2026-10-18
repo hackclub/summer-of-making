@@ -5,7 +5,7 @@ set -euo pipefail
 # Resolve against an empty package database, including libraries already in the
 # dev image, so the result also works in the minimal DHI runtime image.
 apt-get update -qq
-packages=(bash coreutils findutils tzdata libjemalloc2 libpq5 libyaml-0-2
+packages=(bash curl coreutils findutils tzdata libjemalloc2 libpq5 libyaml-0-2
   postgresql-client anacron procps zip)
 mkdir -p /tmp/runtime-debs/partial /tmp/package-controls /opt/runtime
 cd /tmp/runtime-debs
@@ -17,6 +17,9 @@ for archive in *.deb; do
   dpkg-deb --field "$archive" > "/tmp/package-controls/$archive"
   printf 'Status: install ok installed\n\n' >> "/tmp/package-controls/$archive"
 done
+# Extracting .debs skips the post-install step that creates /bin/sh. Docker and
+# Coolify use this shell for CMD-SHELL health checks; bash supports POSIX mode.
+ln -sf bash /opt/runtime/usr/bin/sh
 mkdir -p /opt/runtime/etc/ld.so.conf.d
 echo /usr/local/lib > /opt/runtime/etc/ld.so.conf.d/local.conf
 ldconfig -r /opt/runtime
