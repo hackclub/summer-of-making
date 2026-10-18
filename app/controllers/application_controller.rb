@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 class ApplicationController < ActionController::Base
-  include Pagy::Backend
+  include Pagy::Method
   include PublicActivity::StoreController
   include Pundit::Authorization
   include ActionView::Helpers::AssetUrlHelper

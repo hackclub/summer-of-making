@@ -13,6 +13,6 @@ module SecretThirdThing
     end
 
     def shared_secret = spooky_data[:shared_secret]
-    def verifier = ActiveSupport::MessageVerifier.new shared_secret
+    def verifier = ActiveSupport::MessageVerifier.new(shared_secret)
   end
 end

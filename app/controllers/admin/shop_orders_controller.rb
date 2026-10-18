@@ -2,7 +2,7 @@
 
 module Admin
   class ShopOrdersController < ApplicationController
-    include Pagy::Backend
+    include Pagy::Method
     before_action :ensure_authorized_user
     before_action :set_shop_order, except: [ :index, :pending, :awaiting_fulfillment ]
     before_action :ensure_order_has_account, only: [ :approve, :mark_fulfilled, :convert_to_preauth ]

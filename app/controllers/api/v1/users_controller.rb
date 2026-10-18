@@ -9,7 +9,7 @@
 module Api
   module V1
     class UsersController < ApplicationController
-      include Pagy::Backend
+      include Pagy::Method
       before_action :authenticate_user! # omg
 
       def index
@@ -23,10 +23,10 @@ module Api
         begin
           pagy, users = pagy(
             User.order(:id).includes(:user_profile, :user_hackatime_data, :user_badges), # order by id
-            items: 20,
+            limit: 20,
             page: page
           )
-        rescue Pagy::OverflowError
+        rescue Pagy::RangeError
           render json: { error: "Page out of bounds" }, status: :not_found
           return
         end

@@ -3,7 +3,7 @@
 module Api
   module V2
     class BaseController < ApplicationController
-      include Pagy::Backend
+      include Pagy::Method
       protect_from_forgery with: :null_session
 
       def index
@@ -13,7 +13,7 @@ module Api
       private
 
       def render_paginated(collection, serializer_options = {})
-        pagy, records = pagy(collection, items: 20)
+        pagy, records = pagy(collection, limit: 20)
 
         data = if block_given?
           records.map { |record| yield(record) }
@@ -30,7 +30,7 @@ module Api
             items: pagy.limit
           }
         }
-      rescue Pagy::OverflowError
+      rescue Pagy::RangeError
         render json: { error: "not found" }, status: :not_found
       end
 

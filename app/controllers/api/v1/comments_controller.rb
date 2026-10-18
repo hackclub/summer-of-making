@@ -3,7 +3,7 @@
 module Api
   module V1
     class CommentsController < ApplicationController
-      include Pagy::Backend
+      include Pagy::Method
 
       def index
         page = Integer(params[:page], exception: false) || 1
@@ -18,10 +18,10 @@ module Api
         begin
           pagy, comments = pagy(
             Comment.order(:id).includes(:user, :devlog),
-            items: 20,
+            limit: 20,
             page: page
           )
-        rescue Pagy::OverflowError
+        rescue Pagy::RangeError
           render json: {
             error: "Page out of bounds"
           }, status: :not_found

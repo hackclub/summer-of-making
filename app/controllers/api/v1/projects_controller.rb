@@ -7,7 +7,7 @@
 module Api
   module V1
     class ProjectsController < ApplicationController
-      include Pagy::Backend
+      include Pagy::Method
       before_action :authenticate_user! # fucking over the api clients
 
       def index
@@ -25,10 +25,10 @@ module Api
 
           pagy, projects = pagy(
             base_scope,
-            items: 20,
+            limit: 20,
             page: page
           )
-        rescue Pagy::OverflowError
+        rescue Pagy::RangeError
           render json: {
             error: "Page out of bounds"
           }, status: :not_found

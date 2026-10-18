@@ -40,8 +40,8 @@
   </tbody>
 </table>
 <div style="margin: 2em 0;">
-  <%== pagy_nav(@pagy) %> <br>
-  <%== pagy_info(@pagy) %>
+  <%== @pagy.series_nav %> <br>
+  <%== @pagy.info_tag %>
 
 <%= link_to "← back", admin_root_path, class: 'aout' %>
 

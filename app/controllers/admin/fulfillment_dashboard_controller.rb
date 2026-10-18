@@ -2,7 +2,7 @@
 
 module Admin
   class FulfillmentDashboardController < ApplicationController
-    include Pagy::Backend
+    include Pagy::Method
     before_action :ensure_authorized_user
     skip_before_action :authenticate_admin!
 

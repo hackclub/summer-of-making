@@ -753,7 +753,7 @@ class User < ApplicationRecord
     Badge.award_badges_for(self, backfill: backfill)
   end
 
-  def update_cached_badges! = update! badges: user_badges.order(id: :asc).pluck(:badge_key).uniq
+  def update_cached_badges! = update!(badges: user_badges.order(id: :asc).pluck(:badge_key).uniq)
 
   def award_badges_async!(trigger_event = nil, backfill: false)
     AwardBadgesJob.perform_later(id, trigger_event, backfill)

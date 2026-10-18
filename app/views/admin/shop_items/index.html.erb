@@ -353,7 +353,7 @@
   </tbody>
 </table>
 
-<%== pagy_nav(@pagy) if respond_to?(:pagy_nav) %>
-<%== pagy_info(@pagy) if respond_to?(:pagy_info) %>
+<%== @pagy.series_nav if @pagy %>
+<%== @pagy.info_tag if @pagy %>
 
 <%= link_to "← back", admin_root_path %>

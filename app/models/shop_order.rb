@@ -84,7 +84,7 @@ class ShopOrder < ApplicationRecord
     "#{user&.display_name || "Deleted user"}'s order for #{quantity} #{shop_item.name.pluralize(quantity)}"
   end
 
-  aasm timestamps: true do # SAGA PATTERN TIME BABEY
+  aasm timestamps: true, whiny_persistence: false do # SAGA PATTERN TIME BABEY
     # NORMAL STATES: steps we'd like orders to take on their journeys
 
     state :pending, initial: true             # submitted, awaiting shoperations rubber-stampage

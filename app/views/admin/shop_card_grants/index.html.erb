@@ -25,5 +25,5 @@
   </div>
 <% end %>
 
-<%= pagy_info(@pagy) if @pagy.pages > 1 %>
-<%= pagy_nav(@pagy) if @pagy.pages > 1 %>
+<%== @pagy.info_tag if @pagy.pages > 1 %>
+<%== @pagy.series_nav if @pagy.pages > 1 %>

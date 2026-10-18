@@ -386,8 +386,8 @@
 <% end %>
 
 <% if @pagy %>
-  <%== pagy_nav(@pagy) %> <br>
-  <%== pagy_info(@pagy) %> <br>
+  <%== @pagy.series_nav %> <br>
+  <%== @pagy.info_tag %> <br>
 <% end %>
 
 <%= link_to "← back", admin_root_path %>

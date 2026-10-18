@@ -3,8 +3,8 @@ class ExploreController < ApplicationController
     authorize :explore, :index?
 
     devlogs = Devlog.for_explore_feed
-    @pagy, @recent_devlogs = pagy(devlogs, items: 8)
-  rescue Pagy::OverflowError
+    @pagy, @recent_devlogs = pagy(devlogs, limit: 8)
+  rescue Pagy::RangeError
     redirect_to explore_path
   end
 
@@ -12,8 +12,8 @@ class ExploreController < ApplicationController
     authorize :explore, :following?
 
     devlogs = Devlog.for_user_following(current_user.id)
-    @pagy, @recent_devlogs = pagy(devlogs, items: 8)
-  rescue Pagy::OverflowError
+    @pagy, @recent_devlogs = pagy(devlogs, limit: 8)
+  rescue Pagy::RangeError
     redirect_to explore_following_path
   end
 
@@ -21,7 +21,7 @@ class ExploreController < ApplicationController
     authorize :explore, :gallery?
 
     projects = Project.for_gallery
-    @pagy, @projects = pagy(projects, items: 12)
+    @pagy, @projects = pagy(projects, limit: 12)
     @gallery_pagy = @pagy
 
     if user_signed_in? && @projects.present?
@@ -29,7 +29,7 @@ class ExploreController < ApplicationController
       @followed_project_ids = current_user.project_follows.where(project_id: project_ids).pluck(:project_id).to_set
     end
 
-  rescue Pagy::OverflowError
+  rescue Pagy::RangeError
     redirect_to explore_gallery_path
   end
 end

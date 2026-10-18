@@ -1,6 +1,6 @@
 module Admin
   class UsersController < ApplicationController
-    include Pagy::Backend
+    include Pagy::Method
     before_action :ensure_authorized_user
     before_action :set_user, except: [ :index ]
     skip_before_action :authenticate_admin!
@@ -11,7 +11,7 @@ module Admin
           .all
           .search(params[:search]&.sub("mailto:", ""))
           .order(id: :desc),
-        items: 50)
+        limit: 50)
     end
 
     def show

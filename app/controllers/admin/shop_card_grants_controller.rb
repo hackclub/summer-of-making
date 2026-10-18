@@ -2,7 +2,7 @@
 
 module Admin
   class ShopCardGrantsController < ApplicationController
-    include Pagy::Backend
+    include Pagy::Method
     before_action :set_shop_card_grant, only: [ :show, :refresh_hcb_data ]
 
     def scope

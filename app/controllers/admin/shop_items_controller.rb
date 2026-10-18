@@ -2,7 +2,7 @@
 
 module Admin
   class ShopItemsController < ApplicationController
-    include Pagy::Backend
+    include Pagy::Method
     before_action :set_shop_item, except: [ :index, :new, :create ]
 
     def index

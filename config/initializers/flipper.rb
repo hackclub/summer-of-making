@@ -31,7 +31,7 @@ end
 Flipper.configure do |config|
   ## Configure other adapters that you want to use here:
   ## See http://flippercloud.io/docs/adapters
-  config.use Flipper::Adapters::ActiveSupportCacheStore, Rails.cache, expires_in: 5.minutes
+  config.use Flipper::Adapters::ActiveSupportCacheStore, Rails.cache, 5.minutes
 end
 
 ## Register a group that can be used for enabling features.

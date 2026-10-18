@@ -111,7 +111,7 @@ gem "norairrecord"
 
 gem "redcarpet"
 
-gem "pagy"
+gem "pagy", "~> 43.0"
 
 gem "chartkick", "~> 5.1"
 
@@ -119,19 +119,16 @@ gem "groupdate", "~> 6.6"
 
 gem "ruby-openai", "~> 8.1"
 
-gem "ferrum_pdf", "~> 0.3.0"
+gem "ferrum_pdf", "~> 3.2"
 
-gem "avo", "~> 3.32"
+gem "avo", "~> 4.3"
 gem "aws-sdk-s3", require: false
 
-# Security pin: stay on the json 2.x line. 2.19.9 fixes CVE-2026-... while json 3.x
-# is a breaking major (rejects duplicate keys/comments on parse) we don't want on
-# the archived app. Bump the floor if the advisory ever requires >= 3.
-gem "json", "~> 2.19", ">= 2.19.9"
+gem "json", "~> 3.1"
 
-gem "lz_string", "~> 0.3.0"
+gem "lz_string", "~> 1.0"
 
-gem "aasm", "~> 5.5"
+gem "aasm", "~> 6.0"
 
 gem "public_activity", "~> 3.0"
 
@@ -141,13 +138,13 @@ gem "pundit", "~> 2.5"
 
 gem "awesome_print", "~> 1.9"
 
-gem "flipper", "1.3.4"
-gem "flipper-active_record", "1.3.4"
-gem "flipper-ui", "1.3.4"
-gem "flipper-active_support_cache_store", "1.3.4"
+gem "flipper", "~> 1.4"
+gem "flipper-active_record", "~> 1.4"
+gem "flipper-ui", "~> 1.4"
+gem "flipper-active_support_cache_store", "~> 1.4"
 
-gem "redis", "~> 5.4"
-gem "connection_pool", "~> 2.4"
+gem "redis", "~> 6.0"
+gem "connection_pool", "~> 3.0"
 
 gem "rack-attack", "~> 6.7"
 
@@ -161,7 +158,7 @@ gem "strong_migrations", "~> 2.5"
 
 gem "jb", "~> 0.8.2"
 
-gem "rbtrace", "~> 0.5.2"
+gem "rbtrace", "~> 0.5"
 
 gem "autotuner", "~> 1.0"
 
