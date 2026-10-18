@@ -18,7 +18,6 @@ Rails.application.configure do
   config.server_timing = true
 
   # Configure Active Storage
-  config.active_storage.variant_processor = :mini_magick
 
   # Store uploaded files on the local file system
   config.active_storage.service = :local

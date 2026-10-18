@@ -56,9 +56,6 @@ gem "rack-mini-profiler"
 gem "memory_profiler"
 gem "flamegraph"
 
-# Use Active Storage variants [https://guides.rubyonrails.org/active_storage_overview.html#transforming-images]
-# gem "image_processing", "~> 1.2"
-
 group :development, :test do
   # See https://guides.rubyonrails.org/debugging_rails_applications.html#debugging-with-the-debug-gem
   gem "debug", platforms: %i[mri windows], require: "debug/prelude"
@@ -124,10 +121,6 @@ gem "ruby-openai", "~> 8.1"
 
 gem "ferrum_pdf", "~> 0.3.0"
 
-gem "streamio-ffmpeg", "~> 3.0"
-
-gem "image_processing", "~> 1.14"
-
 gem "avo", "~> 3.32"
 gem "aws-sdk-s3", require: false
 
@@ -152,8 +145,6 @@ gem "flipper", "1.3.4"
 gem "flipper-active_record", "1.3.4"
 gem "flipper-ui", "1.3.4"
 gem "flipper-active_support_cache_store", "1.3.4"
-
-gem "mini_magick", "~> 5.2"
 
 gem "redis", "~> 5.4"
 gem "connection_pool", "~> 2.4"

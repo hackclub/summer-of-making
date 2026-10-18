@@ -5,5 +5,5 @@
 <b>Ticket cost: </b> <%= shop_item.ticket_cost %> <br>
 <b>Type: </b> <%= shop_item.type %> <br>
 <% if shop_item.image.attached? %>
-  <%= image_tag shop_item.image.variant(:thumb), style: "max-width: 200px; height: auto;" %>
+  <%= image_tag shop_item.image, style: "max-width: 200px; height: auto;" %>
 <% end %>

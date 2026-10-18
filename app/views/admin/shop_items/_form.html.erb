@@ -45,7 +45,7 @@
         <% if @shop_item.persisted? && @shop_item.image.attached? %>
           <div class="mt-2">
             <small>Current image:</small><br>
-            <%= image_tag @shop_item.image.variant(:thumb), width: 100 %>
+            <%= image_tag @shop_item.image, width: 100 %>
           </div>
         <% end %>
       </div>

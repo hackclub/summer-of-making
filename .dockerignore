@@ -49,3 +49,10 @@
 # Ignore Docker-related files
 /.dockerignore
 /Dockerfile*
+
+# Separate service and local tooling are not part of the Rails image.
+/mole/
+/.ruby-lsp/
+/.ruff_cache/
+/test/
+/docs/

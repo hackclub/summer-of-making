@@ -1,0 +1,44 @@
+#!/bin/bash
+set -euo pipefail
+
+# Include entrypoint/operational tools, without compilers, headers, Git or apt.
+# Resolve against an empty package database, including libraries already in the
+# dev image, so the result also works in the minimal DHI runtime image.
+apt-get update -qq
+packages=(bash coreutils findutils tzdata libjemalloc2 libpq5 libyaml-0-2
+  postgresql-client anacron procps zip)
+mkdir -p /tmp/runtime-debs/partial /tmp/package-controls /opt/runtime
+cd /tmp/runtime-debs
+apt-get install --download-only --no-install-recommends -y \
+  -o Dir::State::status=/dev/null -o Dir::Cache::archives=/tmp/runtime-debs \
+  "${packages[@]}"
+for archive in *.deb; do
+  dpkg-deb --extract "$archive" /opt/runtime
+  dpkg-deb --field "$archive" > "/tmp/package-controls/$archive"
+  printf 'Status: install ok installed\n\n' >> "/tmp/package-controls/$archive"
+done
+mkdir -p /opt/runtime/etc/ld.so.conf.d
+echo /usr/local/lib > /opt/runtime/etc/ld.so.conf.d/local.conf
+ldconfig -r /opt/runtime
+ln -snf /usr/share/zoneinfo/America/New_York /opt/runtime/etc/localtime
+echo America/New_York > /opt/runtime/etc/timezone
+rm -rf /opt/runtime/usr/share/doc /opt/runtime/usr/share/man \
+  /opt/runtime/usr/share/lintian
+
+# Base-files contains compatibility symlinks that conflict with DHI's existing
+# runtime directories. Runtime state comes from the base image, not Debian .debs.
+rm -rf /opt/runtime/var /opt/runtime/run
+# Retain accurate package versions for vulnerability scanners and dpkg-query.
+mkdir -p /opt/runtime/var/lib/dpkg
+ruby <<'RUBY'
+records = {}
+["/tmp/base-package-status", *Dir["/tmp/package-controls/*"]].each do |path|
+  File.binread(path).split(/\n\n+/).each do |record|
+    key = [record[/^Package: (.+)$/, 1], record[/^Architecture: (.+)$/, 1]]
+    records[key] = record if key.first
+  end
+end
+File.write("/opt/runtime/var/lib/dpkg/status", records.values.join("\n\n") + "\n\n")
+RUBY
+# Keep the read-only query tool, without the package installation tools.
+find /opt/runtime/usr/bin -name 'dpkg*' ! -name dpkg-query -delete
