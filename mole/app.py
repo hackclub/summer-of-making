@@ -572,8 +572,9 @@ def health_check():
         if steel_api_key:
             steel_client = Steel(steel_api_key=steel_api_key)
             steel_sessions = steel_client.sessions.list()
-    except Exception as e:
-        steel_error = str(e)
+    except Exception:
+        logger.exception("Failed to check Steel session status")
+        steel_error = "Unable to retrieve Steel session status"
     
     health_data = {
         "status": "healthy", 
