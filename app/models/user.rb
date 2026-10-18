@@ -295,7 +295,6 @@ class User < ApplicationRecord
         error: e.message
       }.to_json)
     end
-
   end
 
   def hackatime_projects
