@@ -2,49 +2,7 @@
 
 class AttachmentsController < ApplicationController
   def upload
-    file = params[:file]
-
-    if file.size > 250 * 1024 * 1024
-      render json: { error: "this file is bigger than yo mama" }, status: :unprocessable_entity
-      return
-    end
-
-    ext = File.extname(file.original_filename).downcase
-    unless valid_ext?(ext)
-      render json: { error: "Invalid file type" }, status: :unprocessable_entity
-      return
-    end
-
-    filename = "#{SecureRandom.hex(32)}#{ext}"
-    temp_path = Rails.root.join("tmp", "uploads", filename)
-
-    FileUtils.mkdir_p(File.dirname(temp_path))
-    File.binwrite(temp_path, file.read)
-
-    if %w[.jpg .jpeg .png .webp].include?(ext)
-      require Rails.root.join("app/services/image_sanitizer")
-      ImageSanitizer.img_opt(temp_path)
-    end
-
-    temp_url = url_for(controller: "attachments", action: "download", filename: filename, only_path: false)
-    Rails.logger.debug { "temp_url: #{temp_url}" }
-    conn = Faraday.new(url: "https://cdn.hackclub.com") do |f|
-      f.request :json
-      f.response :json
-    end
-
-    response = conn.post("/api/v3/new") do |req|
-      req.headers["Authorization"] = "Bearer beans"
-      req.body = [ temp_url ]
-    end
-
-    FileUtils.rm_f(temp_path)
-
-    if response.success?
-      render json: { url: response.body["files"][0]["deployedUrl"] }
-    else
-      render json: { error: "Failed to upload file" }, status: :unprocessable_entity
-    end
+    render json: { error: "Summer of Making is archived. Uploads are closed." }, status: :gone
   end
 
   def download
@@ -68,11 +26,6 @@ class AttachmentsController < ApplicationController
   end
 
   private
-
-  def valid_ext?(ext)
-    allow = %w[.jpg .jpeg .png .gif .webp .svg .pdf .txt .md .doc .docx .mp4 .mov .avi .mp3 .wav]
-    allow.include?(ext)
-  end
 
   def sanitize(filename)
     return nil if filename.blank?

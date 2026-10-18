@@ -13,7 +13,7 @@
       <div class="space-y-6">
         <% if @item.image.attached? %>
           <div class="bg-white p-4 card-pixel">
-            <%= image_tag @item.image.variant(:thumb),
+            <%= image_tag @item.image,
                           class: "w-full h-64 object-contain mx-auto",
                           alt: @item.name %>
           </div>

@@ -2,11 +2,31 @@ version: 2
 updates:
 - package-ecosystem: bundler
   directory: "/"
+  exclude-paths:
+    - "mole/**"
   schedule:
     interval: daily
   open-pull-requests-limit: 10
 - package-ecosystem: github-actions
   directory: "/"
+  exclude-paths:
+    - "mole/**"
   schedule:
     interval: daily
   open-pull-requests-limit: 10
+# Mole is retained as-is. Explicit ignores also prevent security update PRs
+# for its Python manifests; GitHub security alerts are configured separately.
+- package-ecosystem: pip
+  directory: "/mole"
+  schedule:
+    interval: monthly
+  open-pull-requests-limit: 0
+  ignore:
+    - dependency-name: "*"
+- package-ecosystem: uv
+  directory: "/mole"
+  schedule:
+    interval: monthly
+  open-pull-requests-limit: 0
+  ignore:
+    - dependency-name: "*"

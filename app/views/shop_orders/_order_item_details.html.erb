@@ -3,7 +3,7 @@
   <div class="flex items-start space-x-6">
     <% if order.shop_item.image.attached? %>
       <div class="w-32 h-32 bg-soft-bone card-pixel p-4 flex-shrink-0">
-        <%= image_tag order.shop_item.image.variant(:thumb),
+        <%= image_tag order.shop_item.image,
                       class: "w-full h-full object-contain",
                       alt: order.shop_item.name %>
       </div>

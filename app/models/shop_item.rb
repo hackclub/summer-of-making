@@ -69,9 +69,7 @@ class ShopItem < ApplicationRecord
     ShopItem::LetterMail
   ]
 
-  has_one_attached :image do |attachable|
-    attachable.variant :thumb, resize_to_limit: [ 256, 256 ]
-  end
+  has_one_attached :image
 
   has_many :shop_orders
 

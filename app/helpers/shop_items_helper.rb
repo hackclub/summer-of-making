@@ -30,7 +30,7 @@ module ShopItemsHelper
                   content_tag(:div, class: "item", style: "display: flex; flex-direction: column;") do
                     tag = if field_type == :image
                             if item.image.attached?
-                              image_tag item.image.variant(:thumb)
+                              image_tag item.image
                             else
                               content_tag(:div, "No image uploaded", class: "text-gray-400 italic")
                             end

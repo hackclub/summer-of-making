@@ -253,7 +253,7 @@
         <td><%= shop_item.id %></td>
         <td>
           <% if shop_item.image.attached? %>
-            <%= image_tag shop_item.image.variant(:thumb), width: 50, height: 50 %>
+            <%= image_tag shop_item.image, width: 50, height: 50 %>
           <% else %>
             <span class="text-muted">No image</span>
           <% end %>

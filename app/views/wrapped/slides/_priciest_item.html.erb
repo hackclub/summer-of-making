@@ -4,7 +4,7 @@
   <p class="font-medium uppercase tracking-[0.35em] text-sm text-slate-500 text-balance">Priciest Item</p>
   <% if item.present? %>
     <% if item.image&.attached? %>
-      <%= image_tag item.image.variant(resize_to_limit: [260, 260]), class: "h-48 w-48 rounded-2xl object-cover shadow-lg" %>
+      <%= image_tag item.image, class: "h-48 w-48 rounded-2xl object-cover shadow-lg" %>
     <% end %>
     <% caption = {
       "Pile of Stickers" => "stick it to the man!",

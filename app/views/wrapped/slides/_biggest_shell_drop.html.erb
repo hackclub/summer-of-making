@@ -5,7 +5,7 @@
   <% if order.present? %>
     <% shop_item = order.shop_item %>
     <% if shop_item&.image&.attached? %>
-      <%= image_tag shop_item.image.variant(resize_to_limit: [260, 260]), class: "h-48 w-48 rounded-2xl object-cover shadow-lg" %>
+      <%= image_tag shop_item.image, class: "h-48 w-48 rounded-2xl object-cover shadow-lg" %>
     <% end %>
     <h2 class="text-4xl md:text-5xl font-black text-balance">
       <%= shop_item&.name || "Mystery Reward" %>

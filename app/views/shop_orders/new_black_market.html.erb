@@ -7,7 +7,7 @@
 <hr>
 
 <% if @item.image.attached? %>
-  <%= image_tag @item.image.variant(:thumb), alt: @item.name %>
+  <%= image_tag @item.image, alt: @item.name %>
 <% else %>
   <img src="construction.gif" alt="under construction">
 <% end %>
