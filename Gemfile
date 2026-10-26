@@ -113,7 +113,7 @@ gem "redcarpet"
 
 gem "pagy", "~> 43.0"
 
-gem "chartkick", "~> 5.1"
+gem "chartkick", "~> 5.3"
 
 gem "groupdate", "~> 6.6"
 
