@@ -156,7 +156,7 @@ gem "paper_trail"
 
 gem "strong_migrations", "~> 2.5"
 
-gem "jb", "~> 0.8.2"
+gem "jb", "~> 0.9.0"
 
 gem "rbtrace", "~> 0.5"
 
