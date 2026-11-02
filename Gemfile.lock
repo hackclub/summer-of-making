@@ -90,7 +90,7 @@ GEM
       faraday (>= 1.0, < 3.0)
       faraday-net_http_persistent
       net-http-persistent
-    annotaterb (4.25.0)
+    annotaterb (4.26.0)
       activerecord (>= 6.0.0)
       activesupport (>= 6.0.0)
     ast (2.4.3)
@@ -643,7 +643,7 @@ DEPENDENCIES
   aasm (~> 6.0)
   activeinsights
   airrecord
-  annotaterb (~> 4.15)
+  annotaterb (~> 4.26)
   autotuner (~> 1.0)
   avo (~> 4.3)
   awesome_print (~> 1.9)
