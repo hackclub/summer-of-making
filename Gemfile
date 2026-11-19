@@ -75,7 +75,7 @@ group :development, :test do
   gem "ruby-lsp", require: false
 
   # Annotate Rails models
-  gem "annotaterb", "~> 4.15"
+  gem "annotaterb", "~> 4.26"
 end
 
 group :development do
